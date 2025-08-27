@@ -6,6 +6,7 @@ import { Dialog, DialogClose, DialogContent, DialogHeader, DialogOverlay } from 
 import { Textarea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { imageProcessor } from "@/utils/imageCompressor";
+import type { StoryType } from "./StoriesSlider";
 import { dummyStoriesData, dummyUserData } from "@/dummy-data";
 
 const TEXT_BG_COLORS: ("transparent" | "#fff" | "#000")[] = ["transparent", "#fff", "#000"];
@@ -64,12 +65,15 @@ const CreateStoryModal = ({ isOpen, onClose }: Props) => {
   // Alternar el color de fondo del texto (transparente, blanco o negro)
   const toggleTextBgColor = () => {
     // Obtener el index del color actual
-    let index = TEXT_BG_COLORS.indexOf(storyTextBgColor);
+    const index = TEXT_BG_COLORS.indexOf(storyTextBgColor);
 
     if (index === -1) return;
 
+    // Actualizar el index para obtener el siguiente color
+    const nextIndex = index + 1 === TEXT_BG_COLORS.length ? 0 : index + 1;
+
     // Actualizar el color actual
-    setStoryTextBgColor(TEXT_BG_COLORS[index + 1 === TEXT_BG_COLORS.length ? 0 : index + 1]);
+    setStoryTextBgColor(TEXT_BG_COLORS[nextIndex]);
   }
 
   const onSubmitHandler = () => {
@@ -78,7 +82,7 @@ const CreateStoryModal = ({ isOpen, onClose }: Props) => {
     setIsLoading(true);
 
     setTimeout(() => {
-      dummyStoriesData.unshift({
+      const newStory: StoryType = {
         _id: Date.now().toString(),
         background_color: selectdBgColor.value,
         content: storyTextContent,
@@ -89,7 +93,9 @@ const CreateStoryModal = ({ isOpen, onClose }: Props) => {
         media_url: selectedImagePreview || "",
         updatedAt: new Date().toString(),
         user: dummyUserData
-      });
+      }
+
+      dummyStoriesData.unshift(newStory);
 
       setIsLoading(false);
       onClose(false);

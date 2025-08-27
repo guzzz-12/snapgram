@@ -68,7 +68,11 @@ const StoryCard = ({ storyData }: Props) => {
       {storyData.content &&
         <p
           ref={textRef}
-          style={{fontSize: `${fontSize}px`, backgroundColor: storyData.text_bg_color}}
+          style={{
+            color: storyData.text_color,
+            fontSize: `${fontSize}px`,
+            backgroundColor: storyData.text_bg_color
+          }}
           className="px-1 py-0.5 text-white text-center text-shadow-sm line-clamp-6 rounded-sm transition-all"
         >
           {storyData.content}

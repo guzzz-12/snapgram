@@ -26,7 +26,7 @@ const StoriesSlider = () => {
       <CreateStoryModal isOpen={openStoryModal} onClose={setOpenStoryModal} />
 
       <Carousel
-        className="w-full h-[120px]"
+        className="w-full min-h-[120px] mb-6"
         opts={{ align: "start"}}
       >
         <CarouselContent>
@@ -37,11 +37,11 @@ const StoriesSlider = () => {
               onClick={() => setOpenStoryModal(true)}
             >
               <CirclePlus
-                className="size-9 fill-blue-600 stroke-1 stroke-white group-hover:scale-[120%] transition-transform"
+                className="mt-auto size-9 fill-blue-600 stroke-1 stroke-white group-hover:scale-[120%] transition-transform"
                 aria-hidden
               />
 
-              <p className="sr-only">
+              <p className="mt-auto text-sm">
                 Crear historia
               </p>
             </Button>
@@ -60,9 +60,9 @@ const StoriesSlider = () => {
           ))}
         </CarouselContent>
 
-        <CarouselPrevious disabled={loading} />
+        <CarouselPrevious className="ml-2" disabled={loading} />
 
-        <CarouselNext disabled={loading} />
+        <CarouselNext className="mr-2" disabled={loading} />
       </Carousel>
     </section>
   )

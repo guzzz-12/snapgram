@@ -34,6 +34,7 @@ const CreateStoryModal = ({ isOpen, onClose }: Props) => {
         setSelectedImageFile(null);
         setSelectedImagePreview(null);
         setSelectedBgColor(COLORS[0]);
+        setStoryTextBgColor(TEXT_BG_COLORS[0]);
   
         if(fileInputRef.current) {
           fileInputRef.current.value = ""

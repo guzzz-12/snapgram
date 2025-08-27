@@ -53,7 +53,7 @@ const StoryCard = ({ storyData }: Props) => {
             {backgroundColor: storyData.background_color}
           ),
       }}
-      className="relative flex justify-center items-center aspect-[3/4] p-3 bg-neutral-100 rounded-md overflow-hidden cursor-pointer"
+      className="relative flex justify-center items-center aspect-[1/1.7] p-3 bg-neutral-100 rounded-md overflow-hidden cursor-pointer"
     >
       <Avatar className="absolute top-3 left-3 outline-2 outline-white">
         <AvatarImage
@@ -68,8 +68,8 @@ const StoryCard = ({ storyData }: Props) => {
       {storyData.content &&
         <p
           ref={textRef}
-          style={{fontSize: `${fontSize}px`}}
-          className="text-white text-center text-shadow-sm line-clamp-6 transition-all"
+          style={{fontSize: `${fontSize}px`, backgroundColor: storyData.text_bg_color}}
+          className="px-1 py-0.5 text-white text-center text-shadow-sm line-clamp-6 rounded-sm transition-all"
         >
           {storyData.content}
         </p>

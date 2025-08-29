@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import type { StoryType } from "./StoriesSlider";
+import type { StoryType } from "@/dummy-data";
 
 interface Props {
   storyData: StoryType;
@@ -54,7 +54,7 @@ const StoryCard = ({ storyData, setOpenStoryId }: Props) => {
             {backgroundColor: storyData.background_color}
           ),
       }}
-      className="relative flex justify-center items-center w-auto h-full aspect-[3/4] min-[1100px]:aspect-[1/1.7] p-3 bg-neutral-100 rounded-md overflow-hidden cursor-pointer"
+      className="relative flex justify-center items-center w-full h-full p-3 bg-neutral-100 rounded-md overflow-hidden cursor-pointer"
       onClick={() => setOpenStoryId(storyData._id)}
     >
       <Avatar className="absolute top-3 left-3 outline-2 outline-white">

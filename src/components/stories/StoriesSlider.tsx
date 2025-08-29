@@ -6,9 +6,7 @@ import StoryCardSkeleton from "./StoryCardSkeleton";
 import StoryViewer from "./StoryViewer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
 import { Button } from "../ui/button";
-import { dummyStoriesData } from "@/dummy-data";
-
-export type StoryType = typeof dummyStoriesData[0];
+import { dummyStoriesData, type StoryType } from "@/dummy-data";
 
 const StoriesSlider = () => {
   const [stories, setStories] = useState<StoryType[]>([]);
@@ -24,7 +22,7 @@ const StoriesSlider = () => {
   }, []);
 
   return (
-    <section className="w-full">
+    <section className="w-full mb-6">
       <StoryViewer
         isOpen={!!openStoryId}
         storyId={openStoryId}
@@ -33,14 +31,11 @@ const StoriesSlider = () => {
 
       <CreateStoryModal isOpen={openStoryModal} onClose={setOpenStoryModal} />
 
-      <Carousel
-        className="mb-6"
-        opts={{ align: "start"}}
-      >
-        <CarouselContent>
-          <CarouselItem className="basis-1/4 min-[1100px]:basis-1/5">
+      <Carousel opts={{ align: "start"}}>
+        <CarouselContent className="h-[180px]">
+          <CarouselItem className="basis-1/6">
             <Button
-              className="relative flex flex-col justify-center items-center gap-2 w-full h-auto aspect-[3/4] min-[1100px]:aspect-[1/1.7] p-3 bg-neutral-100 hover:bg-neutral-200 rounded-md border-2 border-dashed border-blue-600 overflow-hidden cursor-pointer group"
+              className="relative flex flex-col justify-center items-center gap-2 w-full h-full p-3 bg-neutral-100 hover:bg-neutral-200 rounded-md border-2 border-dashed border-blue-600 overflow-hidden cursor-pointer group"
               variant="ghost"
               onClick={() => setOpenStoryModal(true)}
             >
@@ -56,13 +51,13 @@ const StoriesSlider = () => {
           </CarouselItem>
 
           {loading && Array.from({ length: 5 }).map((_, i) => (
-            <CarouselItem key={i} className="basis-1/4 min-[1100px]:basis-1/5">
+            <CarouselItem key={i} className="basis-1/6">
               <StoryCardSkeleton />
             </CarouselItem>
           ))}
 
           {!loading && stories.map((story) => (
-            <CarouselItem key={story._id} className="basis-1/4 min-[1100px]:basis-1/5">
+            <CarouselItem key={story._id} className="basis-1/6">
               <StoryCard
                 storyData={story}
                 setOpenStoryId={(storyId) => setOpenStoryId(storyId)}

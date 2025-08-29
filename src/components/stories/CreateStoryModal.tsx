@@ -6,8 +6,7 @@ import { Dialog, DialogClose, DialogContent, DialogHeader, DialogOverlay } from 
 import { Textarea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { imageProcessor } from "@/utils/imageCompressor";
-import type { StoryType } from "./StoriesSlider";
-import { dummyStoriesData, dummyUserData } from "@/dummy-data";
+import { dummyStoriesData, dummyUserData, type StoryType } from "@/dummy-data";
 
 const TEXT_BG_COLORS: ("transparent" | "#fff" | "#000")[] = ["transparent", "#fff", "#000"];
 

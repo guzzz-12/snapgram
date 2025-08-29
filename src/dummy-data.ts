@@ -132,7 +132,6 @@ export const dummyStoriesData = [
   }
 ]
 
-
 export const dummyPostsData = [
   {
     "_id": "68773e977db16954a783839c",
@@ -306,3 +305,12 @@ export const dummyFollowingData = [
 export const dummyPendingConnectionsData = [
   dummyUserData
 ]
+
+export type StoryType = typeof dummyStoriesData[0];
+export type PostType = typeof dummyPostsData[0];
+export type RecentMessageType = typeof dummyRecentMessagesData[0];
+export type MessageType = typeof dummyMessagesData[0];
+export type ConnectionType = typeof dummyConnectionsData[0];
+export type FollowerType = typeof dummyFollowersData[0];
+export type FollowingType = typeof dummyFollowingData[0];
+export type PendingConnectionType = typeof dummyPendingConnectionsData[0];

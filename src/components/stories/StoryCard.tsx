@@ -4,10 +4,11 @@ import type { StoryType } from "./StoriesSlider";
 
 interface Props {
   storyData: StoryType;
+  setOpenStoryId: (storyId: string | null) => void;
 }
 
-const StoryCard = ({ storyData }: Props) => {
-  const cardRef = useRef<HTMLDivElement>(null);
+const StoryCard = ({ storyData, setOpenStoryId }: Props) => {
+  const cardRef = useRef<HTMLButtonElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
 
   const [fontSize, setFontSize] = useState(18);
@@ -41,7 +42,7 @@ const StoryCard = ({ storyData }: Props) => {
   }, []);
 
   return (
-    <div
+    <button
       ref={cardRef}
       style={{
         ...(storyData.media_type === "image" ?
@@ -53,7 +54,8 @@ const StoryCard = ({ storyData }: Props) => {
             {backgroundColor: storyData.background_color}
           ),
       }}
-      className="relative flex justify-center items-center aspect-[1/1.7] p-3 bg-neutral-100 rounded-md overflow-hidden cursor-pointer"
+      className="relative flex justify-center items-center w-auto h-full aspect-[3/4] min-[1100px]:aspect-[1/1.7] p-3 bg-neutral-100 rounded-md overflow-hidden cursor-pointer"
+      onClick={() => setOpenStoryId(storyData._id)}
     >
       <Avatar className="absolute top-3 left-3 outline-2 outline-white">
         <AvatarImage
@@ -78,7 +80,7 @@ const StoryCard = ({ storyData }: Props) => {
           {storyData.content}
         </p>
       }
-    </div>
+    </button>
   )
 }
 

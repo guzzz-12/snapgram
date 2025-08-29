@@ -1,7 +1,6 @@
-import type { PostType } from "@/dummy-data";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
 import dayjs from "dayjs";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import type { PostType } from "@/dummy-data";
 
 interface Props {
   postData: PostType

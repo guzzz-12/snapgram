@@ -219,7 +219,7 @@ export const dummyRecentMessagesData = [
     "_id": "6878cc3c17a54e4d3748012f",
     "from_user_id": dummyUserData,
     "to_user_id": dummyUserData,
-    "text": "This is a Samsung Tablet",
+    "text": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse sint ex molestias error sequi voluptate impedit reprehenderit, eius minima optio temporibus harum ipsam laudantium magnam. Sunt eaque ut earum cupiditate veritatis exercitationem ratione expedita, quos magnam amet dolore quibusdam laboriosam.",
     "message_type": "text",
     "media_url": "",
     "createdAt": "2025-07-17T10:11:08.437Z",
@@ -228,6 +228,39 @@ export const dummyRecentMessagesData = [
   },
   {
     "_id": "686fb66c7f0dcbff63b239e7",
+    "from_user_id": dummyUser3Data,
+    "to_user_id": dummyUserData,
+    "text": "how are you",
+    "message_type": "text",
+    "media_url": "",
+    "createdAt": "2025-07-10T12:47:40.510Z",
+    "updatedAt": "2025-07-10T12:47:40.510Z",
+    "seen": false
+  },
+  {
+    "_id": "686fb66c7f0dcbff63b239e8",
+    "from_user_id": dummyUser3Data,
+    "to_user_id": dummyUserData,
+    "text": "how are you",
+    "message_type": "text",
+    "media_url": "",
+    "createdAt": "2025-07-10T12:47:40.510Z",
+    "updatedAt": "2025-07-10T12:47:40.510Z",
+    "seen": false
+  },
+  {
+    "_id": "686fb66c7f0dcbff63b239e9",
+    "from_user_id": dummyUser3Data,
+    "to_user_id": dummyUserData,
+    "text": "how are you",
+    "message_type": "text",
+    "media_url": "",
+    "createdAt": "2025-07-10T12:47:40.510Z",
+    "updatedAt": "2025-07-10T12:47:40.510Z",
+    "seen": false
+  },
+  {
+    "_id": "686fb66c7f0dcbff63b239e44",
     "from_user_id": dummyUser3Data,
     "to_user_id": dummyUserData,
     "text": "how are you",

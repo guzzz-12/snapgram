@@ -33,7 +33,7 @@ const StoriesSlider = () => {
 
       <Carousel opts={{ align: "start"}}>
         <CarouselContent className="h-[180px]">
-          <CarouselItem className="basis-1/6">
+          <CarouselItem className="basis-1/5">
             <Button
               className="relative flex flex-col justify-center items-center gap-2 w-full h-full p-3 bg-neutral-100 hover:bg-neutral-200 rounded-md border-2 border-dashed border-blue-600 overflow-hidden cursor-pointer group"
               variant="ghost"
@@ -51,13 +51,13 @@ const StoriesSlider = () => {
           </CarouselItem>
 
           {loading && Array.from({ length: 5 }).map((_, i) => (
-            <CarouselItem key={i} className="basis-1/6">
+            <CarouselItem key={i} className="basis-1/5">
               <StoryCardSkeleton />
             </CarouselItem>
           ))}
 
           {!loading && stories.map((story) => (
-            <CarouselItem key={story._id} className="basis-1/6">
+            <CarouselItem key={story._id} className="basis-1/5">
               <StoryCard
                 storyData={story}
                 setOpenStoryId={(storyId) => setOpenStoryId(storyId)}
@@ -66,9 +66,9 @@ const StoriesSlider = () => {
           ))}
         </CarouselContent>
 
-        <CarouselPrevious className="ml-2" disabled={loading} />
+        <CarouselPrevious className="ml-2 cursor-pointer" disabled={loading} />
 
-        <CarouselNext className="mr-2" disabled={loading} />
+        <CarouselNext className="mr-2 cursor-pointer" disabled={loading} />
       </Carousel>
     </section>
   )

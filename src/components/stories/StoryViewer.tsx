@@ -50,7 +50,7 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
         className="w-auto h-[95vh] p-0 aspect-[1/1.7] rounded-lg border-none overflow-hidden [&>button]:hidden"
       >
         <DialogTitle className="sr-only">
-          Historia de {storyData.user.username}
+          Historia de {storyData.user.full_name}
         </DialogTitle>
 
         <div className="flex flex-col gap-4 w-full h-full overflow-hidden">
@@ -61,13 +61,13 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
             <Avatar className="size-10">
               <AvatarImage src={storyData.user.profile_picture} />
               <AvatarFallback>
-                {storyData.user.username.charAt(0)}
+                {storyData.user.full_name.charAt(0)}
               </AvatarFallback>
             </Avatar>
 
             <div className="flex flex-col gap-0.5 w-full overflow-hidden">
               <p className="text-white font-semibold truncate">
-                {storyData.user.username}
+                {storyData.user.full_name}
               </p>
 
               <p className="text-xs text-neutral-300 truncate">

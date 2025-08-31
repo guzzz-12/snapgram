@@ -10,7 +10,7 @@ interface Props {
 const RecentMessageItem = ({ messageData }: Props) => {
   return (
     <Link
-      to={`/messages/${messageData._id}`}
+      to={`/messages/${messageData.from_user_id._id}`}
       className="flex justify-start items-center gap-2 w-full p-1 rounded-sm hover:bg-neutral-100 transition-colors"
     >
       <Avatar className="shrink-0 border-2 border-blue-600">

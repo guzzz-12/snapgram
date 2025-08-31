@@ -3,7 +3,7 @@ import { useUser } from "@clerk/clerk-react";
 import AuthLayout from "@/pages/AuthLayout";
 import Layout from "@/pages/Layout";
 import HomePage from "@/pages/HomePage";
-import ChatBoxPage from "@/pages/ChatBoxPage";
+import MessagesPage from "./pages/MessagesPage";
 import ConnectionsPage from "@/pages/ConnectionsPage";
 import CreatePostPage from "@/pages/CreatePostPage";
 import DiscoverPage from "@/pages/DiscoverPage";
@@ -70,10 +70,10 @@ const App = () => {
           }
         />
         <Route
-          path="messages/:userId"
+          path="messages"
           element={
             <ProtectedRoute>
-              <ChatBoxPage />
+              <MessagesPage />
             </ProtectedRoute>
           }
         />

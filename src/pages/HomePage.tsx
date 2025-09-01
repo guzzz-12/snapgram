@@ -6,7 +6,7 @@ import { dummyPostsData } from "@/dummy-data";
 
 const HomePage = () => {
   return (
-    <main className="relative flex justify-between gap-24 w-full h-full pl-24 pr-4 pt-6 pb-9 bg-slate-200">
+    <main className="pageWrapper">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
       <div className="w-full h-full shrink-[2]">
         <StoriesSlider />

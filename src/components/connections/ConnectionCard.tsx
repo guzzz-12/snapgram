@@ -15,7 +15,7 @@ const FollowerCard = ({ connectionData, connection }: Props) => {
         to={`/profile/${connectionData._id}`}
         className="flex items-start h-full shrink-0"
       >
-        <Avatar>
+        <Avatar className="w-[40px] h-[40px]">
           <AvatarImage src={connectionData.profile_picture} />
           <AvatarFallback>
             {connectionData.full_name.charAt(0).toUpperCase()}
@@ -35,21 +35,21 @@ const FollowerCard = ({ connectionData, connection }: Props) => {
           @{connectionData.username}
         </p>
 
-        <p className="w-full mb-4 text-xs text-neutral-700 line-clamp-2">
+        <p className="w-full mb-4 text-sm text-neutral-700 line-clamp-2">
           {connectionData.bio}
         </p>
 
         <div className="flex justify-between items-center gap-2">
           <Link
             to={`/profile/${connectionData._id}`}
-            className="flex justify-center items-center gap-2 w-full px-2 py-1.5 text-xs text-center text-white bg-blue-600 rounded-sm hover:bg-blue-700 transition-colors"
+            className="flex justify-center items-center gap-2 w-full px-2 py-2 text-sm text-center text-white rounded-md bg-[#4F39F6] hover:bg-[#331fcf] transition-colors"
           >
             Ver perfil
           </Link>
 
           {connection !== "follower" &&
             <button
-              className="flex justify-center items-center gap-2 w-full px-2 py-1.5 text-xs text-center text-black bg-neutral-200 rounded-sm hover:bg-neutral-300 transition-colors cursor-pointer"
+              className="flex justify-center items-center gap-2 w-full px-2 py-2 text-sm text-center text-black bg-neutral-200 rounded-sm hover:bg-neutral-300 transition-colors cursor-pointer"
               onClick={() => {}}
             >
               {connection === "following" && "Dejar de seguir"}

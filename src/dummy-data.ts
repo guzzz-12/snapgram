@@ -57,6 +57,12 @@ const dummyUser3Data = {
   profile_picture: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&h=200&auto=format&fit=crop",
 }
 
+export const dummyUsersData = [
+  dummyUserData,
+  dummyUser2Data,
+  dummyUser3Data
+];
+
 export const dummyStoriesData = [
   {
     "_id": "68833d466e4b42b685068860",
@@ -339,6 +345,7 @@ export const dummyPendingConnectionsData = [
   dummyUserData
 ]
 
+export type UserType = typeof dummyUserData;
 export type StoryType = typeof dummyStoriesData[0];
 export type PostType = typeof dummyPostsData[0];
 export type RecentMessageType = typeof dummyRecentMessagesData[0];

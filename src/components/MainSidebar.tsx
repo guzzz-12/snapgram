@@ -28,7 +28,7 @@ const SIDEBAR_ITEMS = [
   },
   {
     name: "Perfil",
-    href: "/profile",
+    href: "/profile/user_2zdFoZib5lNr614LgkONdD8WG32",
     icon: UserRound
   },
 ];

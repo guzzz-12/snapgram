@@ -1,7 +1,7 @@
 import { UserRoundCheck, UserRoundPlus, UsersRound } from "lucide-react";
+import ConnectionCard from "./ConnectionCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { dummyConnectionsData, dummyFollowersData, dummyFollowingData, dummyPendingConnectionsData } from "@/dummy-data";
-import ConnectionCard from "./ConnectionCard";
 
 const ConnectionsTabs = () => {
   return (

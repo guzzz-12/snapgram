@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Image, Palette, Plus, TypeOutline } from "lucide-react";
 import StoryColorPicker, { COLORS } from "./StoryColorPicker";
 import { Button } from "../ui/button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogOverlay } from "../ui/dialog";
 import { Textarea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { imageProcessor } from "@/utils/imageCompressor";
+import useImagePicker from "@/hooks/useImagePicker";
 import { dummyStoriesData, dummyUserData, type StoryType } from "@/dummy-data";
 
 const TEXT_BG_COLORS: ("transparent" | "#fff" | "#000")[] = ["transparent", "#fff", "#000"];
@@ -22,9 +22,9 @@ const CreateStoryModal = ({ isOpen, onClose }: Props) => {
   const [storyTextColor, setStoryTextColor] = useState<"#fff" | "#000">("#fff");
   const [storyTextBgColor, setStoryTextBgColor] = useState<"transparent" | "#fff" | "#000">(TEXT_BG_COLORS[0]);
   const [selectdBgColor, setSelectedBgColor] = useState<{ name: string, value: string }>( COLORS[0] );
-  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, onImagePickHandler} = useImagePicker({fileInputRef});
 
   useEffect(() => {
     return () => {
@@ -41,26 +41,6 @@ const CreateStoryModal = ({ isOpen, onClose }: Props) => {
       }
     }
   }, [isOpen]);
-
-  const onImagePickHandler = async (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-
-    if(files) {
-      const file = files[0];
-
-      const imageBase64 = await imageProcessor(file, "base64") as string;
-      const compressedImage = await imageProcessor(file, "file") as File;
-
-      setSelectedImagePreview(imageBase64);
-      setSelectedImageFile(compressedImage);
-    };
-
-    // Limpiar el ref del input luego de seleccionar la imagen
-    // para restablecer el evento change del input.
-    if(fileInputRef.current) {
-      fileInputRef.current.value = ""
-    };
-  };
 
   // Alternar el color de fondo del texto (transparente, blanco o negro)
   const toggleTextBgColor = () => {

@@ -111,6 +111,7 @@ const CreatePostPage = () => {
                           className="border-b border-t-0 border-l-0 border-r-0 rounded-none shadow-none resize-none placeholder:text-neutral-400"
                           placeholder="¿Qué estás pensando?"
                           rows={4}
+                          disabled={isSubmitting}
                           {...field}
                         />
                       </FormControl>

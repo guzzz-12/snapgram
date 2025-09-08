@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { Eye, MessageSquare } from "lucide-react";
 import RightSidebar from "@/components/RightSidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,7 +50,8 @@ const MessagesPage = () => {
                 </div>
 
                 <div className="flex flex-col gap-2 shrink-0">
-                  <button
+                  <Link
+                    to={`/messages/${connection._id}`}
                     className="flex items-center justify-center w-9 h-9 p-2 bg-slate-300 hover:bg-slate-200 rounded-sm focus-visible:outline-neutral-700 cursor-pointer"
                   >
                     <MessageSquare
@@ -60,7 +62,7 @@ const MessagesPage = () => {
                     <span className="sr-only">
                       Enviar mensaje
                     </span>
-                  </button>
+                  </Link>
 
                   <button
                     className="flex items-center justify-center w-9 h-9 p-2 bg-slate-300 hover:bg-slate-200 rounded-sm focus-visible:outline-neutral-700 cursor-pointer"

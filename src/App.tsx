@@ -13,6 +13,7 @@ import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import NoAuthRoute from "./components/NoAuthRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ChatBoxPage from "./pages/ChatBoxPage";
 
 const App = () => {
   const {isSignedIn} = useUser();
@@ -74,6 +75,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <MessagesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="messages/:userId"
+          element={
+            <ProtectedRoute>
+              <ChatBoxPage />
             </ProtectedRoute>
           }
         />

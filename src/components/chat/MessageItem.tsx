@@ -30,7 +30,7 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
         style={{ justifyContent: isCurrentUserSender ? "flex-end" : "flex-start" }}
         className="flex w-full"
       >
-        <div className="flex flex-col w-full max-w-[40%] px-4 py-2 rounded-md bg-white shadow">
+        <div className="flex flex-col w-full max-w-[80%] md:max-w-[40%] px-4 py-2 rounded-md bg-white shadow">
           {/* Header del mensaje */}
           <div className="flex justify-between items-center gap-2 w-full overflow-hidden">
             <Link

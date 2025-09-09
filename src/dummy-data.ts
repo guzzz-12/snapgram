@@ -43,7 +43,7 @@ export const dummyUserData = {
 
 const dummyUser2Data = {
   ...dummyUserData,
-  _id: "user_2",
+  _id: "user_2zwZSCMRXQ9GaEEVLgm6akQo96i",
   username: "Richard Hendricks",
   full_name: "Richard Hendricks",
   profile_picture: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200",
@@ -51,7 +51,7 @@ const dummyUser2Data = {
 
 const dummyUser3Data = {
   ...dummyUserData,
-  _id: "user_3",
+  _id: "user_2zwZSCMRXQ9GaEEVLgm6akQo14h",
   username: "alexa_james",
   full_name: "Alexa james",
   profile_picture: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&h=200&auto=format&fit=crop",
@@ -296,7 +296,7 @@ export const dummyMessagesData = [
     "to_user_id": "user_2zdFoZib5lNr614LgkONdD8WG32",
     "text": "This is a Samsung Tablet",
     "message_type": "text",
-    "media_url": "",
+    "media_url": "https://images.pexels.com/photos/218717/pexels-photo-218717.jpeg",
     "createdAt": "2025-07-17T10:11:08.437Z",
     "updatedAt": "2025-07-25T10:43:50.346Z",
     "seen": true
@@ -305,9 +305,9 @@ export const dummyMessagesData = [
     "_id": "68835ffc6e4b42b685069def",
     "from_user_id": "user_2zdFoZib5lNr614LgkONdD8WG32",
     "to_user_id": "user_2zwZSCMRXQ9GaEEVLgm6akQo96i",
-    "text": "yah , this tablet is good",
-    "message_type": "text",
-    "media_url": "",
+    "text": "yah , this tablet is good, check the quality of the camera",
+    "message_type": "media",
+    "media_url": "https://images.pexels.com/photos/33476489/pexels-photo-33476489.jpeg",
     "seen": false,
     "createdAt": "2025-07-25T10:44:12.753Z",
     "updatedAt": "2025-07-25T10:44:12.753Z",
@@ -316,7 +316,7 @@ export const dummyMessagesData = [
     "_id": "6878cc2817a54e4d3748010c",
     "from_user_id": "user_2zdFoZib5lNr614LgkONdD8WG32",
     "to_user_id": "user_2zwZSCMRXQ9GaEEVLgm6akQo96i",
-    "text": "you can purchase it from amazon",
+    "text": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Pariatur qui ducimus molestiae facere voluptatibus quas sint error aliquam sit adipisci cupiditate aut, consequatur eos placeat et, ea ipsam. Temporibus, eos.\n\nLorem ipsum dolor, sit amet consectetur adipisicing elit. Pariatur qui ducimus molestiae facere voluptatibus quas sint error aliquam sit adipisci cupiditate aut, consequatur eos placeat et, ea ipsam. Temporibus, eos.",
     "message_type": "text",
     "media_url": "",
     "createdAt": "2025-08-17T10:10:48.956Z",
@@ -326,7 +326,7 @@ export const dummyMessagesData = [
 ]
 
 export const dummyConnectionsData = [
-  dummyUserData,
+  // dummyUserData,
   dummyUser2Data,
   dummyUser3Data
 ]

@@ -1,5 +1,6 @@
 import { NavLink } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Input } from "../ui/input";
 import { dummyConnectionsData } from "@/dummy-data";
 
 interface Props {
@@ -8,14 +9,22 @@ interface Props {
 
 const ChatList = ({ headerHeight }: Props) => {
   return (
-    <aside className="flex flex-col w-full max-w-[255px] h-full pb-6 border-r overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+    <aside className="flex flex-col w-max max-w-[255px] h-full pb-6 border-r overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
       <div
         style={{
           height: `calc(${headerHeight}px + 1px)`,
         }}
-        className="w-full px-6 py-4 bg-white border-b"
+        className="flex flex-col justify-center items-start w-full px-6 bg-white border-b"
       >
-        <p className="text-lg font-semibold text-neutral-900">Chats</p>
+        <p className="hidden min-[900px]:block text-lg font-semibold text-neutral-900">Chats</p>
+
+        <search>
+          <Input
+            className="hidden min-[900px]:block w-full p-2 bg-slate-100 rounded-md"
+            type="search"
+            placeholder="Buscar..."
+          />
+        </search>
       </div>
 
       {dummyConnectionsData.map((user) => (
@@ -33,9 +42,11 @@ const ChatList = ({ headerHeight }: Props) => {
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex flex-col justify-between items-start gap-0 w-full">
-            <p className="text-sm font-semibold text-neutral-900">{user.full_name}</p>
-            <p className="text-xs text-neutral-700">@{user.username}</p>
+          <div className="hidden min-[900px]:flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
+            <p className="w-full text-sm text-neutral-900 font-semibold truncate">
+              {user.full_name}
+            </p>
+            <p className="w-full text-xs text-neutral-700 truncate">@{user.username}</p>
           </div>
         </NavLink>
       ))}

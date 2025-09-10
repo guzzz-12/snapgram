@@ -1,0 +1,218 @@
+import { useRef, useState } from "react";
+import z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import ProfileAvatarEdit from "./ProfileAvatarEdit";
+import ProfileCoverEdit from "./ProfileCoverEdit";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay } from "../ui/dialog";
+import useImagePicker from "@/hooks/useImagePicker";
+import type { UserType } from "@/dummy-data";
+
+const FormSchema = z.object({
+  name: z.string().max(50, "El nombre no puede tener más de 50 caracteres"),
+  username: z.string().max(50, "El nombre de usuario no puede tener más de 50 caracteres"),
+  bio: z.string().max(4200, "La biografía no puede tener más de 4200 caracteres").optional(),
+});
+
+type FormType = z.infer<typeof FormSchema>;
+
+interface Props {
+  userData: UserType;
+  isOpen: boolean;
+  onClose: (isOpen: boolean) => void;
+}
+
+const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
+  const profilePicInputRef = useRef<HTMLInputElement | null>(null);
+  const coverPicInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [mutableUserData, setMutableUserData] = useState<UserType>(userData);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const formProps = useForm<FormType>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      name: mutableUserData.full_name,
+      username: mutableUserData.username,
+      bio: mutableUserData.bio,
+    },
+  });
+  
+  const {selectedImageFile: selectedProfilePicFile, selectedImagePreview: selectedProfilePicPreview, setSelectedImagePreview: setSelectedProfilePicPreview, onImagePickHandler: onProfilePicPickHandler, setSelectedImageFile: setSelectedProfilePicFile} = useImagePicker({fileInputRef: profilePicInputRef});
+
+  const {selectedImageFile: selectedCoverPicFile, selectedImagePreview: selectedCoverPicPreview, setSelectedImageFile: setSelectedCoverPicFile, setSelectedImagePreview: setSelectedCoverPicPreview, onImagePickHandler: onCoverPicPickHandler} = useImagePicker({fileInputRef: coverPicInputRef});
+
+  const onSubmitHandler = async (values: FormType) => {
+    console.log({...values, selectedProfilePicPreview, selectedCoverPicFile});
+  }
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={isOpen => {
+        if (isLoading) return;
+        onClose(isOpen);
+      }}
+    >
+      <DialogOverlay className="bg-black opacity-70" />
+
+      <DialogContent className="w-full !max-w-[50vw] h-[90vh] pb-6 rounded-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        <DialogHeader className="w-full bg-white">
+          <h2 className="text-xl text-left text-neutral-900 font-bold">
+            Editar perfil
+          </h2>
+        </DialogHeader>
+
+        <Separator className="w-full" />
+
+        <div className="flex flex-col gap-6 w-full h-full">
+          <ProfileAvatarEdit
+            title="Foto de perfil"
+            userData={mutableUserData}
+            setUserData={setMutableUserData}
+            selectedImageFile={selectedProfilePicFile}
+            selectedImagePreview={selectedProfilePicPreview}
+            setSelectedImageFile={setSelectedProfilePicFile}
+            setSelectedImagePreview={setSelectedProfilePicPreview}
+            profilePicInputRef={profilePicInputRef}
+          />
+
+          <ProfileCoverEdit
+            title="Foto de portada"
+            userData={mutableUserData}
+            setUserData={setMutableUserData}
+            selectedImageFile={selectedCoverPicFile}
+            selectedImagePreview={selectedCoverPicPreview}
+            setSelectedImageFile={setSelectedCoverPicFile}
+            setSelectedImagePreview={setSelectedCoverPicPreview}
+            coverPicInputRef={coverPicInputRef}
+          />
+
+          <Form {...formProps}>
+            <form 
+              className="flex flex-col gap-5 w-full"
+              onSubmit={formProps.handleSubmit(onSubmitHandler)}
+            >
+              <FormField
+                name="name"
+                control={formProps.control}
+                render={({field: fieldProps}) => {
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-base">
+                        Tu nombre
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Tu nombre completo"
+                          disabled={false}
+                          {...fieldProps}
+                        />
+                      </FormControl>
+                      
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )
+                }}
+              />
+
+              <FormField
+                name="username"
+                control={formProps.control}
+                render={({field: fieldProps}) => {
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-base">
+                        Tu nombre de usuario
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="john_snow"
+                          disabled={false}
+                          {...fieldProps}
+                        />
+                      </FormControl>
+                      
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )
+                }}
+              />
+
+              <FormField
+                name="bio"
+                control={formProps.control}
+                render={({field: fieldProps}) => {
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-base">
+                        Escribe algo sobre ti
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          className="resize-none"
+                          placeholder="Escribe algo sobre ti..."
+                          rows={4}
+                          disabled={false}
+                          {...fieldProps}
+                        />
+                      </FormControl>
+                      
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )
+                }}
+              />
+            </form>
+          </Form>
+        </div>
+
+        <DialogFooter className="flex justify-end items-center gap-2">
+          <Button
+            className="cursor-pointer"
+            variant="outline"
+            onClick={() => onClose(false)}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            className="cursor-pointer"
+            type="submit"
+          >
+            Guardar
+          </Button>
+        </DialogFooter>
+
+        {/* Input oculto del selector del avatar */}
+        <input
+          ref={profilePicInputRef}
+          type="file"
+          hidden
+          multiple={false}
+          disabled={isLoading}
+          accept="image/png, image/jpg, image/jpeg, image/webp"
+          onChange={onProfilePicPickHandler}
+        />
+
+        {/* Input oculto del selector del la imagen de portada */}
+        <input
+          ref={coverPicInputRef}
+          type="file"
+          hidden
+          multiple={false}
+          disabled={isLoading}
+          accept="image/png, image/jpg, image/jpeg, image/webp"
+          onChange={onCoverPicPickHandler}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export default ProfileEditModal

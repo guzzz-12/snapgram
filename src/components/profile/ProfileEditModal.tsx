@@ -61,7 +61,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
     >
       <DialogOverlay className="bg-black opacity-70" />
 
-      <DialogContent className="w-full !max-w-[50vw] h-[90vh] pb-6 rounded-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+      <DialogContent className="w-full !max-w-[90vw] min-[750px]:!max-w-[80vw] min-[900px]:!max-w-[70vw] min-[1100px]:!max-w-[800px] h-[90vh] pb-6 rounded-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
         <DialogHeader className="w-full bg-white">
           <h2 className="text-xl text-left text-neutral-900 font-bold">
             Editar perfil

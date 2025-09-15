@@ -182,7 +182,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
           </Button>
 
           <Button
-            className="cursor-pointer"
+            className="bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
             type="submit"
           >
             Guardar

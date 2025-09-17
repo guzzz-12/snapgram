@@ -87,7 +87,7 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
                 className="border-none cursor-pointer"
                 variant="outline"
                 disabled={isSubmitting}
-                onClick={onUploadCoverPicHandler}
+                onClick={() => coverPicInputRef.current?.click()}
               >
                 <Pencil className="size-4" aria-hidden />
                 <span>Cambiar foto</span>
@@ -99,7 +99,7 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
                 className="text-white hover:text-white border-none bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
                 variant="outline"
                 disabled={isSubmitting}
-                onClick={() => {}}
+                onClick={onUploadCoverPicHandler}
               >
                 <Save className="size-4" aria-hidden />
                 <span>Guardar</span>

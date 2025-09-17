@@ -33,7 +33,7 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
 
       const {data} = await axiosInstance<{data: UserType}>({
         method: "POST",
-        url: "/users/update-user-avatar",
+        url: "/users/user-avatar",
         data: formData,
         headers: {
           "Content-Type": "multipart/form-data"
@@ -60,7 +60,7 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
 
       const {data} = await axiosInstance<{data: UserType}>({
         method: "DELETE",
-        url: "/users/delete-user-avatar"
+        url: "/users/user-avatar"
       });
 
       toast.success("Avatar eliminado con éxito");

@@ -1,6 +1,8 @@
-import type { Dispatch, RefObject, SetStateAction } from "react";
+import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { Pencil, Save, Trash2Icon, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
+import { axiosInstance } from "@/utils/axiosInstance";
 import type { UserType } from "@/dummy-data";
 
 interface Props {
@@ -15,6 +17,62 @@ interface Props {
 }
 
 const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, coverPicInputRef }: Props) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const onUploadCoverPicHandler = async () => {
+    try {
+      if (!selectedImageFile) {
+        return false;
+      }
+
+      setIsSubmitting(true);
+
+      const formData = new FormData();
+      formData.append("coverPicture", selectedImageFile);
+
+      const {data} = await axiosInstance<{data: UserType}>({
+        method: "POST",
+        url: "/users/cover-picture",
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      toast.success("Imagen de portada actualizada correctamente");
+
+      setSelectedImageFile(null);
+      setSelectedImagePreview(null);
+      setUserData(data.data);
+
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  }
+
+  const onDeleteCoverPicHandler = async () => {
+    try {
+      setIsSubmitting(true);
+
+      const {data} = await axiosInstance<{data: UserType}>({
+        method: "DELETE",
+        url: "/users/cover-picture"
+      });
+
+      toast.success("Foto de portada eliminada con éxito");
+
+      setUserData(data.data);
+      setSelectedImageFile(null);
+      setSelectedImagePreview(null);
+      
+    } catch (error: any) {
+      toast.error(error.message);
+
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="flex flex-col items-center gap-2 w-full">
       <p className="w-full text-left text-neutral-900 font-medium">
@@ -28,9 +86,8 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
               <Button
                 className="border-none cursor-pointer"
                 variant="outline"
-                onClick={() => {
-                  coverPicInputRef.current?.click();
-                }}
+                disabled={isSubmitting}
+                onClick={onUploadCoverPicHandler}
               >
                 <Pencil className="size-4" aria-hidden />
                 <span>Cambiar foto</span>
@@ -41,6 +98,7 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
               <Button
                 className="text-white hover:text-white border-none bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
                 variant="outline"
+                disabled={isSubmitting}
                 onClick={() => {}}
               >
                 <Save className="size-4" aria-hidden />
@@ -52,10 +110,8 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
               <Button
                 className="border-none cursor-pointer"
                 variant="outline"
-                disabled={!userData.cover_photo}
-                onClick={() => {
-                  setUserData(prev => ({ ...prev, cover_photo: "" }));
-                }}
+                disabled={!userData.cover_photo || isSubmitting}
+                onClick={onDeleteCoverPicHandler}
               >
                 <Trash2Icon className="size-4 text-destructive" aria-hidden />
                 <span>Eliminar foto</span>

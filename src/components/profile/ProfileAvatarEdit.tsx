@@ -1,7 +1,9 @@
-import type { Dispatch, RefObject, SetStateAction } from "react";
+import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { Pencil, Save, Trash2Icon, X } from "lucide-react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import { axiosInstance } from "@/utils/axiosInstance";
 import type { UserType } from "@/dummy-data";
 
 interface Props {
@@ -17,6 +19,64 @@ interface Props {
 }
 
 const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, profilePicInputRef }: Props) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const onSubmitHandler = async () => {
+    try {
+      if (!selectedImageFile) return;
+
+      setIsSubmitting(true);
+
+      const formData = new FormData();
+
+      formData.append("avatar", selectedImageFile);
+
+      const {data} = await axiosInstance<{data: UserType}>({
+        method: "POST",
+        url: "/users/update-user-avatar",
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      toast.success("Avatar actualizado con éxito");
+
+      setUserData(data.data);
+      setSelectedImageFile(null);
+      setSelectedImagePreview(null);
+      
+    } catch (error: any) {
+      toast.error(error.message);
+
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  const onDeleteAvatarHandler = async () => {
+    try {
+      setIsSubmitting(true);
+
+      const {data} = await axiosInstance<{data: UserType}>({
+        method: "DELETE",
+        url: "/users/delete-user-avatar"
+      });
+
+      toast.success("Avatar eliminado con éxito");
+
+      setUserData(data.data);
+      setSelectedImageFile(null);
+      setSelectedImagePreview(null);
+      
+    } catch (error: any) {
+      toast.error(error.message);
+
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="flex flex-col items-start gap-2 w-full">
       <p className="text-left text-neutral-900 font-medium">
@@ -56,7 +116,8 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
             <Button
               className="text-white hover:text-white border-none bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
               variant="outline"
-              onClick={() => {}}
+              disabled={isSubmitting}
+              onClick={onSubmitHandler}
             >
               <Save className="size-4" aria-hidden />
               <span>Guardar</span>
@@ -67,10 +128,8 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
             <Button
               className="border-none cursor-pointer"
               variant="outline"
-              disabled={!userData.profile_picture}
-              onClick={() => {
-                setUserData(prev => ({ ...prev, profile_picture: "" }));
-              }}
+              disabled={!userData.profile_picture || isSubmitting}
+              onClick={onDeleteAvatarHandler}
             >
               <Trash2Icon className="size-4 text-destructive" aria-hidden />
               <span>Eliminar foto</span>
@@ -81,6 +140,7 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
             <Button
               className="border-none cursor-pointer"
               variant="outline"
+              disabled={isSubmitting}
               onClick={() => {
                 setSelectedImageFile(null);
                 setSelectedImagePreview(null);

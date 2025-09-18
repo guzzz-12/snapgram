@@ -1,12 +1,40 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
-import DiscoverCard from "@/components/DiscoverCard";
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
+import { toast } from "sonner";
+import DiscoverCard from "@/components/discover/DiscoverCard";
+import SearchBar from "@/components/discover/SearchBar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { dummyConnectionsData } from "@/dummy-data";
+import { dummyConnectionsData, type UserType } from "@/dummy-data";
+import { axiosInstance } from "@/utils/axiosInstance";
 
 const DiscoverPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get("searchTerm");
+  
+  const [isSearching, setIsSearching] = useState(false);
+
+  const search = async (keyword: string | null) => {
+    try {
+      setIsSearching(true);
+
+      const {data} = await axiosInstance<{data: UserType[]}>({
+        method: "GET",
+        url: `/search/discover-users?term=${keyword || "all"}`
+      });
+
+      console.log(data.data);
+      
+    } catch (error: any) {
+      toast.error("Error buscando usuarios");
+
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  useEffect(() => {
+    search(searchTerm);
+  }, [searchTerm]);
 
   return (
     <main className="pageWrapper">
@@ -23,19 +51,7 @@ const DiscoverPage = () => {
           </p>
         </div>
 
-        <search className="w-full p-4 bg-white rounded-md shadow border">
-          <div className="relative">
-            <Search className="absolute top-1/2 left-2 -translate-y-1/2 text-neutral-500" />
-
-            <Input
-              className="pl-10 bg-slate-100"
-              type="search"
-              placeholder="Buscar personas por nombre, ubicación o nombre de usuario"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </search>
+        <SearchBar isSearching={isSearching} />
 
         <div className="grid grid-cols-1 min-[600px]:grid-cols-2 min-[768px]:grid-cols-1 min-[920px]:grid-cols-2 min-[1100px]:grid-cols-3 gap-4 w-full">
           {dummyConnectionsData.map(connection => {

@@ -1,9 +1,9 @@
 import { Link } from "react-router";
 import { MapPin, MessageCircle } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Separator } from "./ui/separator";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { ConnectionType } from "@/dummy-data"
 
 interface Props {

@@ -1,16 +1,41 @@
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { toast } from "sonner";
 import { Link } from "react-router";
 import { MapPin, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { ConnectionType } from "@/dummy-data"
+import type { ConnectionType, FollowingType } from "@/dummy-data"
+import { axiosInstance } from "@/utils/axiosInstance";
 
 interface Props {
   data: ConnectionType;
+  following: FollowingType[];
+  setFollowing: Dispatch<SetStateAction<FollowingType[]>>;
 }
 
-const DiscoverCard = ({ data }: Props) => {
+const DiscoverCard = ({ data, following, setFollowing }: Props) => {
+  const [loading, setLoading] = useState(false);
+
+  const followHandler = async () => {
+    try {
+      setLoading(true);
+      const {data: followingData} = await axiosInstance<{data: FollowingType[]}>({
+        method: "GET",
+        url: `/users/follow-or-unfollow?userId=${data._id}`
+      });
+
+      setFollowing(followingData.data);
+
+    } catch (error: any) {
+      toast.error(error.message);
+
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex flex-col p-5 border rounded-md bg-white">
       <div className="flex flex-col items-center w-full overflow-hidden">
@@ -61,8 +86,10 @@ const DiscoverCard = ({ data }: Props) => {
         <Button
           className="grow text-sm text-center text-white bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
           size="sm"
+          disabled={loading}
+          onClick={followHandler}
         >
-          Siguiendo
+          {following.some((user) => user.followed._id === data._id) ? "Siguiendo" : "Seguir"}
         </Button>
 
         <Button className="shrink-0 cursor-pointer" size="icon" variant="outline">

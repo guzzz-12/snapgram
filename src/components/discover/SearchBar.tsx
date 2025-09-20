@@ -5,10 +5,10 @@ import { Input } from "../ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface Props {
-  isSearching: boolean;
+  loading: boolean;
 }
 
-const SearchBar = ({isSearching}: Props) => {
+const SearchBar = ({loading}: Props) => {
   const navigate = useNavigate();
 
   const [term, setTerm] = useState("");
@@ -32,7 +32,7 @@ const SearchBar = ({isSearching}: Props) => {
           className="pl-10 bg-slate-100"
           type="search"
           placeholder="Buscar personas por nombre, email, username o biografía"
-          disabled={isSearching}
+          disabled={loading}
           value={term}
           onChange={(e) => setTerm(e.target.value)}
         />

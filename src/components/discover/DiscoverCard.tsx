@@ -1,16 +1,18 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router";
+import { useAuth } from "@clerk/clerk-react";
 import { MapPin, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { ConnectionType, FollowingType } from "@/dummy-data"
 import { axiosInstance } from "@/utils/axiosInstance";
+import { cn } from "@/lib/utils";
+import type { FollowingType, UserType } from "@/types/global";
 
 interface Props {
-  data: ConnectionType;
+  data: UserType;
   following: FollowingType[];
   setFollowing: Dispatch<SetStateAction<FollowingType[]>>;
 }
@@ -18,12 +20,20 @@ interface Props {
 const DiscoverCard = ({ data, following, setFollowing }: Props) => {
   const [loading, setLoading] = useState(false);
 
+  const { getToken } = useAuth();
+
   const followHandler = async () => {
     try {
       setLoading(true);
+
+      const token = await getToken();
+
       const {data: followingData} = await axiosInstance<{data: FollowingType[]}>({
         method: "GET",
-        url: `/users/follow-or-unfollow?userId=${data._id}`
+        url: `/users/follow-or-unfollow?userId=${data._id}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
 
       setFollowing(followingData.data);
@@ -41,16 +51,16 @@ const DiscoverCard = ({ data, following, setFollowing }: Props) => {
       <div className="flex flex-col items-center w-full overflow-hidden">
         <Link to={`/profile/${data._id}`}>
           <Avatar className="w-[50px] h-[50px] mb-2">
-            <AvatarImage src={data.profile_picture} />
+            <AvatarImage src={data.profilePicture} />
             <AvatarFallback>
-              {data.full_name.charAt(0).toUpperCase()}
+              {data.fullName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>        
         </Link>
 
         <Link to={`/profile/${data._id}`}>
           <p className="w-full text-center font-semibold truncate">
-            {data.full_name}
+            {data.fullName}
           </p>
         </Link>
 
@@ -61,8 +71,8 @@ const DiscoverCard = ({ data, following, setFollowing }: Props) => {
 
       <Separator className="w-full my-3" />
 
-      <p className="w-full mb-4 text-sm text-center text-neutral-700 line-clamp-4">
-        {data.bio}
+      <p className={cn("w-full mb-4 text-sm text-center line-clamp-4", data.bio ? "text-neutral-700" : "text-neutral-400 italic")}>
+        {`${data.bio || "Sin biografía"}`}
       </p>
 
       <div className="flex justify-center items-center gap-2 w-full mb-4">
@@ -94,7 +104,7 @@ const DiscoverCard = ({ data, following, setFollowing }: Props) => {
 
         <Button className="shrink-0 cursor-pointer" size="icon" variant="outline">
           <MessageCircle aria-hidden />
-          <span className="sr-only">Enviar mensaje a {data.full_name}</span>
+          <span className="sr-only">Enviar mensaje a {data.fullName}</span>
         </Button>
       </div>
     </div>

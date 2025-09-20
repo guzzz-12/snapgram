@@ -353,16 +353,3 @@ export type MessageType = typeof dummyMessagesData[0];
 export type ConnectionType = typeof dummyConnectionsData[0];
 export type FollowerType = typeof dummyFollowersData[0];
 export type PendingConnectionType = typeof dummyPendingConnectionsData[0];
-
-export type FollowingType = {
-  _id: string;
-  follower: string;
-  followed: UserType;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type FollowingAndFollowersType = {
-  following: UserType[];
-  followers: UserType[];
-}

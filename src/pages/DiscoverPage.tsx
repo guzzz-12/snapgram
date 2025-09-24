@@ -98,7 +98,7 @@ const DiscoverPage = () => {
             return (
               <DiscoverCard
                 key={connection._id}
-                data={connection}
+                userData={connection}
                 following={following?.data || []}
                 loading={loadingFollowing}
               />

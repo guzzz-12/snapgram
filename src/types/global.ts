@@ -29,7 +29,7 @@ export type MessageType = {
   fromUserId: string;
   toUserId: string;
   text?: string;
-  message_type: "text" | "image" | "video";
+  messageType: "text" | "image" | "video";
   mediaUrl?: string;
   createdAt: string;
   updatedAt: string;

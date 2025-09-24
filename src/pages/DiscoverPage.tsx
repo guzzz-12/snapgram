@@ -1,79 +1,78 @@
-import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import DiscoverCard from "@/components/discover/DiscoverCard";
 import SearchBar from "@/components/discover/SearchBar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConnectionCardSkeleton from "@/components/connections/ConnectionCardSkeleton";
 import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
 import type { FollowingType, UserType } from "@/types/global";
 
 const DiscoverPage = () => {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
-  
-  const [connections, setConnections] = useState<UserType[]>([]);
-  const [following, setFollowing] = useState<FollowingType[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const { getToken } = useAuth();
 
-  const search = async (keyword: string | null | undefined) => {
-    try {
-      setLoading(true);
+  const search = async (page: number, keyword: string | null | undefined) => {
+    const token = await getToken();
 
-      const token = await getToken();
+    const {data} = await axiosInstance<{
+      data: UserType[];
+      hasMore: boolean;
+      nextPage: number | null;
+    }>({
+      method: "GET",
+      url: "/search/discover-users",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      params: {
+        page,
+        keyword: keyword || "all",
+        limit: 10
+      }
+    });
 
-      const {data: connectionsData} = await axiosInstance<{data: UserType[]}>({
-        method: "GET",
-        url: `/search/discover-users?term=${keyword || "all"}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      setConnections(connectionsData.data);
-      
-    } catch (error: any) {
-      toast.error(`Error buscando usuarios: ${error.message}`);
-
-    } finally {
-      setLoading(false);
-    }
+    return data;
   }
 
   const getFollowing = async () => {
-    try {
-      setLoading(true);
+    const token = await getToken();
 
-      const token = await getToken();
+    const {data} = await axiosInstance<{data: FollowingType[]}>({
+      method: "GET",
+      url: "/users/following",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
-      const {data: followingData} = await axiosInstance<{data: FollowingType[]}>({
-        method: "GET",
-        url: "/users/following",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      setFollowing(followingData.data);
-      
-    } catch (error: any) {
-      toast.error(`Error buscando los usuarios seguidos: ${error.message}`);
-
-    } finally {
-      setLoading(false);
-    }
+    return data;
   }
 
-  useEffect(() => {
-    search(searchTerm);
-  }, [searchTerm]);
+  const {data: searchData, error: searchError, fetchNextPage, isFetching, isFetchingNextPage} = useInfiniteQuery({
+    queryKey: ["discover", searchTerm],
+    queryFn: ({pageParam}) => search(pageParam, searchTerm),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
+    refetchOnWindowFocus: false
+  });
 
-  useEffect(() => {
-    getFollowing();
-  }, []);
+  const {data: following, isPending: loadingFollowing, error: followingError} = useQuery({
+    queryKey: ["following"],
+    queryFn: getFollowing,
+    enabled: !!searchData?.pages.length,
+    refetchOnWindowFocus: false
+  });
+
+  if (searchError) toast.error(errorMessage(searchError));
+  if (followingError) toast.error(errorMessage(followingError));
+
+  const isSearching = isFetching || isFetchingNextPage;
+  const connections = searchData?.pages.flatMap(page => page.data) || [];
 
   return (
     <main className="pageWrapper">
@@ -90,18 +89,18 @@ const DiscoverPage = () => {
           </p>
         </div>
 
-        <SearchBar loading={loading} />
+        <SearchBar loading={isSearching} />
 
         <div className="grid grid-cols-1 min-[600px]:grid-cols-2 min-[768px]:grid-cols-1 min-[920px]:grid-cols-2 min-[1100px]:grid-cols-3 gap-4 w-full">
-          {loading && [...Array(6)].map((_, index) => <ConnectionCardSkeleton key={index} />)}
+          {isSearching && [...Array(6)].map((_, index) => <ConnectionCardSkeleton key={index} />)}
 
-          {!loading && connections.length > 0 && connections.map(connection => {
+          {!isSearching && connections.length > 0 && connections.map(connection => {
             return (
               <DiscoverCard
                 key={connection._id}
                 data={connection}
-                following={following}
-                setFollowing={setFollowing}
+                following={following?.data || []}
+                loading={loadingFollowing}
               />
             )
           })}

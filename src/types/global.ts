@@ -1,5 +1,6 @@
 export type UserType = {
   _id: string;
+  clerkId: string;
   email: string;
   fullName: string;
   username: string;
@@ -35,6 +36,19 @@ export type MessageType = {
   updatedAt: string;
   seen: boolean;
 }
+
+export type StoryType = {
+  _id: string;
+  user: UserType;
+  content: string;
+  textColor: string;
+  textBgColor: string;
+  mediaUrl: string;
+  mediaType: "text" | "image" | "video";
+  backgroundColor: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type FollowingType = {
   _id: string;

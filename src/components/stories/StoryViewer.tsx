@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
-import { X } from "lucide-react";
+import { EllipsisVertical, Loader2Icon, Trash2, X } from "lucide-react";
+import { toast } from "sonner";
+import StoryProgressBar from "./StoryProgressBar";
+import DeleteStoryModal from "./DeleteStoryModal";
 import { Dialog, DialogClose, DialogContent, DialogOverlay, DialogTitle } from "../ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import StoryProgressBar from "./StoryProgressBar";
-import { dummyStoriesData } from "@/dummy-data";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
+import type { StoryType } from "@/types/global";
 
 interface Props {
   isOpen: boolean;
@@ -15,9 +23,29 @@ interface Props {
 }
 
 const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
-  const storyData = dummyStoriesData.find(story => story._id === storyId);
-
   const [showFullText, setShowFullText] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
+  const {getToken, userId} = useAuth();
+
+  const {data: storyData, isFetching, error} = useQuery({
+    queryKey: ["story", storyId],
+    queryFn: async () => {
+      const token = await getToken();
+
+      const { data } = await axiosInstance<{data: StoryType}>({
+        method: "GET",
+        url: `/stories/${storyId}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      return data.data;
+    },
+    retry: 2,
+    enabled: isOpen
+  });
 
   useEffect(() => {    
     return () => {
@@ -25,9 +53,21 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
     }
   }, [isOpen]);
 
-  if (!storyData) return null;
+  if (error) {
+    const message = errorMessage(error);
+    toast.error(message);
+    return <Navigate to="/" replace />
+  }
 
-  const hasMedia = storyData.media_type === "image";
+  const hasMedia = storyData?.mediaType === "image";
+
+  if (isFetching) {
+    return (
+      <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black/70 z-50">
+        <Loader2Icon className="size-9 text-white animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <Dialog
@@ -42,15 +82,15 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
 
       <DialogContent
         style={{
-          backgroundColor: storyData.background_color,
-          backgroundImage: hasMedia ? `url(${storyData.media_url})` : "",
+          backgroundColor: storyData?.backgroundColor,
+          backgroundImage: hasMedia ? `url(${storyData?.mediaUrl})` : "",
           backgroundSize: hasMedia ? "cover" : "",
           backgroundPosition: hasMedia ? "center" : "",
         }}
         className="w-auto h-[95vh] p-0 aspect-[1/1.7] rounded-lg border-none overflow-hidden [&>button]:hidden"
       >
         <DialogTitle className="sr-only">
-          Historia de {storyData.user.full_name}
+          Historia de {storyData?.user.fullName}
         </DialogTitle>
 
         <div className="flex flex-col gap-4 w-full h-full overflow-hidden">
@@ -59,48 +99,85 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
             <StoryProgressBar isOpen={isOpen} setOpenStoryId={setOpenStoryId} />
 
             <Avatar className="size-10">
-              <AvatarImage src={storyData.user.profile_picture} />
+              <AvatarImage src={storyData?.user.profilePicture} />
               <AvatarFallback>
-                {storyData.user.full_name.charAt(0)}
+                {storyData?.user.fullName.charAt(0)}
               </AvatarFallback>
             </Avatar>
 
             <div className="flex flex-col gap-0.5 w-full overflow-hidden">
               <p className="text-white font-semibold truncate">
-                {storyData.user.full_name}
+                {storyData?.user.fullName}
               </p>
 
               <p className="text-xs text-neutral-300 truncate">
-                {dayjs(storyData.updatedAt).format("hh:mm A, MMMM D, YYYY")}
+                {dayjs(storyData?.updatedAt).format("hh:mm A, MMMM D, YYYY")}
               </p>
             </div>
 
-            <DialogClose asChild>
-              <Button
-                className="ml-auto hover:bg-transparent cursor-pointer"
-                variant="ghost"
-                size="icon"
-                disabled={false}
-              >
-                <X className="size-9 shrink-0 text-white stroke-2" aria-hidden />
-                <span className="sr-only">Cerrar</span>
-              </Button>
-            </DialogClose>
+            <div className="flex items-center gap-2">
+              {userId === storyData?.user.clerkId &&
+                <>
+                  <DeleteStoryModal
+                    storyId={storyId || ""}
+                    isOpen={openDeleteModal}
+                    setIsOpen={(open) => setOpenDeleteModal(open)}
+                    setOpenStoryId={() => setOpenStoryId(null)}
+                  />
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="p-1 cursor-pointer">
+                        <EllipsisVertical
+                          className="size-5.5 shrink-0 text-white stroke-2"
+                          aria-hidden
+                        />
+                        <span className="sr-only">
+                          Opciones de la historia
+                        </span>
+                      </button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        className="flex justify-start items-center gap-2 cursor-pointer"
+                        onClick={() => setOpenDeleteModal(true)}
+                      >
+                        <Trash2 className="size-4.5 text-destructive" aria-hidden />
+                        <span className="text-sm">Eliminar historia</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              }
+
+              <DialogClose asChild>
+                <Button
+                  className="ml-auto hover:bg-transparent cursor-pointer"
+                  variant="ghost"
+                  size="icon"
+                  disabled={false}
+                >
+                  <X className="size-6 shrink-0 text-white stroke-2" aria-hidden />
+                  <span className="sr-only">Cerrar</span>
+                </Button>
+              </DialogClose>
+            </div>
           </div>
 
           {/* Contenido de texto del story (si lo hay) */}
-          {storyData.content && (
+          {storyData?.content && (
             <button
-              style={{backgroundColor: storyData.text_bg_color}}
+              style={{backgroundColor: storyData?.textBgColor}}
               className="w-full max-w-[90%] h-auto mx-auto my-auto p-2 translate-y-[-20px] rounded-md overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-[transparent]"
               aria-describedby="story-content-description"
               onClick={() => setShowFullText(prev => !prev)}
             >
               <p
-                style={{color: storyData.text_color}}
+                style={{color: storyData?.textColor}}
                 className={cn("text-2xl text-center leading-tight text-shadow-lg font-semibold whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-[12]")}
               >
-                {storyData.content}
+                {storyData?.content}
               </p>
 
               <span

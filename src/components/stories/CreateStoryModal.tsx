@@ -1,30 +1,78 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type ClipboardEvent } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { ArrowLeft, Image, Palette, Plus, TypeOutline } from "lucide-react";
 import StoryColorPicker, { COLORS } from "./StoryColorPicker";
 import { Button } from "../ui/button";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogOverlay } from "../ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
 import { Textarea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import useImagePicker from "@/hooks/useImagePicker";
-import { dummyStoriesData, dummyUserData, type StoryType } from "@/dummy-data";
+import { useCreateStoryModal } from "@/hooks/useCreateStoryModal";
+import { errorMessage } from "@/utils/errorMessage";
+import { axiosInstance } from "@/utils/axiosInstance";
+import type { StoryType } from "@/types/global";
 
 const TEXT_BG_COLORS: ("transparent" | "#fff" | "#000")[] = ["transparent", "#fff", "#000"];
 
-interface Props {
-  isOpen: boolean;
-  onClose: (isOpen: boolean) => void;
-}
-
-const CreateStoryModal = ({ isOpen, onClose }: Props) => {
+const CreateStoryModal = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const prevTextRef = useRef("");
 
   const [storyTextContent, setStoryTextContent] = useState("");
+  const [charLimitReached, setCharLimitReached] = useState(false);
+  const [isPasted, setIsPasted] = useState(false);
   const [storyTextColor, setStoryTextColor] = useState<"#fff" | "#000">("#fff");
   const [storyTextBgColor, setStoryTextBgColor] = useState<"transparent" | "#fff" | "#000">(TEXT_BG_COLORS[0]);
   const [selectdBgColor, setSelectedBgColor] = useState<{ name: string, value: string }>( COLORS[0] );
-  const [isLoading, setIsLoading] = useState(false);
 
   const { selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, onImagePickHandler} = useImagePicker({fileInputRef});
+
+  const {getToken} = useAuth();
+
+  const queryClient = useQueryClient();
+
+  const {open: isOpen, setOpen: onClose} = useCreateStoryModal();
+
+  useEffect(() => {
+    if (!containerRef.current || !textareaRef.current) {
+      return;
+    }
+
+    if (isPasted) {
+      let containerHeight = containerRef.current.clientHeight;
+      let textarea = textareaRef.current;
+      let splittedText = storyTextContent.split("");
+
+      while (textarea.scrollHeight >= (containerHeight - 120)) {
+        splittedText.pop();
+        textarea.value = splittedText.join("");
+        containerHeight = containerRef.current.clientHeight;
+        textarea = textareaRef.current!;
+      }
+
+      setIsPasted(false);
+      setStoryTextContent(splittedText.join(""));
+      prevTextRef.current = storyTextContent;
+      
+    } else {
+      setIsPasted(false);
+
+      const containerHeight = containerRef.current?.clientHeight;
+      const textarea = textareaRef.current;
+      
+      if (textarea.scrollHeight >= (containerHeight - 120)) {
+        setCharLimitReached(true);
+      } else {
+        setCharLimitReached(false);
+      }
+    
+      prevTextRef.current = storyTextContent;
+    }
+  }, [storyTextContent, isPasted]);
 
   useEffect(() => {
     return () => {
@@ -32,15 +80,34 @@ const CreateStoryModal = ({ isOpen, onClose }: Props) => {
         setStoryTextContent("");
         setSelectedImageFile(null);
         setSelectedImagePreview(null);
-        setSelectedBgColor(COLORS[0]);
-        setStoryTextBgColor(TEXT_BG_COLORS[0]);
-  
+      
         if(fileInputRef.current) {
           fileInputRef.current.value = ""
         };
       }
     }
   }, [isOpen]);
+
+  const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setIsPasted(false);
+
+    if (charLimitReached && e.target.value.length > prevTextRef.current.length) {
+      setStoryTextContent(prevTextRef.current);
+      return false;
+    }
+
+    setStoryTextContent(e.target.value);
+  }
+
+  const onPasteHandler = (e: ClipboardEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+
+    const text = e.clipboardData.getData("text/plain");
+
+    setIsPasted(true);
+    setStoryTextContent(text);
+    prevTextRef.current = text;
+  }
 
   // Alternar el color de fondo del texto (transparente, blanco o negro)
   const toggleTextBgColor = () => {
@@ -56,31 +123,46 @@ const CreateStoryModal = ({ isOpen, onClose }: Props) => {
     setStoryTextBgColor(TEXT_BG_COLORS[nextIndex]);
   }
 
-  const onSubmitHandler = () => {
+  const onSubmitHandler = async () => {
     if (!storyTextContent && !selectedImageFile) return;
 
-    setIsLoading(true);
+    const token = await getToken();
 
-    setTimeout(() => {
-      const newStory: StoryType = {
-        _id: Date.now().toString(),
-        background_color: selectdBgColor.value,
-        content: storyTextContent,
-        text_color: storyTextColor,
-        text_bg_color: storyTextBgColor,
-        createdAt: new Date().toString(),
-        media_type: selectedImageFile ? "image" : "text",
-        media_url: selectedImagePreview || "",
-        updatedAt: new Date().toString(),
-        user: dummyUserData
+    const formData = new FormData();
+
+    if (selectedImageFile) {
+      formData.append("media", selectedImageFile);
+    }
+
+    formData.append("backgroundColor", selectdBgColor.value);
+    formData.append("content", storyTextContent);
+    formData.append("textColor", storyTextColor);
+    formData.append("textBgColor", storyTextBgColor);
+    formData.append("mediaType", selectedImageFile ? "image" : "text");
+    
+    const {data} = await axiosInstance<{data: StoryType}>({
+      method: "POST",
+      url: "/stories/create",
+      data: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data"
       }
+    });
 
-      dummyStoriesData.unshift(newStory);
-
-      setIsLoading(false);
-      onClose(false);
-    }, 2500);
+    return data.data;
   }
+
+  const {mutate: createStory, isPending: isLoading} = useMutation({
+    mutationFn: onSubmitHandler,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ["stories"]});
+    },
+    onError: (error) => {
+      const message = errorMessage(error);
+      toast.error(message);
+    }
+  });
 
   return (
     <Dialog
@@ -92,117 +174,131 @@ const CreateStoryModal = ({ isOpen, onClose }: Props) => {
     >
       <DialogOverlay className="bg-black opacity-70" />
 
-      <DialogContent className="w-full bg-transparent text-white border-none shadow-none [&>button]:hidden overflow-hidden">
-        <DialogHeader>
-          <div className="relative w-full py-1">
-            <DialogClose asChild>
-              <Button
-                className="absolute top-[50%] left-0 translate-y-[-50%] hover:bg-transparent cursor-pointer"
-                variant="ghost"
-                size="icon"
-                disabled={isLoading}
-              >
-                <ArrowLeft className="size-6 shrink-0 text-white stroke-2" aria-hidden />
-                <span className="sr-only">Cancelar</span>
-              </Button>
-            </DialogClose>
-            <p className="w-full text-xl text-white text-center">
-              Crear historia
-            </p>
-          </div>
-          
-          <div
-            style={{
-              backgroundColor: selectdBgColor.value,
-              backgroundImage: selectedImagePreview ? `url(${selectedImagePreview})` : undefined,
-              backgroundPosition: "center",
-              backgroundSize: "cover",
-              backgroundRepeat: "no-repeat",
-            }}
-            className="flex justify-center items-center w-full p-4 aspect-[4/3] rounded-md"
-          >
-            <Textarea
-              style={{ color: storyTextColor, backgroundColor: storyTextBgColor }}
-              className="flex justify-center items-center w-fit max-h-[50vh] !text-2xl text-center leading-tight text-shadow-lg font-semibold resize-none bg-transparent shadow-none border-none focus:outline-none focus:border-none focus-visible:outline-none focus-visible:ring-0 placeholder:text-white overflow-y-auto scrollbar-none"
-              placeholder="¿Qué estás pensando?"
-              rows={1}
+      <DialogContent className="flex flex-col justify-start w-auto h-[95vh] p-0 aspect-[1/1.7] rounded-lg bg-transparent text-white border-none shadow-none [&>button]:hidden overflow-hidden">
+      <DialogTitle className="sr-only">
+        Crear historia
+      </DialogTitle>
+
+      <DialogHeader className="absolute top-0 left-0 w-full p-4 bg-linear-to-b from-black to-transparent z-10">
+        <div className="relative w-full py-1">
+          <DialogClose asChild>
+            <Button
+              className="absolute top-[50%] left-0 translate-y-[-50%] hover:bg-transparent cursor-pointer"
+              variant="ghost"
+              size="icon"
               disabled={isLoading}
-              value={storyTextContent}
-              onChange={(e) => setStoryTextContent(e.target.value)}
-            />
-          </div>
+            >
+              <ArrowLeft className="size-6 shrink-0 text-white stroke-2" aria-hidden />
+              <span className="sr-only">Cancelar</span>
+            </Button>
+          </DialogClose>
 
-          <div className="flex justify-between gap-4 w-full">
-            <div className="flex justify-start items-center gap-1.5">
-              <StoryColorPicker onSelect={(color) => setSelectedBgColor(color)} />
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    className="flex justify-center items-center gap-1 w-10 h-10 rounded-full text-neutral-900 bg-white hover:bg-neutral-100 cursor-pointer"
-                    size="icon"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Image className="size-6 text-neutral-600" aria-hidden />
-                    <span className="sr-only">Seleccionar Imagen</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Seleccionar imagen</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    className="flex justify-center items-center gap-1 w-10 h-10 rounded-full text-neutral-900 bg-white hover:bg-neutral-100 cursor-pointer"
-                    size="icon"
-                    onClick={() => {
-                      setStoryTextColor(storyTextColor === "#fff" ? "#000" : "#fff");
-                    }}
-                  >
-                    <TypeOutline className="size-6 text-neutral-600" aria-hidden />
-                    <span className="sr-only">Cambiar color del texto</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Cambiar color del texto</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Button
-                className="flex justify-center items-center gap-1 w-10 h-10 rounded-full text-neutral-900 bg-white hover:bg-neutral-100 cursor-pointer"
-                size="icon"
-                onClick={toggleTextBgColor}
-              >
-                <Palette className="size-6 text-neutral-600" aria-hidden />
-                <span className="sr-only">Cambiar color del fondo del texto</span>
-              </Button>
-            </div>
-          </div>
-
-          <Button
-            className="gap-1 text-base font-normal bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
-            disabled={isLoading}
-            onClick={onSubmitHandler}
-          >
-            <Plus className="size-6" aria-hidden />
-            <span>Publicar historia</span>
-          </Button>
-        </DialogHeader>
-
-        {/* Input oculto del selector de imagen */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          hidden
-          multiple={false}
+          <p className="w-full text-xl text-white text-center">
+            Crear historia
+          </p>
+        </div>
+      </DialogHeader>
+        
+      <div
+        ref={containerRef}
+        style={{
+          backgroundColor: selectdBgColor.value,
+          backgroundImage: selectedImagePreview ? `url(${selectedImagePreview})` : undefined,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+        }}
+        className="relative flex justify-center items-center w-full h-full grow p-4 rounded-md overflow-hidden"
+      >
+        <Textarea
+          ref={textareaRef}
+          style={{ color: storyTextColor, backgroundColor: storyTextBgColor }}
+          className="flex justify-center items-center w-full max-h-full !text-2xl text-center leading-tight text-shadow-lg font-semibold resize-none bg-transparent shadow-none border-none focus:outline-none focus:border-none focus-visible:outline-none focus-visible:ring-0 placeholder:text-white scrollbar scrollbar-track-transparent scrollbar-thumb-transparent"
+          placeholder="¿Qué estás pensando?"
+          rows={1}
           disabled={isLoading}
-          accept="image/png, image/jpg, image/jpeg, image/webp"
-          onChange={onImagePickHandler}
+          value={storyTextContent}
+          onChange={onChangeHandler}
+          onPaste={onPasteHandler}
         />
+      </div>
+
+      <div className="absolute left-0 bottom-0 flex flex-col gap-3 w-full p-4 bg-linear-to-t from-black to-transparent z-10">
+        <div className="flex justify-between gap-4 w-full">
+          <div className="flex justify-start items-center gap-1.5">
+            <StoryColorPicker onSelect={(color) => setSelectedBgColor(color)} />
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  className="flex justify-center items-center gap-1 w-8 h-8 rounded-full text-neutral-900 bg-white hover:bg-neutral-100 cursor-pointer"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Image className="size-5 text-neutral-600" aria-hidden />
+                  <span className="sr-only">Seleccionar Imagen</span>
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent>
+                <p>Seleccionar imagen</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  className="flex justify-center items-center gap-1 w-8 h-8 rounded-full text-neutral-900 bg-white hover:bg-neutral-100 cursor-pointer"
+                  size="icon"
+                  onClick={() => {
+                  setStoryTextColor(storyTextColor === "#fff" ? "#000" : "#fff");
+                  }}
+                >
+                  <TypeOutline className="size-5 text-neutral-600" aria-hidden />
+                  <span className="sr-only">Cambiar color del texto</span>
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent>
+                <p>Cambiar color del texto</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Button
+              className="flex justify-center items-center gap-1 w-8 h-8 rounded-full text-neutral-900 bg-white hover:bg-neutral-100 cursor-pointer"
+              size="icon"
+              onClick={toggleTextBgColor}
+            >
+              <Palette className="size-5 text-neutral-600" aria-hidden />
+              <span className="sr-only">Cambiar color del fondo del texto</span>
+            </Button>
+          </div>
+        </div>
+
+        <Button
+          className="gap-1 text-base font-light bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
+          size="sm"
+          disabled={isLoading}
+          onClick={() => createStory()}
+        >
+          <Plus className="size-6" aria-hidden />
+          <span>Publicar historia</span>
+        </Button>
+      </div>
+
+
+      {/* Input oculto del selector de imagen */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        hidden
+        multiple={false}
+        disabled={isLoading}
+        accept="image/png, image/jpg, image/jpeg, image/webp"
+        onChange={onImagePickHandler}
+      />
       </DialogContent>
     </Dialog>
   )

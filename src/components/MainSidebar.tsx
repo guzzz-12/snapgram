@@ -1,9 +1,12 @@
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router";
 import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
-import { CirclePlus, House, LogOut, MessageCircle, Search, UserRound, UsersRound } from "lucide-react";
+import { CirclePlus, House, ImagePlus, LogOut, MessageCircle, Search, TypeOutline, UserRound, UsersRound } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "./ui/sidebar";
 import { Button } from "./ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import logo from "@/assets/logo-simple.webp";
+import { useCreateStoryModal } from "@/hooks/useCreateStoryModal";
 
 const SIDEBAR_ITEMS = [
   {
@@ -34,8 +37,21 @@ const SIDEBAR_ITEMS = [
 ];
 
 const MainSidebar = () => {
+  const createPostBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  const [createPostBtnWidth, setCreatePostBtnWidth] = useState(0);
+
   const {user, isLoaded} = useUser();
   const {signOut} = useClerk();
+
+  const {setOpen: openCreateStoryModal} = useCreateStoryModal();
+
+  // Establecer el ancho del dropdown igual al ancho del botón
+  useEffect(() => {
+    if (createPostBtnRef.current) {
+      setCreatePostBtnWidth(createPostBtnRef.current.clientWidth);
+    }
+  }, []);
 
   if (isLoaded && !user) return null;
 
@@ -76,13 +92,37 @@ const MainSidebar = () => {
           ))}
 
           <SidebarMenuItem className="mt-4" key="create-post">
-            <Link
-              className="flex justify-center items-center gap-2 h-full px-4 py-2 text-base text-white rounded-md bg-[#4F39F6] hover:bg-[#331fcf] transition-colors"
-              to="/create-post"
-            >
-              <CirclePlus className="!size-5" aria-hidden />
-              <span>Crear Post</span>
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  ref={createPostBtnRef}
+                  className="flex justify-center items-center gap-2 w-full h-full px-4 py-2 text-base text-white rounded-md bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
+                >
+                  <CirclePlus className="!size-5" aria-hidden />
+                  <span>Crear Post</span>
+                </button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent style={{ width: `${createPostBtnWidth}px` }}>
+                <DropdownMenuItem asChild>
+                  <Link
+                    className="flex justify-start items-center gap-2 w-full h-full cursor-pointer"
+                    to="/create-post"
+                  >
+                    <ImagePlus className="size-5" aria-hidden />
+                    <span>Crear publicación</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  className="flex justify-start items-center gap-2 cursor-pointer"
+                  onClick={() => openCreateStoryModal(true)}
+                >
+                  <TypeOutline className="size-5" aria-hidden />
+                  <span>Crear historia</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>

@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { esMX } from "@clerk/localizations";
+import { ImageKitProvider } from "@imagekit/react";
 import App from "./App.tsx";
 import "./index.css";
 
@@ -21,7 +22,9 @@ createRoot(document.getElementById("root")!).render(
       localization={esMX}
     >
       <BrowserRouter>
-        <App />
+        <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
+          <App />
+        </ImageKitProvider>
       </BrowserRouter>
     </ClerkProvider>
   </QueryClientProvider>

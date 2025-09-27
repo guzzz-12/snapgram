@@ -1,76 +1,142 @@
-import { useEffect, useState } from "react";
-import { CirclePlus } from "lucide-react";
-import StoryCard from "./StoryCard";
-import CreateStoryModal from "./CreateStoryModal";
-import StoryCardSkeleton from "./StoryCardSkeleton";
+import { useRef, useState, type UIEvent } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
+import { CircleArrowLeft, CircleArrowRight } from "lucide-react";
+import { toast } from "sonner";
+import StoryCardRounded from "./StoryCardRounded";
+import StoryCardSkeletonRounded from "./StoryCardSkeletonRounded";
 import StoryViewer from "./StoryViewer";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
-import { Button } from "../ui/button";
-import { dummyStoriesData, type StoryType } from "@/dummy-data";
+import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
+import type { StoryType } from "@/types/global";
+import { cn } from "@/lib/utils";
 
 const StoriesSlider = () => {
-  const [stories, setStories] = useState<StoryType[]>([]);
-  const [openStoryModal, setOpenStoryModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [openStoryId, setOpenStoryId] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setStories(dummyStoriesData);
-      setLoading(false);
-    }, 2000);
-  }, []);
+  const [openStoryId, setOpenStoryId] = useState<string | null>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(true);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
+  const { getToken } = useAuth();
+
+  const getStories = async (page: number) => {
+    const token = await getToken();
+
+    const {data} = await axiosInstance<{
+      data: StoryType[];
+      hasMore: boolean;
+      nextPage: number | null;
+    }>({
+      method: "GET",
+      url: "/stories",
+      params: {
+        page,
+        limit: 10
+      },
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+    });
+
+    return data;
+  };
+
+  const {data, error, isFetching: loading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
+    queryKey: ["stories"],
+    queryFn: ({pageParam}) => getStories(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
+    refetchOnWindowFocus: false
+  });
+  
+  const SCROLL_STEP = 240;
+
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({
+        left: -SCROLL_STEP,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({
+        left: SCROLL_STEP,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  const onScrollHandler = (e: UIEvent<HTMLElement, globalThis.UIEvent>) => {
+    const scrollLeft = e.currentTarget.scrollLeft;
+    setShowLeftArrow(scrollLeft > 0);
+    setShowRightArrow(scrollLeft < (e.currentTarget.scrollWidth - e.currentTarget.clientWidth));
+  }
+
+  const stories = data?.pages.flatMap((page) => page.data) || [];
+
+  if (error) {
+    toast.error(errorMessage(error));
+  }
 
   return (
-    <section className="w-full mb-6">
-      <StoryViewer
-        isOpen={!!openStoryId}
-        storyId={openStoryId}
-        setOpenStoryId={(id) => setOpenStoryId(id)}
-      />
+    <div className="relative w-full mb-5 overflow-x-hidden">
+      {/* Botones del slider */}
+      <button
+        className={cn("absolute top-0 left-0 flex justify-center items-center h-full px-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10", showLeftArrow ? "flex" : "hidden")}
+        onClick={scrollLeft}
+      >
+        <CircleArrowLeft 
+          className="size-7 stroke-white fill-[#4F39F6]"
+          aria-hidden
+        />
+        <span className="sr-only">
+          Ir a las historias anteriores
+        </span>
+      </button>
 
-      <CreateStoryModal isOpen={openStoryModal} onClose={setOpenStoryModal} />
+      <button
+        style={{ display: showRightArrow ? "flex" : "none" }}
+        className={cn("absolute top-0 right-0 justify-center items-center h-full px-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10", showRightArrow ? "flex" : "hidden")}
+        onClick={scrollRight}
+      >
+        <CircleArrowRight
+          className="size-7 stroke-white fill-[#4F39F6]"
+          aria-hidden
+        />
+        <span className="sr-only">
+          Ir a las historias siguientes
+        </span>
+      </button>
 
-      <Carousel opts={{ align: "start"}}>
-        <CarouselContent className="h-[180px]">
-          <CarouselItem className="basis-1/5">
-            <Button
-              className="relative flex flex-col justify-center items-center gap-2 w-full h-full p-3 bg-neutral-100 hover:bg-neutral-200 rounded-md border-2 border-dashed border-blue-600 overflow-hidden cursor-pointer group"
-              variant="ghost"
-              onClick={() => setOpenStoryModal(true)}
-            >
-              <CirclePlus
-                className="mt-auto size-9 fill-blue-600 stroke-1 stroke-white group-hover:scale-[120%] transition-transform"
-                aria-hidden
-              />
+      <section
+        ref={scrollRef}
+        className="w-full overflow-x-auto scrollbar-none"
+        onScroll={onScrollHandler}
+      >
+        <StoryViewer
+          isOpen={!!openStoryId}
+          storyId={openStoryId}
+          setOpenStoryId={(id) => setOpenStoryId(id)}
+        />
 
-              <p className="mt-auto text-sm">
-                Crear historia
-              </p>
-            </Button>
-          </CarouselItem>
-
-          {loading && Array.from({ length: 5 }).map((_, i) => (
-            <CarouselItem key={i} className="basis-1/5">
-              <StoryCardSkeleton />
-            </CarouselItem>
+        <div className="flex items-center gap-3">
+          {loading && stories.length === 0 && Array.from({ length: 5 }).map((_, i) => (
+            <StoryCardSkeletonRounded key={i} />
           ))}
-
           {!loading && stories.map((story) => (
-            <CarouselItem key={story._id} className="basis-1/5">
-              <StoryCard
-                storyData={story}
-                setOpenStoryId={(storyId) => setOpenStoryId(storyId)}
-              />
-            </CarouselItem>
+            <StoryCardRounded
+              key={story._id}
+              storyData={story}
+              setOpenStoryId={(storyId) => setOpenStoryId(storyId)}
+            />
           ))}
-        </CarouselContent>
-
-        <CarouselPrevious className="ml-2 cursor-pointer" disabled={loading} />
-
-        <CarouselNext className="mr-2 cursor-pointer" disabled={loading} />
-      </Carousel>
-    </section>
+        </div>
+      </section>
+    </div>
   )
 }
 

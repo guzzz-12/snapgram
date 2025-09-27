@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type ClipboardEvent } fr
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Image, Palette, Plus, TypeOutline } from "lucide-react";
+import { ArrowLeft, Expand, Image, Minimize, Palette, Plus, TypeOutline } from "lucide-react";
 import StoryColorPicker, { COLORS } from "./StoryColorPicker";
 import { Button } from "../ui/button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
@@ -28,6 +28,7 @@ const CreateStoryModal = () => {
   const [storyTextColor, setStoryTextColor] = useState<"#fff" | "#000">("#fff");
   const [storyTextBgColor, setStoryTextBgColor] = useState<"transparent" | "#fff" | "#000">(TEXT_BG_COLORS[0]);
   const [selectdBgColor, setSelectedBgColor] = useState<{ name: string, value: string }>( COLORS[0] );
+  const [imageSize, setImageSize] = useState<"cover" | "contain">("cover");
 
   const { selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, onImagePickHandler} = useImagePicker({fileInputRef});
 
@@ -35,7 +36,7 @@ const CreateStoryModal = () => {
 
   const queryClient = useQueryClient();
 
-  const {open: isOpen, setOpen: onClose} = useCreateStoryModal();
+  const {open: isOpen, setOpen} = useCreateStoryModal();
 
   useEffect(() => {
     if (!containerRef.current || !textareaRef.current) {
@@ -139,6 +140,7 @@ const CreateStoryModal = () => {
     formData.append("textColor", storyTextColor);
     formData.append("textBgColor", storyTextBgColor);
     formData.append("mediaType", selectedImageFile ? "image" : "text");
+    imageSize && formData.append("imageSize", imageSize);
     
     const {data} = await axiosInstance<{data: StoryType}>({
       method: "POST",
@@ -157,6 +159,7 @@ const CreateStoryModal = () => {
     mutationFn: onSubmitHandler,
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ["stories"]});
+      setOpen(false);
     },
     onError: (error) => {
       const message = errorMessage(error);
@@ -169,7 +172,7 @@ const CreateStoryModal = () => {
       open={isOpen}
       onOpenChange={isOpen => {
         if (isLoading) return;
-        onClose(isOpen);
+        setOpen(isOpen);
       }}
     >
       <DialogOverlay className="bg-black opacity-70" />
@@ -205,7 +208,7 @@ const CreateStoryModal = () => {
           backgroundColor: selectdBgColor.value,
           backgroundImage: selectedImagePreview ? `url(${selectedImagePreview})` : undefined,
           backgroundPosition: "center",
-          backgroundSize: "cover",
+          backgroundSize: imageSize,
           backgroundRepeat: "no-repeat",
         }}
         className="relative flex justify-center items-center w-full h-full grow p-4 rounded-md overflow-hidden"
@@ -213,7 +216,7 @@ const CreateStoryModal = () => {
         <Textarea
           ref={textareaRef}
           style={{ color: storyTextColor, backgroundColor: storyTextBgColor }}
-          className="flex justify-center items-center w-full max-h-full !text-2xl text-center leading-tight text-shadow-lg font-semibold resize-none bg-transparent shadow-none border-none focus:outline-none focus:border-none focus-visible:outline-none focus-visible:ring-0 placeholder:text-white scrollbar scrollbar-track-transparent scrollbar-thumb-transparent"
+          className="flex justify-center items-center w-[auto] max-h-full !text-2xl text-center leading-tight text-shadow-lg font-semibold resize-none bg-transparent shadow-none border-none focus:outline-none focus:border-none focus-visible:outline-none focus-visible:ring-0 placeholder:text-white scrollbar scrollbar-track-transparent scrollbar-thumb-transparent"
           placeholder="¿Qué estás pensando?"
           rows={1}
           disabled={isLoading}
@@ -224,10 +227,37 @@ const CreateStoryModal = () => {
       </div>
 
       <div className="absolute left-0 bottom-0 flex flex-col gap-3 w-full p-4 bg-linear-to-t from-black to-transparent z-10">
+        {selectedImageFile &&
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="absolute top-0 left-4 -translate-y-[100%] p-2 rounded-full text-white bg-black/30 cursor-pointer z-10"
+                onClick={() => setImageSize(imageSize === "contain" ? "cover" : "contain")}
+              >
+                {imageSize === "contain" &&
+                  <Expand className="size-6 stroke-1" aria-hidden />
+                }
+
+                {imageSize === "cover" &&
+                  <Minimize className="size-6 stroke-1" aria-hidden />
+                }
+
+                <span className="sr-only">
+                  {imageSize === "contain" ? "Expandir imagen" : "Contraer imagen"}
+                </span>
+              </button>
+            </TooltipTrigger>
+
+            <TooltipContent>
+              <span>
+                {imageSize === "contain" ? "Expandir imagen" : "Contraer imagen"}
+              </span>
+            </TooltipContent>
+          </Tooltip>
+        }
+
         <div className="flex justify-between gap-4 w-full">
-          <div className="flex justify-start items-center gap-1.5">
-            <StoryColorPicker onSelect={(color) => setSelectedBgColor(color)} />
-          </div>
+          <StoryColorPicker onSelect={(color) => setSelectedBgColor(color)} />
 
           <div className="flex items-center gap-1.5">
             <Tooltip>

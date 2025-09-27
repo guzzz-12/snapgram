@@ -46,6 +46,7 @@ export type StoryType = {
   mediaUrl: string;
   mediaType: "text" | "image" | "video";
   backgroundColor: string;
+  imageSize: "cover" | "contain";
   createdAt: string;
   updatedAt: string;
 };

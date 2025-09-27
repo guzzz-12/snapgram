@@ -4,6 +4,10 @@ export const COLORS = [
     value: "#165DFC"
   },
   {
+    name: "Blanco",
+    value: "#f8f8f8"
+  },
+  {
     name: "Negro",
     value: "#000000",
   },
@@ -34,8 +38,9 @@ const StoryColorPicker = ({ onSelect }: Props) => {
     <div className="flex justify-start items-center gap-1.5">
       {COLORS.map((color) => (
         <button
+          key={color.name}
           style={{ backgroundColor: color.value }}
-          className="w-5 h-5 rounded-full border-2 border-neutral-200 cursor-pointer"
+          className="w-5.5 h-5.5 rounded-full border-2 border-neutral-200 cursor-pointer"
           onClick={() => onSelect(color)}
         >
           <span className="sr-only">

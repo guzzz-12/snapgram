@@ -311,7 +311,10 @@ const CreateStoryModal = () => {
           className="gap-1 text-base font-light bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
           size="sm"
           disabled={isLoading}
-          onClick={() => createStory()}
+          onClick={() => {
+            if (!storyTextContent && !selectedImageFile) return;
+            createStory();
+          }}
         >
           <Plus className="size-6" aria-hidden />
           <span>Publicar historia</span>

@@ -3,7 +3,7 @@ import { Navigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
-import { EllipsisVertical, Loader2Icon, Trash2, X } from "lucide-react";
+import { EllipsisVertical, Loader2Icon, Pause, Play, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import StoryProgressBar from "./StoryProgressBar";
 import DeleteStoryModal from "./DeleteStoryModal";
@@ -13,7 +13,6 @@ import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import { cn } from "@/lib/utils";
 import type { StoryType } from "@/types/global";
 
 interface Props {
@@ -23,10 +22,15 @@ interface Props {
 }
 
 const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
-  const [showFullText, setShowFullText] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const {getToken, userId} = useAuth();
+
+  // Pausar/reanudar el story cuando se abre/cierra el modal de eliminar la historia
+  useEffect(() => {
+    setIsPaused(openDeleteModal);
+  }, [openDeleteModal]);
 
   const {data: storyData, isFetching, error} = useQuery({
     queryKey: ["story", storyId],
@@ -46,12 +50,6 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
     retry: 2,
     enabled: isOpen
   });
-
-  useEffect(() => {    
-    return () => {
-      setShowFullText(false);
-    }
-  }, [isOpen]);
 
   if (error) {
     const message = errorMessage(error);
@@ -84,8 +82,9 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
         style={{
           backgroundColor: storyData?.backgroundColor,
           backgroundImage: hasMedia ? `url(${storyData?.mediaUrl})` : "",
-          backgroundSize: hasMedia ? "cover" : "",
+          backgroundSize: storyData?.imageSize,
           backgroundPosition: hasMedia ? "center" : "",
+          backgroundRepeat: hasMedia ? "no-repeat" : "",
         }}
         className="w-auto h-[95vh] p-0 aspect-[1/1.7] rounded-lg border-none overflow-hidden [&>button]:hidden"
       >
@@ -96,7 +95,12 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
         <div className="flex flex-col gap-4 w-full h-full overflow-hidden">
           {/* Header del story */}
           <div className="relative flex justify-start items-center gap-3 bg-linear-to-b from-black to-transparent p-4 pb-6">
-            <StoryProgressBar isOpen={isOpen} setOpenStoryId={setOpenStoryId} />
+            <StoryProgressBar
+              isOpen={isOpen}
+              isPaused={isPaused}
+              setOpenStoryId={setOpenStoryId}
+              setIsPaused={(bool) => setIsPaused(bool)}
+            />
 
             <Avatar className="size-10">
               <AvatarImage src={storyData?.user.profilePicture} />
@@ -115,21 +119,31 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <button
+                className="p-1 text-white cursor-pointer"
+                onClick={() => setIsPaused(paused => !paused)}
+              >
+                {isPaused ?
+                  <Play className="size-5.5 fill-white" /> :
+                  <Pause className="size-5.5 fill-white" />
+                }
+              </button>
+
               {userId === storyData?.user.clerkId &&
                 <>
                   <DeleteStoryModal
                     storyId={storyId || ""}
                     isOpen={openDeleteModal}
-                    setIsOpen={(open) => setOpenDeleteModal(open)}
                     setOpenStoryId={() => setOpenStoryId(null)}
+                    setIsOpen={(open) => setOpenDeleteModal(open)}
                   />
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="p-1 cursor-pointer">
                         <EllipsisVertical
-                          className="size-5.5 shrink-0 text-white stroke-2"
+                          className="size-5.5 shrink-0 text-white"
                           aria-hidden
                         />
                         <span className="sr-only">
@@ -158,7 +172,7 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
                   size="icon"
                   disabled={false}
                 >
-                  <X className="size-6 shrink-0 text-white stroke-2" aria-hidden />
+                  <X className="size-6 shrink-0 text-white stroke-3" aria-hidden />
                   <span className="sr-only">Cerrar</span>
                 </Button>
               </DialogClose>
@@ -171,11 +185,10 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
               style={{backgroundColor: storyData?.textBgColor}}
               className="w-full max-w-[90%] h-auto mx-auto my-auto p-2 translate-y-[-20px] rounded-md overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-[transparent]"
               aria-describedby="story-content-description"
-              onClick={() => setShowFullText(prev => !prev)}
             >
               <p
                 style={{color: storyData?.textColor}}
-                className={cn("text-2xl text-center leading-tight text-shadow-lg font-semibold whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-[12]")}
+                className="text-2xl text-center leading-tight text-shadow-lg font-semibold whitespace-pre-wrap"
               >
                 {storyData?.content}
               </p>

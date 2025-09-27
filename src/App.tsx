@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router";
 import { useUser } from "@clerk/clerk-react";
-import AuthLayout from "@/pages/AuthLayout";
-import Layout from "@/pages/Layout";
+import AuthLayout from "@/AuthLayout";
+import Layout from "@/Layout";
 import HomePage from "@/pages/HomePage";
 import MessagesPage from "./pages/MessagesPage";
 import ConnectionsPage from "@/pages/ConnectionsPage";

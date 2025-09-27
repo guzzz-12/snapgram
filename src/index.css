@@ -123,6 +123,6 @@
   }
 
   .pageWrapper {
-    @apply relative flex justify-between gap-0 w-full h-full pl-24 pr-24 min-xl:gap-24 min-xl:pr-4 pt-6 pb-9 bg-slate-200
+    @apply relative flex justify-between gap-0 w-full max-w-[720px] h-full pl-24 pr-24 min-xl:gap-24 min-xl:pr-4 pt-6 pb-9 bg-slate-200
   }
 }

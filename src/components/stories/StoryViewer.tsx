@@ -48,7 +48,8 @@ const StoryViewer = ({ isOpen, storyId, setOpenStoryId }: Props) => {
       return data.data;
     },
     retry: 2,
-    enabled: isOpen
+    enabled: isOpen,
+    refetchOnWindowFocus: false
   });
 
   if (error) {

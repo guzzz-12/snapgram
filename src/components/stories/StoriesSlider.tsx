@@ -1,4 +1,4 @@
-import { useRef, useState, type UIEvent } from "react";
+import { useEffect, useRef, useState, type UIEvent } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { CircleArrowLeft, CircleArrowRight } from "lucide-react";
@@ -13,10 +13,12 @@ import { cn } from "@/lib/utils";
 
 const StoriesSlider = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const paginationRef = useRef<HTMLDivElement>(null);
 
   const [openStoryId, setOpenStoryId] = useState<string | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(true);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
   const { getToken } = useAuth();
 
@@ -42,13 +44,41 @@ const StoriesSlider = () => {
     return data;
   };
 
-  const {data, error, isFetching: loading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
+  const {data, error, isLoading: loading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
     queryKey: ["stories"],
     queryFn: ({pageParam}) => getStories(pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false
   });
+
+  // Verificar si la referencia del paginador está en el viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      setIsIntersecting(entries[0].isIntersecting)
+    }, {
+      threshold: 0.5
+    });
+
+    if (paginationRef.current) {
+      observer.observe(paginationRef.current);
+    }
+
+    return () => {
+      if (paginationRef.current) {
+        observer.unobserve(paginationRef.current);
+      }
+    }
+  }, [hasNextPage]);
+
+  // Consultar la siguiente página de stories
+  // si la referencia del paginador está en el viewport
+  // y si hay más stories
+  useEffect(() => {
+    if (isIntersecting && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [isIntersecting, hasNextPage]);
   
   const SCROLL_STEP = 240;
 
@@ -72,8 +102,10 @@ const StoriesSlider = () => {
 
   const onScrollHandler = (e: UIEvent<HTMLElement, globalThis.UIEvent>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
+    
     setShowLeftArrow(scrollLeft > 0);
-    setShowRightArrow(scrollLeft < (e.currentTarget.scrollWidth - e.currentTarget.clientWidth));
+
+    setShowRightArrow(scrollLeft < (e.currentTarget.scrollWidth - e.currentTarget.clientWidth) && hasNextPage);
   }
 
   const stories = data?.pages.flatMap((page) => page.data) || [];
@@ -127,13 +159,25 @@ const StoriesSlider = () => {
           {loading && stories.length === 0 && Array.from({ length: 5 }).map((_, i) => (
             <StoryCardSkeletonRounded key={i} />
           ))}
-          {!loading && stories.map((story) => (
+
+          {stories.map((story) => (
             <StoryCardRounded
               key={story._id}
               storyData={story}
               setOpenStoryId={(storyId) => setOpenStoryId(storyId)}
             />
           ))}
+
+          {isFetchingNextPage && Array.from({ length: 5 }).map((_, i) => (
+            <StoryCardSkeletonRounded key={i} />
+          ))}
+
+          {hasNextPage &&
+            <div
+              ref={paginationRef}
+              className="w-[20px] h-[20px] shrink-0"
+            />
+          }
         </div>
       </section>
     </div>

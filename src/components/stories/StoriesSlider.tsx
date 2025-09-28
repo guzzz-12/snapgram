@@ -102,10 +102,11 @@ const StoriesSlider = () => {
 
   const onScrollHandler = (e: UIEvent<HTMLElement, globalThis.UIEvent>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
+    const scrollWidth = e.currentTarget.scrollWidth;
+    const clientWidth = e.currentTarget.clientWidth;
     
     setShowLeftArrow(scrollLeft > 0);
-
-    setShowRightArrow(scrollLeft < (e.currentTarget.scrollWidth - e.currentTarget.clientWidth) && hasNextPage);
+    setShowRightArrow(scrollLeft < (scrollWidth - clientWidth));
   }
 
   const stories = data?.pages.flatMap((page) => page.data) || [];
@@ -115,7 +116,7 @@ const StoriesSlider = () => {
   }
 
   return (
-    <div className="relative w-full mb-5 overflow-x-hidden">
+    <div className="relative max-w-full mb-5 overflow-x-hidden">
       {/* Botones del slider */}
       <button
         className={cn("absolute top-0 left-0 flex justify-center items-center h-full px-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10", showLeftArrow ? "flex" : "hidden")}
@@ -156,7 +157,7 @@ const StoriesSlider = () => {
         />
 
         <div className="flex items-center gap-3">
-          {loading && stories.length === 0 && Array.from({ length: 5 }).map((_, i) => (
+          {loading && stories.length === 0 && Array.from({ length: 10 }).map((_, i) => (
             <StoryCardSkeletonRounded key={i} />
           ))}
 
@@ -168,7 +169,7 @@ const StoriesSlider = () => {
             />
           ))}
 
-          {isFetchingNextPage && Array.from({ length: 5 }).map((_, i) => (
+          {isFetchingNextPage && Array.from({ length: 10 }).map((_, i) => (
             <StoryCardSkeletonRounded key={i} />
           ))}
 

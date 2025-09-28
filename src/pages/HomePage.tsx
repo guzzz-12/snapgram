@@ -8,7 +8,7 @@ const HomePage = () => {
   return (
     <main className="pageWrapper">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
-      <div className="w-full h-full shrink-[2]">
+      <div className="w-full max-w-[600px] h-full shrink-[2]">
         <StoriesSlider />
         
         <section className="flex flex-col gap-6 w-full">

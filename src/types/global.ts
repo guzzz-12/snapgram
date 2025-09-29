@@ -63,3 +63,12 @@ export type FollowingAndFollowersType = {
   following: UserType[];
   followers: UserType[];
 }
+
+export type UserWithStories = {
+  _id: string;
+  clerkId: string;
+  fullName: string;
+  username: string;
+  profilePicture?: string;
+  stories: StoryType[];
+}

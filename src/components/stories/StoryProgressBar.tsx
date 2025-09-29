@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { StoryType } from "@/types/global";
 
 interface Props {
   isOpen: boolean;
   isPaused: boolean;
-  currentStoryId: string;
-  timerStoryId: string;
+  activeStoryId: string;
+  storyId: string;
   stories: StoryType[];
+  seenStories: string[];
   setOpenUserId: (id: string | null) => void;
-  setCurrentStoryId: (id: string) => void;
+  setActiveStoryId: (id: string) => void;
   setIsPaused: (isPaused: boolean) => void;
+  setSeenStories: Dispatch<SetStateAction<string[]>>
 }
 
 const StoryProgressBar = (props: Props) => {
@@ -17,28 +19,42 @@ const StoryProgressBar = (props: Props) => {
     isOpen,
     isPaused,
     stories,
-    currentStoryId,
-    timerStoryId,
+    activeStoryId,
+    storyId,
+    seenStories,
     setOpenUserId,
-    setCurrentStoryId,
-    setIsPaused
+    setActiveStoryId,
+    setIsPaused,
+    setSeenStories
   } = props;
 
   const TIMER_DURATION = 10000;
+  const isCurrentStory = activeStoryId === storyId;
+  const isLastStory = stories.length - 1 === stories.findIndex((story) => story._id === storyId);
 
   const [timeRemaining, setTimeRemaining] = useState(TIMER_DURATION);
 
-  // Restablecer el state paused cuando se cierra el story
   useEffect(() => {
+    // Resetear el timer cuando se regresa a un story visto
+    if (seenStories.includes(storyId) && storyId === activeStoryId) {
+      setTimeRemaining(TIMER_DURATION);
+    }
+
+    // Finalizar el timer al pasar al siguiente story
+    if (seenStories.includes(storyId) && storyId !== activeStoryId) {
+      setTimeRemaining(0);
+    }
+    
+    // Restablecer el state paused cuando se cierra el story
     return () => setIsPaused(false);
-  }, []);
+    
+  }, [storyId, seenStories, activeStoryId]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    const isCurrentStory = currentStoryId === timerStoryId;
-
-    // Actualizar el timer del tiempo restante cada 100ms si el story esta abierto y no esta pausado
+    // Actualizar el timer del tiempo restante cada 100ms
+    // al story activo si no está pausado
     if (isOpen && !isPaused && isCurrentStory) {
       interval = setInterval(() => {
         setTimeRemaining((prev) => {
@@ -51,37 +67,38 @@ const StoryProgressBar = (props: Props) => {
       }, 100);
     }
 
-    // Eliminar el timer al pausar el story
-    if (interval && isPaused) {
-      clearInterval(interval);
-    }
-
     return () => {
       if (interval) {
         clearInterval(interval);
       }
     }
-  }, [isOpen, isPaused, stories, currentStoryId, timerStoryId, setTimeRemaining]);
+  }, [isOpen, isPaused, stories, activeStoryId, storyId, setTimeRemaining]);
 
   // Pasar al siguiente story cuando el timer llega a cero
   // Cerrar el viewer al terminar de ver el ultimo story
   useEffect(() => {
     if (timeRemaining <= 0) {
-      const currentStoryIndex = stories.findIndex((story) => story._id === currentStoryId);
-      
-      if (currentStoryIndex === stories.length - 1) {
-        setOpenUserId(null);
+      const currentStoryIndex = stories.findIndex((story) => story._id === storyId);
+
+      if (!isLastStory) {
+        const nextStoryId = stories[currentStoryIndex + 1]._id;
+
+        setActiveStoryId(nextStoryId);
+
+        const filteredDuplicates = seenStories.filter((id) => id !== nextStoryId);
+        setSeenStories([...filteredDuplicates, nextStoryId]);
+
       } else {
-        setCurrentStoryId(stories[currentStoryIndex + 1]._id);
+        setOpenUserId(null);
       }
     }
-  }, [timeRemaining]);
+  }, [timeRemaining, isLastStory]);
 
   return (
     <div className="relative w-full h-[3px] rounded bg-neutral-700 overflow-hidden">
       <div
         style={{ width: `${(1 - (timeRemaining / TIMER_DURATION)) * 100}%` }}
-        className="h-full bg-white transition-all"
+        className="h-full bg-white"
       />
     </div>
   )

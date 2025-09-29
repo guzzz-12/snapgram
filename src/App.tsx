@@ -7,7 +7,6 @@ import MessagesPage from "./pages/MessagesPage";
 import ConnectionsPage from "@/pages/ConnectionsPage";
 import CreatePostPage from "@/pages/CreatePostPage";
 import DiscoverPage from "@/pages/DiscoverPage";
-import FeedPage from "@/pages/FeedPage";
 import ProfilePage from "@/pages/ProfilePage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
@@ -59,14 +58,6 @@ const App = () => {
           element={
             <ProtectedRoute>
               <DiscoverPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="feed"
-          element={
-            <ProtectedRoute>
-              <FeedPage />
             </ProtectedRoute>
           }
         />

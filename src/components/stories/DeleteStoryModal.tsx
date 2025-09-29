@@ -10,10 +10,10 @@ interface Props {
   storyId: string;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  setOpenStoryId: (storyId: string | null) => void;
+  setOpenUserId: (storyId: string | null) => void;
 }
 
-const DeleteStoryModal = ({storyId, isOpen, setIsOpen, setOpenStoryId}: Props) => {
+const DeleteStoryModal = ({storyId, isOpen, setIsOpen, setOpenUserId}: Props) => {
   const {getToken} = useAuth();
 
   const queryClient = useQueryClient();
@@ -34,7 +34,6 @@ const DeleteStoryModal = ({storyId, isOpen, setIsOpen, setOpenStoryId}: Props) =
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ["stories"]});
       setIsOpen(false);
-      setOpenStoryId(null);
     },
     onError: (error) => {
       const message = errorMessage(error);
@@ -47,6 +46,7 @@ const DeleteStoryModal = ({storyId, isOpen, setIsOpen, setOpenStoryId}: Props) =
       open={isOpen}
       onOpenChange={() => {
         if (isPending) return;
+        setOpenUserId(null);
         setIsOpen(false);
       }}
     >

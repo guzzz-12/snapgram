@@ -5,17 +5,17 @@ import { CircleArrowLeft, CircleArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import StoryCardRounded from "./StoryCardRounded";
 import StoryCardSkeletonRounded from "./StoryCardSkeletonRounded";
-import StoryViewer from "./StoryViewer";
+import UserStoriesViewer from "./UserStoriesViewer";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { StoryType } from "@/types/global";
+import type { UserWithStories } from "@/types/global";
 import { cn } from "@/lib/utils";
 
 const StoriesSlider = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const paginationRef = useRef<HTMLDivElement>(null);
 
-  const [openStoryId, setOpenStoryId] = useState<string | null>(null);
+  const [openUserId, setOpenUserId] = useState<string | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(true);
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [isIntersecting, setIsIntersecting] = useState(false);
@@ -26,7 +26,7 @@ const StoriesSlider = () => {
     const token = await getToken();
 
     const {data} = await axiosInstance<{
-      data: StoryType[];
+      data: UserWithStories[];
       hasMore: boolean;
       nextPage: number | null;
     }>({
@@ -109,7 +109,7 @@ const StoriesSlider = () => {
     setShowRightArrow(scrollLeft < (scrollWidth - clientWidth));
   }
 
-  const stories = data?.pages.flatMap((page) => page.data) || [];
+  const usersWithStories = data?.pages.flatMap((page) => page.data) || [];
 
   if (error) {
     toast.error(errorMessage(error));
@@ -150,22 +150,23 @@ const StoriesSlider = () => {
         className="w-full overflow-x-auto scrollbar-none"
         onScroll={onScrollHandler}
       >
-        <StoryViewer
-          isOpen={!!openStoryId}
-          storyId={openStoryId}
-          setOpenStoryId={(id) => setOpenStoryId(id)}
+        <UserStoriesViewer
+          isOpen={!!openUserId}
+          usersWithStories={usersWithStories}
+          storiesUserId={openUserId}
+          setStoriesUserId={(id) => setOpenUserId(id)}
         />
 
         <div className="flex items-center gap-3">
-          {loading && stories.length === 0 && Array.from({ length: 10 }).map((_, i) => (
+          {loading && usersWithStories.length === 0 && Array.from({ length: 10 }).map((_, i) => (
             <StoryCardSkeletonRounded key={i} />
           ))}
 
-          {stories.map((story) => (
+          {usersWithStories.map((user) => (
             <StoryCardRounded
-              key={story._id}
-              storyData={story}
-              setOpenStoryId={(storyId) => setOpenStoryId(storyId)}
+              key={user._id}
+              userData={user}
+              setOpenUserId={(userId) => setOpenUserId(userId)}
             />
           ))}
 

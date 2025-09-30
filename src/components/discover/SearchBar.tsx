@@ -31,7 +31,7 @@ const SearchBar = ({loading}: Props) => {
         <Input
           className="pl-10 bg-slate-100"
           type="search"
-          placeholder="Buscar personas por nombre, email, username o biografía"
+          placeholder="Buscar personas por nombre o usuario"
           disabled={loading}
           value={term}
           onChange={(e) => setTerm(e.target.value)}

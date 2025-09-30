@@ -23,7 +23,6 @@ const ConnectionsPage = () => {
           <ConnectionTypeItem count={2} title="Seguidores" />
           <ConnectionTypeItem count={2} title="Siguiendo" />
           <ConnectionTypeItem count={1} title="Pendientes" />
-          <ConnectionTypeItem count={3} title="Conexiones" />
         </ul>
 
         <ConnectionsTabs />

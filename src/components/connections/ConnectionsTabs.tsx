@@ -1,7 +1,7 @@
 import { UserRoundCheck, UserRoundPlus, UsersRound } from "lucide-react";
 import ConnectionCard from "./ConnectionCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { dummyConnectionsData, dummyFollowersData, dummyFollowingData, dummyPendingConnectionsData } from "@/dummy-data";
+import { dummyFollowersData, dummyFollowingData, dummyPendingConnectionsData } from "@/dummy-data";
 
 const ConnectionsTabs = () => {
   return (
@@ -31,15 +31,7 @@ const ConnectionsTabs = () => {
           value="pending"
         >
           <UserRoundPlus />
-          <span>Pendientes</span>
-        </TabsTrigger>
-
-        <TabsTrigger 
-          className="text-neutral-500 data-[state=active]:text-neutral-900 data-[state=active]:shadow-none cursor-pointer"
-          value="connections"
-        >
-          <UsersRound />
-          <span>Conexiones</span>
+          <span>Solicitudes</span>
         </TabsTrigger>
       </TabsList>
 
@@ -79,20 +71,6 @@ const ConnectionsTabs = () => {
                 key={pending._id}
                 connectionData={pending}
                 connection="pending"
-              />
-            )
-          })}
-        </div>
-      </TabsContent>
-
-      <TabsContent value="connections">
-        <div className="grid grid-cols-1 min-[1000px]:grid-cols-2 gap-2 w-full">
-          {dummyConnectionsData.map(connection => {
-            return (
-              <ConnectionCard
-                key={connection._id}
-                connectionData={connection}
-                connection="connection"
               />
             )
           })}

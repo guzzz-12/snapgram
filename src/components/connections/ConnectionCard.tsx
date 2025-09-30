@@ -1,11 +1,11 @@
 import { Link } from "react-router";
+import { MessageSquare } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import type { ConnectionType } from "@/dummy-data";
-import { MessageSquare } from "lucide-react";
 
 interface Props {
   connectionData: ConnectionType;
-  connection: "follower" | "following" | "pending" | "connection";
+  connection: "follower" | "following" | "pending";
 }
 
 const FollowerCard = ({ connectionData, connection }: Props) => {
@@ -40,12 +40,21 @@ const FollowerCard = ({ connectionData, connection }: Props) => {
         </p>
 
         <div className="flex justify-between items-center gap-2">
-          <Link
-            to={`/profile/${connectionData._id}`}
-            className="flex justify-center items-center gap-2 w-full px-2 py-2 text-sm text-center text-white rounded-md bg-[#4F39F6] hover:bg-[#331fcf] transition-colors"
-          >
-            Ver perfil
-          </Link>
+          {connection !== "pending" &&
+            <button className="flex justify-center items-center gap-2 w-full px-2 py-2 text-sm text-center text-white rounded-md bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer">
+              <MessageSquare className="size-4 text-white" aria-hidden />
+              <span>Mensaje</span>
+            </button>
+          }
+
+          {connection === "follower" &&
+            <button
+              className="flex justify-center items-center gap-2 w-full px-2 py-2 text-sm text-center text-black bg-neutral-200 rounded-sm hover:bg-neutral-300 transition-colors cursor-pointer"
+              onClick={() => {}}
+            >
+              Eliminar
+            </button>
+          }
 
           {connection !== "follower" &&
             <button
@@ -54,12 +63,15 @@ const FollowerCard = ({ connectionData, connection }: Props) => {
             >
               {connection === "following" && "Dejar de seguir"}
               {connection === "pending" && "Aceptar"}
-              {connection === "connection" && (
-                <div className="flex justify-center items-center gap-1">
-                  <MessageSquare className="size-4 text-neutral-700" />
-                  <span>Mensaje</span>
-                </div>
-              )}
+            </button>
+          }
+
+          {connection === "pending" &&
+            <button
+              className="flex justify-center items-center gap-2 w-full px-2 py-2 text-sm text-center text-white bg-destructive rounded-sm hover:bg-destructive/80 transition-colors cursor-pointer"
+              onClick={() => {}}
+            >
+              Rechazar
             </button>
           }
         </div>

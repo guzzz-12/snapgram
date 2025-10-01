@@ -125,4 +125,21 @@
   .pageWrapper {
     @apply relative flex justify-between gap-0 w-full h-full pl-24 pr-24 min-xl:gap-24 min-xl:pr-4 pt-6 pb-9 bg-slate-200
   }
+
+  .postCardSlider .slick-prev:before,
+  .postCardSlider .slick-next:before {
+    @apply !text-2xl !text-[#4F39F6]/90
+  }
+
+  .postCardSlider .slick-dots {
+    @apply !flex !justify-center !items-center !gap-0
+  }
+
+  .postCardSlider .slick-dots {
+    @apply !static
+  }
+
+  .postCardSlider .slick-dots li {
+    @apply !mx-0
+  }
 }

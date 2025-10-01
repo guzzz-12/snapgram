@@ -5,6 +5,8 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { esMX } from "@clerk/localizations";
 import { ImageKitProvider } from "@imagekit/react";
 import App from "./App.tsx";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import "./index.css";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY

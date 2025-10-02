@@ -30,7 +30,7 @@ const CreateStoryModal = () => {
   const [selectdBgColor, setSelectedBgColor] = useState<{ name: string, value: string }>( COLORS[0] );
   const [imageSize, setImageSize] = useState<"cover" | "contain">("cover");
 
-  const { selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, onImagePickHandler} = useImagePicker({fileInputRef});
+  const { selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
 
   const {getToken} = useAuth();
 
@@ -79,8 +79,8 @@ const CreateStoryModal = () => {
     return () => {
       if (!isOpen) {
         setStoryTextContent("");
-        setSelectedImageFile(null);
-        setSelectedImagePreview(null);
+        setSelectedImageFiles([]);
+        setSelectedImagePreviews([]);
       
         if(fileInputRef.current) {
           fileInputRef.current.value = ""
@@ -125,21 +125,21 @@ const CreateStoryModal = () => {
   }
 
   const onSubmitHandler = async () => {
-    if (!storyTextContent && !selectedImageFile) return;
+    if (!storyTextContent && !selectedImageFiles[0]) return;
 
     const token = await getToken();
 
     const formData = new FormData();
 
-    if (selectedImageFile) {
-      formData.append("media", selectedImageFile);
+    if (selectedImageFiles[0]) {
+      formData.append("media", selectedImageFiles[0]);
     }
 
     formData.append("backgroundColor", selectdBgColor.value);
     formData.append("content", storyTextContent);
     formData.append("textColor", storyTextColor);
     formData.append("textBgColor", storyTextBgColor);
-    formData.append("mediaType", selectedImageFile ? "image" : "text");
+    formData.append("mediaType", selectedImageFiles[0] ? "image" : "text");
     imageSize && formData.append("imageSize", imageSize);
     
     const {data} = await axiosInstance<{data: StoryType}>({
@@ -206,7 +206,7 @@ const CreateStoryModal = () => {
         ref={containerRef}
         style={{
           backgroundColor: selectdBgColor.value,
-          backgroundImage: selectedImagePreview ? `url(${selectedImagePreview})` : undefined,
+          backgroundImage: selectedImagePreviews[0] ? `url(${selectedImagePreviews[0]})` : undefined,
           backgroundPosition: "center",
           backgroundSize: imageSize,
           backgroundRepeat: "no-repeat",
@@ -227,7 +227,7 @@ const CreateStoryModal = () => {
       </div>
 
       <div className="absolute left-0 bottom-0 flex flex-col gap-3 w-full p-4 bg-linear-to-t from-black to-transparent z-10">
-        {selectedImageFile &&
+        {selectedImageFiles[0] &&
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -312,7 +312,7 @@ const CreateStoryModal = () => {
           size="sm"
           disabled={isLoading}
           onClick={() => {
-            if (!storyTextContent && !selectedImageFile) return;
+            if (!storyTextContent && !selectedImageFiles[0]) return;
             createStory();
           }}
         >

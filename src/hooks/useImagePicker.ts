@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type RefObject } from "react";
+import { toast } from "sonner";
 import { imageProcessor } from "@/utils/imageCompressor";
 
 interface Props {
@@ -6,20 +7,28 @@ interface Props {
 }
 
 const useImagePicker = ({ fileInputRef }: Props) => {
-  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
+  const [selectedImagePreviews, setSelectedImagePreviews] = useState<string[]>([]);
 
   const onImagePickHandler = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
 
     if(files) {
-      const file = files[0];
+      if ((selectedImageFiles.length + files.length > 10) || files.length > 10) {
+        toast.error("Solo puedes seleccionar un máximo de 10 imágenes");
+        return false;
+      }
 
-      const imageBase64 = await imageProcessor(file, "base64") as string;
-      const compressedImage = await imageProcessor(file, "file") as File;
+      const filesArray = Array.from(files!);
 
-      setSelectedImagePreview(imageBase64);
-      setSelectedImageFile(compressedImage);
+      const imagePreviewsPromises = filesArray.map((file) => imageProcessor(file, "base64") as Promise<string>);
+      const filesPromises = filesArray.map((file) => imageProcessor(file, "file") as Promise<File>);
+
+      const imagesBase64 = await Promise.all(imagePreviewsPromises);
+      const compressedImages = await Promise.all(filesPromises);
+
+      setSelectedImagePreviews(prev => [...imagesBase64, ...prev]);
+      setSelectedImageFiles(prev => [...compressedImages, ...prev]);
     };
 
     // Limpiar el ref del input luego de seleccionar la imagen
@@ -30,10 +39,10 @@ const useImagePicker = ({ fileInputRef }: Props) => {
   };
 
   return {
-    selectedImageFile,
-    selectedImagePreview,
-    setSelectedImageFile,
-    setSelectedImagePreview,
+    selectedImageFiles,
+    selectedImagePreviews,
+    setSelectedImageFiles,
+    setSelectedImagePreviews,
     onImagePickHandler
   };
 }

@@ -15,13 +15,13 @@ const ChatInput = ({ wrapperHeight }: Props) => {
   const [messageText, setMessageText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const {selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, onImagePickHandler} = useImagePicker({fileInputRef});
+  const {selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
 
   useEffect(() => {
     return () => {
       setMessageText("");
-      setSelectedImageFile(null);
-      setSelectedImagePreview(null);
+      setSelectedImageFiles([]);
+      setSelectedImagePreviews([]);
 
       if(fileInputRef.current) {
         fileInputRef.current.value = ""
@@ -30,16 +30,16 @@ const ChatInput = ({ wrapperHeight }: Props) => {
   }, []);
 
   const onSubmitHandler = async () => {
-    if (!messageText.trim() && !selectedImageFile) return;
+    if (!messageText.trim() && !selectedImageFiles.length) return;
 
     setSubmitting(true);
 
     setTimeout(() => {
       setMessageText("");
-      setSelectedImageFile(null);
-      setSelectedImagePreview(null);
+      setSelectedImageFiles([]);
+      setSelectedImagePreviews([]);
       setSubmitting(false);
-      console.log({messageText, selectedImageFile});
+      console.log({messageText, selectedImageFiles});
     }, 2500);
   }
 
@@ -48,13 +48,13 @@ const ChatInput = ({ wrapperHeight }: Props) => {
       style={{height: `${wrapperHeight}px`}}
       className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-white"
     >
-      {selectedImagePreview &&
+      {selectedImagePreviews.length > 0 &&
         <div className="absolute -top-1 right-1 p-1.5 -translate-x-[100%] -translate-y-[100%] bg-neutral-300 rounded-sm shadow overflow-hidden">
           <button
             className="absolute top-1 right-1 p-0.5 rounded-full bg-red-50 cursor-pointer"
             onClick={() => {
-              setSelectedImageFile(null);
-              setSelectedImagePreview(null);
+              setSelectedImageFiles([]);
+              setSelectedImagePreviews([]);
             }}
           >
             <X className="text-destructive" aria-hidden />
@@ -62,7 +62,7 @@ const ChatInput = ({ wrapperHeight }: Props) => {
           </button>
 
           <img
-            src={selectedImagePreview}
+            src={selectedImagePreviews[0]}
             className="w-[80px] h-[80px] object-cover"
           />
         </div>
@@ -97,7 +97,7 @@ const ChatInput = ({ wrapperHeight }: Props) => {
         />
       </div>
 
-      {messageText.length === 0 && !selectedImageFile &&
+      {messageText.length === 0 && !selectedImageFiles[0] &&
         <div className="flex justify-between items-center gap-3">
           <button
             className="cursor-pointer"
@@ -118,7 +118,7 @@ const ChatInput = ({ wrapperHeight }: Props) => {
         </div>
       }
 
-      {(messageText.length > 0 || selectedImageFile) &&
+      {(messageText.length > 0 || selectedImageFiles[0]) &&
         <button
           className="p-1 text-sm text-blue-700 font-semibold cursor-pointer hover:underline"
           disabled={submitting}

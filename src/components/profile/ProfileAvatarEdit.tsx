@@ -4,15 +4,15 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { UserType } from "@/dummy-data";
+import type { UserType } from "@/types/global";
 
 interface Props {
   title: string;
   userData: UserType;
-  selectedImageFile: File | null;
-  selectedImagePreview: string | null;
-  setSelectedImageFile: Dispatch<SetStateAction<File | null>>;
-  setSelectedImagePreview: Dispatch<SetStateAction<string | null>>;
+  selectedImageFile: File[];
+  selectedImagePreview: string[];
+  setSelectedImageFile: Dispatch<SetStateAction<File[]>>;
+  setSelectedImagePreview: Dispatch<SetStateAction<string[]>>;
   setUserData: Dispatch<SetStateAction<UserType>>;
   profilePicInputRef: RefObject<HTMLInputElement | null>;
   
@@ -23,13 +23,13 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
 
   const onSubmitHandler = async () => {
     try {
-      if (!selectedImageFile) return;
+      if (!selectedImageFile[0]) return;
 
       setIsSubmitting(true);
 
       const formData = new FormData();
 
-      formData.append("avatar", selectedImageFile);
+      formData.append("avatar", selectedImageFile[0]);
 
       const {data} = await axiosInstance<{data: UserType}>({
         method: "POST",
@@ -43,8 +43,8 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
       toast.success("Avatar actualizado con éxito");
 
       setUserData(data.data);
-      setSelectedImageFile(null);
-      setSelectedImagePreview(null);
+      setSelectedImageFile([]);
+      setSelectedImagePreview([]);
       
     } catch (error: any) {
       toast.error(error.message);
@@ -66,8 +66,8 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
       toast.success("Avatar eliminado con éxito");
 
       setUserData(data.data);
-      setSelectedImageFile(null);
-      setSelectedImagePreview(null);
+      setSelectedImageFile([]);
+      setSelectedImagePreview([]);
       
     } catch (error: any) {
       toast.error(error.message);
@@ -88,13 +88,13 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
           <AvatarImage
             className="w-full h-full object-cover object-center"
             src={
-              selectedImagePreview ||
-              userData.profile_picture ||
+              selectedImagePreview[0] ||
+              userData.profilePicture ||
               "/default_avatar.webp"
             }
           />
           <AvatarFallback>
-            {userData.full_name.charAt(0).toUpperCase()}
+            {userData.fullName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
 
@@ -128,7 +128,7 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
             <Button
               className="border-none cursor-pointer"
               variant="outline"
-              disabled={!userData.profile_picture || isSubmitting}
+              disabled={!userData.profilePicture || isSubmitting}
               onClick={onDeleteAvatarHandler}
             >
               <Trash2Icon className="size-4 text-destructive" aria-hidden />
@@ -142,8 +142,8 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
               variant="outline"
               disabled={isSubmitting}
               onClick={() => {
-                setSelectedImageFile(null);
-                setSelectedImagePreview(null);
+                setSelectedImageFile([]);
+                setSelectedImagePreview([]);
               }}
             >
               <X className="size-4 text-destructive" aria-hidden />

@@ -3,15 +3,15 @@ import { Pencil, Save, Trash2Icon, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { UserType } from "@/dummy-data";
+import type { UserType } from "@/types/global";
 
 interface Props {
   title: string;
   userData: UserType;
-  selectedImageFile: File | null;
-  selectedImagePreview: string | null;
-  setSelectedImageFile: Dispatch<SetStateAction<File | null>>;
-  setSelectedImagePreview: Dispatch<SetStateAction<string | null>>;
+  selectedImageFile: File[];
+  selectedImagePreview: string[];
+  setSelectedImageFile: Dispatch<SetStateAction<File[]>>;
+  setSelectedImagePreview: Dispatch<SetStateAction<string[]>>;
   setUserData: Dispatch<SetStateAction<UserType>>;
   coverPicInputRef: RefObject<HTMLInputElement | null>;
 }
@@ -21,14 +21,14 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
 
   const onUploadCoverPicHandler = async () => {
     try {
-      if (!selectedImageFile) {
+      if (!selectedImageFile[0]) {
         return false;
       }
 
       setIsSubmitting(true);
 
       const formData = new FormData();
-      formData.append("coverPicture", selectedImageFile);
+      formData.append("coverPicture", selectedImageFile[0]);
 
       const {data} = await axiosInstance<{data: UserType}>({
         method: "POST",
@@ -41,8 +41,8 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
 
       toast.success("Imagen de portada actualizada correctamente");
 
-      setSelectedImageFile(null);
-      setSelectedImagePreview(null);
+      setSelectedImageFile([]);
+      setSelectedImagePreview([]);
       setUserData(data.data);
 
     } catch (error: any) {
@@ -62,8 +62,8 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
       toast.success("Foto de portada eliminada con éxito");
 
       setUserData(data.data);
-      setSelectedImageFile(null);
-      setSelectedImagePreview(null);
+      setSelectedImageFile([]);
+      setSelectedImagePreview([]);
       
     } catch (error: any) {
       toast.error(error.message);
@@ -110,7 +110,7 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
               <Button
                 className="border-none cursor-pointer"
                 variant="outline"
-                disabled={!userData.cover_photo || isSubmitting}
+                disabled={!userData.coverPhoto || isSubmitting}
                 onClick={onDeleteCoverPicHandler}
               >
                 <Trash2Icon className="size-4 text-destructive" aria-hidden />
@@ -123,8 +123,8 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
                 className="border-none cursor-pointer"
                 variant="outline"
                 onClick={() => {
-                  setSelectedImageFile(null);
-                  setSelectedImagePreview(null);
+                  setSelectedImageFile([]);
+                  setSelectedImagePreview([]);
                 }}
               >
                 <X className="size-4 text-destructive" aria-hidden />
@@ -136,8 +136,8 @@ const ProfileCoverEdit = ({title, userData, setUserData, selectedImageFile, sele
 
         <img
           src={
-            selectedImagePreview ||
-            userData.cover_photo ||
+            selectedImagePreview[0] ||
+            userData.coverPhoto ||
             "/placeholder_image.webp"
           }
           className="w-full h-full object-cover"

@@ -11,7 +11,7 @@ import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay } from "../ui/dialog";
 import useImagePicker from "@/hooks/useImagePicker";
-import type { UserType } from "@/dummy-data";
+import type { UserType } from "@/types/global";
 
 const FormSchema = z.object({
   name: z.string().max(50, "El nombre no puede tener más de 50 caracteres"),
@@ -37,15 +37,19 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
   const formProps = useForm<FormType>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: mutableUserData.full_name,
+      name: mutableUserData.fullName,
       username: mutableUserData.username,
       bio: mutableUserData.bio,
     },
   });
   
-  const {selectedImageFile: selectedProfilePicFile, selectedImagePreview: selectedProfilePicPreview, setSelectedImagePreview: setSelectedProfilePicPreview, onImagePickHandler: onProfilePicPickHandler, setSelectedImageFile: setSelectedProfilePicFile} = useImagePicker({fileInputRef: profilePicInputRef});
+  const {selectedImageFiles: selectedProfilePicFile, selectedImagePreviews: selectedProfilePicPreview, setSelectedImagePreviews: setSelectedProfilePicPreview, onImagePickHandler: onProfilePicPickHandler, setSelectedImageFiles: setSelectedProfilePicFile} = useImagePicker({
+    fileInputRef: profilePicInputRef
+  });
 
-  const {selectedImageFile: selectedCoverPicFile, selectedImagePreview: selectedCoverPicPreview, setSelectedImageFile: setSelectedCoverPicFile, setSelectedImagePreview: setSelectedCoverPicPreview, onImagePickHandler: onCoverPicPickHandler} = useImagePicker({fileInputRef: coverPicInputRef});
+  const {selectedImageFiles: selectedCoverPicFile, selectedImagePreviews: selectedCoverPicPreview, setSelectedImageFiles: setSelectedCoverPicFile, setSelectedImagePreviews: setSelectedCoverPicPreview, onImagePickHandler: onCoverPicPickHandler} = useImagePicker({
+    fileInputRef: coverPicInputRef
+  });
 
   const onSubmitHandler = async (values: FormType) => {
     console.log({...values, selectedProfilePicPreview, selectedCoverPicFile});

@@ -18,9 +18,8 @@ export type PostType = {
   _id: string;
   user: UserType;
   content: string;
-  imageUrls?: string[];
-  postType: "text_with_image" | "text" | "image";
-  likesCount: string[];
+  imageUrls: string[];
+  postType: "textWithImage" | "text" | "image";
   createdAt: string;
   updatedAt: string;
 }

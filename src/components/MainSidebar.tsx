@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router";
-import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
+import { useClerk, UserButton } from "@clerk/clerk-react";
 import { CirclePlus, House, ImagePlus, LogOut, MessageCircle, Search, TypeOutline, UserRound, UsersRound } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "./ui/sidebar";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import logo from "@/assets/logo-simple.webp";
 import { useCreateStoryModal } from "@/hooks/useCreateStoryModal";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import logo from "@/assets/logo-simple.webp";
 
 const SIDEBAR_ITEMS = [
   {
@@ -29,19 +30,15 @@ const SIDEBAR_ITEMS = [
     href: "/discover",
     icon: Search
   },
-  {
-    name: "Perfil",
-    href: "/profile/user_2zdFoZib5lNr614LgkONdD8WG32",
-    icon: UserRound
-  },
 ];
 
 const MainSidebar = () => {
   const createPostBtnRef = useRef<HTMLButtonElement | null>(null);
 
   const [createPostBtnWidth, setCreatePostBtnWidth] = useState(0);
+  
+  const {user, loadingUser} = useCurrentUser();
 
-  const {user, isLoaded} = useUser();
   const {signOut} = useClerk();
 
   const {setOpen: openCreateStoryModal} = useCreateStoryModal();
@@ -53,7 +50,7 @@ const MainSidebar = () => {
     }
   }, []);
 
-  if (isLoaded && !user) return null;
+  if (!loadingUser && !user) return null;
 
   return (
     <Sidebar className="bg-white">
@@ -90,6 +87,18 @@ const MainSidebar = () => {
               </NavLink>
             </SidebarMenuItem>
           ))}
+
+          <SidebarMenuItem>
+            <NavLink
+              to={`/profile/${user?.clerkId}`}
+              className={({ isActive }) => (
+                `flex justify-start items-center gap-3 w-full h-full px-4 py-2 text-base rounded-md hover:!bg-indigo-50 transition-colors ${isActive ? "!bg-indigo-100" : "bg-transparent"}`
+              )}
+            >
+              <UserRound className="!size-5 text-neutral-700" aria-hidden />
+              Perfil
+            </NavLink>
+          </SidebarMenuItem>
 
           <SidebarMenuItem className="mt-4" key="create-post">
             <DropdownMenu>
@@ -143,11 +152,11 @@ const MainSidebar = () => {
 
           <div className="flex flex-col justify-center items-start gap-0 text-left overflow-hidden">
             <p className="w-full text-sm font-semibold text-neutral-900 truncate">
-              {user?.firstName} {user?.lastName}
+              {user?.fullName}
             </p>
             
             <p className="w-full text-xs text-left text-neutral-500 truncate">
-              {user?.emailAddresses[0].emailAddress}
+              {user?.email}
             </p>
           </div>
 

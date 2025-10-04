@@ -48,7 +48,7 @@ const PostCardHeader = ({ postData }: Props) => {
     <div className="flex justify-start items-center gap-3 w-full">
       <Link
         className={cn(isPending && "pointer-events-none")}
-        to={`/profile/${postData.user._id}`}
+        to={`/profile/${postData.user.clerkId}`}
       >
         <Avatar className="shrink-0 outline-2 outline-blue-600 outline-offset-1">
           <AvatarImage src={postData.user.profilePicture} />
@@ -61,7 +61,7 @@ const PostCardHeader = ({ postData }: Props) => {
       <div className="flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
         <Link
           className={cn("w-full font-semibold text-neutral-900 truncate", isPending && "pointer-events-none")}
-          to={`/profile/${postData.user._id}`}
+          to={`/profile/${postData.user.clerkId}`}
         >
           {postData.user.fullName}
         </Link>

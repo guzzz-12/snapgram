@@ -1,5 +1,5 @@
-import type { PostType } from "@/dummy-data"
 import { Heart, MessageCircle, Share2 } from "lucide-react";
+import type { PostType } from "@/types/global";
 
 interface Props {
   postData: PostType;

@@ -116,7 +116,7 @@ const StoriesSlider = () => {
   }
 
   return (
-    <div className="relative max-w-full mb-5 overflow-x-hidden">
+    <div className="relative max-w-full mb-9 overflow-x-hidden">
       {/* Botones del slider */}
       <button
         className={cn("absolute top-0 left-0 flex justify-center items-center h-full px-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10", showLeftArrow ? "flex" : "hidden")}

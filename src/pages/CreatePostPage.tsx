@@ -1,60 +1,80 @@
 import { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Image, X } from "lucide-react";
+import { useNavigate } from "react-router";
+import { useAuth } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ImagePlus, PlusCircle, X } from "lucide-react";
 import { toast } from "sonner";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import useImagePicker from "@/hooks/useImagePicker";
 import { dummyUserData } from "@/dummy-data";
-
-const FormSchema = z.object({
-  content: z
-    .string()
-    .max(2400, "El contenido no puede tener más de 2400 caracteres"),
-});
-
-type FormType = z.infer<typeof FormSchema>;
+import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
+import type { PostType } from "@/types/global";
 
 const CreatePostPage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [textContent, setTextContent] = useState("");
 
-  const formProps = useForm<FormType>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      content: "",
+  const navigate = useNavigate();
+
+  const {selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({ fileInputRef });
+
+  const {getToken} = useAuth();
+  const queryClient = useQueryClient();
+
+  const createPost = async () => {
+    if (!textContent && !selectedImageFiles) return;
+
+    const formData = new FormData();
+
+    if (textContent) {
+      formData.append("content", textContent);
     }
-  });
 
-  const {selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, onImagePickHandler} = useImagePicker({ fileInputRef });
+    selectedImageFiles.forEach(file => formData.append("images", file));
 
-  const onSubmitHandler = async (values: FormType) => {
-    if (!values.content.trim() && !selectedImageFile) return;
+    const token = await getToken();
 
-    setIsSubmitting(true);
+    const {data} = await axiosInstance<{data: PostType}>({
+      method: "POST",
+      url: "/posts",
+      data: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`
+      }
+    });
 
-    setTimeout(() => {
-      console.log({...values, selectedImageFile});
+    return data;
+  }
 
-      setIsSubmitting(false);
-      setSelectedImageFile(null);
-      setSelectedImagePreview(null);
+  const {mutate, isPending} = useMutation({
+    mutationFn: createPost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ["posts"]});
 
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
 
-      formProps.reset();
+      setTextContent("");
 
       toast.success("Post creado con éxito.");
-    }, 1200);
-  }
+
+      setSelectedImageFiles([]);
+      setSelectedImagePreviews([]);
+
+      navigate("/");
+    },
+    onError: (error) => {
+      const message = errorMessage(error);
+      toast.error(message);
+    }
+  });
 
   return (
     <main className="pageWrapper">
@@ -95,56 +115,63 @@ const CreatePostPage = () => {
             </div>
           </div>
 
-          <Form {...formProps}>
-            <form
-              className="flex flex-col gap-4 w-full"
-              onSubmit={formProps.handleSubmit(onSubmitHandler)}
-            >
-              <div className="max-h-[420px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-                <FormField
-                  control={formProps.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          className="border-b border-t-0 border-l-0 border-r-0 rounded-none shadow-none resize-none placeholder:text-neutral-400"
-                          placeholder="¿Qué estás pensando?"
-                          rows={4}
-                          disabled={isSubmitting}
-                          {...field}
-                        />
-                      </FormControl>
+          <form
+            className="flex flex-col gap-4 w-full"
+            onSubmit={(e) => {
+              e.preventDefault();
+              mutate();
+            }}
+          >
+            <div className="max-h-[420px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+              <Textarea
+                className="border-b border-t-0 border-l-0 border-r-0 rounded-none shadow-none resize-none placeholder:text-neutral-400"
+                placeholder="¿Qué estás pensando?"
+                rows={4}
+                disabled={isPending}
+                value={textContent}
+                onChange={(e) => setTextContent(e.target.value)}
+              />
+            </div>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="flex justify-between items-center w-full">
-                <div className="flex justify-start items-center gap-3">
-                  <Button
-                    className="border-none cursor-pointer"
+            <div className="flex justify-between items-center gap-4 w-full overflow-hidden">
+              <div className="flex justify-start items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+                {!selectedImagePreviews.length && (
+                  <button
+                    className="p-2 cursor-pointer"
                     type="button"
-                    size="icon"
-                    variant="outline"
-                    disabled={isSubmitting}
+                    disabled={isPending}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <Image className="size-6 text-neutral-600" aria-hidden />
-                    <span className="sr-only">Adjuntar imagen</span>
-                  </Button>
+                    <ImagePlus className="size-10 text-neutral-600 stroke-1" aria-hidden />
+                    <span className="sr-only">Adjuntar imágenes</span>
+                  </button>
+                )}
 
-                  {selectedImagePreview && selectedImageFile && (
-                    <div className="relative">
+                {selectedImagePreviews.length > 0 && selectedImagePreviews.length < 10 && (
+                  <button
+                    className="p-2 cursor-pointer"
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <PlusCircle className="size-10 text-neutral-600 stroke-1" aria-hidden />
+                    <span className="sr-only">Adjuntar otra imagen</span>
+                  </button>
+                )}
+
+                <div className="flex justify-start items-center gap-3 w-full">
+                  {selectedImagePreviews.map((preview, i) => (
+                    <div
+                      key={i}
+                      className="relative w-16 h-16 shrink-0"
+                    >
                       <button
                         className="absolute top-0.5 right-0.5 flex justify-center items-center p-0.5 rounded-full cursor-pointer text-red-700 bg-red-50"
                         type="button"
-                        disabled={isSubmitting}
+                        disabled={isPending}
                         onClick={() => {
-                          setSelectedImageFile(null);
-                          setSelectedImagePreview(null);
+                          setSelectedImageFiles(selectedImageFiles.filter((_, index) => index !== i));
+                          setSelectedImagePreviews(selectedImagePreviews.filter((_, index) => index !== i));
                         }}
                       >
                         <X className="size-4" aria-hidden />
@@ -152,32 +179,32 @@ const CreatePostPage = () => {
                       </button>
 
                       <img
-                        className="w-[50px] h-[50px] shrink-0 rounded-sm"
-                        src={selectedImagePreview}
-                        alt={selectedImageFile.name}
+                        className="w-full h-full object-cover rounded-sm"
+                        src={preview}
+                        alt=""
                       />
-                    </div>
-                  )}
+                    </div>                    
+                  ))}
                 </div>
-
-                <Button
-                  className="gap-1 text-sm font-normal bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  Publicar Post
-                </Button>
               </div>
-            </form>
-          </Form>
+
+              <Button
+                className="gap-1 text-sm font-normal shrink-0 bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
+                type="submit"
+                disabled={isPending || (!textContent && !selectedImageFiles.length)}
+              >
+                Publicar Post
+              </Button>
+            </div>
+          </form>
 
           {/* Input oculto del selector de imagen */}
           <input
             ref={fileInputRef}
             type="file"
             hidden
-            multiple={false}
-            disabled={isSubmitting}
+            multiple
+            disabled={isPending}
             accept="image/png, image/jpg, image/jpeg, image/webp"
             onChange={onImagePickHandler}
           />

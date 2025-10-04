@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import Slider, {type Settings} from "react-slick";
 import PostHeader from "./PostCardHeader";
 import PostCardFooter from "./PostCardFooter";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
+import useClampedText from "@/hooks/useClampedText";
 import type { PostType } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -24,31 +25,12 @@ const PostCard = ({ postData }: Props) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
   const showClampBtnRef = useRef<"shouldShow" | "shouldNotShow">("shouldNotShow");
 
-  const [showFullText, setShowFullText] = useState(false);
-  const [isClamped, setIsClamped] = useState(false);
-
-  useEffect(() => {
-    // Observar cambios en el tamaño del texto
-    const resizeObserver = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      setIsClamped(entry.target.scrollHeight > entry.target.clientHeight);
-    });
-
-    if (textContentRef.current) {
-      // Verificar si el texto está inicialmente truncado
-      const isInitiallyClamped = textContentRef.current.scrollHeight > textContentRef.current.clientHeight;
-
-      // Verificar si debería mostrarse el botón de "Ver más..." en el primer render
-      showClampBtnRef.current = isInitiallyClamped ? "shouldShow" : "shouldNotShow";
-
-      resizeObserver.observe(textContentRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    }
-
-  }, []);
+  const {
+    isClamped,
+    showFullText,
+    setShowFullText,
+    setIsClamped
+  } = useClampedText({ textContentRef, showClampBtnRef });
 
   return (
     <article className="flex flex-col gap-2 w-full p-4 rounded-lg bg-white shadow">

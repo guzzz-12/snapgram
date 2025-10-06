@@ -2,6 +2,9 @@ import { useRef, useState } from "react";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
+import { toast } from "sonner";
 import ProfileAvatarEdit from "./ProfileAvatarEdit";
 import ProfileCoverEdit from "./ProfileCoverEdit";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
@@ -9,12 +12,14 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogOverlay } from "../ui/dialog";
+import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
 import useImagePicker from "@/hooks/useImagePicker";
 import type { UserType } from "@/types/global";
 
 const FormSchema = z.object({
-  name: z.string().max(50, "El nombre no puede tener más de 50 caracteres"),
+  fullName: z.string().max(50, "El nombre no puede tener más de 50 caracteres"),
   username: z.string().max(50, "El nombre de usuario no puede tener más de 50 caracteres"),
   bio: z.string().max(4200, "La biografía no puede tener más de 4200 caracteres").optional(),
 });
@@ -32,12 +37,14 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
   const coverPicInputRef = useRef<HTMLInputElement | null>(null);
 
   const [mutableUserData, setMutableUserData] = useState<UserType>(userData);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const {getToken, userId} = useAuth();
+  const queryClient = useQueryClient();
 
   const formProps = useForm<FormType>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: mutableUserData.fullName,
+      fullName: mutableUserData.fullName,
       username: mutableUserData.username,
       bio: mutableUserData.bio,
     },
@@ -51,15 +58,45 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
     fileInputRef: coverPicInputRef
   });
 
-  const onSubmitHandler = async (values: FormType) => {
-    console.log({...values, selectedProfilePicPreview, selectedCoverPicFile});
+  const updateUserMutation = useMutation({
+    mutationFn: async (values: FormType) => {
+      const token = await getToken();
+
+      const {data} = await axiosInstance({
+        method: "PUT",
+        url: `/users/update-user`,
+        data: values,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      return data;
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({queryKey: ["user", userId]}),
+        queryClient.invalidateQueries({queryKey: ["posts", userId]}),      
+      ]);
+
+      onClose(false);
+    },
+    onError: (error) => {
+      const message = errorMessage(error);
+      toast.error(message);
+    }
+  });
+
+  const onSubmitHandler = (values: FormType) => {
+    updateUserMutation.mutate(values);
   }
 
   return (
     <Dialog
       open={isOpen}
       onOpenChange={isOpen => {
-        if (isLoading) return;
+        if (updateUserMutation.isPending) return;
         onClose(isOpen);
       }}
     >
@@ -78,7 +115,6 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
           <ProfileAvatarEdit
             title="Foto de perfil"
             userData={mutableUserData}
-            setUserData={setMutableUserData}
             selectedImageFile={selectedProfilePicFile}
             selectedImagePreview={selectedProfilePicPreview}
             setSelectedImageFile={setSelectedProfilePicFile}
@@ -89,7 +125,6 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
           <ProfileCoverEdit
             title="Foto de portada"
             userData={mutableUserData}
-            setUserData={setMutableUserData}
             selectedImageFile={selectedCoverPicFile}
             selectedImagePreview={selectedCoverPicPreview}
             setSelectedImageFile={setSelectedCoverPicFile}
@@ -103,7 +138,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
               onSubmit={formProps.handleSubmit(onSubmitHandler)}
             >
               <FormField
-                name="name"
+                name="fullName"
                 control={formProps.control}
                 render={({field: fieldProps}) => {
                   return (
@@ -114,7 +149,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
                       <FormControl>
                         <Input
                           placeholder="Tu nombre completo"
-                          disabled={false}
+                          disabled={updateUserMutation.isPending}
                           {...fieldProps}
                         />
                       </FormControl>
@@ -137,7 +172,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
                       <FormControl>
                         <Input
                           placeholder="john_snow"
-                          disabled={false}
+                          disabled={updateUserMutation.isPending}
                           {...fieldProps}
                         />
                       </FormControl>
@@ -162,7 +197,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
                           className="resize-none"
                           placeholder="Escribe algo sobre ti..."
                           rows={4}
-                          disabled={false}
+                          disabled={updateUserMutation.isPending}
                           {...fieldProps}
                         />
                       </FormControl>
@@ -172,26 +207,31 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
                   )
                 }}
               />
+
+              <div className="flex justify-end items-center gap-2">
+                <Button
+                  className="cursor-pointer"
+                  variant="outline"
+                  type="button"
+                  disabled={updateUserMutation.isPending}
+                  onClick={() => onClose(false)}
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  className="bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
+                  type="submit"
+                  form="profile-edit-form"
+                  disabled={updateUserMutation.isPending}
+                  onClick={() => formProps.handleSubmit(onSubmitHandler)()}
+                >
+                  Guardar
+                </Button>
+              </div>
             </form>
           </Form>
         </div>
-
-        <DialogFooter className="flex justify-end items-center gap-2">
-          <Button
-            className="cursor-pointer"
-            variant="outline"
-            onClick={() => onClose(false)}
-          >
-            Cancelar
-          </Button>
-
-          <Button
-            className="bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
-            type="submit"
-          >
-            Guardar
-          </Button>
-        </DialogFooter>
 
         {/* Input oculto del selector del avatar */}
         <input
@@ -199,7 +239,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
           type="file"
           hidden
           multiple={false}
-          disabled={isLoading}
+          disabled={updateUserMutation.isPending}
           accept="image/png, image/jpg, image/jpeg, image/webp"
           onChange={onProfilePicPickHandler}
         />
@@ -210,7 +250,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
           type="file"
           hidden
           multiple={false}
-          disabled={isLoading}
+          disabled={updateUserMutation.isPending}
           accept="image/png, image/jpg, image/jpeg, image/webp"
           onChange={onCoverPicPickHandler}
         />

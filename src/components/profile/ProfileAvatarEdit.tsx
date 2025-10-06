@@ -1,8 +1,13 @@
 import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { useParams } from "react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
 import { Pencil, Save, Trash2Icon, X } from "lucide-react";
 import { toast } from "sonner";
+import DeleteAvatarModal from "./DeleteAvatarModal";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { UserType } from "@/types/global";
 
@@ -13,72 +18,95 @@ interface Props {
   selectedImagePreview: string[];
   setSelectedImageFile: Dispatch<SetStateAction<File[]>>;
   setSelectedImagePreview: Dispatch<SetStateAction<string[]>>;
-  setUserData: Dispatch<SetStateAction<UserType>>;
   profilePicInputRef: RefObject<HTMLInputElement | null>;
-  
 }
 
-const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, profilePicInputRef }: Props) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, profilePicInputRef }: Props) => {
+  const {userClerkId} = useParams<{userClerkId: string}>();
+
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
+  const {getToken} = useAuth();
+  const queryClient = useQueryClient();
+
+  const {setUser} = useCurrentUser();
 
   const onSubmitHandler = async () => {
-    try {
-      if (!selectedImageFile[0]) return;
+    if (!selectedImageFile[0]) return;
 
-      setIsSubmitting(true);
+    const token = await getToken();
 
-      const formData = new FormData();
+    const formData = new FormData();
 
-      formData.append("avatar", selectedImageFile[0]);
+    formData.append("avatar", selectedImageFile[0]);
 
-      const {data} = await axiosInstance<{data: UserType}>({
-        method: "POST",
-        url: "/users/user-avatar",
-        data: formData,
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      });
+    const {data} = await axiosInstance<{data: UserType}>({
+      method: "POST",
+      url: "/users/user-avatar",
+      data: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data"
+      }
+    });
 
+    return data.data;
+  }
+
+  const updateAvatarMutation = useMutation({
+    mutationFn: onSubmitHandler,
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({queryKey: ["user", userClerkId]});
+      setUser(data!);
       toast.success("Avatar actualizado con éxito");
-
-      setUserData(data.data);
       setSelectedImageFile([]);
       setSelectedImagePreview([]);
-      
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast.error(error.message);
-
-    } finally {
-      setIsSubmitting(false);
     }
-  }
+  });
 
   const onDeleteAvatarHandler = async () => {
-    try {
-      setIsSubmitting(true);
+    const token = await getToken();
 
-      const {data} = await axiosInstance<{data: UserType}>({
-        method: "DELETE",
-        url: "/users/user-avatar"
-      });
+    const {data} = await axiosInstance<{data: UserType}>({
+      method: "DELETE",
+      url: "/users/user-avatar",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
+    return data.data;
+  }
+
+  const deleteAvatarMutation = useMutation({
+    mutationFn: onDeleteAvatarHandler,
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({queryKey: ["user", userClerkId]});
+      setUser(data);
       toast.success("Avatar eliminado con éxito");
-
-      setUserData(data.data);
+      setOpenDeleteModal(false);
       setSelectedImageFile([]);
       setSelectedImagePreview([]);
-      
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast.error(error.message);
-
-    } finally {
-      setIsSubmitting(false);
     }
-  }
+  });
+
+  const isSubmitting = updateAvatarMutation.isPending || deleteAvatarMutation.isPending;
 
   return (
     <div className="flex flex-col items-start gap-2 w-full">
+      <DeleteAvatarModal
+        isOpen={openDeleteModal}
+        isLoading={deleteAvatarMutation.isPending}
+        setIsOpen={setOpenDeleteModal}
+        onDelete={() => deleteAvatarMutation.mutate()}
+      />
+      
       <p className="text-left text-neutral-900 font-medium">
         {title}
       </p>
@@ -99,7 +127,7 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
         </Avatar>
 
         <div className="flex justify-center items-center gap-2 w-max">
-          {!selectedImageFile &&
+          {!selectedImageFile[0] &&
             <Button
               className="border-none cursor-pointer"
               variant="outline"
@@ -112,31 +140,31 @@ const ProfileAvatarEdit = ({title, userData, setUserData, selectedImageFile, sel
             </Button>
           }
 
-          {selectedImageFile &&
+          {selectedImageFile[0] &&
             <Button
               className="text-white hover:text-white border-none bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
               variant="outline"
               disabled={isSubmitting}
-              onClick={onSubmitHandler}
+              onClick={() => updateAvatarMutation.mutate()}
             >
               <Save className="size-4" aria-hidden />
               <span>Guardar</span>
             </Button>
           }
 
-          {!selectedImageFile &&
+          {!selectedImageFile[0] &&
             <Button
               className="border-none cursor-pointer"
               variant="outline"
               disabled={!userData.profilePicture || isSubmitting}
-              onClick={onDeleteAvatarHandler}
+              onClick={() => setOpenDeleteModal(true)}
             >
               <Trash2Icon className="size-4 text-destructive" aria-hidden />
               <span>Eliminar foto</span>
             </Button>
           }
 
-          {selectedImageFile &&
+          {selectedImageFile[0] &&
             <Button
               className="border-none cursor-pointer"
               variant="outline"

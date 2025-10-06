@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { Pencil, Save, Trash2Icon, X } from "lucide-react";
 import { toast } from "sonner";
-import DeleteAvatarModal from "./DeleteAvatarModal";
+import DeleteAvatarModal from "./DeleteModal";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -103,6 +103,7 @@ const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePre
       <DeleteAvatarModal
         isOpen={openDeleteModal}
         isLoading={deleteAvatarMutation.isPending}
+        title="¿Eliminar foto de perfil?"
         setIsOpen={setOpenDeleteModal}
         onDelete={() => deleteAvatarMutation.mutate()}
       />

@@ -4,11 +4,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 interface Props {
   isOpen: boolean;
   isLoading: boolean;
+  title: string;
   setIsOpen: (isOpen: boolean) => void;
   onDelete: () => void;
 }
 
-const DeleteAvatarModal = ({ isOpen, isLoading, setIsOpen, onDelete }: Props) => {
+const DeleteModal = ({ isOpen, isLoading, title, setIsOpen, onDelete }: Props) => {
   return (
     <Dialog
       open={isOpen}
@@ -20,7 +21,7 @@ const DeleteAvatarModal = ({ isOpen, isLoading, setIsOpen, onDelete }: Props) =>
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>¿Eliminar foto de perfil?</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           
           <DialogDescription>
             Esta acción no se puede deshacer.
@@ -50,4 +51,4 @@ const DeleteAvatarModal = ({ isOpen, isLoading, setIsOpen, onDelete }: Props) =>
   )
 }
 
-export default DeleteAvatarModal
+export default DeleteModal;

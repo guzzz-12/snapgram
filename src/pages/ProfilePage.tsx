@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Navigate, useParams } from "react-router";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
@@ -13,7 +14,12 @@ import { axiosInstance } from "@/utils/axiosInstance";
 import type { PostType, UserType } from "@/types/global";
 
 const ProfilePage = () => {
+  const paginationRef = useRef<HTMLDivElement>(null);
+
   const {userClerkId} = useParams<{userClerkId: string}>();
+
+  const [isIntersecting, setIsIntersecting] = useState(false);
+
   const {getToken} = useAuth();
 
   const getUser = async () => {
@@ -67,6 +73,30 @@ const ProfilePage = () => {
     enabled: !!userData,
     retry: 2,
   });
+
+  // Observar si la referencia de la paginación es visible en el viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      setIsIntersecting(entries[0].isIntersecting);
+    }, {threshold: 0.5});
+
+    if (paginationRef.current) {
+      observer.observe(paginationRef.current);
+    }
+
+    return () => {
+      if (paginationRef.current) {
+        observer.unobserve(paginationRef.current);
+      }
+    }
+  }, [data]);
+
+  // Obtener la siguiente página de posts cuando la referencia de la paginación sea visible
+  useEffect(() => {
+    if (isIntersecting && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [isIntersecting, hasNextPage]);
 
   if (!loadingUser && !userData) {
     toast.error("Usuario no encontrado.");
@@ -136,6 +166,10 @@ const ProfilePage = () => {
             No se encontraron publicaciones.
           </p>
         }
+
+        {hasNextPage && (
+          <div ref={paginationRef} className="w-full h-4 shrink-0"/>
+        )}
       </section>
     </main>
   );

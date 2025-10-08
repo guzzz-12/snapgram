@@ -30,7 +30,7 @@ const HomePage = () => {
       url: "/posts",
       params: {
         page,
-        limit: 5
+        limit: 2
       },
       headers: {
         Authorization: `Bearer ${token}`
@@ -62,7 +62,7 @@ const HomePage = () => {
         observer.unobserve(paginationRef.current);
       }
     }
-  }, []);
+  }, [data]);
 
   useEffect(() => {
     if (isIntersecting && hasNextPage) {
@@ -101,7 +101,7 @@ const HomePage = () => {
           }
 
           {hasNextPage && (
-            <div ref={paginationRef} className="w-full h-4 shrink-0 bg-yellow-300"/>
+            <div ref={paginationRef} className="w-full h-4 shrink-0"/>
           )}
         </section>
       </div>

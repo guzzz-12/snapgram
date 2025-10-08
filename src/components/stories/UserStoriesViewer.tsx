@@ -13,13 +13,14 @@ import type { UserWithStories } from "@/types/global";
 interface Props {
   isOpen: boolean;
   usersWithStories: UserWithStories[];
+  // Se usa como criterio abrir/cerrar el visor
   storiesUserId: string | null;
   setStoriesUserId: (userId: string | null) => void;
 }
 
 const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStoriesUserId }: Props) => {
   const storiesUser = usersWithStories.find((user) => user._id === storiesUserId);
-  const stories = storiesUser?.stories;
+  const stories = storiesUser?.stories || [];
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -28,14 +29,18 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
 
   const {userId} = useAuth();
 
-  const currentStory = stories?.find((story) => story._id === activeStoryId);
+  const currentStory = stories.find((story) => story._id === activeStoryId);
   const hasMedia = currentStory?.mediaType === "image";
   
   // Abrir el primer story cuando se abre el visor de stories
   useEffect(() => {
-    if (stories && isOpen) {
+    if (stories.length > 0 && isOpen) {
       setActiveStoryId(stories[0]._id);
       setSeenStories([stories[0]._id]);
+    }
+
+    if (stories.length === 0 && isOpen) {
+      setStoriesUserId(null);
     }
   }, [stories, isOpen]);
 
@@ -49,7 +54,7 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
   }, [openDeleteModal]);
 
   const nextStoryHandler = () => {
-    if (!stories || activeStoryId === stories[stories.length - 1]._id) {
+    if (stories.length === 0 || activeStoryId === stories[stories.length - 1]._id) {
       return false;
     };
     
@@ -62,7 +67,7 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
   }
 
   const prevStoryHandler = () => {
-    if (!stories || activeStoryId === stories[0]._id) {
+    if (stories.length === 0 || activeStoryId === stories[0]._id) {
       return false;
     };
     
@@ -98,7 +103,7 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
         className="w-auto h-[95vh] p-0 aspect-[1/1.7] border-none [&>button]:hidden"
       >
         <div className="relative flex flex-col gap-4 w-full h-full">
-          {stories && stories.length > 1 && (
+          {stories.length > 1 && (
             <>
               <div className="absolute top-0 left-0 flex justify-center items-center h-full px-1 translate-x-[-90%] z-10">
                 <button
@@ -126,7 +131,7 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
           {/* Header del viewer */}
           <div className="relative bg-linear-to-b from-black to-transparent p-4 pb-6">
             <div className="absolute top-4 left-0 flex items-center gap-1 w-full px-3 z-10">
-              {stories?.map((story) => (
+              {stories.map((story) => (
                 <StoryProgressBar
                   key={story._id}
                   isOpen={isOpen}

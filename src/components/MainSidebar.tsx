@@ -108,7 +108,7 @@ const MainSidebar = () => {
                   className="flex justify-center items-center gap-2 w-full h-full px-4 py-2 text-base text-white rounded-md bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
                 >
                   <CirclePlus className="!size-5" aria-hidden />
-                  <span>Crear Post</span>
+                  <span>Crear</span>
                 </button>
               </DropdownMenuTrigger>
 

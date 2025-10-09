@@ -16,11 +16,13 @@ export type UserType = {
 
 export type LikeType = {
   _id: string;
-  user: string;
-  onModel: "Post" | "Comment";
-  onItem: string;
-  createdAt: string;
-  updatedAt: string;
+  user: {
+    _id: string;
+    clerkId: string;
+    fullName: string;
+    profilePicture: string;
+    username: string;
+  }
 }
 
 export type PostType = {
@@ -40,6 +42,8 @@ export type PostWithLikes = {
   imageUrls: string[];
   postType: "textWithImage" | "text" | "image";
   likes: LikeType[];
+  isLiked: boolean;
+  likesCount: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -5,7 +5,7 @@ import { CirclePlus, House, ImagePlus, LogOut, MessageCircle, Search, TypeOutlin
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "./ui/sidebar";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { useCreateStoryModal } from "@/hooks/useCreateStoryModal";
+import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import logo from "@/assets/logo-simple.webp";
 
@@ -41,7 +41,7 @@ const MainSidebar = () => {
 
   const {signOut} = useClerk();
 
-  const {setOpen: openCreateStoryModal} = useCreateStoryModal();
+  const {setOpen: openCreateStoryModal} = useCreatePublicationModal();
 
   // Establecer el ancho del dropdown igual al ancho del botón
   useEffect(() => {
@@ -113,19 +113,17 @@ const MainSidebar = () => {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent style={{ width: `${createPostBtnWidth}px` }}>
-                <DropdownMenuItem asChild>
-                  <Link
-                    className="flex justify-start items-center gap-2 w-full h-full cursor-pointer"
-                    to="/create-post"
-                  >
-                    <ImagePlus className="size-5" aria-hidden />
-                    <span>Crear publicación</span>
-                  </Link>
+                <DropdownMenuItem
+                  className="flex justify-start items-center gap-2 w-full h-full cursor-pointer"
+                  onClick={() => openCreateStoryModal({open: true, publicationType: "post"})}
+                >
+                  <ImagePlus className="size-5" aria-hidden />
+                  <span>Crear publicación</span>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                   className="flex justify-start items-center gap-2 cursor-pointer"
-                  onClick={() => openCreateStoryModal(true)}
+                  onClick={() => openCreateStoryModal({open: true, publicationType: "story"})}
                 >
                   <TypeOutline className="size-5" aria-hidden />
                   <span>Crear historia</span>

@@ -9,7 +9,6 @@ import Layout from "@/Layout";
 import HomePage from "@/pages/HomePage";
 import MessagesPage from "@/pages/MessagesPage";
 import ConnectionsPage from "@/pages/ConnectionsPage";
-import CreatePostPage from "@/pages/CreatePostPage";
 import DiscoverPage from "@/pages/DiscoverPage";
 import ProfilePage from "@/pages/ProfilePage";
 import LoginPage from "@/pages/LoginPage";
@@ -93,14 +92,6 @@ const App = () => {
           element={
             <ProtectedRoute>
               <ConnectionsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="create-post"
-          element={
-            <ProtectedRoute>
-              <CreatePostPage />
             </ProtectedRoute>
           }
         />

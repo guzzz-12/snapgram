@@ -4,10 +4,10 @@ import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { PostType } from "@/types/global";
+import type { PostWithLikes } from "@/types/global";
 
 interface Props {
-  postData: PostType;
+  postData: PostWithLikes;
 }
 
 const PostCardFooter = ({ postData }: Props) => {
@@ -43,20 +43,29 @@ const PostCardFooter = ({ postData }: Props) => {
         disabled={likeMutation.isPending}
         onClick={() => likeMutation.mutate()}
       >
-        <Heart className="size-4" aria-hidden />
+        <Heart
+          className="size-4"
+          fill={postData.isLiked ? "red" : "none"}
+          stroke={postData.isLiked ? "red" : "currentColor"}
+          aria-hidden
+        />
+
         <span className="text-sm font-semibold" aria-hidden>
-          {10}
+          {postData.likesCount}
         </span>
+
         <span className="sr-only">
-          Este post tiene {10} Me gusta
+          Este post tiene {postData.likesCount} me gusta
         </span>
       </button>
 
       <button className="flex items-center gap-1 text-neutral-500 cursor-pointer">
         <MessageCircle className="size-4" aria-hidden />
+        
         <span className="text-sm font-semibold" aria-hidden>
           {21}
         </span>
+
         <span className="sr-only">
           Este post tiene {21} Comentarios
         </span>

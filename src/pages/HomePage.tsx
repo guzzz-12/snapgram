@@ -9,7 +9,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { PostType } from "@/types/global";
+import type { PostWithLikes } from "@/types/global";
 
 const HomePage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
@@ -22,7 +22,7 @@ const HomePage = () => {
     const token = await getToken();
 
     const {data} = await axiosInstance<{
-      data: PostType[];
+      data: PostWithLikes[];
       hasMore: boolean;
       nextPage: number | null;
     }>({
@@ -77,10 +77,10 @@ const HomePage = () => {
   }
 
   return (
-    <main className="pageWrapper">
+    <main className="pageWrapper px-6 min-[1000px]:px-24">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
 
-      <div className="w-full max-w-[600px] h-full shrink-[2]">
+      <div className="w-full max-w-[600px] h-full mx-auto shrink-[2]">
         <StoriesSlider />
         
         <section className="flex flex-col gap-6 w-full">

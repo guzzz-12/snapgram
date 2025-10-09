@@ -14,12 +14,32 @@ export type UserType = {
   updatedAt: string;
 }
 
+export type LikeType = {
+  _id: string;
+  user: string;
+  onModel: "Post" | "Comment";
+  onItem: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type PostType = {
   _id: string;
   user: UserType;
   content: string;
   imageUrls: string[];
   postType: "textWithImage" | "text" | "image";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PostWithLikes = {
+  _id: string;
+  user: UserType;
+  content: string;
+  imageUrls: string[];
+  postType: "textWithImage" | "text" | "image";
+  likes: LikeType[];
   createdAt: string;
   updatedAt: string;
 }

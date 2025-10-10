@@ -11,7 +11,7 @@ import ProfileHeaderSkeleton from "@/components/posts/ProfileHeaderSkeleton";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { PostType, UserType } from "@/types/global";
+import type { PostWithLikes, UserType } from "@/types/global";
 
 const ProfilePage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,7 @@ const ProfilePage = () => {
     const token = await getToken();
     
     const {data} = await axiosInstance<{
-      data: PostType[];
+      data: PostWithLikes[];
       hasMore: boolean;
       nextPage: number | null;
     }>({

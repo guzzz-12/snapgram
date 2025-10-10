@@ -5,11 +5,11 @@ import PostCardFooter from "./PostCardFooter";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import useClampedText from "@/hooks/useClampedText";
-import type { PostType } from "@/types/global";
+import type { PostWithLikes } from "@/types/global";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  postData: PostType;
+  postData: PostWithLikes;
 }
 
 const SLIDER_SETTINGS: Settings = {

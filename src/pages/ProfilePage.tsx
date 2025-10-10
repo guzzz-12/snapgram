@@ -19,6 +19,7 @@ const ProfilePage = () => {
   const {userClerkId} = useParams<{userClerkId: string}>();
 
   const [isIntersecting, setIsIntersecting] = useState(false);
+  const [fetchingFirstPostsPage, setFetchingFirstPostsPage] = useState(true);
 
   const {getToken} = useAuth();
 
@@ -54,6 +55,10 @@ const ProfilePage = () => {
         Authorization: `Bearer ${token}`
       }
     });
+
+    if (page === 1) {
+      setFetchingFirstPostsPage(false);
+    }
 
     return data;
   }
@@ -112,7 +117,7 @@ const ProfilePage = () => {
   }
 
   const postsData = data?.pages.flatMap((page) => page.data) ?? [];
-  const loadingPosts = isLoading || isFetchingNextPage;
+  const loadingPosts = fetchingFirstPostsPage || isLoading || isFetchingNextPage;
 
   return (
     <main className="w-full min-h-screen mx-auto p-6 bg-slate-200">

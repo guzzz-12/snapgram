@@ -1,8 +1,7 @@
-import { useRef } from "react";
+import { useRef, type HTMLAttributes } from "react";
 import Slider, {type Settings} from "react-slick";
 import PostHeader from "./PostCardHeader";
 import PostCardFooter from "./PostCardFooter";
-import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import useClampedText from "@/hooks/useClampedText";
 import type { PostWithLikes } from "@/types/global";
@@ -10,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   postData: PostWithLikes;
+  className?: HTMLAttributes<HTMLElement>["className"];
 }
 
 const SLIDER_SETTINGS: Settings = {
@@ -21,7 +21,7 @@ const SLIDER_SETTINGS: Settings = {
   slidesToScroll: 1,
 };
 
-const PostCard = ({ postData }: Props) => {
+const PostCard = ({ postData, className }: Props) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
   const showClampBtnRef = useRef<"shouldShow" | "shouldNotShow">("shouldNotShow");
 
@@ -33,7 +33,7 @@ const PostCard = ({ postData }: Props) => {
   } = useClampedText({ textContentRef, showClampBtnRef });
 
   return (
-    <article className="flex flex-col gap-2 w-full p-4 rounded-lg bg-white shadow">
+    <article className={cn("flex flex-col gap-3 w-full p-4 rounded-lg bg-white shadow", className)}>
       <PostHeader postData={postData} />
 
       {postData.content && (
@@ -86,8 +86,6 @@ const PostCard = ({ postData }: Props) => {
           </div>
         ))}
       </Slider>
-
-      <Separator className="w-full" />
 
       <PostCardFooter postData={postData} />
     </article>

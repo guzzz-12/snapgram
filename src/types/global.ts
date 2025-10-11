@@ -95,3 +95,15 @@ export type UserWithStories = {
   profilePicture?: string;
   stories: StoryType[];
 }
+
+export type Comment = {
+  _id: string;
+  user: UserType;
+  post: PostType;
+  parent: Comment | null;
+  content: string;
+  messageType: "text" | "image" | "video";
+  mediaUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}

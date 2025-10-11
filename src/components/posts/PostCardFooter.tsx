@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
@@ -5,12 +6,15 @@ import { toast } from "sonner";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { PostWithLikes } from "@/types/global";
+import PostModal from "./PostModal";
 
 interface Props {
   postData: PostWithLikes;
 }
 
 const PostCardFooter = ({ postData }: Props) => {
+  const [openPostModal, setOpenPostModal] = useState(false);
+
   const {getToken} = useAuth();
 
   const queryClient = useQueryClient();
@@ -37,49 +41,61 @@ const PostCardFooter = ({ postData }: Props) => {
   });
 
   return (
-    <div className="flex justify-start items-center gap-3 w-full">
-      <button
-        className="flex items-center gap-1 text-neutral-500 cursor-pointer"
-        disabled={likeMutation.isPending}
-        onClick={() => likeMutation.mutate()}
-      >
-        <Heart
-          className="size-4"
-          fill={postData.isLiked ? "red" : "none"}
-          stroke={postData.isLiked ? "red" : "currentColor"}
-          aria-hidden
-        />
+    <div className="flex flex-col gap-3">
+      <PostModal
+        isOpen={openPostModal}
+        postData={postData}
+        setIsOpen={setOpenPostModal}
+      />
 
-        <span className="text-sm font-semibold" aria-hidden>
-          {postData.likesCount}
+      <div className="flex justify-start items-center gap-5 w-full">
+        <button
+          className="flex items-center gap-2 text-neutral-500 cursor-pointer"
+          disabled={likeMutation.isPending}
+          onClick={() => likeMutation.mutate()}
+        >
+          <Heart
+            className="size-6"
+            fill={postData.isLiked ? "red" : "none"}
+            stroke={postData.isLiked ? "red" : "currentColor"}
+            aria-hidden
+          />
+          <span className="sr-only">
+            Este post tiene {postData.likesCount} me gusta
+          </span>
+        </button>
+
+        <button
+          className="flex items-center gap-2 text-neutral-500 cursor-pointer"
+          onClick={() => setOpenPostModal(true)}
+        >
+          <MessageCircle className="size-6" aria-hidden />
+          <span className="sr-only">
+            Este post tiene {21} Comentarios
+          </span>
+        </button>
+
+        <button className="flex items-center gap-2 text-neutral-500 cursor-pointer">
+          <Share2 className="size-6" aria-hidden />
+          <span className="sr-only">
+            Este post ha sido compartido {6} veces
+          </span>
+        </button>
+      </div>
+      
+      <div className="flex justify-start items-center gap-6 pt-3 font-semibold text-neutral-700 text-sm border-t">
+        <span>
+          {postData.likesCount} Me gusta
         </span>
 
-        <span className="sr-only">
-          Este post tiene {postData.likesCount} me gusta
-        </span>
-      </button>
-
-      <button className="flex items-center gap-1 text-neutral-500 cursor-pointer">
-        <MessageCircle className="size-4" aria-hidden />
-        
-        <span className="text-sm font-semibold" aria-hidden>
-          {21}
+        <span>
+          {0} Comentarios
         </span>
 
-        <span className="sr-only">
-          Este post tiene {21} Comentarios
+        <span>
+          {0} Compartido
         </span>
-      </button>
-
-      <button className="flex items-center gap-1 text-neutral-500 cursor-pointer">
-        <Share2 className="size-4" aria-hidden />
-        <span className="text-sm font-semibold" aria-hidden>
-          {6}
-        </span>
-        <span className="sr-only">
-          Este post ha sido compartido {6} veces
-        </span>
-      </button>
+      </div>
     </div>
   )
 }

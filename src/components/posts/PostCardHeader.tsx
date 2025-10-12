@@ -46,10 +46,10 @@ const PostCardHeader = ({ postData }: Props) => {
         </Link>
 
         <p
-          className="text-xs text-neutral-700"
-          title={dayjs(postData.updatedAt).format("DD/MM/YYYY - hh:mm A")}
+          className="text-sm text-neutral-700"
+          title={dayjs(postData.createdAt).format("dddd, DD [de] MMMM [de] YYYY [a las] hh:mm a")}
         >
-          {dayjs(postData.updatedAt).format("DD/MM/YYYY")}
+          {dayjs(postData.updatedAt).fromNow().replace("hace", "Hace")}
         </p>
       </div>
 

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   postData: PostWithLikes;
+  isModal?: boolean;
   className?: HTMLAttributes<HTMLElement>["className"];
 }
 
@@ -21,7 +22,7 @@ const SLIDER_SETTINGS: Settings = {
   slidesToScroll: 1,
 };
 
-const PostCard = ({ postData, className }: Props) => {
+const PostCard = ({ postData, isModal, className }: Props) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
   const showClampBtnRef = useRef<"shouldShow" | "shouldNotShow">("shouldNotShow");
 
@@ -87,7 +88,7 @@ const PostCard = ({ postData, className }: Props) => {
         ))}
       </Slider>
 
-      <PostCardFooter postData={postData} />
+      <PostCardFooter postData={postData} isModal={isModal} />
     </article>
   )
 }

@@ -72,7 +72,7 @@ const PostCommentInput = ({postId}: {postId: string}) => {
   }, []);
 
   return (
-    <div className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-white">
+    <div className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-neutral-100">
       {selectedImagePreviews.length > 0 &&
         <div className="absolute -top-1 right-1 p-1.5 -translate-x-[100%] -translate-y-[100%] bg-neutral-300 rounded-sm shadow overflow-hidden">
           <button
@@ -115,7 +115,7 @@ const PostCommentInput = ({postId}: {postId: string}) => {
         </Popover>
 
         <Textarea
-          className="w-full min-h-auto max-h-[150px] pl-12 py-4 bg-slate-100 border-none rounded-sm resize-none scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white"
+          className="w-full min-h-auto max-h-[150px] pl-12 py-4 bg-white border-none rounded-sm resize-none scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white"
           placeholder="Escribe un comentario..."
           disabled={isPending}
           value={commentText}

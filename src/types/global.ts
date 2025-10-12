@@ -25,12 +25,19 @@ export type LikeType = {
   }
 }
 
+export type ChangeLogType = {
+  _id: string;
+  previousContent: string;
+  editedAt: string;
+}
+
 export type PostType = {
   _id: string;
   user: UserType;
   content: string;
   imageUrls: string[];
   postType: "textWithImage" | "text" | "image";
+  changeLog: ChangeLogType[];
   createdAt: string;
   updatedAt: string;
 }
@@ -44,6 +51,7 @@ export type PostWithLikes = {
   likes: LikeType[];
   isLiked: boolean;
   likesCount: number;
+  changeLog: ChangeLogType[];
   createdAt: string;
   updatedAt: string;
 }

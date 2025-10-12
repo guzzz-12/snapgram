@@ -102,8 +102,7 @@ export type Comment = {
   post: PostType;
   parent: Comment | null;
   content: string;
-  // TODO: Corregir el nombre de este field a commentType
-  messageType: "text" | "image" | "video";
+  commentType: "text" | "image" | "video";
   mediaUrl: string;
   createdAt: string;
   updatedAt: string;

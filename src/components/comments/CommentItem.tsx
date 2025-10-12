@@ -106,7 +106,7 @@ const CommentItem = ({ commentData }: Props) => {
           </p>
         }
 
-        {commentData.messageType === "image" &&
+        {commentData.commentType === "image" &&
           <div className="w-full h-auto max-h-[210px] pt-2">
             <img
               className="w-auto h-full object-contain object-center rounded-md shadow"

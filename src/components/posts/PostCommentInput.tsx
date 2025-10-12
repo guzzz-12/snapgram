@@ -72,7 +72,7 @@ const PostCommentInput = ({postId}: {postId: string}) => {
   }, []);
 
   return (
-    <div className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-neutral-100">
+    <div className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-neutral-100 border-t">
       {selectedImagePreviews.length > 0 &&
         <div className="absolute -top-1 right-1 p-1.5 -translate-x-[100%] -translate-y-[100%] bg-neutral-300 rounded-sm shadow overflow-hidden">
           <button

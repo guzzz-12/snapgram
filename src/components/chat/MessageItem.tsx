@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { Twemoji } from "react-emoji-render";
 import { ChevronDown } from "lucide-react";
 import MessageDropdown from "./MessageDropdown";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -66,7 +67,7 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
           {/* Contenido de texto del mensaje (si lo tiene) */}
           {messageData.text && (
             <p className="w-full mt-2 text-sm text-neutral-900 whitespace-pre-wrap">
-              {messageData.text}
+              <Twemoji text={messageData.text} />
             </p>
           )}
           <p

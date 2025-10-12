@@ -156,7 +156,8 @@
     @apply !flex !items-center
   }
 
-  /* Ajustar el tamaño de los emojis de los comentarios */
+  /* Ajustar el tamaño de los emojis de los comentarios y de los posts */
+  .postText img,
   .commentText img {
     @apply inline-block !w-[16px] !h-[16px]
   }

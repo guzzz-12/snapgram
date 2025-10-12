@@ -4,9 +4,9 @@ import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, PlusCircle, X } from "lucide-react";
 import { toast } from "sonner";
+import CreatePostInput from "./CreatePostInput";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import useImagePicker from "@/hooks/useImagePicker";
@@ -131,21 +131,16 @@ const CreatePostModal = () => {
               mutate();
             }}
           >
-            <div className="max-h-[420px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-              <Textarea
-                className="p-0 border-b border-t-0 border-l-0 border-r-0 rounded-none shadow-none resize-none placeholder:text-neutral-400"
-                placeholder="¿Qué estás pensando?"
-                rows={3}
-                disabled={isPending}
-                value={textContent}
-                onChange={(e) => setTextContent(e.target.value)}
-              />
-            </div>
+            <CreatePostInput
+              isPending={isPending}
+              textContent={textContent}
+              setTextContent={setTextContent}
+            />
 
             <div className="flex justify-start items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
               {!selectedImagePreviews.length && (
                 <button
-                  className="p-2 cursor-pointer"
+                  className="cursor-pointer"
                   type="button"
                   disabled={isPending}
                   onClick={() => fileInputRef.current?.click()}
@@ -197,7 +192,7 @@ const CreatePostModal = () => {
             </div>
 
             <Button
-              className="gap-1 w-full text-sm font-normal shrink-0 bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
+              className="gap-1 w-full mt-3 text-sm font-normal shrink-0 bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
               type="submit"
               disabled={isPending || (!textContent && !selectedImageFiles.length)}
             >

@@ -131,6 +131,14 @@
     @apply !text-2xl !text-[#4F39F6]/90
   }
 
+  .postCardSlider .slick-prev {
+    @apply !left-[10px] !z-10
+  }
+
+  .postCardSlider .slick-next {
+    @apply !right-[10px]
+  }
+
   .postCardSlider .slick-dots {
     @apply !flex !justify-center !items-center !gap-0
   }
@@ -141,5 +149,15 @@
 
   .postCardSlider .slick-dots li {
     @apply !mx-0
+  }
+
+  /* Alinear el texto de los comentarios con los emojis */
+  .commentText span {
+    @apply !flex !items-center
+  }
+
+  /* Ajustar el tamaño de los emojis de los comentarios */
+  .commentText img {
+    @apply inline-block !w-[16px] !h-[16px]
   }
 }

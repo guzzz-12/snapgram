@@ -1,13 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { useAuth } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Twemoji } from "react-emoji-render";
 import dayjs from "dayjs";
 import { Ellipsis, Pencil, Trash2Icon } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { toast } from "sonner";
 import DeleteCommentModal from "./DeleteCommentModal";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Separator } from "../ui/separator";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
 import type { Comment } from "@/types/global";
 
@@ -17,9 +22,36 @@ interface Props {
 
 const CommentItem = ({ commentData }: Props) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [isDeletingComment, setIsDeletingComment] = useState(false);
+
+  const {getToken} = useAuth();
+  const queryClient = useQueryClient();
 
   const {user} = useCurrentUser();
+
+  const {mutate, isPending} = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      return axiosInstance({
+        method: "DELETE",
+        url: `/comments/${commentData._id}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["postComments", commentData.post._id]
+      });
+
+      setOpenDeleteModal(false);
+    },
+    onError: (error) => {
+      const message = errorMessage(error);
+      toast.error(message);
+    }
+  });
 
   return (
     <div className="flex justify-between gap-3 w-full">
@@ -27,8 +59,9 @@ const CommentItem = ({ commentData }: Props) => {
         isOpen={openDeleteModal}
         commentId={commentData._id}
         postId={commentData.post._id}
+        isPending={isPending}
         setIsOpen={setOpenDeleteModal}
-        setIsDeleting={(bool) => setIsDeletingComment(bool)}
+        onDeleteHandler={() => mutate()}
       />
 
       <Link
@@ -65,8 +98,8 @@ const CommentItem = ({ commentData }: Props) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={cn("flex justify-center items-center min-w-6 min-h-6 ml-auto p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 cursor-pointer transition-colors", isDeletingComment && "pointer-events-none")}
-                  disabled={isDeletingComment}
+                  className={cn("flex justify-center items-center min-w-6 min-h-6 ml-auto p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 cursor-pointer transition-colors", isPending && "pointer-events-none")}
+                  disabled={isPending}
                 >
                   <Ellipsis className="size-4 text-neutral-700" aria-hidden />
                   <span className="sr-only">
@@ -77,8 +110,8 @@ const CommentItem = ({ commentData }: Props) => {
 
               <DropdownMenuContent>
                 <DropdownMenuItem
-                  className={cn("flex justify-start items-center gap-2 cursor-pointer", isDeletingComment && "pointer-events-none")}
-                  disabled={isDeletingComment}
+                  className={cn("flex justify-start items-center gap-2 cursor-pointer", isPending && "pointer-events-none")}
+                  disabled={isPending}
                   onClick={() => {}}
                 >
                   <Pencil className="size-4.5" aria-hidden />
@@ -88,8 +121,8 @@ const CommentItem = ({ commentData }: Props) => {
                 <Separator />
                 
                 <DropdownMenuItem
-                  className={cn("flex justify-start items-center gap-2 cursor-pointer hover:!bg-destructive/5", isDeletingComment && "pointer-events-none")}
-                  disabled={isDeletingComment}
+                  className={cn("flex justify-start items-center gap-2 cursor-pointer hover:!bg-destructive/5", isPending && "pointer-events-none")}
+                  disabled={isPending}
                   onClick={() => setOpenDeleteModal(true)}
                 >
                   <Trash2Icon className="size-5 text-destructive/60" aria-hidden />

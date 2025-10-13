@@ -65,14 +65,14 @@ const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
     >
       <DialogOverlay className="bg-black/70" />
 
-      <DialogContent className="gap-0 !w-full !max-w-[700px] h-[90vh] p-0 !shadow-none overflow-hidden">
+      <DialogContent className="flex flex-col gap-0 !w-full !max-w-[700px] h-[90vh] p-0 !shadow-none overflow-hidden">
         <DialogHeader className="flex justify-center p-4 bg-neutral-100 border-b overflow-hidden">
           <h2 className="max-w-[75%] mx-auto text-xl text-center font-semibold truncate">
             Publicación de {postData.user.fullName}
           </h2>
         </DialogHeader>
 
-        <div className="p-5 pb-0 overflow-y-auto">
+        <div className="h-full px-5 py-3 overflow-y-auto">
           <PostCard
             className="w-full p-0 shadow-none"
             postData={postData}

@@ -151,11 +151,6 @@
     @apply !mx-0
   }
 
-  /* Alinear el texto de los comentarios con los emojis */
-  .commentText span {
-    @apply !flex !items-center
-  }
-
   /* Ajustar el tamaño de los emojis de los comentarios y de los posts */
   .postText img,
   .commentText img {

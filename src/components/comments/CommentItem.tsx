@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Twemoji } from "react-emoji-render";
 import dayjs from "dayjs";
-import { Ellipsis, Logs, Pencil, Trash2Icon } from "lucide-react";
+import { Dot, Ellipsis, Logs, Pencil, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 import DeleteCommentModal from "./DeleteCommentModal";
 import CreateCommentInput from "@/components/posts/CreateCommentInput";
@@ -130,12 +130,29 @@ const CommentItem = ({ commentData }: Props) => {
               {commentData.user.fullName}
             </Link>
 
-            <span
-              className="text-xs text-neutral-700"
-              title={dayjs(commentData.createdAt).format("dddd, DD [de] MMMM [de] YYYY [a las] hh:mm a")}
-            >
-              {dayjs(commentData.createdAt).fromNow()}
-            </span>
+            <div className="flex justify-start items-center gap-0">
+              <span
+                className="text-xs text-neutral-700"
+                title={dayjs(commentData.createdAt).format("dddd, DD [de] MMMM [de] YYYY [a las] hh:mm a")}
+              >
+                {dayjs(commentData.createdAt).fromNow()}
+              </span>
+
+              {commentData.changeLog.length > 0 &&
+                <>
+                  <Dot className="size-3" />
+
+                  <Button
+                    className="block h-fit ml-auto p-0 text-xs text-neutral-600 font-normal cursor-pointer"
+                    variant="link"
+                    size="sm"
+                    onClick={() => setOpenChangeLogModal(true)}
+                  >
+                    Editado
+                  </Button>
+                </>
+              }
+            </div>
           </div>
 
           {user?.clerkId === commentData.user.clerkId &&
@@ -229,7 +246,10 @@ const CommentItem = ({ commentData }: Props) => {
 
         {commentData.content && !isEditing &&
           <p className="commentText text-sm text-neutral-700 whitespace-pre-wrap">
-            <Twemoji text={commentData.content} />
+            <Twemoji
+              className="[&>img]:!inline"
+              text={commentData.content}
+            />
           </p>
         }
 

@@ -112,6 +112,7 @@ export type Comment = {
   content: string;
   commentType: "text" | "image" | "video";
   mediaUrl: string;
+  changeLog: ChangeLogType[];
   createdAt: string;
   updatedAt: string;
 }

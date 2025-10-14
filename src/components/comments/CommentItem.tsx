@@ -4,12 +4,15 @@ import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Twemoji } from "react-emoji-render";
 import dayjs from "dayjs";
-import { Ellipsis, Pencil, Trash2Icon } from "lucide-react";
+import { Ellipsis, Logs, Pencil, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 import DeleteCommentModal from "./DeleteCommentModal";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { Separator } from "../ui/separator";
+import CreateCommentInput from "@/components/posts/CreateCommentInput";
+import ChangeLogModal from "@/components/ChangeLogModal";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -21,14 +24,46 @@ interface Props {
 }
 
 const CommentItem = ({ commentData }: Props) => {
+  const [commentText, setCommentText] = useState(commentData.content);
+  const [isEditing, setIsEditing] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openChangeLogModal, setOpenChangeLogModal] = useState(false);
 
   const {getToken} = useAuth();
   const queryClient = useQueryClient();
 
   const {user} = useCurrentUser();
 
-  const {mutate, isPending} = useMutation({
+  const {mutate: updateComment, isPending: isUpdating} = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      return axiosInstance({
+        method: "PUT",
+        url: `/comments/${commentData._id}`,
+        data: {
+          content: commentText
+        },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["postComments", commentData.post._id]
+      });
+
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      const message = errorMessage(error);
+      toast.error(message);
+    }
+  });
+
+  const {mutate: deleteComment, isPending: isDeleting} = useMutation({
     mutationFn: async () => {
       const token = await getToken();
 
@@ -53,15 +88,24 @@ const CommentItem = ({ commentData }: Props) => {
     }
   });
 
+  const isPending = isUpdating || isDeleting;
+
   return (
     <div className="flex justify-between gap-3 w-full">
       <DeleteCommentModal
         isOpen={openDeleteModal}
         commentId={commentData._id}
         postId={commentData.post._id}
-        isPending={isPending}
+        isPending={isDeleting}
         setIsOpen={setOpenDeleteModal}
-        onDeleteHandler={() => mutate()}
+        onDeleteHandler={() => deleteComment()}
+      />
+
+      <ChangeLogModal
+        title="Ver historial de cambios"
+        changeLog={commentData.changeLog}
+        isOpen={openChangeLogModal}
+        setIsOpen={setOpenChangeLogModal}
       />
 
       <Link
@@ -112,7 +156,7 @@ const CommentItem = ({ commentData }: Props) => {
                 <DropdownMenuItem
                   className={cn("flex justify-start items-center gap-2 cursor-pointer", isPending && "pointer-events-none")}
                   disabled={isPending}
-                  onClick={() => {}}
+                  onClick={() => setIsEditing(true)}
                 >
                   <Pencil className="size-4.5" aria-hidden />
                   <span className="text-sm text-neutral-900">Editar</span>
@@ -128,12 +172,62 @@ const CommentItem = ({ commentData }: Props) => {
                   <Trash2Icon className="size-5 text-destructive/60" aria-hidden />
                   <span className="text-sm text-destructive">Eliminar</span>
                 </DropdownMenuItem>
+
+                <Separator />
+
+                <DropdownMenuItem
+                  className="flex justify-start items-center gap-2 cursor-pointer disabled:pointer-events-none"
+                  disabled={isPending || !commentData.changeLog.length}
+                  onClick={() => setOpenChangeLogModal(true)}
+                >
+                  <Logs className="size-5" aria-hidden />
+                  <span className="text-sm text-neutral-900">
+                    Ver historial de cambios
+                  </span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           }
         </div>
 
-        {commentData.content &&
+        {isEditing &&
+          <div className="flex flex-col gap-2 w-full">
+            <CreateCommentInput
+              isPending={isUpdating}
+              textContent={commentText}
+              setTextContent={setCommentText}
+            />
+
+            <div className="flex justify-end items-center gap-2 w-full">
+              <Button
+                className="cursor-pointer"
+                variant="outline"
+                size="sm"
+                disabled={isPending}
+                onClick={() => setIsEditing(false)}
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                className="bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer disabled:pointer-events-none"
+                size="sm"
+                disabled={
+                  isPending
+                  ||
+                  commentData.content === commentText
+                  ||
+                  commentData.content === ""
+                }
+                onClick={() => updateComment()}
+              >
+                Guardar cambios
+              </Button>
+            </div>
+          </div>
+        }
+
+        {commentData.content && !isEditing &&
           <p className="commentText text-sm text-neutral-700 whitespace-pre-wrap">
             <Twemoji text={commentData.content} />
           </p>

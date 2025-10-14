@@ -29,7 +29,7 @@ const ChangeLogModal = ({changeLog, title, isOpen, setIsOpen}: Props) => {
 
         <Separator />
 
-        <div className="flex flex-col gap-3 w-full max-h-[360px] px-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        <div className="flex flex-col gap-3 w-full max-h-[360px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           {changeLog.map((changeLogItem) => (
             <div
               key={changeLogItem._id}

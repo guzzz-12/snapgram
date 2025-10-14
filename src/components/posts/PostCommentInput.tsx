@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { Comment } from "@/types/global";
+import CreateCommentInput from "./CreateCommentInput";
 
 const PostCommentInput = ({postId}: {postId: string}) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -94,34 +95,11 @@ const PostCommentInput = ({postId}: {postId: string}) => {
         </div>
       }
 
-      <div className="relative w-full border rounded-sm overflow-hidden">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              className="absolute left-4 top-1/2 shrink-0 -translate-y-1/2 cursor-pointer"
-              disabled={isPending}
-            >
-              <Smile className="text-neutral-600" aria-hidden />
-              <span className="sr-only">Seleccionar Emoji</span>
-            </button>
-          </PopoverTrigger>
-
-          <PopoverContent className="w-full p-0 -translate-y-[1rem] bg-transparent">
-            <EmojiPicker
-              searchDisabled
-              onEmojiClick={(e) => setCommentText((prev) => prev + e.emoji)}
-            />
-          </PopoverContent>
-        </Popover>
-
-        <Textarea
-          className="w-full min-h-auto max-h-[150px] pl-12 py-4 bg-white border-none rounded-sm resize-none scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white"
-          placeholder="Escribe un comentario..."
-          disabled={isPending}
-          value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
-        />
-      </div>
+      <CreateCommentInput
+        textContent={commentText}
+        isPending={isPending}
+        setTextContent={setCommentText}
+      />
 
       {!selectedImageFiles[0] &&
         <div className="flex justify-between items-center gap-3">
@@ -147,15 +125,15 @@ const PostCommentInput = ({postId}: {postId: string}) => {
       }
 
       {/* Input oculto del selector de imagen */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          hidden
-          multiple={false}
-          disabled={isPending}
-          accept="image/png, image/jpg, image/jpeg, image/webp"
-          onChange={onImagePickHandler}
-        />
+      <input
+        ref={fileInputRef}
+        type="file"
+        hidden
+        multiple={false}
+        disabled={isPending}
+        accept="image/png, image/jpg, image/jpeg, image/webp"
+        onChange={onImagePickHandler}
+      />
     </div>
   )
 }

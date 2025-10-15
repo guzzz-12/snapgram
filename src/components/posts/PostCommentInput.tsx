@@ -1,16 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import EmojiPicker from "emoji-picker-react";
-import { Image, Smile, X } from "lucide-react";
-import { toast } from "sonner";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Textarea } from "../ui/textarea";
-import useImagePicker from "@/hooks/useImagePicker";
+import { Image, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import CreateCommentInput from "./CreateCommentInput";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
+import useImagePicker from "@/hooks/useImagePicker";
 import type { Comment } from "@/types/global";
-import CreateCommentInput from "./CreateCommentInput";
 
 const PostCommentInput = ({postId}: {postId: string}) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -47,12 +44,13 @@ const PostCommentInput = ({postId}: {postId: string}) => {
       });
 
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setCommentText("");
       setSelectedImageFiles([]);
       setSelectedImagePreviews([]);
 
-      queryClient.invalidateQueries({queryKey: ["postComments", postId]});
+      await queryClient.invalidateQueries({queryKey: ["posts"]});
+      await queryClient.invalidateQueries({queryKey: ["postComments", postId]});
     },
     onError: (error) => {
       const message = errorMessage(error);

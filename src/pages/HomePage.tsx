@@ -30,7 +30,7 @@ const HomePage = () => {
       url: "/posts",
       params: {
         page,
-        limit: 2
+        limit: 5
       },
       headers: {
         Authorization: `Bearer ${token}`

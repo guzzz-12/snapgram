@@ -1,16 +1,19 @@
-import { type Dispatch, type SetStateAction } from "react";
+import { type Dispatch, type HTMLAttributes, type SetStateAction } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { Smile } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Textarea } from "../ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface Props {
   textContent: string;
   isPending: boolean;
+  placeholder?: string;
+  className?: HTMLAttributes<HTMLElement>["className"];
   setTextContent: Dispatch<SetStateAction<string>>;
 }
 
-const CreateCommentInput = ({textContent, isPending, setTextContent} : Props) => {
+const CreateCommentInput = ({textContent, isPending, placeholder, className, setTextContent} : Props) => {
   return (
     <div className="relative w-full border rounded-sm overflow-hidden">
       <Popover>
@@ -33,8 +36,8 @@ const CreateCommentInput = ({textContent, isPending, setTextContent} : Props) =>
       </Popover>
 
       <Textarea
-        className="w-full min-h-auto max-h-[150px] pl-12 py-4 bg-white border-none rounded-sm resize-none scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white"
-        placeholder="Escribe un comentario..."
+        className={cn("w-full min-h-auto max-h-[150px] pl-12 py-4 bg-white border-none rounded-sm resize-none scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white", className)}
+        placeholder={placeholder || "Escribe un comentario..."}
         disabled={isPending}
         value={textContent}
         onChange={(e) => setTextContent(e.target.value)}

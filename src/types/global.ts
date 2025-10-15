@@ -22,6 +22,12 @@ export type LikeType = {
     fullName: string;
     profilePicture: string;
     username: string;
+  },
+  post: {
+    _id: string;
+  },
+  comment: {
+    _id: string;
   }
 }
 
@@ -51,6 +57,7 @@ export type PostWithLikes = {
   likes: LikeType[];
   isLiked: boolean;
   likesCount: number;
+  commentsCount: number;
   changeLog: ChangeLogType[];
   createdAt: string;
   updatedAt: string;
@@ -113,6 +120,7 @@ export type Comment = {
   commentType: "text" | "image" | "video";
   mediaUrl: string;
   changeLog: ChangeLogType[];
+  repliesCount: number;
   createdAt: string;
   updatedAt: string;
 }

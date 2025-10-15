@@ -19,7 +19,7 @@ const CommentsList = ({ comments }: Props) => {
   };
 
   return (
-    <ul className="flex flex-col gap-3 pt-3 pb-6 border-t">
+    <ul className="flex flex-col gap-4 pt-3 pb-6 border-t">
       {comments.map(comment => {
         return (
           <CommentItem

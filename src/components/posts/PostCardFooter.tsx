@@ -3,11 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import PostModal from "./PostModal";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { PostWithLikes } from "@/types/global";
-import PostModal from "./PostModal";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -127,7 +127,7 @@ const PostCardFooter = ({ postData, isModal }: Props) => {
             }
           }}
         >
-          {0} Comentarios
+          {postData.commentsCount} Comentarios
         </button>
 
         <span>

@@ -3,16 +3,19 @@ import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Twemoji } from "react-emoji-render";
-import dayjs from "dayjs";
-import { CornerLeftDown, SendHorizontal } from "lucide-react";
+import { CirclePlus, SendHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import CommentsList from "./CommentsList";
+import CommentFooter from "./CommentFooter";
 import CommentDropdown from "./CommentDropdown";
 import DeleteCommentModal from "./DeleteCommentModal";
+import CommentSkeleton from "./CommentSkeleton";
 import CreateCommentInput from "@/components/posts/CreateCommentInput";
+import CommentEditInputBtns from "./CommentEditInputBtns";
 import ChangeLogModal from "@/components/ChangeLogModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -89,6 +92,10 @@ const CommentItem = ({ commentData }: Props) => {
         queryKey: ["postComments", commentData.post._id]
       });
 
+      await queryClient.invalidateQueries({
+        queryKey: ["commentReplies", commentData._id]
+      });
+
       setOpenDeleteModal(false);
     },
     onError: (error) => {
@@ -155,7 +162,8 @@ const CommentItem = ({ commentData }: Props) => {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     enabled: openReplies,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    staleTime: 0
   });
 
   const commentReplies = repliesData?.pages.flatMap((page) => page.data) ?? [];
@@ -221,32 +229,13 @@ const CommentItem = ({ commentData }: Props) => {
                       setTextContent={setCommentText}
                     />
 
-                    <div className="flex justify-end items-center gap-2 w-full">
-                      <Button
-                        className="cursor-pointer"
-                        variant="outline"
-                        size="sm"
-                        disabled={isPending}
-                        onClick={() => setIsEditing(false)}
-                      >
-                        Cancelar
-                      </Button>
-
-                      <Button
-                        className="bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer disabled:pointer-events-none"
-                        size="sm"
-                        disabled={
-                          isPending
-                          ||
-                          commentData.content === commentText
-                          ||
-                          commentData.content === ""
-                        }
-                        onClick={() => updateComment()}
-                      >
-                        Guardar cambios
-                      </Button>
-                    </div>
+                    <CommentEditInputBtns
+                      commentData={commentData}
+                      isPending={isPending}
+                      commentText={commentText}
+                      setIsEditing={setIsEditing}
+                      updateComment={() => updateComment()}
+                    />
                   </div>
                 }
               </div>
@@ -273,58 +262,61 @@ const CommentItem = ({ commentData }: Props) => {
                 />
               </div>
             }
-
-            {/* Footer del comentario */}
-            <div className="flex flex-col items-start gap-1">
-              <div className="flex justify-start items-center gap-3 py-0.5">
-                <span
-                  className="text-xs text-neutral-600 font-medium"
-                  title={dayjs(commentData.createdAt).format("dddd, DD [de] MMMM [de] YYYY [a las] hh:mm a")}
-                >
-                  {dayjs(commentData.createdAt).fromNow()}
-                </span>
-
-                <Button
-                  className="block h-fit p-0 text-xs text-neutral-600 cursor-pointer"
-                  variant="link"
-                  size="sm"
-                  onClick={() => setOpenReplies(true)}
-                >
-                  Responder
-                </Button>
-
-                {commentData.changeLog.length > 0 &&
-                  <Button
-                    className="block h-fit p-0 text-xs text-neutral-600 cursor-pointer"
-                    variant="link"
-                    size="sm"
-                    onClick={() => setOpenChangeLogModal(true)}
-                  >
-                    Editado
-                  </Button>
-                }
-              </div>
-
-              {commentData.repliesCount > 0 && !openReplies &&
-                <Button
-                  className="flex h-fit !px-0 !py-0 text-base text-neutral-600 cursor-pointer"
-                  variant="link"
-                  size="sm"
-                  onClick={() => setOpenReplies(true)}
-                >
-                  <CornerLeftDown />
-                  Ver {commentData.repliesCount} {commentData.repliesCount > 1 ? "respuestas" : "respuesta"}
-                </Button>
-              }
-            </div>
+            
+            <CommentFooter
+              commentData={commentData}
+              openReplies={openReplies}
+              setOpenReplies={setOpenReplies}
+              setOpenChangeLogModal={setOpenChangeLogModal}
+            />
           </div>
         </div>
       </div>
 
-      {/* Lista de respuestas e input para responder al comentario */}
-      {openReplies &&
-        <div className="flex flex-col w-full grow pl-20 ml-auto">
-          <CommentsList comments={commentReplies} />
+      {/* Lista de respuestas del comentario, input para responder al comentario */}
+      {openReplies && !commentData.parent &&
+        <div className="flex flex-col gap-3 w-full grow pl-20 ml-auto">
+          {isLoading &&
+            <div className="flex flex-col gap-3 w-full">
+              <CommentSkeleton commentWidth="w-[90%]" commentHeight="h-[80px]" />
+              <CommentSkeleton commentWidth="w-[55%]" commentHeight="h-[50px]" />
+              <CommentSkeleton commentWidth="w-[70%]" commentHeight="h-[60px]" />
+            </div>
+          }
+
+          <CommentsList comments={commentReplies} isLoading={isLoading} />
+
+          {isFetchingNextPage &&
+            <div className="flex flex-col gap-3 w-full">
+              <CommentSkeleton commentWidth="w-[90%]" commentHeight="h-[80px]" />
+              <CommentSkeleton commentWidth="w-[55%]" commentHeight="h-[50px]" />
+              <CommentSkeleton commentWidth="w-[70%]" commentHeight="h-[60px]" />
+            </div>
+          }
+
+          {/* Referencia del paginador */}
+          {hasNextPage && !isFetchingNextPage && !isLoading &&
+            <div className="flex justify-center items-center w-full">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="text-sm text-neutral-900 cursor-pointer hover:underline"
+                    disabled={isFetchingNextPage}
+                    onClick={() => fetchNextPage()}
+                  >
+                    <CirclePlus className="size-7" />
+                    <span className="sr-only">
+                      {isFetchingNextPage ? "Cargando..." : "Ver más"}
+                    </span>
+                  </button>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                  Ver más respuestas
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          }
 
           <div className="flex justify-start items-center gap-2 p-2 bg-neutral-100 rounded-md">
             <CreateCommentInput
@@ -345,7 +337,7 @@ const CommentItem = ({ commentData }: Props) => {
               </span>
             </Button>
           </div>
-        // </div>
+        </div>
       }
     </div>
   )

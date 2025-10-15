@@ -81,7 +81,7 @@ const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
 
           <Separator className="mt-3 bg-transparent" />
 
-          <CommentsList comments={comments} />
+          <CommentsList comments={comments} isLoading={loading} />
 
           {hasNextPage && !isFetchingNextPage && (
             <div className="flex justify-center items-center w-full pb-4">

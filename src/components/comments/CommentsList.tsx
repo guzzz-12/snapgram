@@ -4,10 +4,11 @@ import type { Comment } from "@/types/global";
 
 interface Props {
   comments: Comment[];
+  isLoading: boolean;
 }
 
-const CommentsList = ({ comments }: Props) => {
-  if (comments.length === 0) {
+const CommentsList = ({ comments, isLoading }: Props) => {
+  if (comments.length === 0 && !isLoading) {
     return (
       <div className="flex flex-col justify-center items-center w-full py-5">
         <MessageSquareText className="w-[150px] h-[150px] text-neutral-500 stroke-[0.75]" />
@@ -19,7 +20,7 @@ const CommentsList = ({ comments }: Props) => {
   };
 
   return (
-    <ul className="flex flex-col gap-4 pt-3 pb-6 border-t">
+    <ul className="flex flex-col gap-4 py-3">
       {comments.map(comment => {
         return (
           <CommentItem

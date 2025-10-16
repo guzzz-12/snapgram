@@ -1,26 +1,30 @@
+import type { HTMLAttributes } from "react";
 import { MessageSquareText } from "lucide-react";
 import CommentItem from "./CommentItem";
 import type { Comment } from "@/types/global";
+import { cn } from "@/lib/utils";
 
 interface Props {
   comments: Comment[];
   isLoading: boolean;
+  className?: HTMLAttributes<HTMLElement>["className"];
+  isReply?: boolean;
 }
 
-const CommentsList = ({ comments, isLoading }: Props) => {
+const CommentsList = ({ comments, isLoading, className, isReply }: Props) => {
   if (comments.length === 0 && !isLoading) {
     return (
       <div className="flex flex-col justify-center items-center w-full py-5">
         <MessageSquareText className="w-[150px] h-[150px] text-neutral-500 stroke-[0.75]" />
-        <p className="text-neutral-500 font-semibold">
-          Todavía no hay comentarios
+        <p className={cn("text-neutral-500 font-semibold", isReply ? "text-sm" : "text-base")}>
+          {isReply ? "Sé el primero en responder" : "Todavía no hay comentarios"}
         </p>
       </div>
     )
   };
 
   return (
-    <ul className="flex flex-col gap-4 py-3">
+    <ul className={cn("flex flex-col gap-4 py-3", className)}>
       {comments.map(comment => {
         return (
           <CommentItem

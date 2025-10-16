@@ -4,7 +4,8 @@ import { useAuth } from "@clerk/clerk-react";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import PostModal from "./PostModal";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import LikesPopover from "@/components/likes/LikesPopover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { PostWithLikes } from "@/types/global";
@@ -115,9 +116,11 @@ const PostCardFooter = ({ postData, isModal }: Props) => {
       </div>
       
       <div className="flex justify-start items-center gap-6 pt-3 font-semibold text-neutral-700 text-sm border-t">
-        <span>
-          {postData.likesCount} Me gusta
-        </span>
+        <LikesPopover
+          itemId={postData._id}
+          likesCount={postData.likesCount}
+          itemType="post"
+        />
 
         <button
           className={cn(isModal ? "cursor-default pointer-events-none" : "cursor-pointer")}

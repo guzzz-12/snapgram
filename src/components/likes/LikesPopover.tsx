@@ -9,6 +9,7 @@ import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
 import type { LikeType } from "@/types/global";
+import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 
 interface Props {
   likesCount: number;
@@ -22,7 +23,6 @@ const LikesPopover = (props: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [isIntersecting, setIsIntersecting] = useState(false);
 
   const {getToken} = useAuth();
 
@@ -55,21 +55,7 @@ const LikesPopover = (props: Props) => {
     enabled: isOpen,
   });
 
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      setIsIntersecting(entries[0].isIntersecting);
-    }, {threshold: 0.5});
-
-    if (paginationRef.current) {
-      observer.observe(paginationRef.current);
-    }
-
-    return () => {
-      if (paginationRef.current) {
-        observer.unobserve(paginationRef.current);
-      }
-    }
-  }, [data]);
+  const {isIntersecting} = useIntersectionObserver({ data, paginationRef });
 
   useEffect(() => {
     if (isIntersecting && hasNextPage) {

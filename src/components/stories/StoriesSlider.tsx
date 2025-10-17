@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import StoryCardRounded from "./StoryCardRounded";
 import StoryCardSkeletonRounded from "./StoryCardSkeletonRounded";
 import UserStoriesViewer from "./UserStoriesViewer";
+import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { UserWithStories } from "@/types/global";
@@ -18,7 +19,6 @@ const StoriesSlider = () => {
   const [openUserId, setOpenUserId] = useState<string | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(true);
   const [showRightArrow, setShowRightArrow] = useState(true);
-  const [isIntersecting, setIsIntersecting] = useState(false);
 
   const { getToken } = useAuth();
 
@@ -53,23 +53,7 @@ const StoriesSlider = () => {
   });
 
   // Verificar si la referencia del paginador está en el viewport
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      setIsIntersecting(entries[0].isIntersecting)
-    }, {
-      threshold: 0.5
-    });
-
-    if (paginationRef.current) {
-      observer.observe(paginationRef.current);
-    }
-
-    return () => {
-      if (paginationRef.current) {
-        observer.unobserve(paginationRef.current);
-      }
-    }
-  }, [hasNextPage]);
+  const { isIntersecting } = useIntersectionObserver({ data, paginationRef });
 
   // Consultar la siguiente página de stories
   // si la referencia del paginador está en el viewport

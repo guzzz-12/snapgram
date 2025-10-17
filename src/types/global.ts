@@ -4,11 +4,13 @@ export type UserType = {
   email: string;
   fullName: string;
   username: string;
-  bio?: string;
-  profilePicture?: string;
-  coverPhoto?: string;
-  location?: string;
-  posts: PostType[];
+  bio: string;
+  profilePicture: string;
+  coverPhoto: string;
+  location: string;
+  postsCount: number;
+  followersCount: number;
+  followingCount: number;
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;

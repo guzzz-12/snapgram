@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -7,14 +7,13 @@ import StoriesSlider from "@/components/stories/StoriesSlider";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import RightSidebar from "@/components/RightSidebar";
+import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { PostWithLikes } from "@/types/global";
 
 const HomePage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
-
-  const [isIntersecting, setIsIntersecting] = useState(false);
 
   const {getToken} = useAuth();
 
@@ -30,7 +29,7 @@ const HomePage = () => {
       url: "/posts",
       params: {
         page,
-        limit: 5
+        limit: 2
       },
       headers: {
         Authorization: `Bearer ${token}`
@@ -48,21 +47,7 @@ const HomePage = () => {
     refetchOnWindowFocus: false
   });
 
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      setIsIntersecting(entries[0].isIntersecting);
-    }, {threshold: 0.5});
-
-    if (paginationRef.current) {
-      observer.observe(paginationRef.current);
-    }
-
-    return () => {
-      if (paginationRef.current) {
-        observer.unobserve(paginationRef.current);
-      }
-    }
-  }, [data]);
+  const {isIntersecting} = useIntersectionObserver({ data, paginationRef });
 
   useEffect(() => {
     if (isIntersecting && hasNextPage) {

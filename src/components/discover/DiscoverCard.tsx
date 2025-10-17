@@ -31,7 +31,7 @@ const DiscoverCard = ({ userData, following, loading }: Props) => {
 
     const {data} = await axiosInstance<{data: FollowingType[]}>({
       method: "POST",
-      url: "/users/follow-or-unfollow",
+      url: "/follows/follow-or-unfollow",
       data: {
         userId: userData._id
       },

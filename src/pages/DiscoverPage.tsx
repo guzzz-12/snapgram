@@ -44,7 +44,7 @@ const DiscoverPage = () => {
 
     const {data} = await axiosInstance<{data: FollowingType[]}>({
       method: "GET",
-      url: "/users/following",
+      url: "/follows/get-following",
       headers: {
         Authorization: `Bearer ${token}`
       }

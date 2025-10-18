@@ -91,18 +91,30 @@ export type StoryType = {
   updatedAt: string;
 };
 
-export type FollowingType = {
+export type FollowerType = {
   _id: string;
-  follower: string;
-  followed: UserType;
-  createdAt: Date;
-  updatedAt: Date;
+  followerData: {
+    _id: string;
+    clerkId: string;
+    username: string;
+    fullName: string;
+    profilePicture: string;
+  },
+  isFollowingBack: boolean;
+  followingSince: string;
 };
 
-export type FollowingAndFollowersType = {
-  following: UserType[];
-  followers: UserType[];
-}
+export type FollowedType = {
+  _id: string;
+  followedData: {
+    _id: string;
+    clerkId: string;
+    username: string;
+    fullName: string;
+    profilePicture: string;
+  },
+  followingSince: string;
+};
 
 export type UserWithStories = {
   _id: string;

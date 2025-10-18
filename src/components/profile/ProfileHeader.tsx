@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import dayjs from "dayjs";
 import { Calendar, MapPin, Pencil } from "lucide-react";
 import ProfileEditModal from "./ProfileEditModal";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useClampedText from "@/hooks/useClampedText";
 import { cn } from "@/lib/utils";
@@ -88,7 +88,7 @@ const ProfileHeader = ({ userData }: Props) => {
           }}
           className="w-full p-6"
         >
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-2">
             <div className="grow overflow-hidden">
               <h1 className="mb-0 text-2xl font-semibold truncate">
                 {userData.fullName}
@@ -111,10 +111,17 @@ const ProfileHeader = ({ userData }: Props) => {
             }
           </div>
 
-          <div className="max-h-[450px] mb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <div className="flex items-center gap-1 mb-4 text-neutral-500">
+            <Calendar className="size-4" />
+            <span className="text-sm truncate">
+              {dayjs(userData.createdAt).format("[Se unió el] DD [de] MMMM [de] YYYY")}
+            </span>
+          </div>
+
+          <div className="max-h-[450px] mb-4 pt-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 border-t">
             <p
               ref={textContentRef}
-              className={cn("inline-block text-left text-neutral-700 whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-3")}
+              className={cn("inline-block pt-2 text-left text-neutral-700 whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-3")}
             >
               {userData.bio}
             </p>
@@ -142,32 +149,6 @@ const ProfileHeader = ({ userData }: Props) => {
                 </span>
               </div>
             }
-
-            <div className="flex items-center gap-2 text-neutral-500">
-              <Calendar className="size-5" />
-              <span className="text-sm truncate">
-                Se unió hace 12 días
-              </span>
-            </div>
-          </div>
-
-          <Separator className="w-full mt-9 mb-6" />
-
-          <div className="flex justify-center min-[500px]:justify-start gap-4 min-[500px]:gap-9">
-            <div className="flex flex-col min-[500px]:flex-row justify-start items-center min-[500px]:items-baseline gap-0 min-[500px]:gap-2">
-              <p className="text-base min-[950px]:text-2xl font-bold">10</p>
-              <p className="text-neutral-700">Posts</p>
-            </div>
-
-            <div className="flex flex-col min-[500px]:flex-row justify-start items-center min-[500px]:items-baseline gap-0 min-[500px]:gap-2">
-              <p className="text-base min-[950px]:text-2xl font-bold">150</p>
-              <p className="text-neutral-700">Seguidores</p>
-            </div>
-
-            <div className="flex flex-col min-[500px]:flex-row justify-start items-center min-[500px]:items-baseline gap-0 min-[500px]:gap-2">
-              <p className="text-base min-[950px]:text-2xl font-bold">250</p>
-              <p className="text-neutral-700">Siguiendo</p>
-            </div>
           </div>
         </div>
       </div>

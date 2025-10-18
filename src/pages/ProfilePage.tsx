@@ -1,27 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import { RotateCw, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
-import PostCard from "@/components/posts/PostCard";
 import ProfileHeader from "@/components/profile/ProfileHeader";
-import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import ProfileHeaderSkeleton from "@/components/posts/ProfileHeaderSkeleton";
+import PostsTabContent from "@/components/profile/PostsTabContent";
+import FollowersTabContent from "@/components/profile/FollowersTabContent";
+import FollowingTabContent from "@/components/profile/FollowingTabContent";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { PostWithLikes, UserType } from "@/types/global";
+import type { UserType } from "@/types/global";
 
 const ProfilePage = () => {
-  const paginationRef = useRef<HTMLDivElement>(null);
-
   const {userClerkId} = useParams<{userClerkId: string}>();
 
-  const [isIntersecting, setIsIntersecting] = useState(false);
-  const [fetchingFirstPostsPage, setFetchingFirstPostsPage] = useState(true);
+  const [activeTab, setActiveTab] = useState("posts");
 
   const {getToken} = useAuth();
+
+  // Restablecer el tab default al cambiar de usuario
+  useEffect(() => {
+    setActiveTab("posts");
+  }, [userClerkId]);
 
   const getUser = async () => {
     const token = await getToken();
@@ -37,71 +39,11 @@ const ProfilePage = () => {
     return data.data;
   }
 
-  const getUserPosts = async (page: number) => {
-    const token = await getToken();
-    
-    const {data} = await axiosInstance<{
-      data: PostWithLikes[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: `/posts/user/${userData?._id}`,
-      params: {
-        page,
-        limit: 5
-      },
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    if (page === 1) {
-      setFetchingFirstPostsPage(false);
-    }
-
-    return data;
-  }
-
   const {data: userData, isLoading: loadingUser, error: userError} = useQuery({
     queryKey: ["user", userClerkId],
     queryFn: getUser,
     enabled: !!userClerkId
   });
-
-  const {data, error, isLoading, isRefetching, isFetchingNextPage, hasNextPage, fetchNextPage, refetch} = useInfiniteQuery({
-    queryKey: ["posts", userClerkId],
-    queryFn: ({pageParam}) => getUserPosts(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
-    enabled: !!userData,
-    retry: 2,
-  });
-
-  // Observar si la referencia de la paginación es visible en el viewport
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      setIsIntersecting(entries[0].isIntersecting);
-    }, {threshold: 0.5});
-
-    if (paginationRef.current) {
-      observer.observe(paginationRef.current);
-    }
-
-    return () => {
-      if (paginationRef.current) {
-        observer.unobserve(paginationRef.current);
-      }
-    }
-  }, [data]);
-
-  // Obtener la siguiente página de posts cuando la referencia de la paginación sea visible
-  useEffect(() => {
-    if (isIntersecting && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [isIntersecting, hasNextPage]);
 
   if (!loadingUser && !userData) {
     toast.error("Usuario no encontrado.");
@@ -112,18 +54,11 @@ const ProfilePage = () => {
     toast.error("Error al obtener el usuario.");
   }
 
-  if (error) {
-    toast.error("Error al obtener los posts.");
-  }
-
-  const postsData = data?.pages.flatMap((page) => page.data) ?? [];
-  const loadingPosts = fetchingFirstPostsPage || isLoading || isFetchingNextPage;
-
   return (
     <main className="w-full min-h-screen mx-auto p-6 bg-slate-200">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
 
-      <section className="w-full max-w-[800px] mx-auto mb-10">
+      <section className="w-full max-w-[800px] mx-auto">
         {loadingUser &&
           <ProfileHeaderSkeleton />
         }
@@ -133,49 +68,51 @@ const ProfilePage = () => {
         }
       </section>
 
-      <section className="flex flex-col gap-6 w-full max-w-[600px] mx-auto">
-        {!loadingPosts && error &&
-          <div className="flex flex-col justify-center items-center gap-4">
-            <div className="flex justify-center items-center gap-3">
-              <TriangleAlert className="size-9 shrink-0 text-orange-600" />
-              <p className="text-center text-lg text-neutral-700">
-                Error al obtener los posts del usuario.
-              </p>
-            </div>
+      {!loadingUser &&
+        <section className="w-full max-w-[800px] mx-auto">
+          <Tabs
+            className="w-full pb-10" 
+            defaultValue={activeTab}
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
+            <TabsList className="flex items-center w-full h-auto mx-auto my-4 px-4 py-2 bg-white shadow-sm">
+              <TabsTrigger
+                className="!text-[16px] !text-center font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                value="posts"
+              >
+                {userData?.postsCount} Posts
+              </TabsTrigger>
 
-            <Button
-              className="text-white bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
-              disabled={isRefetching}
-              onClick={() => refetch()}
-            >
-              <RotateCw aria-hidden />
-              Intentar nuevamente
-            </Button>
-          </div>
-        }
+              <TabsTrigger
+                className="text-[16px] font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                value="followers"
+              >
+                {userData?.followersCount} Seguidores
+              </TabsTrigger>
 
-        {loadingPosts &&
-          Array(3).fill(0).map((_, i) => (
-            <PostCardSkeleton key={i} />
-          ))
-        }
+              <TabsTrigger
+                className="text-[16px] font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                value="following"
+              >
+                {userData?.followingCount} Siguiendo
+              </TabsTrigger>
+            </TabsList>
 
-        {!loadingPosts && postsData.length > 0 &&
-          postsData.map((post) => (
-            <PostCard key={post._id} postData={post} />
-          ))
-        }
+            <TabsContent className="w-full" value="posts">
+              {userData && <PostsTabContent userData={userData} />}
+            </TabsContent>
 
-        {!loadingPosts && userData && postsData.length === 0 &&
-          <p className="text-center text-lg text-neutral-700">
-            No se encontraron publicaciones.
-          </p>
-        }
+            <TabsContent className="w-full" value="followers">
+              {userData && <FollowersTabContent userData={userData} />}
+            </TabsContent>
 
-        {hasNextPage && (
-          <div ref={paginationRef} className="w-full h-4 shrink-0"/>
-        )}
-      </section>
+            <TabsContent className="w-full" value="following">
+              {userData && <FollowingTabContent userData={userData} />}
+            </TabsContent>
+          </Tabs>
+        </section>
+      }
     </main>
   );
 }

@@ -1,0 +1,90 @@
+import { useRef } from "react";
+import { Link } from "react-router";
+import { useAuth } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
+import type { FollowedType, UserType } from "@/types/global";
+
+interface Props {
+  data: FollowedType;
+  userData: UserType | null;
+}
+
+const FollowedItem = ({ data, userData }: Props) => {
+  const {followedData: {_id: followedId, clerkId: followedClerkId, fullName, username, profilePicture}} = data;
+  
+  const followBtnRef = useRef<HTMLButtonElement>(null);
+
+  const {getToken, userId: currentUserClerkId} = useAuth();
+
+  const queryClient = useQueryClient();
+
+  const {mutate, isPending} = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      return axiosInstance({
+        method: "POST",
+        url: `/follows/follow-or-unfollow`,
+        data: {
+          userId: followedId
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({queryKey: ["followers", userData?._id]});
+    },
+    onError: (error) => {
+      toast.error(errorMessage(error));
+    }
+  });
+
+  return (
+    <li className="flex justify-start items-center gap-2 w-full border rounded-md p-2 bg-white shadow">
+      <Link
+        className="flex justify-start items-center gap-2 w-full"
+        to={`/profile/${followedClerkId}`}
+      >
+        <div className="flex items-start shrink-0">
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={profilePicture} />
+            <AvatarFallback>
+              {fullName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+
+        <div className="flex flex-col justify-start items-start w-full grow overflow-hidden">
+          <p className="text-base text-neutral-900 font-semibold truncate">
+            {fullName}
+          </p>
+          <span className="text-sm text-neutral-700 truncate">
+            @{username}
+          </span>
+        </div>
+      </Link>
+
+      {followedClerkId !== currentUserClerkId &&
+        <Button
+          ref={followBtnRef}
+          className="text-current cursor-pointer transition-none hover:text-destructive hover:border-destructive hover:bg-destructive/5"
+          variant="outline"
+          size="sm"
+          disabled={isPending}
+          onClick={() => mutate()}
+        >
+          Dejar de seguir
+        </Button>
+      }
+    </li>
+  );
+}
+
+export default FollowedItem

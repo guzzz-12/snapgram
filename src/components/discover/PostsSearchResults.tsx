@@ -1,6 +1,7 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import Masonry from "react-responsive-masonry";
 import { toast } from "sonner";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import PostCard from "@/components/posts/PostCard";
@@ -100,21 +101,29 @@ const PostsSearchResults = (props: Props) => {
       {!isLoading && totalResults > 0 &&
         <div className="w-full -mb-[10px]">
           <p className="text-neutral-600">
-            Se encontraron {totalResults} {totalResults === 1 ? "publicación" : "publicaciones"} para el término <span className="font-semibold">"{searchTerm}"</span>
+            Se {totalResults === 1 ? "encontró" : "encontraron"} {totalResults} {totalResults === 1 ? "publicación" : "publicaciones"} para el término <span className="font-semibold">"{searchTerm}"</span>
           </p>
         </div>
+      }
+
+      {searchPostsResults.length > 0 &&
+        <Masonry
+          className="w-full"
+          columnsCount={2}
+          gutter="16px"
+        >
+          {!isLoading && searchPostsResults.map((post) => {
+            return (
+              <PostCard key={post._id} postData={post} />
+            )
+          })}
+        </Masonry>
       }
 
       <div className="grid grid-cols-1 min-[1100px]:grid-cols-2 gap-4 w-full">
         {isLoading && [...Array(6)].map((_, index) => (
           <PostCardSkeleton key={index} />
         ))}
-
-        {!isLoading && searchPostsResults.map((post) => {
-          return (
-            <PostCard key={post._id} postData={post} />
-          )
-        })}
 
         {isFetchingNextPage && [...Array(6)].map((_, index) => (
           <PostCardSkeleton key={index} />
@@ -124,6 +133,14 @@ const PostsSearchResults = (props: Props) => {
           <div ref={paginationRef} className="w-full h-10" />
         }
       </div>
+
+      {searchPostsResults.length > 0 && !hasNextPage &&
+        <div className="w-full pt-2 border-t border-[#4F39F6]/20">
+          <p className="w-full text-center text-neutral-600 text-sm">
+            Fin de los resultados
+          </p>
+        </div>
+      }
 
       {searchTerm && !isLoading && searchPostsResults.length === 0 &&
         <NoResults

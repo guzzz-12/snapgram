@@ -1,5 +1,5 @@
 import { useEffect, type RefObject } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -13,14 +13,24 @@ interface Props {
 
 const SearchBar = ({loading, term, setTerm, searchInputRef}: Props) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get("searchTerm");
+
+  // Inicializar el searchTerm si existe al actualizar la página
+  useEffect(() => {
+    if (searchTerm) {
+      setTerm(searchTerm);
+    }
+  }, [searchTerm]);
 
   const {debouncedValue} = useDebounce(term);
 
+  // Enfocar el input cuando se cargue la página y cuando termine de buscar
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
-  }, []);
+  }, [loading]);
   
   useEffect(() => {
     if (debouncedValue.length > 0) {

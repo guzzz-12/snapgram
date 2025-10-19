@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, PlusCircle, X } from "lucide-react";
@@ -17,13 +17,14 @@ import type { PostWithLikes } from "@/types/global";
 
 const CreatePostModal = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get("searchTerm");
   
   const [textContent, setTextContent] = useState("");
 
   const {user} = useCurrentUser();
   const {open, publicationType, setOpen} = useCreatePublicationModal();
-
-  const navigate = useNavigate();
 
   const {selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({ fileInputRef });
 
@@ -58,8 +59,12 @@ const CreatePostModal = () => {
 
   const {mutate, isPending} = useMutation({
     mutationFn: createPost,
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["posts"]});
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["posts"]});
+
+      if (searchTerm) {
+        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+      }
 
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -73,8 +78,6 @@ const CreatePostModal = () => {
       setSelectedImagePreviews([]);
 
       setOpen({open: false, publicationType: null});
-
-      navigate("/");
     },
     onError: (error) => {
       const message = errorMessage(error);

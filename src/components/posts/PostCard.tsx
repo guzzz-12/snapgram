@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type HTMLAttributes } from "react";
+import { useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import Slider, {type Settings} from "react-slick";
@@ -32,6 +33,9 @@ const SLIDER_SETTINGS: Settings = {
 const PostCard = ({ postData, isModal, className }: Props) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
   const showClampBtnRef = useRef<"shouldShow" | "shouldNotShow">("shouldNotShow");
+
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get("searchTerm");
 
   const [isEditingPost, setIsEditingPost] = useState(false);
   const [textContent, setTextContent] = useState(() => postData.content);
@@ -70,6 +74,11 @@ const PostCard = ({ postData, isModal, className }: Props) => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: ["posts"]});
+
+      if (searchTerm) {
+        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+      }
+
       setIsEditingPost(false);
     },
     onError: (error) => {

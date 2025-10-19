@@ -1,19 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, type RefObject } from "react";
 import { useNavigate } from "react-router";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface Props {
+  term: string;
   loading: boolean;
+  searchInputRef: RefObject<HTMLInputElement | null>;
+  setTerm: (term: string) => void;
 }
 
-const SearchBar = ({loading}: Props) => {
+const SearchBar = ({loading, term, setTerm, searchInputRef}: Props) => {
   const navigate = useNavigate();
 
-  const [term, setTerm] = useState("");
-
   const {debouncedValue} = useDebounce(term);
+
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
   
   useEffect(() => {
     if (debouncedValue.length > 0) {
@@ -29,9 +36,10 @@ const SearchBar = ({loading}: Props) => {
         <Search className="absolute top-1/2 left-2 -translate-y-1/2 text-neutral-500" />
 
         <Input
+          ref={searchInputRef}
           className="pl-10 bg-slate-100"
           type="search"
-          placeholder="Buscar personas por nombre o usuario"
+          placeholder="Introduce un término para buscar personas o publicaciones..."
           disabled={loading}
           value={term}
           onChange={(e) => setTerm(e.target.value)}

@@ -132,11 +132,11 @@
   }
 
   .postCardSlider .slick-prev {
-    @apply !left-[10px] !z-10
+    @apply !left-[10px] !translate-y-[-100%] !z-10
   }
 
   .postCardSlider .slick-next {
-    @apply !right-[10px]
+    @apply !right-[10px] !translate-y-[-100%] !z-10
   }
 
   .postCardSlider .slick-dots {

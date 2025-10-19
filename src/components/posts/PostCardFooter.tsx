@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
@@ -17,6 +18,9 @@ interface Props {
 }
 
 const PostCardFooter = ({ postData, isModal }: Props) => {
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get("searchTerm");
+
   const [openPostModal, setOpenPostModal] = useState(false);
 
   const {getToken} = useAuth();
@@ -38,6 +42,10 @@ const PostCardFooter = ({ postData, isModal }: Props) => {
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: ["posts"]});
       await queryClient.invalidateQueries({queryKey: ["posts", postData._id]});
+      
+      if (searchTerm) {
+        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+      }
     },
     onError: (error) => {
       toast.error(errorMessage(error));

@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
@@ -14,6 +15,9 @@ interface Props {
 }
 
 const DeletePostModal = ({postId, isOpen, setIsDeleting, setIsOpen}: Props) => {
+  const [seachParams] = useSearchParams();
+  const searchTerm = seachParams.get("searchTerm");
+
   const {getToken} = useAuth();
   const queryClient = useQueryClient();
 
@@ -31,9 +35,16 @@ const DeletePostModal = ({postId, isOpen, setIsDeleting, setIsOpen}: Props) => {
 
   const {mutate, isPending} = useMutation({
     mutationFn: deletePost,
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["posts"]});
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["posts"]});
+
+      if (searchTerm) {
+        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+      }
+
       toast.success("Post eliminado con éxito.");
+      
+      setIsOpen(false);
     },
     onError: (error) => {
       const message = errorMessage(error);

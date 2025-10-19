@@ -40,6 +40,7 @@ const PostsSearchResults = (props: Props) => {
       data: PostWithLikes[];
       hasMore: boolean;
       nextPage: number | null;
+      totalResults: number;
     }>({
       method: "GET",
       url: "/search/search-posts",
@@ -63,6 +64,7 @@ const PostsSearchResults = (props: Props) => {
     data,
     error,
     isLoading,
+    hasNextPage,
     isFetchingNextPage,
     fetchNextPage
   } = useInfiniteQuery({
@@ -89,11 +91,20 @@ const PostsSearchResults = (props: Props) => {
   }
 
   const searchPostsResults = data?.pages.flatMap(page => page.data) || [];
+  const totalResults = data?.pages[0].totalResults || 0;
 
   if (filter !== "posts") return null;
 
   return (
     <>
+      {!isLoading && totalResults > 0 &&
+        <div className="w-full -mb-[10px]">
+          <p className="text-neutral-600">
+            Se encontraron {totalResults} {totalResults === 1 ? "publicación" : "publicaciones"} para el término <span className="font-semibold">"{searchTerm}"</span>
+          </p>
+        </div>
+      }
+
       <div className="grid grid-cols-1 min-[1100px]:grid-cols-2 gap-4 w-full">
         {isLoading && [...Array(6)].map((_, index) => (
           <PostCardSkeleton key={index} />
@@ -109,7 +120,9 @@ const PostsSearchResults = (props: Props) => {
           <PostCardSkeleton key={index} />
         ))}
 
-        <div ref={paginationRef} className="w-full h-10" />
+        {hasNextPage && !isFetchingNextPage &&
+          <div ref={paginationRef} className="w-full h-10" />
+        }
       </div>
 
       {searchTerm && !isLoading && searchPostsResults.length === 0 &&

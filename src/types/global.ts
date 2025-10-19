@@ -52,7 +52,13 @@ export type PostType = {
 
 export type PostWithLikes = {
   _id: string;
-  user: UserType;
+  user: {
+    _id: string;
+    clerkId: string;
+    fullName: string;
+    username: string;
+    profilePicture: string;
+  };
   content: string;
   imageUrls: string[];
   postType: "textWithImage" | "text" | "image";
@@ -138,3 +144,18 @@ export type Comment = {
   createdAt: string;
   updatedAt: string;
 }
+
+export type SearchUsersResult = {
+  _id: string;
+  bio: string;
+  clerkId: string;
+  createdAt: string;
+  followersCount: number;
+  followingCount: number;
+  fullName: string;
+  isFollowing: boolean;
+  isVerified: boolean;
+  location: string;
+  profilePicture: string;
+  username: string;
+};

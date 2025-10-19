@@ -8,9 +8,13 @@ import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import useImagePicker from "@/hooks/useImagePicker";
 import type { Comment } from "@/types/global";
+import { useSearchParams } from "react-router";
 
 const PostCommentInput = ({postId}: {postId: string}) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get("searchTerm");
 
   const [commentText, setCommentText] = useState("");
 
@@ -51,6 +55,10 @@ const PostCommentInput = ({postId}: {postId: string}) => {
 
       await queryClient.invalidateQueries({queryKey: ["posts"]});
       await queryClient.invalidateQueries({queryKey: ["postComments", postId]});
+
+      if (searchTerm) {
+        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+      }
     },
     onError: (error) => {
       const message = errorMessage(error);

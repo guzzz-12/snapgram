@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Masonry from "react-responsive-masonry";
@@ -29,6 +29,20 @@ const PostsSearchResults = (props: Props) => {
   } = props;
 
   const paginationRef = useRef<HTMLDivElement | null>(null);
+
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    ;}
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    }
+  }, []);
 
   const { getToken } = useAuth();
 
@@ -109,7 +123,7 @@ const PostsSearchResults = (props: Props) => {
       {searchPostsResults.length > 0 &&
         <Masonry
           className="w-full"
-          columnsCount={2}
+          columnsCount={windowWidth >= 1000 ? 2 : 1}
           gutter="16px"
         >
           {!isLoading && searchPostsResults.map((post) => {

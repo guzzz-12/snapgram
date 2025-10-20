@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
@@ -14,14 +13,14 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   postData: PostWithLikes;
+  openPostModal: boolean;
   isModal?: boolean;
+  setOpenPostModal: (isOpen: boolean) => void;
 }
 
-const PostCardFooter = ({ postData, isModal }: Props) => {
+const PostCardFooter = ({ postData, isModal, openPostModal, setOpenPostModal }: Props) => {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
-
-  const [openPostModal, setOpenPostModal] = useState(false);
 
   const {getToken} = useAuth();
 

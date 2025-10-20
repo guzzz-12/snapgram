@@ -39,6 +39,7 @@ const PostCard = ({ postData, isModal, className }: Props) => {
 
   const [isEditingPost, setIsEditingPost] = useState(false);
   const [textContent, setTextContent] = useState(() => postData.content);
+  const [openPostModal, setOpenPostModal] = useState(false);
 
   // Restablecer el texto inicial del post al salir
   // del modo de edición sin guardar los cambios
@@ -158,13 +159,17 @@ const PostCard = ({ postData, isModal, className }: Props) => {
 
       <Slider {...SLIDER_SETTINGS}>
         {postData.imageUrls.map((imageUrl, index) => (
-          <div
+          <button
             key={index}
             style={{
               filter: "blur(15px)",
               backgroundImage: `url(${imageUrl})`
             }}
-            className="relative w-full aspect-[4/3] rounded-lg bg-neutral-200 overflow-hidden"
+            className={cn("relative w-full aspect-[4/3] rounded-lg bg-neutral-200 overflow-hidden", isModal ? "cursor-default" : "cursor-pointer")}
+            onClick={() => {
+              if (isModal) return;
+              setOpenPostModal(true);
+            }}
           >
             <div
               style={{
@@ -179,11 +184,16 @@ const PostCard = ({ postData, isModal, className }: Props) => {
               src={imageUrl}
               alt={`Post de ${postData.user.fullName}`}
             />
-          </div>
+          </button>
         ))}
       </Slider>
 
-      <PostCardFooter postData={postData} isModal={isModal} />
+      <PostCardFooter
+        postData={postData}
+        isModal={isModal}
+        openPostModal={openPostModal}
+        setOpenPostModal={(open) => setOpenPostModal(open)}
+      />
     </article>
   )
 }

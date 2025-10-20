@@ -1,8 +1,8 @@
-import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
-import EmojiPicker from "emoji-picker-react";
+import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
+import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
 import { Smile } from "lucide-react";
-import { Textarea } from "../ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Props {
   textContent: string;
@@ -12,6 +12,8 @@ interface Props {
 
 const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const [caretPosition, setCaretPosition] = useState(0);
 
   // Hacer autoFocus en el textarea
   useEffect(() => {
@@ -23,12 +25,26 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
       const contentLength = textarea.value.length;
 
       textarea.setSelectionRange(contentLength, contentLength);
-    }, 500);
+    }, 0);
 
     return () => {
       clearTimeout(timeout);
     };
   }, []);
+
+  const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.currentTarget.value;
+    const caretPosition = e.target.selectionStart;
+
+    setTextContent(value);
+    setCaretPosition(caretPosition);
+  }
+  
+  // Insertar el emoji en la posición del cursor
+  const onEmojiPickHandler = (e: EmojiClickData) => {
+    const value = textContent.slice(0, caretPosition) + e.emoji + textContent.slice(caretPosition);
+    setTextContent(value);
+  }
 
   return (
     <div className="relative flex justify-start items-start gap-3 w-full max-h-[420px] border-b overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
@@ -38,7 +54,12 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
         placeholder="¿Qué estás pensando?"
         disabled={isPending}
         value={textContent}
-        onChange={(e) => setTextContent(e.target.value)}
+        onChange={onChangeHandler}
+        onClick={(e) => {
+          // Actualizar el state de la posición del cursor al clickear en el textarea
+          const caretPosition = e.currentTarget.selectionStart;
+          setCaretPosition(caretPosition);
+        }}
       />
 
       <div className="sticky top-[50%] right-1 flex justify-center items-center h-full shrink-0 translate-y-[-50%] z-10">
@@ -59,7 +80,7 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
           >
             <EmojiPicker
               searchDisabled
-              onEmojiClick={(e) => setTextContent((prev) => prev + e.emoji)}
+              onEmojiClick={onEmojiPickHandler}
             />
           </PopoverContent>
         </Popover>

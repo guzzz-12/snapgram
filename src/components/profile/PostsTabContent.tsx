@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
+import Masonry from "react-responsive-masonry";
 import { RotateCw, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import PostCard from "@/components/posts/PostCard";
@@ -17,7 +18,21 @@ interface Props {
 const PostsTabContent = ({userData}: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [fetchingFirstPostsPage, setFetchingFirstPostsPage] = useState(true);
+
+  // Actualizar el state del ancho del viewport
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    ;}
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    }
+  }, []);
 
   const {getToken} = useAuth();
 
@@ -77,7 +92,7 @@ const PostsTabContent = ({userData}: Props) => {
   const loadingPosts = fetchingFirstPostsPage || isLoading || isFetchingNextPage;
 
   return (
-    <section className="flex flex-col gap-6 w-full max-w-[600px] mx-auto">
+    <section className="flex flex-col gap-6 w-full mx-auto">
       {!loadingPosts && error &&
         <div className="flex flex-col justify-center items-center gap-4">
           <div className="flex justify-center items-center gap-3">
@@ -98,17 +113,27 @@ const PostsTabContent = ({userData}: Props) => {
         </div>
       }
 
-      {loadingPosts &&
-        Array(3).fill(0).map((_, i) => (
-          <PostCardSkeleton key={i} />
-        ))
+      {!loadingPosts && postsData.length > 0 &&
+        <Masonry
+          className="w-full"
+          columnsCount={windowWidth >= 1000 ? 2 : 1}
+          gutter="16px"
+        >
+          {postsData.map((post) => (
+            <PostCard key={post._id} postData={post} />
+          ))}
+        </Masonry>
       }
 
-      {!loadingPosts && postsData.length > 0 &&
-        postsData.map((post) => (
-          <PostCard key={post._id} postData={post} />
-        ))
-      }
+      <div className="grid grid-cols-1 min-[1000px]:grid-cols-2 gap-4 w-full">
+        {loadingPosts && [...Array(6)].map((_, index) => (
+          <PostCardSkeleton key={index} />
+        ))}
+
+        {isFetchingNextPage && [...Array(6)].map((_, index) => (
+          <PostCardSkeleton key={index} />
+        ))}
+      </div>
 
       {!loadingPosts && userData && postsData.length === 0 &&
         <p className="text-center text-lg text-neutral-700">
@@ -116,9 +141,9 @@ const PostsTabContent = ({userData}: Props) => {
         </p>
       }
 
-      {hasNextPage && (
+      {hasNextPage && !isFetchingNextPage && 
         <div ref={paginationRef} className="w-full h-4 shrink-0"/>
-      )}
+      }
     </section>
   )
 }

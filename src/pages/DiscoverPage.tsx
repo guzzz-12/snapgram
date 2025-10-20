@@ -19,10 +19,10 @@ const DiscoverPage = () => {
   const [isSearchingPosts, setIsSearchingPosts] = useState(false);
 
   return (
-    <main className="pageWrapper max-[1000px]:px-4">
+    <main className="pageWrapper">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
 
-      <section className="flex flex-col gap-6 w-full max-w-[900px]">
+      <section className="flex flex-col gap-6 w-full max-w-[900px] mx-auto">
         <div className="">
           <h1 className="text-2xl font-semibold">
             Descubre

@@ -9,15 +9,11 @@ interface Props {
 
 const ChatList = ({ headerHeight }: Props) => {
   return (
-    <aside className="flex flex-col w-max max-w-[255px] h-full pb-6 border-r overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+    <aside className="flex flex-col w-fit min-[900px]:w-[320px] h-full pb-6 border-r overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
       <div
-        style={{
-          height: `calc(${headerHeight}px + 1px)`,
-        }}
-        className="flex flex-col justify-center items-start w-full px-6 bg-white border-b"
+        style={{ height: `calc(${headerHeight}px + 1px)` }}
+        className="flex flex-col justify-center items-start w-full p-4 bg-white border-b"
       >
-        <p className="hidden min-[900px]:block text-lg font-semibold text-neutral-900">Chats</p>
-
         <search>
           <Input
             className="hidden min-[900px]:block w-full p-2 bg-slate-100 rounded-md"
@@ -32,7 +28,7 @@ const ChatList = ({ headerHeight }: Props) => {
           key={user._id}
           to={`/messages/${user._id}`}
           className={({isActive}) => (
-            `flex justify-start items-center gap-2 px-4 py-3  border-b hover:bg-gray-100 cursor-pointer last:mb-0 ${isActive ? "bg-gray-200" : ""}`
+            `flex justify-start items-center gap-2 px-4 py-3 border-b hover:bg-gray-100 cursor-pointer last:mb-0 ${isActive ? "bg-slate-200" : ""}`
           )}
         >
           <Avatar className="w-[40px] h-[40px] shrink-0 outline-2 outline-white">

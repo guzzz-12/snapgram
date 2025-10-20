@@ -58,7 +58,7 @@ const ProfilePage = () => {
     <main className="w-full min-h-screen mx-auto p-6 bg-slate-200">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
 
-      <section className="w-full max-w-[800px] mx-auto">
+      <section className="w-full max-w-[900px] mx-auto">
         {loadingUser &&
           <ProfileHeaderSkeleton />
         }
@@ -69,7 +69,7 @@ const ProfilePage = () => {
       </section>
 
       {!loadingUser &&
-        <section className="w-full max-w-[800px] mx-auto">
+        <section className="w-full max-w-[900px] mx-auto">
           <Tabs
             className="w-full pb-10" 
             defaultValue={activeTab}

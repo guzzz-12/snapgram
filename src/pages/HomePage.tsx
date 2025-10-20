@@ -62,7 +62,7 @@ const HomePage = () => {
   }
 
   return (
-    <main className="pageWrapper px-6 min-[1000px]:px-24">
+    <main className="pageWrapper">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
 
       <div className="w-full max-w-[600px] h-full mx-auto shrink-[2]">

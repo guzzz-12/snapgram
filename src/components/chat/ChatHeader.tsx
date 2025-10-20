@@ -12,7 +12,7 @@ const ChatHeader = ({ user, headerRef }: Props) => {
   return (
     <div
       ref={headerRef}
-      className="flex justify-start w-full px-6 py-4 bg-white border-b"
+      className="flex justify-start w-full px-6 py-2 bg-white border-b"
     >
       <Link
         to={`/profile/${user._id}`}

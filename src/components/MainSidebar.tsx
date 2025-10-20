@@ -54,10 +54,10 @@ const MainSidebar = () => {
 
   return (
     <Sidebar className="bg-white">
-      <SidebarHeader className="px-4 border-b overflow-hidden">
+      <SidebarHeader className="px-4 overflow-hidden">
         <Link
+          className="flex justify-start items-center gap-2 w-full pt-2"
           to="/"
-          className="flex justify-start items-center gap-2 w-full"
         >
           <img
             className="w-[30px] h-auto"
@@ -73,16 +73,16 @@ const MainSidebar = () => {
       </SidebarHeader>
 
       <SidebarContent className="p-4">
-        <SidebarMenu>
+        <SidebarMenu className="gap-2">
           {SIDEBAR_ITEMS.map((item) => (
             <SidebarMenuItem key={item.name}>
               <NavLink
                 to={item.href}
                 className={({ isActive }) => (
-                  `flex justify-start items-center gap-3 w-full h-full px-4 py-2 text-base rounded-md hover:!bg-indigo-50 transition-colors ${isActive ? "!bg-indigo-100" : "bg-transparent"}`
+                  `flex justify-start items-center gap-3 w-full h-full px-4 py-3 text-base rounded-md hover:!bg-indigo-50 transition-colors ${isActive ? "!bg-indigo-100 font-bold [&>svg]:stroke-black" : "bg-transparent font-normal [&>svg]:stroke-current"}`
                 )}
               >
-                <item.icon className="!size-5 text-neutral-700" aria-hidden />
+                <item.icon className="!size-6 text-neutral-700" aria-hidden />
                 {item.name}
               </NavLink>
             </SidebarMenuItem>
@@ -92,10 +92,10 @@ const MainSidebar = () => {
             <NavLink
               to={`/profile/${user?.clerkId}`}
               className={({ isActive }) => (
-                `flex justify-start items-center gap-3 w-full h-full px-4 py-2 text-base rounded-md hover:!bg-indigo-50 transition-colors ${isActive ? "!bg-indigo-100" : "bg-transparent"}`
+                `flex justify-start items-center gap-3 w-full h-full px-4 py-3 text-base rounded-md hover:!bg-indigo-50 transition-colors ${isActive ? "!bg-indigo-100 font-bold [&>svg]:stroke-black" : "bg-transparent font-normal [&>svg]:stroke-current"}`
               )}
             >
-              <UserRound className="!size-5 text-neutral-700" aria-hidden />
+              <UserRound className="!size-6 text-neutral-700" aria-hidden />
               Perfil
             </NavLink>
           </SidebarMenuItem>
@@ -107,7 +107,7 @@ const MainSidebar = () => {
                   ref={createPostBtnRef}
                   className="flex justify-center items-center gap-2 w-full h-full px-4 py-2 text-base text-white rounded-md bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
                 >
-                  <CirclePlus className="!size-5" aria-hidden />
+                  <CirclePlus className="!size-6" aria-hidden />
                   <span>Crear</span>
                 </button>
               </DropdownMenuTrigger>

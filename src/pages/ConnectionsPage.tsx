@@ -5,10 +5,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const ConnectionsPage = () => {
   return (
-    <main className="pageWrapper">
+    <main className="pageWrapper gap-10">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
 
-      <section className="flex flex-col gap-6 w-full">
+      <section className="flex flex-col gap-6 w-full max-w-[900px] mx-auto">
         <div className="">
           <h1 className="text-2xl font-semibold">
             Conexiones

@@ -62,6 +62,7 @@ const UsersSearchResults = (props: Props) => {
     data,
     error,
     isLoading,
+    hasNextPage,
     isFetchingNextPage,
     fetchNextPage
   } = useInfiniteQuery({
@@ -111,7 +112,9 @@ const UsersSearchResults = (props: Props) => {
           <SearchUserCardSkeleton key={index} />
         ))}
 
-        <div ref={paginationRef} className="w-full h-10" />
+        {hasNextPage && !isFetchingNextPage &&
+          <div ref={paginationRef} className="w-full h-10" />
+        }
       </div>
 
       {searchTerm && !isLoading && searchUsersResults.length === 0 &&

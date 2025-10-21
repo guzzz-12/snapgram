@@ -12,6 +12,7 @@ import { Button } from "../ui/button";
 import useClampedText from "@/hooks/useClampedText";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
+import { hashtagParser } from "@/utils/hashtagsParser";
 import { cn } from "@/lib/utils";
 import type { PostWithLikes } from "@/types/global";
 
@@ -138,7 +139,7 @@ const PostCard = ({ postData, isModal, className }: Props) => {
             className={cn("inline-block text-base text-left text-neutral-700 whitespace-pre-wrap bg-transparent", showFullText ? "line-clamp-none" : "line-clamp-6")}
           >
             <Twemoji className="[&>img]:!inline">
-              {postData.content}
+              {hashtagParser(postData.content)}
             </Twemoji>
           </p>
           

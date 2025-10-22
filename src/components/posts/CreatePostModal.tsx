@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, PlusCircle, X } from "lucide-react";
+import { ImagePlus, Loader2Icon, PlusCircle, X } from "lucide-react";
 import { toast } from "sonner";
 import CreatePostInput from "./CreatePostInput";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
@@ -170,7 +170,7 @@ const CreatePostModal = () => {
                 {selectedImagePreviews.map((preview, i) => (
                   <div
                     key={i}
-                    className="relative w-[120px] h-[120px] shrink-0"
+                    className="relative w-[120px] h-[120px] shrink-0 bg-slate-200 rounded-sm"
                   >
                     <button
                       className="absolute top-0.5 right-0.5 flex justify-center items-center p-0.5 rounded-full cursor-pointer text-red-700 bg-red-50"
@@ -186,7 +186,7 @@ const CreatePostModal = () => {
                     </button>
 
                     <img
-                      className="w-full h-full object-cover rounded-sm"
+                      className="w-full h-full object-contain rounded-sm"
                       src={preview}
                       alt=""
                     />
@@ -200,7 +200,14 @@ const CreatePostModal = () => {
               type="submit"
               disabled={isPending || (!textContent && !selectedImageFiles.length)}
             >
-              Publicar Post
+              {isPending ? 
+                <>
+                  <Loader2Icon className="size-4 text-white animate-spin" aria-hidden />
+                  Publicando post...
+                </>
+                :
+                <>Publicar Post</>
+              }
             </Button>
           </form>
 

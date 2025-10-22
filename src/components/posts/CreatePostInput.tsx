@@ -146,6 +146,7 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
         setSelectedHashtag={(hashtag) => {
           setSelectedHashtag(hashtag);
           setShowHashtagPopover(false);
+          inputRef.current!.focus();
         }}
       />
 

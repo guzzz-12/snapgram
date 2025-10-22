@@ -159,3 +159,17 @@ export type SearchUsersResult = {
   profilePicture: string;
   username: string;
 };
+
+export type HashtagType = {
+  _id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type HashtagWithPostsCount = {
+  _id: string;
+  title: string;
+  postsCount: number;
+  createdAt: string;
+}

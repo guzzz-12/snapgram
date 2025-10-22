@@ -8,7 +8,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useDebounce } from "@/hooks/useDebounce";
 import { getCaretCoordinates } from "@/utils/getCaretCoordinates";
 
-const HASHTAG_REGEX = /#[A-Za-z_][A-Za-z0-9_]*$/;
+// const HASHTAG_REGEX = /#[A-Za-z_][A-Za-z0-9_]*$/; // No soporta diacríticas
+const HASHTAG_REGEX = /#[\p{L}\p{N}_]+$/u; // Soporta diacríticas (multilenguaje)
 
 interface Props {
   textContent: string;

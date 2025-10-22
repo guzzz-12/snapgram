@@ -12,9 +12,9 @@ const DiscoverPage = () => {
 
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
+  const searchType = searchParams.get("type") as "people" | "posts" | null;
 
   const [term, setTerm] = useState("");
-  const [filter, setFilter] = useState<"users" | "posts">("users");
   const [isSearchingUsers, setIsSearchingUsers] = useState(false);
   const [isSearchingPosts, setIsSearchingPosts] = useState(false);
 
@@ -35,16 +35,16 @@ const DiscoverPage = () => {
 
         <SearchBar
           term={term}
-          setTerm={(term) => setTerm(term)}
           loading={isSearchingUsers || isSearchingPosts}
+          searchType={searchType}
+          setTerm={(term) => setTerm(term)}
           searchInputRef={searchInputRef}
         />
         
         <FiltersBar
-          filter={filter}
           searchTerm={searchTerm}
+          searchType={searchType}
           loading={isSearchingUsers || isSearchingPosts}
-          setFilter={setFilter}
         />
 
         {!isSearchingUsers && !isSearchingPosts && !searchTerm &&
@@ -52,16 +52,16 @@ const DiscoverPage = () => {
         }
 
         <UsersSearchResults
-          filter={filter}
           searchTerm={searchTerm}
+          searchType={searchType}
           setTerm={setTerm}
           searchInputRef={searchInputRef}
           setIsSearchingUsers={(isSearching) => setIsSearchingUsers(isSearching)}
         />
         
         <PostsSearchResults
-          filter={filter}
           searchTerm={searchTerm}
+          searchType={searchType}
           setTerm={setTerm}
           searchInputRef={searchInputRef}
           setIsSearchingUsers={(isSearching) => setIsSearchingPosts(isSearching)}

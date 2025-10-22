@@ -4,7 +4,7 @@ import { Link } from "react-router";
 export const hashtagParser = (text: string) => {
   if (!text) return null;
 
-  const hashtagRegex = /#(\w+)/g;
+  const hashtagRegex = /#([\p{L}\p{N}_]+)/gu;
   const parts = [];
   let lastIndex = 0;
 
@@ -12,7 +12,7 @@ export const hashtagParser = (text: string) => {
   // Explicación de los argumentos del callback:
   // - match: El texto completo del hashtag (#hashtagText)
   // - hashtagText: El texto del hashtag (#hashtagText)
-  // - offset: La posicion del hashtag en el texto (comienza en 0)
+  // - offset: El index donde comienza el hashtag en el texto
   text.replace(hashtagRegex, (match: string, hashtagText: string, offset: number) => {
     // Pushear el texto *antes* del hashtag
     if (offset > lastIndex) {
@@ -31,7 +31,7 @@ export const hashtagParser = (text: string) => {
       </Link>
     );
 
-    // Actualizar el index para comenzar a buscar despues de la ocurrencia actual
+    // Actualizar el index para comenzar a buscar despues del match actual
     lastIndex = offset + match.length;
 
     return match;

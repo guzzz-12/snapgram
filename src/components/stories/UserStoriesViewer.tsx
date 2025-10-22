@@ -149,9 +149,12 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
             </div>
 
             <div className="flex justify-start items-center gap-3 pt-4">
-              <Avatar className="size-8">
-                <AvatarImage src={storiesUser?.profilePicture} />
-                <AvatarFallback>
+              <Avatar className="w-8 h-8 shrink-0">
+                <AvatarImage
+                  className="w-full h-full object-cover"
+                  src={storiesUser?.profilePicture}
+                />
+                <AvatarFallback className="w-full h-full object-cover">
                   {storiesUser?.fullName.charAt(0)}
                 </AvatarFallback>
               </Avatar>

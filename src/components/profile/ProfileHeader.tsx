@@ -76,7 +76,7 @@ const ProfileHeader = ({ userData }: Props) => {
               className="w-full h-full object-cover"
               src={userData.profilePicture || "/default_avatar.webp"}
             />
-            <AvatarFallback>
+            <AvatarFallback className="w-full h-full object-cover">
               {userData.fullName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

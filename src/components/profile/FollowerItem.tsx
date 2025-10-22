@@ -78,8 +78,11 @@ const FollowerItem = ({ data, userData }: Props) => {
       >
         <div className="flex items-start shrink-0">
           <Avatar className="w-10 h-10">
-            <AvatarImage src={profilePicture} />
-            <AvatarFallback>
+            <AvatarImage
+              className="w-full h-full object-cover"
+              src={profilePicture}
+            />
+            <AvatarFallback className="w-full h-full object-cover">
               {fullName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

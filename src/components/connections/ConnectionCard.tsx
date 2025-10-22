@@ -15,9 +15,12 @@ const FollowerCard = ({ connectionData, connection }: Props) => {
         to={`/profile/${connectionData._id}`}
         className="flex items-start h-full shrink-0"
       >
-        <Avatar className="w-[40px] h-[40px]">
-          <AvatarImage src={connectionData.profile_picture} />
-          <AvatarFallback>
+        <Avatar className="w-[40px] h-[40px] shrink-0">
+          <AvatarImage
+            className="w-full h-full object-cover"
+            src={connectionData.profile_picture} 
+          />
+          <AvatarFallback className="w-full h-full object-cover">
             {connectionData.full_name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>

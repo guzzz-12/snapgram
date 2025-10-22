@@ -113,16 +113,16 @@ const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePre
       </p>
 
       <div className="flex justify-between items-center w-full p-4 shrink-0 bg-slate-200 rounded-lg">
-        <Avatar className="w-[120px] h-[120px] outline-2 outline-[#4F39F6]">
+        <Avatar className="w-[120px] h-[120px] shrink-0 outline-2 outline-[#4F39F6]">
           <AvatarImage
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover"
             src={
               selectedImagePreview[0] ||
               userData.profilePicture ||
               "/default_avatar.webp"
             }
           />
-          <AvatarFallback>
+          <AvatarFallback className="w-full h-full object-cover">
             {userData.fullName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>

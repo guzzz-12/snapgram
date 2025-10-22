@@ -14,8 +14,11 @@ const LikeItem = ({like}: Props) => {
         to={`/profile/${like.user.clerkId}`}
       >
         <Avatar className="w-7 h-7 shrink-0">
-          <AvatarImage src={like.user.profilePicture} />
-          <AvatarFallback>
+          <AvatarImage
+            className="w-full h-full object-cover"
+            src={like.user.profilePicture}
+          />
+          <AvatarFallback className="w-full h-full object-cover">
             {like.user.fullName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>

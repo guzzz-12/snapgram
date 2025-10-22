@@ -31,9 +31,12 @@ const PostCardHeader = ({ postData, setisEditingPost }: Props) => {
         className={cn(isPending && "pointer-events-none")}
         to={`/profile/${postData.user.clerkId}`}
       >
-        <Avatar className="shrink-0 outline-2 outline-blue-600 outline-offset-1">
-          <AvatarImage src={postData.user.profilePicture} />
-          <AvatarFallback>
+        <Avatar className="w-[40px] h-[40px] shrink-0 outline-2 outline-blue-600 outline-offset-1">
+          <AvatarImage
+            className="w-full h-full object-cover"
+            src={postData.user.profilePicture}
+          />
+          <AvatarFallback className="w-full h-full object-cover">
             {postData.user.fullName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>

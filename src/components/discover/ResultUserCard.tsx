@@ -70,8 +70,11 @@ const ResultUserCard = ({ userData }: Props) => {
       <div className="flex flex-col items-center w-full overflow-hidden">
         <Link to={`/profile/${userData.clerkId}`}>
           <Avatar className="w-[50px] h-[50px] mb-2">
-            <AvatarImage src={userData.profilePicture} />
-            <AvatarFallback>
+            <AvatarImage
+              className="w-full h-full object-cover"
+              src={userData.profilePicture}
+            />
+            <AvatarFallback className="w-full h-full object-cover">
               {userData.fullName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>        

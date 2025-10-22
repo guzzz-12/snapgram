@@ -14,11 +14,11 @@ const StoryCardRounded = ({ userData, setOpenUserId }: Props) => {
     >
       <Avatar className="w-full h-full">
         <AvatarImage
-          className="w-full h-full"
-          src={userData.profilePicture}
+          className="w-full h-full object-cover"
+          src={userData.profilePicture  || "/default_avatar.webp"}
           alt={userData.username}
         />
-        <AvatarFallback className="w-full h-full">
+        <AvatarFallback className="w-full h-full object-cover">
           {userData.username.charAt(0)}
         </AvatarFallback>
       </Avatar>

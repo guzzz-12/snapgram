@@ -192,8 +192,11 @@ const CommentItem = ({ commentData }: Props) => {
           to={`/profile/${commentData.user.clerkId}`}
         >
           <Avatar className="w-[32px] h-[32px] shrink-0">
-            <AvatarImage src={commentData.user.profilePicture} />
-            <AvatarFallback className="w-full h-full">
+            <AvatarImage
+              className="w-full h-full object-cover"
+              src={commentData.user.profilePicture}
+            />
+            <AvatarFallback className="w-full h-full object-cover">
               {commentData.user.fullName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

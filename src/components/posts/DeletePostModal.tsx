@@ -64,7 +64,7 @@ const DeletePostModal = ({postId, isOpen, setIsDeleting, setIsOpen}: Props) => {
         };
       }}
     >
-      <DialogOverlay className="bg-black/70 backdrop-blur-sm" />
+      <DialogOverlay className="bg-black/70" />
 
       <DialogContent className="!max-w-[270px]">
         <DialogHeader>

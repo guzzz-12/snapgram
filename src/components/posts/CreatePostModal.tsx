@@ -94,7 +94,7 @@ const CreatePostModal = () => {
         }
       }}
     >
-      <DialogOverlay className="bg-black/80 backdrop-blur-sm" />
+      <DialogOverlay className="bg-black/80" />
 
       <DialogContent className="gap-0 overflow-hidden">
         <DialogHeader>
@@ -105,13 +105,14 @@ const CreatePostModal = () => {
 
         <div className="w-full max-w-[600px] h-auto overflow-hidden">
           <div className="flex justify-start items-center gap-2 mb-4">
-            <Avatar className="shrink-0">
+            <Avatar className="w-[40px] h-[40px] shrink-0">
               <AvatarImage
+                className="w-full h-full object-cover"
                 src={user?.profilePicture}
                 alt={user?.username}
               />
 
-              <AvatarFallback>
+              <AvatarFallback className="w-full h-full object-cover">
                 {user?.fullName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>

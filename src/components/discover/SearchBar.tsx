@@ -7,11 +7,12 @@ import { useDebounce } from "@/hooks/useDebounce";
 interface Props {
   term: string;
   loading: boolean;
+  searchType: "people" | "posts" | null;
   searchInputRef: RefObject<HTMLInputElement | null>;
   setTerm: (term: string) => void;
 }
 
-const SearchBar = ({loading, term, setTerm, searchInputRef}: Props) => {
+const SearchBar = ({loading, term, searchType, setTerm, searchInputRef}: Props) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
@@ -33,12 +34,10 @@ const SearchBar = ({loading, term, setTerm, searchInputRef}: Props) => {
   }, [loading]);
   
   useEffect(() => {
-    if (debouncedValue.length > 0) {
-      navigate(`/discover?searchTerm=${debouncedValue}`);      
-    } else {
-      navigate("/discover");
+    if (debouncedValue.length > 0 && searchType) {
+      navigate(`/discover?searchTerm=${debouncedValue}&type=${searchType}`);      
     }
-  }, [debouncedValue]);
+  }, [debouncedValue, searchType]);
 
   return (
     <search className="w-full p-4 bg-white rounded-md shadow border">

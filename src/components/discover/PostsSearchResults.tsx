@@ -13,7 +13,7 @@ import type { PostWithLikes } from "@/types/global";
 
 interface Props {
   searchTerm: string | null;
-  filter: "users" | "posts";
+  searchType: "people" | "posts" | null;
   setTerm: (term: string) => void;
   searchInputRef: RefObject<HTMLInputElement | null>;
   setIsSearchingUsers: (isSearchingUsers: boolean) => void;
@@ -22,7 +22,7 @@ interface Props {
 const PostsSearchResults = (props: Props) => {
   const {
     searchTerm,
-    filter,
+    searchType,
     setTerm,
     searchInputRef,
     setIsSearchingUsers
@@ -89,7 +89,7 @@ const PostsSearchResults = (props: Props) => {
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,
     retry: 2,
-    enabled: !!searchTerm && filter === "posts"
+    enabled: !!searchTerm && searchType === "posts"
   });
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});
@@ -108,7 +108,7 @@ const PostsSearchResults = (props: Props) => {
   const searchPostsResults = data?.pages.flatMap(page => page.data) || [];
   const totalResults = data?.pages[0].totalResults || 0;
 
-  if (filter !== "posts") return null;
+  if (searchType !== "posts") return null;
 
   return (
     <>
@@ -149,7 +149,7 @@ const PostsSearchResults = (props: Props) => {
       </div>
 
       {searchPostsResults.length > 0 && !hasNextPage &&
-        <div className="w-full pt-2 border-t border-[#4F39F6]/20">
+        <div className="w-full mt-auto pt-2 border-t border-[#4F39F6]/20">
           <p className="w-full text-center text-neutral-600 text-sm">
             Fin de los resultados
           </p>
@@ -159,7 +159,7 @@ const PostsSearchResults = (props: Props) => {
       {searchTerm && !isLoading && searchPostsResults.length === 0 &&
         <NoResults
           term={searchTerm}
-          searchType={filter}
+          searchType={searchType}
           setTerm={(term) => setTerm(term)}
           searchInputRef={searchInputRef}
         />

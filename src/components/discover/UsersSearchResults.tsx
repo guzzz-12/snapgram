@@ -12,7 +12,7 @@ import type { SearchUsersResult } from "@/types/global";
 
 interface Props {
   searchTerm: string | null;
-  filter: "users" | "posts";
+  searchType: "people" | "posts" | null;
   setTerm: (term: string) => void;
   searchInputRef: RefObject<HTMLInputElement | null>;
   setIsSearchingUsers: (isSearchingUsers: boolean) => void;
@@ -21,7 +21,7 @@ interface Props {
 const UsersSearchResults = (props: Props) => {
   const {
     searchTerm,
-    filter,
+    searchType,
     setTerm,
     searchInputRef,
     setIsSearchingUsers
@@ -72,7 +72,7 @@ const UsersSearchResults = (props: Props) => {
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,
     retry: 2,
-    enabled: !!searchTerm && filter === "users"
+    enabled: !!searchTerm && searchType === "people"
   });
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});
@@ -90,7 +90,7 @@ const UsersSearchResults = (props: Props) => {
 
   const searchUsersResults = data?.pages.flatMap(page => page.data) || [];
 
-  if (filter !== "users") return null;
+  if (searchType && searchType !== "people") return null;
 
   return (
     <>
@@ -117,10 +117,10 @@ const UsersSearchResults = (props: Props) => {
         }
       </div>
 
-      {searchTerm && !isLoading && searchUsersResults.length === 0 &&
+      {searchTerm && searchType && !isLoading && searchUsersResults.length === 0 &&
         <NoResults
           term={searchTerm}
-          searchType={filter}
+          searchType={searchType}
           setTerm={(term) => setTerm(term)}
           searchInputRef={searchInputRef}
         />

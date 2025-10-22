@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 
 interface Props {
   term: string;
-  searchType: "users" | "posts";
+  searchType: "people" | "posts";
   setTerm: (term: string) => void;
   searchInputRef: RefObject<HTMLInputElement | null>;
 }
@@ -34,7 +34,7 @@ const NoResults = ({term, searchType, setTerm, searchInputRef}: Props) => {
 
       <div className="flex flex-col justify-center items-center gap-1 w-full max-w-[70%]">
         <p className="text-center text-xl text-neutral-700 ">
-          No se encontraron {searchType === "users" ? "personas" : "publicaciones"} para <span className="font-semibold">"{term}"</span>
+          No se encontraron {searchType === "people" ? "personas" : "publicaciones"} para <span className="font-semibold">"{term}"</span>
         </p>
 
         <span className="text-center text-sm text-neutral-600">

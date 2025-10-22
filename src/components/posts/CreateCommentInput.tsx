@@ -1,5 +1,6 @@
 import { type Dispatch, type HTMLAttributes, type SetStateAction } from "react";
-import EmojiPicker from "emoji-picker-react";
+import Picker from "@emoji-mart/react";
+import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { Smile } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Textarea } from "../ui/textarea";
@@ -28,10 +29,15 @@ const CreateCommentInput = ({textContent, isPending, placeholder, className, set
         </PopoverTrigger>
 
         <PopoverContent className="w-full p-0 -translate-y-[1rem] bg-transparent">
-          <EmojiPicker
-            searchDisabled
-            onEmojiClick={(e) => setTextContent((prev) => prev + e.emoji)}
-          />
+          <Picker
+              locale="es"
+              emojiVersion="15"
+              set="twitter"
+              data={emojiData}
+              onEmojiSelect={(emoji: any) => {
+                setTextContent((prev) => prev + emoji.native)
+              }}
+            />
         </PopoverContent>
       </Popover>
 

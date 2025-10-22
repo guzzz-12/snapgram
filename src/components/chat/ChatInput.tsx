@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import EmojiPicker from "emoji-picker-react";
+import Picker from "@emoji-mart/react";
+import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { Image, Mic, Smile, X } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -81,9 +82,14 @@ const ChatInput = ({ wrapperHeight }: Props) => {
           </PopoverTrigger>
 
           <PopoverContent className="w-full p-0 -translate-y-[1rem] bg-transparent">
-            <EmojiPicker
-              searchDisabled
-              onEmojiClick={(e) => setMessageText((prev) => prev + e.emoji)}
+            <Picker
+              locale="es"
+              emojiVersion="15"
+              set="twitter"
+              data={emojiData}
+              onEmojiSelect={(emoji: any) => {
+                setMessageText((prev) => prev + emoji.native)
+              }}
             />
           </PopoverContent>
         </Popover>

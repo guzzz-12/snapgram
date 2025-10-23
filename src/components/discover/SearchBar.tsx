@@ -39,7 +39,8 @@ const SearchBar = ({loading, term, searchType, setTerm, searchInputRef}: Props) 
     }
 
     // Por defecto buscar personas si no se especifica el tipo de búsqueda
-    if (debouncedValue.length > 0 && !searchType) {
+    // o si el tipo de búsqueda no es "people" o "posts"
+    if (debouncedValue.length > 0 && (!searchType || !["people", "posts"].includes(searchType))) {
       navigate(`/discover?searchTerm=${debouncedValue}&type=people`);
     }
   }, [debouncedValue, searchType]);

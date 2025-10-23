@@ -15,7 +15,7 @@ const FiltersBar = ({searchTerm, searchType}: Props) => {
   return (
     <div className="flex justify-start items-center gap-3 w-full pb-3 border-b border-[#4F39F6]/20">
       <Link
-        className={cn("flex justify-center items-center gap-2 px-4 py-2 text-neutral-600 rounded-full bg-white hover:bg-[#4F39F6] hover:text-white transition-colors cursor-pointer disabled:text-neutral-500 disabled:pointer-events-none disabled:bg-white", searchType === "people" && "bg-[#331fcf] text-white")}
+        className={cn("flex justify-center items-center gap-2 px-4 py-2 text-neutral-600 rounded-full bg-white hover:bg-[#4F39F6] hover:text-white transition-colors cursor-pointer disabled:text-neutral-500 disabled:pointer-events-none disabled:bg-white select-none", searchType === "people" && "bg-[#331fcf] text-white")}
         to={`/discover/?searchTerm=${searchTerm}&type=people`}
         onClick={() => {
           queryClient.invalidateQueries({
@@ -28,7 +28,7 @@ const FiltersBar = ({searchTerm, searchType}: Props) => {
       </Link>
 
       <Link
-        className={cn("flex justify-center items-center gap-2 px-4 py-2 text-neutral-600 rounded-full bg-white hover:bg-[#4F39F6] hover:text-white transition-colors cursor-pointer disabled:text-neutral-500 disabled:pointer-events-none disabled:bg-white", searchType === "posts" && "bg-[#331fcf] text-white")}
+        className={cn("flex justify-center items-center gap-2 px-4 py-2 text-neutral-600 rounded-full bg-white hover:bg-[#4F39F6] hover:text-white transition-colors cursor-pointer disabled:text-neutral-500 disabled:pointer-events-none disabled:bg-white select-none", searchType === "posts" && "bg-[#331fcf] text-white")}
         to={`/discover/?searchTerm=${searchTerm}&type=posts`}
         onClick={() => {
           queryClient.invalidateQueries({

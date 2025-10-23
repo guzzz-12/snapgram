@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router";
 import { useClerk, UserButton } from "@clerk/clerk-react";
-import { CirclePlus, House, ImagePlus, LogOut, MessageCircle, Search, TypeOutline, UserRound, UsersRound } from "lucide-react";
+import { CirclePlus, ImagePlus, LogOut, TypeOutline } from "lucide-react";
+import { GoHomeFill } from "react-icons/go";
+import { LuMessageCircle, LuSearch, LuUserRound } from "react-icons/lu";
+import { MdNotifications } from "react-icons/md";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "./ui/sidebar";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -13,22 +16,22 @@ const SIDEBAR_ITEMS = [
   {
     name: "Inicio",
     href: "/",
-    icon: House
+    icon: GoHomeFill
   },
   {
     name: "Mensajes",
     href: "/messages",
-    icon: MessageCircle
+    icon: LuMessageCircle
   },
   {
-    name: "Conexiones",
-    href: "/connections",
-    icon: UsersRound
+    name: "Notificaciones",
+    href: "/notifications",
+    icon: MdNotifications
   },
   {
     name: "Descubre",
     href: "/discover",
-    icon: Search
+    icon: LuSearch
   },
 ];
 
@@ -79,7 +82,7 @@ const MainSidebar = () => {
               <NavLink
                 to={item.href}
                 className={({ isActive }) => (
-                  `flex justify-start items-center gap-3 w-full h-full px-4 py-3 text-base rounded-md hover:!bg-indigo-50 transition-colors ${isActive ? "!bg-indigo-100 font-bold [&>svg]:stroke-black" : "bg-transparent font-normal [&>svg]:stroke-current"}`
+                  `flex justify-start items-center gap-2 w-full h-full px-4 py-3 text-base rounded-md hover:!bg-[#4F39F6]/10 transition-colors [&>svg]:stroke-2 ${isActive ? "text-[#4F39F6] font-bold !bg-[#4F39F6]/10 [&>svg]:text-[#4F39F6] [&>svg]:fill-[#4F39F6]/10" : "bg-transparent font-normal [&>svg]:stroke-current [&>svg]:fill-transparent"}`
                 )}
               >
                 <item.icon className="!size-6 text-neutral-700" aria-hidden />
@@ -92,10 +95,10 @@ const MainSidebar = () => {
             <NavLink
               to={`/profile/${user?.clerkId}`}
               className={({ isActive }) => (
-                `flex justify-start items-center gap-3 w-full h-full px-4 py-3 text-base rounded-md hover:!bg-indigo-50 transition-colors ${isActive ? "!bg-indigo-100 font-bold [&>svg]:stroke-black" : "bg-transparent font-normal [&>svg]:stroke-current"}`
+                `flex justify-start items-center gap-2 w-full h-full px-4 py-3 text-base rounded-md hover:!bg-[#4F39F6]/10 transition-colors [&>svg]:stroke-2 ${isActive ? "text-[#4F39F6] font-bold !bg-[#4F39F6]/10 [&>svg]:text-[#4F39F6] [&>svg]:fill-[#4F39F6]/30" : "bg-transparent font-normal [&>svg]:stroke-current [&>svg]:fill-transparent"}`
               )}
             >
-              <UserRound className="!size-6 text-neutral-700" aria-hidden />
+              <LuUserRound className="!size-6 text-neutral-700" aria-hidden />
               Perfil
             </NavLink>
           </SidebarMenuItem>

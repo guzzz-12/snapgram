@@ -156,4 +156,8 @@
   .commentText img {
     @apply inline-block !w-[16px] !h-[16px]
   }
+
+  .sidebarIconWrapper {
+    @apply relative
+  }
 }

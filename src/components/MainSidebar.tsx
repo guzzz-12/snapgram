@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink } from "react-router";
+import { Link } from "react-router";
 import { useClerk, UserButton } from "@clerk/clerk-react";
 import { CirclePlus, ImagePlus, LogOut, TypeOutline } from "lucide-react";
 import { GoHomeFill } from "react-icons/go";
@@ -9,31 +9,9 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
+import MainSidebarItem from "./MainSidebarItem";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import logo from "@/assets/logo-simple.webp";
-
-const SIDEBAR_ITEMS = [
-  {
-    name: "Inicio",
-    href: "/",
-    icon: GoHomeFill
-  },
-  {
-    name: "Mensajes",
-    href: "/messages",
-    icon: LuMessageCircle
-  },
-  {
-    name: "Notificaciones",
-    href: "/notifications",
-    icon: MdNotifications
-  },
-  {
-    name: "Descubre",
-    href: "/discover",
-    icon: LuSearch
-  },
-];
 
 const MainSidebar = () => {
   const createPostBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -46,7 +24,7 @@ const MainSidebar = () => {
 
   const {setOpen: openCreateStoryModal} = useCreatePublicationModal();
 
-  // Establecer el ancho del dropdown igual al ancho del botón
+  // Establecer el ancho del dropdown de creación de posts igual al ancho del botón
   useEffect(() => {
     if (createPostBtnRef.current) {
       setCreatePostBtnWidth(createPostBtnRef.current.clientWidth);
@@ -77,31 +55,35 @@ const MainSidebar = () => {
 
       <SidebarContent className="p-4">
         <SidebarMenu className="gap-2">
-          {SIDEBAR_ITEMS.map((item) => (
-            <SidebarMenuItem key={item.name}>
-              <NavLink
-                to={item.href}
-                className={({ isActive }) => (
-                  `flex justify-start items-center gap-2 w-full h-full px-4 py-3 text-base rounded-md hover:!bg-[#4F39F6]/10 transition-colors [&>svg]:stroke-2 ${isActive ? "text-[#4F39F6] font-bold !bg-[#4F39F6]/10 [&>svg]:text-[#4F39F6] [&>svg]:fill-[#4F39F6]/10" : "bg-transparent font-normal [&>svg]:stroke-current [&>svg]:fill-transparent"}`
-                )}
-              >
-                <item.icon className="!size-6 text-neutral-700" aria-hidden />
-                {item.name}
-              </NavLink>
-            </SidebarMenuItem>
-          ))}
+          <MainSidebarItem
+            href="/"
+            title="Inicio"
+            Icon={GoHomeFill}
+          />
 
-          <SidebarMenuItem>
-            <NavLink
-              to={`/profile/${user?.clerkId}`}
-              className={({ isActive }) => (
-                `flex justify-start items-center gap-2 w-full h-full px-4 py-3 text-base rounded-md hover:!bg-[#4F39F6]/10 transition-colors [&>svg]:stroke-2 ${isActive ? "text-[#4F39F6] font-bold !bg-[#4F39F6]/10 [&>svg]:text-[#4F39F6] [&>svg]:fill-[#4F39F6]/30" : "bg-transparent font-normal [&>svg]:stroke-current [&>svg]:fill-transparent"}`
-              )}
-            >
-              <LuUserRound className="!size-6 text-neutral-700" aria-hidden />
-              Perfil
-            </NavLink>
-          </SidebarMenuItem>
+          <MainSidebarItem
+            href="/messages"
+            title="Mensajes"
+            Icon={LuMessageCircle}
+          />
+
+          <MainSidebarItem
+            href="/notifications"
+            title="Notificaciones"
+            Icon={MdNotifications}
+          />
+
+          <MainSidebarItem
+            href="/discover"
+            title="Descubre"
+            Icon={LuSearch}
+          />
+
+          <MainSidebarItem
+            href={`/profile/${user?.clerkId}`}
+            title="Perfil"
+            Icon={LuUserRound}
+          />
 
           <SidebarMenuItem className="mt-4" key="create-post">
             <DropdownMenu>

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
 import { Ellipsis, Trash2Icon } from "lucide-react";
+import { GoDotFill } from "react-icons/go";
 import { toast } from "sonner";
 import NotificationIcon from "./NotificationIcon";
 import DeleteConfirmModal from "../DeleteConfirmModal";
@@ -35,14 +36,40 @@ const isItemComment = (item: any): item is Comment => {
 }
 
 const NotificationItem = ({ data }: Props) => {
-  const { sender, notificationType, onItem } = data;
+  const { sender, notificationType, onItem, isRead } = data;
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-
-  const {getToken} = useAuth();
+  const [showDropdownTrigger, setShowDropdownTrigger] = useState(false);
 
   const queryClient = useQueryClient();
 
+  const { getToken } = useAuth();
+  
+  const markAsRead = async (notificationId: string) => {
+    const token = await getToken();
+
+    await axiosInstance({
+      method: "PUT",
+      url: "/notifications",
+      data: {
+        notificationId
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+  }
+
+  // Marcar notificacion como leída
+  const {mutate: markAsReadMutation} = useMutation({
+    mutationFn: markAsRead,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["notifications"]});
+    }
+  });
+
+  // Eliminar notificacion
   const {mutate, isPending} = useMutation({
     mutationFn: async () => {
       const token = await getToken();
@@ -64,12 +91,16 @@ const NotificationItem = ({ data }: Props) => {
   });
 
   // Determinar el user del item de la notificacion segun el tipo de notificacion
-  const notificationUser = (isItemPost(onItem) || isItemComment(onItem)) ? onItem.user : onItem;
+  // const notificationUser = (isItemPost(onItem) || isItemComment(onItem)) ? onItem.user : onItem;
 
   const notificationLink = data.originalPost ? `/post/${data.originalPost._id}` : isItemUser(onItem) ? `/profile/${onItem.clerkId}` : "/";
 
   return (
-    <div className="flex justify-start items-center gap-3 w-full p-2 border rounded-md shadow-md bg-white hover:bg-neutral-100 cursor-pointer transition-colors">
+    <div
+      className="flex justify-start items-center gap-0 w-full p-3 bg-white border rounded-md shadow-md hover:bg-neutral-100 cursor-pointer transition-colors"
+      onMouseEnter={() => setShowDropdownTrigger(true)}
+      onMouseLeave={() => setShowDropdownTrigger(false)}
+    >
       <DeleteConfirmModal
         title="Eliminar notificación"
         isOpen={openDeleteModal}
@@ -81,10 +112,11 @@ const NotificationItem = ({ data }: Props) => {
       <Link
         className="flex gap-3 w-full"
         to={notificationLink}
+        onClick={() => markAsReadMutation(data._id)}
       >
         <div className="flex justify-start h-full shrink-0">
           <div className="relative">
-            <Avatar className="w-[60px] h-[60px] shrink-0 outline-2 outline-[#4F39F6]">
+            <Avatar className="w-[50px] h-[50px] shrink-0 outline-2 outline-[#4F39F6]">
               <AvatarImage
                 className="w-full h-full object-cover"
                 src={sender.profilePicture}
@@ -104,8 +136,8 @@ const NotificationItem = ({ data }: Props) => {
         </div>
 
         <div className="flex flex-col justify-center items-start gap-0 w-full overflow-hidden">
-          <p className="text-[15px] text-neutral-900">
-            <span className="font-semibold">{sender.fullName}</span> {notificationType === "follow" ? "comenzó a seguirte" : notificationType === "like" ? "le gustó tu publicación" : notificationType === "comment" ? "comentó en tu publicación" : "respondió a tu comentario en una publicación"}
+          <p className="text-[15px] text-neutral-900 leading-tight">
+            <span>{notificationType === "like" ? "A " : ""}</span> <span className="font-semibold">{sender.fullName}</span> {notificationType === "follow" ? "comenzó a seguirte" : notificationType === "like" ? "le gustó tu publicación" : notificationType === "comment" ? "comentó en tu publicación" : "respondió a tu comentario en una publicación"}
           </p>
 
           <span
@@ -120,7 +152,7 @@ const NotificationItem = ({ data }: Props) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            className="rounded-full cursor-pointer hover:bg-slate-200 z-10"
+            className={cn("opacity-0 rounded-full cursor-pointer hover:bg-slate-200 z-10", showDropdownTrigger && "opacity-100")}
             variant="ghost"
             size="icon"
           >
@@ -141,6 +173,8 @@ const NotificationItem = ({ data }: Props) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <GoDotFill className={cn("w-5 h-5 shrink-0 text-[#4F39F6] opacity-0", !isRead && "opacity-100")} />
     </div>
   )
 }

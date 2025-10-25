@@ -21,10 +21,10 @@ const NotificationIcon = ({notificationType, className, ...props}: Props) => {
   
   return (
     <div
-      className={cn("flex justify-center items-center w-[24px] h-[24px] rounded-full outline-2 outline-white", className)}
+      className={cn("flex justify-center items-center w-[20px] h-[20px] rounded-full outline-2 outline-white", className)}
       {...props}
     >
-      <Icon className="w-[14px] h-[14px] fill-white" />
+      <Icon className="w-[12px] h-[12px] fill-white" />
     </div>
   )
 }

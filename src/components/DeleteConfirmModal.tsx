@@ -1,16 +1,15 @@
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
-import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface Props {
+  title: string;
   isOpen: boolean;
-  commentId: string;
-  postId: string;
   isPending: boolean;
   onDeleteHandler: () => void;
   setIsOpen: (isOpen: boolean) => void;
 }
 
-const DeleteCommentModal = ({isOpen, isPending, onDeleteHandler, setIsOpen}: Props) => {
+const DeleteConfirmModal = ({isOpen, isPending, title, onDeleteHandler, setIsOpen}: Props) => {
   return (
     <Dialog
       open={isOpen}
@@ -25,7 +24,7 @@ const DeleteCommentModal = ({isOpen, isPending, onDeleteHandler, setIsOpen}: Pro
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Eliminar comentario
+            {title}
           </DialogTitle>
         </DialogHeader>
 
@@ -55,4 +54,4 @@ const DeleteCommentModal = ({isOpen, isPending, onDeleteHandler, setIsOpen}: Pro
   )
 }
 
-export default DeleteCommentModal
+export default DeleteConfirmModal

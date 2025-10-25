@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import CommentsList from "./CommentsList";
 import CommentFooter from "./CommentFooter";
 import CommentDropdown from "./CommentDropdown";
-import DeleteCommentModal from "./DeleteCommentModal";
+import DeleteConfirmModal from "../DeleteConfirmModal";
 import CommentSkeleton from "./CommentSkeleton";
 import CreateCommentInput from "@/components/posts/CreateCommentInput";
 import CommentEditInputBtns from "./CommentEditInputBtns";
@@ -171,12 +171,11 @@ const CommentItem = ({ commentData }: Props) => {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex justify-between gap-3 w-full">
-        <DeleteCommentModal
+        <DeleteConfirmModal
+          title="Eliminar comentario"
           isOpen={openDeleteModal}
-          commentId={commentData._id}
-          postId={commentData.post._id}
+          setIsOpen={(bool) => setOpenDeleteModal(bool)}
           isPending={isDeleting}
-          setIsOpen={setOpenDeleteModal}
           onDeleteHandler={() => deleteComment()}
         />
 

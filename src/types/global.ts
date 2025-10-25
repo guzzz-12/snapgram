@@ -173,3 +173,16 @@ export type HashtagWithPostsCount = {
   postsCount: number;
   createdAt: string;
 }
+
+export type NotificationType = {
+  _id: string;
+  sender: UserType;
+  recipient: string;
+  notificationType: "follow" | "like" | "comment" | "reply";
+  onModel: "User" | "Post" | "Comment";
+  onItem: PostType | Comment | UserType;
+  originalPost: PostType | null;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

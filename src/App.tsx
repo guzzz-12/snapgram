@@ -8,12 +8,11 @@ import AuthLayout from "@/AuthLayout";
 import Layout from "@/Layout";
 import HomePage from "@/pages/HomePage";
 import MessagesPage from "@/pages/MessagesPage";
-import ConnectionsPage from "@/pages/ConnectionsPage";
+import NotificationsPage from "@/pages/NotificationsPage";
 import DiscoverPage from "@/pages/DiscoverPage";
 import ProfilePage from "@/pages/ProfilePage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
-import ChatBoxPage from "@/pages/ChatBoxPage";
 import NoAuthRoute from "@/components/NoAuthRoute";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -88,10 +87,10 @@ const App = () => {
           }
         />
         <Route
-          path="connections"
+          path="notifications"
           element={
             <ProtectedRoute>
-              <ConnectionsPage />
+              <NotificationsPage />
             </ProtectedRoute>
           }
         />
@@ -115,7 +114,7 @@ const App = () => {
           path="messages/:userId"
           element={
             <ProtectedRoute>
-              <ChatBoxPage />
+              <MessagesPage />
             </ProtectedRoute>
           }
         />

@@ -50,13 +50,9 @@ const NotificationItem = ({ data }: Props) => {
 
     await axiosInstance({
       method: "PUT",
-      url: "/notifications",
-      data: {
-        notificationId
-      },
+      url: `/notifications/mark-as-read/${notificationId}`,
       headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
+        Authorization: `Bearer ${token}`
       }
     });
   }

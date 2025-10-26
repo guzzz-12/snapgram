@@ -5,12 +5,13 @@ import { CirclePlus, ImagePlus, LogOut, TypeOutline } from "lucide-react";
 import { GoHomeFill } from "react-icons/go";
 import { LuMessageCircle, LuSearch, LuUserRound } from "react-icons/lu";
 import { MdNotifications } from "react-icons/md";
+import MainSidebarItem from "./MainSidebarItem";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "./ui/sidebar";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
-import MainSidebarItem from "./MainSidebarItem";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import logo from "@/assets/logo-simple.webp";
 
 const MainSidebar = () => {
@@ -19,6 +20,8 @@ const MainSidebar = () => {
   const [createPostBtnWidth, setCreatePostBtnWidth] = useState(0);
   
   const {user, loadingUser} = useCurrentUser();
+
+  const {unseenNotifications} = useUnseenNotifications();
 
   const {signOut} = useClerk();
 
@@ -71,6 +74,7 @@ const MainSidebar = () => {
             href="/notifications"
             title="Notificaciones"
             Icon={MdNotifications}
+            badge={unseenNotifications > 0 ? unseenNotifications : undefined}
           />
 
           <MainSidebarItem

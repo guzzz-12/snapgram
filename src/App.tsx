@@ -18,6 +18,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import type { UserType } from "@/types/global";
 
 const App = () => {
@@ -25,6 +26,7 @@ const App = () => {
   const {getToken, userId} = useAuth();
 
   const {setUser, setLoadingUser} = useCurrentUser();
+  const {setUnseenNotifications} = useUnseenNotifications();
 
   // Consultar la data del usuario autenticado
   const {data, isFetching, error} = useQuery({
@@ -46,6 +48,27 @@ const App = () => {
     refetchOnWindowFocus: false
   });
 
+  // Consultar la cantidad de notificaciones no vistas
+  const {data: unseenNotificationsCount} = useQuery({
+    queryKey: ["unseenNotificationsCount"],
+    queryFn: async () => {
+      const token = await getToken();
+
+      const {data} = await axiosInstance<{data: number}>({
+        method: "GET",
+        url: "/notifications/unseen",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      return data.data;
+    },
+    enabled: !!userId,
+    refetchOnWindowFocus: false
+  });
+
+  // Actualizar el state global del usuario
   useEffect(() => {
     setLoadingUser(isFetching);
 
@@ -53,6 +76,11 @@ const App = () => {
       setUser(data);
     }
   }, [data, isFetching]);
+
+  // Actualizar el state del contador de notificaciones no vistas
+  useEffect(() => {
+    setUnseenNotifications(unseenNotificationsCount ?? 0);
+  }, [unseenNotificationsCount]);
 
   if (error) {
     toast.error(errorMessage(error));

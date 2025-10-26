@@ -182,6 +182,7 @@ export type NotificationType = {
   onModel: "User" | "Post" | "Comment";
   onItem: PostType | Comment | UserType;
   originalPost: PostType | null;
+  isSeen: boolean;
   isRead: boolean;
   createdAt: string;
   updatedAt: string;

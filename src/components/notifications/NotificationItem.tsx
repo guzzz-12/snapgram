@@ -36,7 +36,7 @@ const isItemComment = (item: any): item is Comment => {
 }
 
 const NotificationItem = ({ data }: Props) => {
-  const { sender, notificationType, onItem, isRead } = data;
+  const { sender, notificationType, onItem, isSeen, isRead } = data;
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [showDropdownTrigger, setShowDropdownTrigger] = useState(false);
@@ -97,7 +97,7 @@ const NotificationItem = ({ data }: Props) => {
 
   return (
     <div
-      className="flex justify-start items-center gap-0 w-full p-3 bg-white border rounded-md shadow-md hover:bg-neutral-100 cursor-pointer transition-colors"
+      className={cn("flex justify-start items-center gap-0 w-full p-3 bg-white border rounded-md shadow-md hover:bg-neutral-100 cursor-pointer transition-colors", !isSeen && "bg-[#4F39F6]/20")}
       onMouseEnter={() => setShowDropdownTrigger(true)}
       onMouseLeave={() => setShowDropdownTrigger(false)}
     >

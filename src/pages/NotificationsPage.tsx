@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { IoFileTrayStackedOutline } from "react-icons/io5";
 import RightSidebar from "@/components/RightSidebar";
 import NotificationsList from "@/components/notifications/NotificationsList";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { NotificationType } from "@/types/global";
@@ -17,6 +19,10 @@ const ConnectionsPage = () => {
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
 
   const {getToken} = useAuth();
+
+  const queryClient = useQueryClient();
+
+  const {setUnseenNotifications} = useUnseenNotifications();
 
   const getNotifications = async (page: number, activeTab: "all" | "unread") => {
     const token = await getToken();
@@ -49,6 +55,31 @@ const ConnectionsPage = () => {
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false
   });
+
+  const {mutate: markAllAsSeen} = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      return axiosInstance({
+        method: "PUT",
+        url: "/notifications/unseen",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["notifications"]});
+      setUnseenNotifications(0);
+    }
+  });
+
+  // Marcar todas las notificaciones como vistas al abrir la página
+  useEffect(() => {
+    setTimeout(() => {
+      markAllAsSeen();
+    }, 500);
+  }, []);
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});
 
@@ -104,17 +135,28 @@ const ConnectionsPage = () => {
           </TabsList>
         </Tabs>
 
-        <NotificationsList
-          notifications={notifications}
-          loading={isLoading}
-          isFetchingNextPage={isFetchingNextPage}
-        />
+        {notifications.length > 0 &&
+          <NotificationsList
+            notifications={notifications}
+            loading={isLoading}
+            isFetchingNextPage={isFetchingNextPage}
+          />
+        }
+
+        {notifications.length === 0 && !isLoading &&
+          <div className="flex flex-col justify-center items-center gap-3 w-full h-full bg-neutral-50 rounded-lg shadow">
+            <IoFileTrayStackedOutline className="size-24 text-neutral-500" />
+            <p className="w-full text-center text-lg text-neutral-500">
+              No tienes notificaciones
+            </p>
+          </div>
+        }
 
         {hasNextPage &&
           <div ref={paginationRef} className="w-full h-4" />
         }
 
-        {!hasNextPage &&
+        {!hasNextPage && notifications.length > 0 &&
           <div className="w-full mt-auto pt-3 border-t border-neutral-300">
             <p className="w-full text-center text-sm text-neutral-600">
               No tienes más notificaciones

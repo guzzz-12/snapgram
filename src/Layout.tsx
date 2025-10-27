@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import { useUser } from "@clerk/clerk-react";
 import { Toaster } from "sonner";
 import MainSidebar from "@/components/MainSidebar";
@@ -7,6 +7,8 @@ import CreateStoryModal from "@/components/stories/CreateStoryModal";
 import CreatePostModal from "./components/posts/CreatePostModal";
 
 const Layout = () => {
+  const {pathname} = useLocation();
+
   const {isLoaded} = useUser();
 
   if (!isLoaded) {
@@ -20,7 +22,9 @@ const Layout = () => {
 
         <CreateStoryModal />
 
-        <MainSidebar />
+        {!pathname.startsWith("/post") &&        
+          <MainSidebar />
+        }
 
         <section className="grow bg-slate-50 overflow-x-hidden">
           <Outlet />

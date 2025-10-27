@@ -11,6 +11,7 @@ import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
 import type { LikeType, PostWithLikes } from "@/types/global";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface Props {
   postData: PostWithLikes;
@@ -77,26 +78,33 @@ const LikesPopover = (props: Props) => {
         setIsOpen(open);
       }}
     >
-      <PopoverTrigger asChild>
-        <button
-          className={cn("flex justify-start items-center gap-1 text-sm font-semibold cursor-pointer hover:underline", postData.likesCount === 0 && "pointer-events-none")}
-          disabled={postData.likesCount === 0}
-          onClick={(e) => {
-            if (postData.likesCount === 0) {
-              e.preventDefault()
-            }
-          }}
-        >
-          <Heart
-            className="size-5.5 text-neutral-500"
-            aria-hidden
-          />
-
-          <span className="text-neutral-700">
-            {postData.likesCount}
-          </span>
-        </button>
-      </PopoverTrigger>
+      <Tooltip>
+        <PopoverTrigger asChild>
+          <TooltipTrigger asChild>
+            <button
+              className={cn("flex justify-start items-center gap-1 text-sm font-semibold cursor-pointer hover:underline", postData.likesCount === 0 && "pointer-events-none")}
+              disabled={postData.likesCount === 0}
+              onClick={(e) => {
+                if (postData.likesCount === 0) {
+                  e.preventDefault()
+                }
+              }}
+            >
+              <Heart
+                className="size-5.5 text-neutral-500"
+                aria-hidden
+              />
+              <span className="text-neutral-700">
+                {postData.likesCount}
+              </span>
+            </button>
+          </TooltipTrigger>
+        </PopoverTrigger>
+        
+        <TooltipContent sideOffset={5}>
+          {postData.likesCount} me gusta
+        </TooltipContent>
+      </Tooltip>
 
       <PopoverContent className="p-0 overflow-hidden">
         <div className="w-full max-h-[320px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">

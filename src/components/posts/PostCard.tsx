@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type HTMLAttributes } from "react";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import Slider, {type Settings} from "react-slick";
 import { Twemoji } from "react-emoji-render";
+import Slider from "react-slick";
 import { toast } from "sonner";
 import PostHeader from "./PostCardHeader";
 import PostCardFooter from "./PostCardFooter";
@@ -14,6 +14,7 @@ import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { hashtagParser } from "@/utils/hashtagsParser";
 import { cn } from "@/lib/utils";
+import { SLIDER_SETTINGS } from "@/utils/constants";
 import type { PostWithLikes } from "@/types/global";
 
 interface Props {
@@ -21,15 +22,6 @@ interface Props {
   isModal?: boolean;
   className?: HTMLAttributes<HTMLElement>["className"];
 }
-
-const SLIDER_SETTINGS: Settings = {
-  className: "postCardSlider",
-  dots: true,
-  infinite: false,
-  speed: 500,
-  slidesToShow: 1,
-  slidesToScroll: 1,
-};
 
 const PostCard = ({ postData, isModal, className }: Props) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
@@ -158,19 +150,19 @@ const PostCard = ({ postData, isModal, className }: Props) => {
         </div>
       )}
 
-      <Slider {...SLIDER_SETTINGS}>
+      <Slider
+        className="postCardSlider"
+        {...SLIDER_SETTINGS}
+      >
         {postData.imageUrls.map((imageUrl, index) => (
-          <button
+          <Link
             key={index}
+            to={`/post/${postData._id}`}
             style={{
               filter: "blur(15px)",
               backgroundImage: `url(${imageUrl})`
             }}
-            className={cn("relative w-full aspect-[4/3] rounded-lg bg-neutral-200 overflow-hidden", isModal ? "cursor-default" : "cursor-pointer")}
-            onClick={() => {
-              if (isModal) return;
-              setOpenPostModal(true);
-            }}
+            className="relative w-full aspect-[4/3] rounded-lg bg-neutral-200 overflow-hidden cursor-pointer"
           >
             <div
               style={{
@@ -185,7 +177,7 @@ const PostCard = ({ postData, isModal, className }: Props) => {
               src={imageUrl}
               alt={`Post de ${postData.user.fullName}`}
             />
-          </button>
+          </Link>
         ))}
       </Slider>
 

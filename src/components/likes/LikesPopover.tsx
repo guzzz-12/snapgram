@@ -1,24 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import LikeItem from "./LikeItem";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Skeleton } from "../ui/skeleton";
+import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
-import type { LikeType } from "@/types/global";
-import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import type { LikeType, PostWithLikes } from "@/types/global";
 
 interface Props {
-  likesCount: number;
+  postData: PostWithLikes;
   itemId: string;
   itemType: "post" | "comment";
 }
 
 const LikesPopover = (props: Props) => {
-  const { likesCount, itemId, itemType } = props;
+  const { postData, itemId, itemType } = props;
 
   const paginationRef = useRef<HTMLDivElement>(null);
 
@@ -78,15 +79,22 @@ const LikesPopover = (props: Props) => {
     >
       <PopoverTrigger asChild>
         <button
-          className={cn("cursor-pointer", likesCount === 0 && "pointer-events-none")}
-          disabled={likesCount === 0}
+          className={cn("flex justify-start items-center gap-1 text-sm font-semibold cursor-pointer hover:underline", postData.likesCount === 0 && "pointer-events-none")}
+          disabled={postData.likesCount === 0}
           onClick={(e) => {
-            if (likesCount === 0) {
+            if (postData.likesCount === 0) {
               e.preventDefault()
             }
           }}
         >
-          {likesCount} Me gusta
+          <Heart
+            className="size-5.5 text-neutral-500"
+            aria-hidden
+          />
+
+          <span className="text-neutral-700">
+            {postData.likesCount}
+          </span>
         </button>
       </PopoverTrigger>
 

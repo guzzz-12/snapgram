@@ -276,7 +276,7 @@ const CommentItem = ({ commentData }: Props) => {
 
       {/* Lista de respuestas del comentario, input para responder al comentario */}
       {openReplies && !commentData.parent &&
-        <div className="flex flex-col gap-3 w-full grow pl-20 ml-auto">
+        <div className="flex flex-col gap-3 w-full grow pl-14 ml-auto">
           {isLoading &&
             <div className="flex flex-col gap-3 w-full">
               <CommentSkeleton commentWidth="w-[90%]" commentHeight="h-[80px]" />
@@ -313,23 +313,35 @@ const CommentItem = ({ commentData }: Props) => {
             </Button>
           }
 
-          <div className="flex justify-start items-center gap-2 p-2 bg-neutral-100 rounded-md">
+          <div className="relative flex justify-start items-center gap-2 p-2 bg-neutral-100 rounded-md">
             <CreateCommentInput
               textContent={replyText}
               isPending={isPending}
               className="py-3 placeholder:!italic"
-              placeholder={`Responde a ${commentData.user.fullName}...`}
+              placeholder="Escribe una respuesta..."
               setTextContent={setReplyText}
             />
+
+            {replyText.length > 0 &&
+              <Button
+                className="h-full shrink-0 bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer disabled:pointer-events-none"
+                disabled={isPending || !replyText}
+                onClick={() => replyComment()}
+              >
+                <SendHorizontal className="size-5" aria-hidden />
+                <span className="sr-only">
+                  Responder a {commentData.user.fullName}
+                </span>
+              </Button>
+            }
+
             <Button
-              className="h-full shrink-0 bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer disabled:pointer-events-none"
-              disabled={isPending || !replyText}
-              onClick={() => replyComment()}
+              className="absolute right-0 bottom-0 text-xs text-neutral-700 translate-y-[100%] cursor-pointer z-10"
+              variant="link"
+              size="sm"
+              onClick={() => setOpenReplies(false)}
             >
-              <SendHorizontal className="size-5" aria-hidden />
-              <span className="sr-only">
-                Responder a {commentData.user.fullName}
-              </span>
+              Cancelar
             </Button>
           </div>
         </div>

@@ -6,7 +6,6 @@ import PostCard from "./PostCard";
 import PostCommentInput from "./PostCommentInput";
 import CommentsList from "../comments/CommentsList";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay } from "../ui/dialog";
-import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -78,8 +77,6 @@ const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
             postData={postData}
             isModal={true}
           />
-
-          <Separator className="mt-3 bg-transparent" />
 
           <CommentsList comments={comments} isLoading={loading} />
 

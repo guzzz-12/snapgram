@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
@@ -15,6 +15,8 @@ interface Props {
 }
 
 const DeletePostModal = ({postId, isOpen, setIsDeleting, setIsOpen}: Props) => {
+  const {pathname} = useLocation();
+  const navigate = useNavigate();
   const [seachParams] = useSearchParams();
   const searchTerm = seachParams.get("searchTerm");
 
@@ -36,6 +38,12 @@ const DeletePostModal = ({postId, isOpen, setIsDeleting, setIsOpen}: Props) => {
   const {mutate, isPending} = useMutation({
     mutationFn: deletePost,
     onSuccess: async () => {
+      // Si se está en la página del post, redirigir a la página principal
+      if (pathname === `/post/${postId}`) {
+        toast.success("Post eliminado con éxito.");
+        return navigate("/", {replace: true});
+      }
+
       await queryClient.invalidateQueries({queryKey: ["posts"]});
 
       if (searchTerm) {

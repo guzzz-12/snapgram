@@ -1,3 +1,4 @@
+import type { HTMLAttributes } from "react";
 import { useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
@@ -6,6 +7,7 @@ import { toast } from "sonner";
 import PostModal from "./PostModal";
 import LikesPopover from "@/components/likes/LikesPopover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { PostWithLikes } from "@/types/global";
@@ -13,12 +15,13 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   postData: PostWithLikes;
-  openPostModal: boolean;
+  openPostModal?: boolean;
   isModal?: boolean;
-  setOpenPostModal: (isOpen: boolean) => void;
+  className?: HTMLAttributes<HTMLElement>["className"];
+  setOpenPostModal?: (isOpen: boolean) => void;
 }
 
-const PostCardFooter = ({ postData, isModal, openPostModal, setOpenPostModal }: Props) => {
+const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPostModal }: Props) => {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
 
@@ -52,97 +55,104 @@ const PostCardFooter = ({ postData, isModal, openPostModal, setOpenPostModal }: 
   });
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className={cn("flex flex-col gap-2 pb-1 border-b", className)}>
       <PostModal
-        isOpen={openPostModal}
+        isOpen={!!openPostModal}
         postData={postData}
-        setIsOpen={setOpenPostModal}
+        setIsOpen={setOpenPostModal ? setOpenPostModal : () => {}}
       />
 
       <div className="flex justify-start items-center gap-5 w-full">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              className="flex items-center gap-2 text-neutral-500 cursor-pointer"
-              disabled={likeMutation.isPending}
-              onClick={() => likeMutation.mutate()}
-            >
-              <Heart
-                className="size-6"
-                fill={postData.isLiked ? "red" : "none"}
-                stroke={postData.isLiked ? "red" : "currentColor"}
-                aria-hidden
-              />
-              <span className="sr-only">
-                Este post tiene {postData.likesCount} me gusta
-              </span>
-            </button>
-          </TooltipTrigger>
-
-          <TooltipContent>
-            {postData.isLiked ? "Ya no me gusta" : "Me gusta"}
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              className={cn("flex items-center gap-2 text-neutral-500", isModal ? "cursor-default pointer-events-none" : "cursor-pointer")}
-              onClick={() => {
-                if (!isModal) {
-                  setOpenPostModal(true);
-                }
-              }}
-            >
-              <MessageCircle className="size-6" aria-hidden />
-              <span className="sr-only">
-                Este post tiene {21} Comentarios
-              </span>
-            </button>
-          </TooltipTrigger>
-
-          <TooltipContent>
-            Comentar
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button className="flex items-center gap-2 text-neutral-500 cursor-pointer">
-              <Share2 className="size-6" aria-hidden />
-              <span className="sr-only">
-                Este post ha sido compartido {6} veces
-              </span>
-            </button>
-          </TooltipTrigger>
-
-          <TooltipContent>
-            Compartir
-          </TooltipContent>
-        </Tooltip>
-      </div>
-      
-      <div className="flex justify-start items-center gap-6 pt-3 font-semibold text-neutral-700 text-sm border-t">
         <LikesPopover
           itemId={postData._id}
-          likesCount={postData.likesCount}
+          postData={postData}
           itemType="post"
         />
 
-        <button
-          className={cn(isModal ? "cursor-default pointer-events-none" : "cursor-pointer")}
+        <div className="flex items-center gap-4 ml-auto">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-neutral-700 font-semibold">
+                  {postData.commentsCount}
+                </span>
+
+                <MessageCircle className="size-5 text-neutral-500" aria-hidden />
+
+                <span className="sr-only">
+                  Este post tiene {postData.commentsCount} Comentarios
+                </span>
+              </div>
+            </TooltipTrigger>
+
+            <TooltipContent>
+              {postData.commentsCount} Comentarios
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-neutral-700 font-semibold">
+                  {6}
+                </span>
+
+                <Share2 className="size-5 text-neutral-500" aria-hidden />
+
+                <span className="sr-only">
+                  Este post ha sido compartido {6} veces
+                </span>
+              </div>
+            </TooltipTrigger>
+
+            <TooltipContent>
+              {6} Compartidos
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
+      
+      <div className="flex justify-between items-center gap-1 w-full font-semibold text-neutral-700 text-sm">
+        <Button
+          className="gap-1 grow text-base font-normal cursor-pointer hover:bg-neutral-200"
+          variant="ghost"
+          size="default"
+          disabled={likeMutation.isPending}
+          onClick={() => likeMutation.mutate()}
+        >
+          <Heart
+            className="size-4.5"
+            fill={postData.isLiked ? "red" : "none"}
+            stroke={postData.isLiked ? "red" : "currentColor"}
+            aria-hidden
+          />
+
+          Me gusta
+        </Button>
+
+        <Button
+          className="gap-1 grow text-base font-normal cursor-pointer hover:bg-neutral-200"
+          variant="ghost"
+          size="default"
           onClick={() => {
             if (!isModal) {
-              setOpenPostModal(true);
+              setOpenPostModal?.(true);
             }
           }}
         >
-          {postData.commentsCount} Comentarios
-        </button>
+          <MessageCircle className="size-4.5" aria-hidden />
+          Comentar
+        </Button>
 
-        <span>
-          {0} Compartido
-        </span>
+        <Button
+          className="gap-1 grow text-base font-normal cursor-pointer hover:bg-neutral-200"
+          variant="ghost"
+          size="default"
+          onClick={() => {}}
+        >
+          <Share2 className="size-4.5" aria-hidden />
+          Compartir
+        </Button>
       </div>
     </div>
   )

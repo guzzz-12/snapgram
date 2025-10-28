@@ -135,13 +135,11 @@ const ConnectionsPage = () => {
           </TabsList>
         </Tabs>
 
-        {notifications.length > 0 &&
-          <NotificationsList
-            notifications={notifications}
-            loading={isLoading}
-            isFetchingNextPage={isFetchingNextPage}
-          />
-        }
+        <NotificationsList
+          notifications={notifications}
+          loading={isLoading}
+          isFetchingNextPage={isFetchingNextPage}
+        />
 
         {notifications.length === 0 && !isLoading &&
           <div className="flex flex-col justify-center items-center gap-3 w-full h-full bg-neutral-50 rounded-lg shadow">

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import AuthLayout from "@/AuthLayout";
 import Layout from "@/Layout";
 import HomePage from "@/pages/HomePage";
+import PostPage from "./pages/PostPage";
 import MessagesPage from "@/pages/MessagesPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import DiscoverPage from "@/pages/DiscoverPage";
@@ -106,6 +107,7 @@ const App = () => {
             </NoAuthRoute>
           }
         />
+
         <Route
           path="signup"
           element={
@@ -114,6 +116,16 @@ const App = () => {
             </NoAuthRoute>
           }
         />
+
+        <Route
+          path="post/:postId"
+          element={
+            <ProtectedRoute>
+              <PostPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="notifications"
           element={
@@ -122,6 +134,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="discover"
           element={
@@ -130,6 +143,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="messages"
           element={
@@ -138,6 +152,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="messages/:userId"
           element={
@@ -146,6 +161,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="profile/:userClerkId"
           element={

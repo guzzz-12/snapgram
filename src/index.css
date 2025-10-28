@@ -160,4 +160,22 @@
   .sidebarIconWrapper {
     @apply relative
   }
+
+  /* Slider de la página del post */
+  .postPageSlider {
+    @apply w-full;
+  }
+
+  .postPageSlider .slick-prev:before,
+  .postPageSlider .slick-next:before {
+    @apply !text-5xl !text-white/90 drop-shadow-lg;
+  }
+
+  .postPageSlider .slick-prev {
+    @apply !left-[10px] !translate-y-[-100%] !z-10
+  }
+
+  .postPageSlider .slick-next {
+    @apply !right-[0] !-translate-x-[200%] !translate-y-[-100%] !z-10
+  }
 }

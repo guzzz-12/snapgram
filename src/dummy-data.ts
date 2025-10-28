@@ -1,10 +1,10 @@
 import { Home, MessageCircle, Search, UserIcon, Users } from 'lucide-react'
 import logo from '@/assets/logo.svg'
-import sample_cover from '@/assets/sample_cover.jpg'
+import sample_cover from '@/assets/sample_cover.webp'
 import sample_profile from '@/assets/sample_profile.jpg'
-import bgImage from '@/assets/bgImage.png'
+import bgImage from '@/assets/bgImage.webp'
 import group_users from '@/assets/group_users.png'
-import sponsored_img from '@/assets/sponsored_img.png'
+import sponsored_img from '@/assets/sponsored_img.webp'
 
 export const assets = {
   logo,

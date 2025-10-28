@@ -1,6 +1,6 @@
 import { Link, Outlet } from "react-router";
 import { useUser } from "@clerk/clerk-react";
-import bgImage from "@/assets/bgImage.png";
+import bgImage from "@/assets/bgImage.webp";
 import logo from "@/assets/logo-simple.webp";
 
 const AuthLayout = () => {  

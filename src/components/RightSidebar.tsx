@@ -1,5 +1,5 @@
 import RecentMessages from "./RecentMessages";
-import sponsoredImg from "@/assets/sponsored_img.png";
+import sponsoredImg from "@/assets/sponsored_img.webp";
 
 const RightSidebar = () => {
   return (

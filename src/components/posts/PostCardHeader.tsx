@@ -1,22 +1,21 @@
-import { useState } from "react";
+import { useState, type HTMLAttributes } from "react";
 import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
-import { Ellipsis, Logs, Pencil, Trash2Icon } from "lucide-react";
+import PostOptionsDropdown from "./PostOptionsDropdown";
 import DeletePostModal from "./DeletePostModal";
-import ChangeLogModal from "../ChangeLogModal";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { Separator } from "../ui/separator";
+import ChangeLogModal from "@/components/ChangeLogModal";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { PostWithLikes } from "@/types/global";
 import { cn } from "@/lib/utils";
 
 interface Props {
   postData: PostWithLikes;
+  className?: HTMLAttributes<HTMLElement>["className"];
   setisEditingPost: (value: boolean) => void;
 };
 
-const PostCardHeader = ({ postData, setisEditingPost }: Props) => {
+const PostCardHeader = ({ postData, className, setisEditingPost }: Props) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openChangelogModal, setOpenChangelogModal] = useState(false);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
@@ -26,7 +25,7 @@ const PostCardHeader = ({ postData, setisEditingPost }: Props) => {
   const isPending = isDeletingPost
 
   return (
-    <div className="flex justify-start items-center gap-3 w-full">
+    <div className={cn("flex justify-start items-center gap-3 w-full", className)}>
       <Link
         className={cn(isPending && "pointer-events-none")}
         to={`/profile/${postData.user.clerkId}`}
@@ -50,82 +49,37 @@ const PostCardHeader = ({ postData, setisEditingPost }: Props) => {
           {postData.user.fullName}
         </Link>
 
-        <p
+        <Link
           className="text-sm text-neutral-700"
+          to={`/post/${postData._id}`}
           title={dayjs(postData.createdAt).format("dddd, DD [de] MMMM [de] YYYY [a las] hh:mm a")}
         >
           {dayjs(postData.createdAt).fromNow().replace("hace", "Hace")}
-        </p>
+        </Link>
       </div>
 
-      <>
-        <DeletePostModal
-          isOpen={openDeleteModal}
-          postId={postData._id}
-          setIsDeleting={(bool) => setIsDeletingPost(bool)}
-          setIsOpen={setOpenDeleteModal}
-        />
+      <DeletePostModal
+        isOpen={openDeleteModal}
+        postId={postData._id}
+        setIsDeleting={(bool) => setIsDeletingPost(bool)}
+        setIsOpen={setOpenDeleteModal}
+      />
 
-        <ChangeLogModal
-          changeLog={postData.changeLog}
-          title="Historial de cambios del post"
-          isOpen={openChangelogModal}
-          setIsOpen={(bool) => setOpenChangelogModal(bool)}
-        />
+      <ChangeLogModal
+        changeLog={postData.changeLog}
+        title="Historial de cambios del post"
+        isOpen={openChangelogModal}
+        setIsOpen={(bool) => setOpenChangelogModal(bool)}
+      />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className={cn("flex justify-center items-center w-9 h-9 p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 cursor-pointer transition-colors", isPending && "pointer-events-none")}
-              disabled={isPending}
-            >
-              <Ellipsis className="size-5 text-neutral-700" aria-hidden />
-              <span className="sr-only">
-                Opciones del post
-              </span>
-            </button>
-          </DropdownMenuTrigger>
-
-            <DropdownMenuContent>
-              {userId === postData.user.clerkId &&  
-                <>
-                  <DropdownMenuItem
-                    className={cn("flex justify-start items-center gap-2 cursor-pointer", isPending && "pointer-events-none")}
-                    disabled={isPending}
-                    onClick={() => setisEditingPost(true)}
-                  >
-                    <Pencil className="size-4.5" aria-hidden />
-                    <span className="text-sm text-neutral-900">Editar</span>
-                  </DropdownMenuItem>
-
-                  <Separator />
-                  
-                  <DropdownMenuItem
-                    className={cn("flex justify-start items-center gap-2 cursor-pointer hover:!bg-destructive/5", isPending && "pointer-events-none")}
-                    disabled={isPending}
-                    onClick={() => setOpenDeleteModal(true)}
-                  >
-                    <Trash2Icon className="size-5 text-destructive/60" aria-hidden />
-                    <span className="text-sm text-destructive">Eliminar</span>
-                  </DropdownMenuItem>
-                  
-                  <Separator />
-                </>
-              }
-
-              <DropdownMenuItem
-                className={cn("flex justify-start items-center gap-2 cursor-pointer", isPending && "pointer-events-none")}
-                disabled={isPending || !postData.changeLog.length}
-                onClick={() => setOpenChangelogModal(true)}
-              >
-                <Logs className="size-5" aria-hidden />
-                <span className="text-sm text-neutral-900">
-                  Ver historial de cambios
-                </span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-      </>
+      <PostOptionsDropdown
+        postData={postData}
+        userId={userId}
+        isPending={isPending}
+        setisEditingPost={setisEditingPost}
+        setOpenDeleteModal={setOpenDeleteModal}
+        setOpenChangelogModal={setOpenChangelogModal}
+      />
     </div>
   )
 }

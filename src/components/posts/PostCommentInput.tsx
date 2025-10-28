@@ -1,16 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type HTMLAttributes } from "react";
+import { useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { Image, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import CreateCommentInput from "./CreateCommentInput";
+import useImagePicker from "@/hooks/useImagePicker";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
-import useImagePicker from "@/hooks/useImagePicker";
+import { cn } from "@/lib/utils";
 import type { Comment } from "@/types/global";
-import { useSearchParams } from "react-router";
 
-const PostCommentInput = ({postId}: {postId: string}) => {
+interface Props {
+  postId: string;
+  className?: HTMLAttributes<HTMLElement>["className"];
+}
+
+const PostCommentInput = ({postId, className}: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [searchParams] = useSearchParams();
@@ -79,7 +85,7 @@ const PostCommentInput = ({postId}: {postId: string}) => {
   }, []);
 
   return (
-    <div className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-neutral-100 border-t">
+    <div className={cn("relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-neutral-100 border-t", className)}>
       {selectedImagePreviews.length > 0 &&
         <div className="absolute -top-1 right-1 p-1.5 -translate-x-[100%] -translate-y-[100%] bg-neutral-300 rounded-sm shadow overflow-hidden">
           <button

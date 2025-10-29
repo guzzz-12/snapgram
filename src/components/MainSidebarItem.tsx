@@ -20,7 +20,7 @@ const MainSidebarItem = ({ href, title, Icon, badge }: Props) => {
       >
         <div className="sidebarIconWrapper">
           {badge &&
-            <div className="absolute -top-2 right-0 flex justify-center items-center min-w-4 h-4 px-1 text-white text-xs font-normal bg-red-600 rounded-full translate-x-[40%] outline-1 outline-white">
+            <div className="absolute -top-1.5 right-1 flex justify-center items-center min-w-4 h-4 px-1 text-white text-xs font-normal bg-red-600 rounded-full translate-x-[40%] outline-1 outline-white">
               {badge}
             </div>
           }

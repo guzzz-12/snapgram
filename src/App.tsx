@@ -43,8 +43,6 @@ const App = () => {
         }
       });
 
-      localStorage.setItem("token", token || "");
-
       return data.data;
     },
     enabled: !!userId,

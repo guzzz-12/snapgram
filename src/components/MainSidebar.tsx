@@ -128,10 +128,7 @@ const MainSidebar = () => {
           className="flex justify-start items-center gap-2 h-full py-2 cursor-pointer"
           variant="ghost"
           size="default"
-          onClick={() => {
-            localStorage.removeItem("token");
-            signOut();
-          }}
+          onClick={() => signOut()}
         >
           <div
             className="flex items-center"

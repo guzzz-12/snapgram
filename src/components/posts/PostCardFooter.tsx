@@ -55,7 +55,7 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
   });
 
   return (
-    <div className={cn("flex flex-col gap-2 pb-1 border-b", className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       <PostModal
         isOpen={!!openPostModal}
         postData={postData}
@@ -112,9 +112,9 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
         </div>
       </div>
       
-      <div className="flex justify-between items-center gap-1 w-full font-semibold text-neutral-700 text-sm">
+      <div className="flex justify-between items-center gap-1 w-full text-neutral-700 text-sm font-semibold border-t pt-2">
         <Button
-          className="gap-1 grow text-base font-normal cursor-pointer hover:bg-neutral-200"
+          className="gap-1 grow text-base font-normal bg-neutral-100 cursor-pointer hover:bg-neutral-200"
           variant="ghost"
           size="default"
           disabled={likeMutation.isPending}
@@ -131,7 +131,7 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
         </Button>
 
         <Button
-          className="gap-1 grow text-base font-normal cursor-pointer hover:bg-neutral-200"
+          className="gap-1 grow text-base font-normal bg-neutral-100 cursor-pointer hover:bg-neutral-200"
           variant="ghost"
           size="default"
           onClick={() => {
@@ -145,7 +145,7 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
         </Button>
 
         <Button
-          className="gap-1 grow text-base font-normal cursor-pointer hover:bg-neutral-200"
+          className="gap-1 grow text-base font-normal bg-neutral-100 cursor-pointer hover:bg-neutral-200"
           variant="ghost"
           size="default"
           onClick={() => {}}

@@ -11,6 +11,7 @@ export type UserType = {
   postsCount: number;
   followersCount: number;
   followingCount: number;
+  isFollowing: boolean; // true si el usuario actual sigue al usuario consultado
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;

@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import dayjs from "dayjs";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
 import { Calendar, MapPin, Pencil } from "lucide-react";
+import { toast } from "sonner";
 import ProfileEditModal from "./ProfileEditModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useClampedText from "@/hooks/useClampedText";
-import { cn } from "@/lib/utils";
+import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
 import type { UserType } from "@/types/global";
+import { cn } from "@/lib/utils";
 
 interface Props {
   userData: UserType;
@@ -23,6 +28,9 @@ const ProfileHeader = ({ userData }: Props) => {
   const [openEditModal, setOpenEditModal] = useState(false);
 
   const {user} = useCurrentUser();
+  const {getToken} = useAuth();
+
+  const queryClient = useQueryClient();
 
   const {
     isClamped,
@@ -47,6 +55,45 @@ const ProfileHeader = ({ userData }: Props) => {
       window.removeEventListener("resize", resizeHandler)
     }
   }, []);
+
+  // Mutation para seguir o dejar de seguir al usuario
+  const {mutate, isPending} = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      return axiosInstance({
+        method: "POST",
+        url: `/follows/follow-or-unfollow`,
+        data: {
+          userId: userData._id
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["user", userData.clerkId]});
+      await queryClient.invalidateQueries({queryKey: ["followers", userData._id]});
+    },
+    onError: (error) => {
+      toast.error(errorMessage(error));
+    }
+  });
+
+  // Si lo está siguiendo, cambia el texto del botón al hacer hover
+  const onMouseFollowBtnEnter = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+    if (userData.isFollowing) {
+      e.currentTarget.textContent = "Dejar de seguir";
+    }
+  }
+
+  // Si lo está siguiendo, restablecer el texto del botón al hacer hover
+  const onMouseFollowBtnLeave = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+    if (userData.isFollowing) {
+      e.currentTarget.textContent = "Siguiendo";
+    }
+  }
 
   return (
     <div className="block rounded-lg bg-slate-50 shadow overflow-hidden">
@@ -107,6 +154,19 @@ const ProfileHeader = ({ userData }: Props) => {
               >
                 <Pencil />
                 <span>Editar</span>
+              </Button>
+            }
+
+            {(user?._id !== userData._id) &&
+              <Button
+                className={cn("shrink-0 cursor-pointer", userData.isFollowing && "hover:text-red-600 hover:border-red-600 hover:bg-red-50")}
+                variant="outline"
+                disabled={isPending}
+                onMouseEnter={onMouseFollowBtnEnter}
+                onMouseLeave={onMouseFollowBtnLeave}
+                onClick={() => mutate()}
+              >
+                {userData.isFollowing ? "Siguiendo" : "Seguir"}
               </Button>
             }
           </div>

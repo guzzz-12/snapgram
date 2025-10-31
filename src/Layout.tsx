@@ -4,7 +4,8 @@ import { Toaster } from "sonner";
 import MainSidebar from "@/components/MainSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import CreateStoryModal from "@/components/stories/CreateStoryModal";
-import CreatePostModal from "./components/posts/CreatePostModal";
+import CreatePostModal from "@/components/posts/CreatePostModal";
+import SocketManager from "@/components/SocketManager";
 
 const Layout = () => {
   const {pathname} = useLocation();
@@ -17,6 +18,8 @@ const Layout = () => {
 
   return (
     <SidebarProvider>
+      <SocketManager />
+
       <div className="flex w-full min-h-screen">
         <CreatePostModal />
 

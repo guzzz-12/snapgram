@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import NotificationToast from "./NotificationToast";
 import { useSocketStore } from "@/hooks/useSocket";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { socket } from "@/utils/socket";
@@ -66,6 +67,20 @@ const SocketManager = () => {
       if (notification.notificationType === "follow") {
         queryClient.invalidateQueries({queryKey: ["followers", notification.recipientId]})
       }
+
+      toast.dismiss();
+
+      toast(
+        <NotificationToast notificationData={notification} />,
+        {
+          duration: 6000,
+          position: "bottom-left",
+          style: {
+            width: "fit-content",
+            padding: 0
+          }
+        }
+      );
     });
 
     return () => {

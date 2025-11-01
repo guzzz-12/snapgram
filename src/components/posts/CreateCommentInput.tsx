@@ -1,4 +1,4 @@
-import { type Dispatch, type HTMLAttributes, type SetStateAction } from "react";
+import { type Dispatch, type HTMLAttributes, type SetStateAction, type WheelEvent } from "react";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { Smile } from "lucide-react";
@@ -14,7 +14,20 @@ interface Props {
   setTextContent: Dispatch<SetStateAction<string>>;
 }
 
-const CreateCommentInput = ({textContent, isPending, placeholder, className, setTextContent} : Props) => {
+const CreateCommentInput = (props : Props) => {
+  const {textContent, isPending, placeholder, className, setTextContent} = props;
+
+  // Detener la propagación del evento scroll del picker al textarea
+  // para que el picker sea scrolleable con el mouse
+  const handleScrollInterception = (e: WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    e.stopPropagation(); 
+
+    // Aplicar manualmente el scroll al emoji picker
+    e.currentTarget.scrollTop += e.deltaY;
+  };
+
   return (
     <div className="relative w-full border rounded-sm overflow-hidden">
       <Popover>
@@ -28,16 +41,21 @@ const CreateCommentInput = ({textContent, isPending, placeholder, className, set
           </button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-full p-0 -translate-y-[1rem] bg-transparent">
+        <PopoverContent
+          className="w-full p-0 translate-x-[2rem] bg-transparent"
+          onWheel={handleScrollInterception}
+        >
           <Picker
-              locale="es"
-              emojiVersion="15"
-              set="twitter"
-              data={emojiData}
-              onEmojiSelect={(emoji: any) => {
-                setTextContent((prev) => prev + emoji.native)
-              }}
-            />
+            locale="es"
+            emojiVersion="15"
+            set="twitter"
+            previewPosition="none"
+            navPosition="bottom"
+            data={emojiData}
+            onEmojiSelect={(emoji: any) => {
+              setTextContent((prev) => prev + emoji.native)
+            }}
+          />
         </PopoverContent>
       </Popover>
 

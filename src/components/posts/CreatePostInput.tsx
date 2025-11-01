@@ -189,6 +189,8 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
                 locale="es"
                 emojiVersion="15"
                 set="twitter"
+                previewPosition="none"
+                navPosition="bottom"
                 data={emojiData}
                 onEmojiSelect={onEmojiPickHandler}
               />

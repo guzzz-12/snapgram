@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type WheelEvent } from "react";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { Image, Mic, Smile, X } from "lucide-react";
@@ -44,6 +44,17 @@ const ChatInput = ({ wrapperHeight }: Props) => {
     }, 2500);
   }
 
+  // Detener la propagación del evento scroll del picker al textarea
+  // para que el picker sea scrolleable con el mouse
+  const handleScrollInterception = (e: WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    e.stopPropagation(); 
+
+    // Aplicar manualmente el scroll al emoji picker
+    e.currentTarget.scrollTop += e.deltaY;
+  };
+
   return (
     <div
       style={{height: `${wrapperHeight}px`}}
@@ -81,11 +92,16 @@ const ChatInput = ({ wrapperHeight }: Props) => {
             </button>
           </PopoverTrigger>
 
-          <PopoverContent className="w-full p-0 -translate-y-[1rem] bg-transparent">
+          <PopoverContent
+            className="w-full p-0 -translate-y-[1rem] bg-transparent"
+            onWheel={handleScrollInterception}
+          >
             <Picker
               locale="es"
               emojiVersion="15"
               set="twitter"
+              previewPosition="none"
+              navPosition="bottom"
               data={emojiData}
               onEmojiSelect={(emoji: any) => {
                 setMessageText((prev) => prev + emoji.native)

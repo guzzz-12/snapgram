@@ -32,10 +32,10 @@ const NotificationToast = ({ notificationData }: Props) => {
         <p className="text-sm text-neutral-50">
           <span className="font-semibold">{sender.fullName}</span>
           &nbsp;
-          {type === "follow" && "te comenzo a seguir."}
-          {type === "like" && "le gusto tu publicacion."}
-          {type === "comment" && "comento tu publicacion."}
-          {type === "reply" && "respondio a tu comentario en una publicacion."}
+          {type === "follow" && "te comenzó a seguir."}
+          {type === "like" && "le gustó tu publicación."}
+          {type === "comment" && "comentó tu publicación."}
+          {type === "reply" && "respondió a tu comentario en una publicación."}
         </p>
       </div>
     </Link>

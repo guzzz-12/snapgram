@@ -4,6 +4,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import { toast } from "sonner";
 import { IoFileTrayStackedOutline } from "react-icons/io5";
 import RightSidebar from "@/components/RightSidebar";
+import NotificationsOptions from "@/components/notifications/NotificationsOptions";
 import NotificationsList from "@/components/notifications/NotificationsList";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,6 +57,7 @@ const ConnectionsPage = () => {
     refetchOnWindowFocus: false
   });
 
+  // Mutation para marcar todas las notificaciones como vistas
   const {mutate: markAllAsSeen} = useMutation({
     mutationFn: async () => {
       const token = await getToken();
@@ -100,14 +102,18 @@ const ConnectionsPage = () => {
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
 
       <section className="flex flex-col gap-0 w-full max-w-[900px] mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold">
-            Notificaciones
-          </h1>
+        <div className="flex justify-between items-start gap-8 w-full">
+          <div className="w-full mb-6">
+            <h1 className="text-2xl font-semibold">
+              Notificaciones
+            </h1>
 
-          <p className="text-sm text-neutral-700">
-            Administra tus notificaciones
-          </p>
+            <p className="text-sm text-neutral-700">
+              Administra tus notificaciones
+            </p>
+          </div>
+
+          <NotificationsOptions />
         </div>
 
         <Tabs

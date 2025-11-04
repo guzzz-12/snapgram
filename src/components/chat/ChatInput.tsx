@@ -1,23 +1,39 @@
-import { useEffect, useRef, useState, type WheelEvent } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction, type WheelEvent } from "react";
+import { useNavigate } from "react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { Image, Mic, Smile, X } from "lucide-react";
-import { Textarea } from "../ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import useImagePicker from "@/hooks/useImagePicker";
+import { errorMessage } from "@/utils/errorMessage";
+import { axiosInstance } from "@/utils/axiosInstance";
+import type { ChatType, MessageType } from "@/types/global";
 
 interface Props {
   wrapperHeight: number;
+  recipientId: string;
+  chatId: string | undefined;
+  setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>
 }
 
-const ChatInput = ({ wrapperHeight }: Props) => {
+const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const navigate = useNavigate();
+
   const [messageText, setMessageText] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+
+  const {getToken} = useAuth();
+
+  const queryClient = useQueryClient();
 
   const {selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
 
+  // Limpiar los estados al salir de la página
   useEffect(() => {
     return () => {
       setMessageText("");
@@ -30,19 +46,57 @@ const ChatInput = ({ wrapperHeight }: Props) => {
     }
   }, []);
 
-  const onSubmitHandler = async () => {
-    if (!messageText.trim() && !selectedImageFiles.length) return;
+  // Mutation para enviar el mensaje
+  const {mutate, isPending: submitting} = useMutation({
+    mutationKey: ["send-private-message", chatId],
+    mutationFn: async () => {
+      const token = await getToken();
 
-    setSubmitting(true);
+      const formData = new FormData();
+      formData.append("text", messageText);
+      formData.append("recipientId", recipientId);
 
-    setTimeout(() => {
+      if (chatId && !chatId.startsWith("temp_")) {
+        formData.append("chatId", chatId);
+      }
+
+      selectedImageFiles.forEach(file => formData.append("file", file));
+
+      const {data} = await axiosInstance<{
+        data: MessageType;
+        isNewChat: boolean;
+        chat: ChatType | null;
+      }>({
+        method: "POST",
+        url: `/messages/send-private`,
+        data: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      return data;
+    },
+    onSuccess: async (data) => {
       setMessageText("");
       setSelectedImageFiles([]);
       setSelectedImagePreviews([]);
-      setSubmitting(false);
-      console.log({messageText, selectedImageFiles});
-    }, 2500);
-  }
+
+      if(fileInputRef.current) {
+        fileInputRef.current.value = ""
+      };
+
+      if (data.isNewChat) {
+        await queryClient.invalidateQueries({queryKey: ["chats"]});
+        setTemporaryChat(null);
+        navigate(`/messages/${data.chat!._id}`, {replace: true});
+      }
+    },
+    onError: (error) => {
+      toast.error(errorMessage(error));
+    },
+  });
 
   // Detener la propagación del evento scroll del picker al textarea
   // para que el picker sea scrolleable con el mouse
@@ -144,7 +198,7 @@ const ChatInput = ({ wrapperHeight }: Props) => {
         <button
           className="p-1 text-sm text-blue-700 font-semibold cursor-pointer hover:underline"
           disabled={submitting}
-          onClick={onSubmitHandler}
+          onClick={() => mutate()}
         >
           Enviar
         </button>

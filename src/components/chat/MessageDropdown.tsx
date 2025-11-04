@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import type { MessageType } from "@/dummy-data";
 import { Pencil, Trash2Icon } from "lucide-react";
+import type { MessageType } from "@/types/global";
 
 interface Props {
   messageData: MessageType;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const MessageDropdown = ({ messageData, currentUserId, children }: Props) => {
-  const isCurrentUserSender = messageData.from_user_id === currentUserId;
+  const isCurrentUserSender = messageData.sender._id === currentUserId;
 
   return (
     <DropdownMenu>

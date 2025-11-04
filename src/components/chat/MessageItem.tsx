@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 import MessageDropdown from "./MessageDropdown";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import dayJsInstance from "@/utils/dayJsInstance";
-import { dummyUsersData, type MessageType } from "@/dummy-data";
+import type { MessageType } from "@/types/global";
 
 interface Props {
   currentUserId: string;
@@ -12,17 +12,17 @@ interface Props {
 }
 
 const MessageItem = ({ currentUserId, messageData }: Props) => {
-  const isCurrentUserSender = messageData.from_user_id === currentUserId;
-  const messageUser = dummyUsersData.find((user) => user._id === messageData.from_user_id)!;
+  const isCurrentUserSender = messageData.sender._id === currentUserId;
+  const messageUser = messageData.sender;
 
   return (
     <div className="flex justify-start gap-2 w-full">
       {!isCurrentUserSender &&
-        <Link to={`/profile/${messageData.from_user_id}`}>
+        <Link to={`/profile/${messageUser.clerkId}`}>
           <Avatar className="w-[30px] h-[30px] shrink-0 border">
-            <AvatarImage src={messageUser.profile_picture} />
+            <AvatarImage src={messageUser.profilePicture} />
             <AvatarFallback>
-              {messageUser.full_name.charAt(0).toUpperCase()}
+              {messageUser.fullName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Link>
@@ -35,10 +35,10 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
           {/* Header del mensaje */}
           <div className="flex justify-between items-center gap-2 w-full overflow-hidden">
             <Link
-              to={`/profile/${messageData.from_user_id}`}
+              to={`/profile/${messageUser._id}`}
               className="w-full text-sm text-blue-600 font-semibold truncate"
             >
-              {messageUser.full_name}
+              {messageUser.fullName}
             </Link>
 
             <MessageDropdown
@@ -55,11 +55,11 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
           </div>
           
           {/* Contenido multimedia del mensaje (si lo hay) */}
-          {messageData.media_url && (
+          {messageData.type !== "text" && (
             <div className="w-full h-auto mt-2 rounded-md overflow-hidden">
               <img
                 className="w-full h-full object-cover"
-                src={messageData.media_url}
+                src={messageData.fileUrl || ""}
                 alt=""
               />
             </div>

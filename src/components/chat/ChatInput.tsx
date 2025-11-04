@@ -4,8 +4,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
-import { Image, Mic, Smile, X } from "lucide-react";
+import { Image, Mic, Smile } from "lucide-react";
 import { toast } from "sonner";
+import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import useImagePicker from "@/hooks/useImagePicker";
@@ -17,7 +18,7 @@ interface Props {
   wrapperHeight: number;
   recipientId: string;
   chatId: string | undefined;
-  setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>
+  setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
 const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Props) => {
@@ -115,22 +116,17 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Pro
       className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-white"
     >
       {selectedImagePreviews.length > 0 &&
-        <div className="absolute -top-1 right-1 p-1.5 -translate-x-[100%] -translate-y-[100%] bg-neutral-300 rounded-sm shadow overflow-hidden">
-          <button
-            className="absolute top-1 right-1 p-0.5 rounded-full bg-red-50 cursor-pointer"
-            onClick={() => {
-              setSelectedImageFiles([]);
-              setSelectedImagePreviews([]);
-            }}
-          >
-            <X className="text-destructive" aria-hidden />
-            <span className="sr-only">Eliminar imagen</span>
-          </button>
-
-          <img
-            src={selectedImagePreviews[0]}
-            className="w-[80px] h-[80px] object-cover"
-          />
+        <div className="absolute -top-1 left-1 flex justify-start items-center gap-2 max-w-[80%] bg-slate-100 shadow border rounded-md translate-x-[24px] -translate-y-[100%] overflow-x-hidden">
+          <div className="px-4 py-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+            <SelectedImagesPreviews
+              fileInputRef={fileInputRef}
+              isPending={submitting}
+              selectedImagePreviews={selectedImagePreviews}
+              selectedImageFiles={selectedImageFiles}
+              setSelectedImagePreviews={setSelectedImagePreviews}
+              setSelectedImageFiles={setSelectedImageFiles}
+            />
+          </div>
         </div>
       }
 
@@ -181,7 +177,7 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Pro
             onClick={() => fileInputRef.current?.click()}
           >
             <Image className="text-neutral-600" aria-hidden />
-            <span className="sr-only">Seleccionar imagen</span>
+            <span className="sr-only">Adjuntar imágenes</span>
           </button>
 
           <button
@@ -209,7 +205,7 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Pro
           ref={fileInputRef}
           type="file"
           hidden
-          multiple={false}
+          multiple
           disabled={submitting}
           accept="image/png, image/jpg, image/jpeg, image/webp"
           onChange={onImagePickHandler}

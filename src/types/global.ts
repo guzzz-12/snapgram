@@ -72,18 +72,6 @@ export type PostWithLikes = {
   updatedAt: string;
 }
 
-export type MessageType = {
-  _id: string;
-  fromUserId: string;
-  toUserId: string;
-  text?: string;
-  messageType: "text" | "image" | "video";
-  mediaUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-  seen: boolean;
-}
-
 export type StoryType = {
   _id: string;
   user: UserType;
@@ -185,6 +173,30 @@ export type NotificationType = {
   originalPost: PostType | null;
   isSeen: boolean;
   isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ChatType = {
+  _id: string;
+  type: "private" | "group";
+  participants: UserType[];
+  groupName: string | null;
+  groupAdmin: UserType | null;
+  lastMessage: MessageType | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type MessageType = {
+  _id: string;
+  chat: ChatType;
+  sender: UserType;
+  text: string | null;
+  fileUrl: string | null;
+  fileId: string | null;
+  seenBy: UserType[];
+  type: "text" | "file" | "fileWithText";
   createdAt: string;
   updatedAt: string;
 }

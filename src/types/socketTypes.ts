@@ -1,3 +1,5 @@
+import type { ChatType, MessageType, UserType } from "./global";
+
 export type OnlineUser = {
   clerkUserId: string;
   socketId: string;
@@ -17,6 +19,12 @@ export type NotificationEventData = {
   };
 }
 
+export type NewMessageEventData = {
+  message: MessageType;
+  chat: ChatType;
+  isNewChat: boolean;
+}
+
 // Eventos de socket.io que el cliente envía
 export interface ClientEvents {
   getOnlineUsers: ({userId}: {userId: string}) => void;
@@ -26,4 +34,5 @@ export interface ClientEvents {
 export interface ServerEvents {
   setOnlineUsers: (onlineUsers: OnlineUser[]) => void;
   newNotification: (notification: NotificationEventData) => void;
+  newPrivateMessage: (newMessage: NewMessageEventData) => void;
 }

@@ -53,7 +53,7 @@ const ChatList = ({ headerHeight, temporaryChatItem }: Props) => {
     queryFn: ({pageParam}) => getChats(pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnMount: false
+    refetchOnWindowFocus: false
   });
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});

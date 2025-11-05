@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import NotificationToast from "./NotificationToast";
+import NewMessageToast from "./NewMessageToast";
 import { useSocketStore } from "@/hooks/useSocket";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { socket } from "@/utils/socket";
 import { errorMessage } from "@/utils/errorMessage";
 
 const SocketManager = () => {
+  const {pathname} = useLocation();
+
   const [token, setToken] = useState<string | null>(null);
 
-  const { getToken, userId } = useAuth();
+  const { getToken } = useAuth();
+
+  const {user: userDocument} = useCurrentUser();
 
   const queryClient = useQueryClient();
 
@@ -37,9 +44,9 @@ const SocketManager = () => {
 
   // Conectar el socket y escuchar los eventos
   useEffect(() => {
-    if (!userId || !token) return;
+    if (!userDocument || !token) return;
 
-    connectSocket(token);
+    connectSocket({ token, userId: userDocument._id });
 
     socket.on("connect", () => {
       setConnected(true);
@@ -83,13 +90,35 @@ const SocketManager = () => {
       );
     });
 
+    // Escuchar el evento de nuevo mensaje (también se escucha en useNewMessage)
+    socket.on("newPrivateMessage", (data) => {
+      const senderId = data.message.sender._id;
+
+      // Mostrar toast al usuario que recibio el mensaje
+      // si no está en la página del chat
+      if (senderId !== userDocument._id && pathname !== `/messages/${data.chat}`) {
+        toast(
+          <NewMessageToast messageData={data.message} />,
+          {
+            duration: 6000,
+            position: "bottom-left",
+            style: {
+              width: "fit-content",
+              padding: 0
+            }
+          }
+        )
+      }
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("setOnlineUsers");
       socket.off("newNotification");
+      socket.off("newPrivateMessage");
     }
-  }, [socket, userId, token]);
+  }, [socket, token, userDocument, pathname]);
 
   return null;
 }

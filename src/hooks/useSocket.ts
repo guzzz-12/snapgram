@@ -8,7 +8,7 @@ interface SocketState {
   onlineUsers: OnlineUser[];
   setConnected: (isConnected: boolean) => void;
   setOnlineUsers: (onlineUsers: OnlineUser[]) => void;
-  connectSocket: (token: string) => void;
+  connectSocket: ( {token, userId}: {token: string; userId: string}) => void;
   disconnectSocket: () => void;
 }
 
@@ -18,10 +18,10 @@ export const useSocketStore = create<SocketState>((set) => ({
   onlineUsers: [],
   setConnected: (isConnected) => set({ isConnected }),
   setOnlineUsers: (onlineUsers) => set({ onlineUsers }),
-  connectSocket: (token) => {
+  connectSocket: ({token, userId}) => {
     if (socket.connected || !token) return; 
 
-    socket.auth = { token: `Bearer ${token}` };
+    socket.auth = { token: `Bearer ${token}`, userId };
 
     socket.connect();
   },

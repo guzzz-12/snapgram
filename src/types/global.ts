@@ -190,11 +190,11 @@ export type ChatType = {
 
 export type MessageType = {
   _id: string;
-  chat: ChatType;
+  chat: string;
   sender: UserType;
   text: string | null;
-  fileUrl: string | null;
-  fileId: string | null;
+  fileUrls: string[];
+  fileIds: string[];
   seenBy: UserType[];
   type: "text" | "file" | "fileWithText";
   createdAt: string;

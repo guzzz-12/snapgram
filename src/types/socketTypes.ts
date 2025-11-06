@@ -35,4 +35,5 @@ export interface ServerEvents {
   setOnlineUsers: (onlineUsers: OnlineUser[]) => void;
   newNotification: (notification: NotificationEventData) => void;
   newPrivateMessage: (newMessage: NewMessageEventData) => void;
+  deletedMessage: (deletedMessage: MessageType) => void;
 }

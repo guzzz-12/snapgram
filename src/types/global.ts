@@ -196,6 +196,8 @@ export type MessageType = {
   fileUrls: string[];
   fileIds: string[];
   seenBy: UserType[];
+  deletedFor: string[];
+  deletedForAll: boolean;
   type: "text" | "file" | "fileWithText";
   createdAt: string;
   updatedAt: string;

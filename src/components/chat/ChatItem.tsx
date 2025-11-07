@@ -1,7 +1,34 @@
 import type { ChatType } from "@/types/global"
 import { NavLink } from "react-router";
+import dayjs from "dayjs";
+import updateLocale from 'dayjs/plugin/updateLocale';
+import { MdOutlineAttachment } from "react-icons/md";
+import { LuDot } from "react-icons/lu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+
+dayjs.extend(updateLocale)
+
+dayjs.updateLocale("es", {
+  relativeTime: {
+    // Definición de futuro y pasado
+    future: "en %s", // Usar solo %s para evitar "en x m" (que no es el formato pedido)
+    past: "%s",     // Usar el sufijo manualmente en cada unidad
+
+    // Unidades de tiempo personalizadas para el formato corto
+    s: "1 min", // Segundos: "1 min (hace segundos)"
+    m: "1 min", // Un minuto: "1 min"
+    mm: "%d min", // Múltiples minutos: "x min"
+    h: "1 h", // Una hora: "1 h"
+    hh: "%d h", // Múltiples horas: "x h"
+    d: "1 d", // Un día: "1 d"
+    dd: "%d d", // Múltiples días: "x d"
+    M: "1 mes", // Un mes: "1 mes"
+    MM: "%d meses", // Múltiples meses
+    y: "1 a", // Un año: "1 a"
+    yy: "%d a" // Múltiples años: "x a"
+  }
+})
 
 interface Props {
   chatData: ChatType;
@@ -12,7 +39,9 @@ const ChatItem = ({chatData}: Props) => {
 
   const otherUser = chatData.participants.find((participant) => participant._id !== user?._id);
 
-  if (!otherUser) return null;
+  const lastMessage = chatData.lastMessage;
+
+  if (!otherUser || !user) return null;
 
   return (
     <NavLink
@@ -37,9 +66,32 @@ const ChatItem = ({chatData}: Props) => {
           {otherUser.fullName}
         </p>
         
-        <p className="w-full text-xs text-neutral-700 truncate">
-          @{otherUser.username}
-        </p>
+        {/* Mostrar el último mensaje del chat */}
+        {lastMessage &&
+          <div className="flex items-center gap-0.5 w-full text-xs text-neutral-700 font-light overflow-hidden">
+            <span className="shrink-0">
+              {lastMessage.sender === user._id && "Tú:"}
+            </span>
+
+            <p className="truncate">
+              {lastMessage.text}
+            </p>
+
+            {lastMessage.type !== "text" &&
+              <p className="truncate">
+                <MdOutlineAttachment className="inline shrink-0" aria-hidden />
+                {" "}
+                Archivo adjunto
+              </p>
+            }
+
+            <LuDot className="size-2 shrink-0" aria-hidden />
+
+            <p className="shrink-0">
+              {dayjs(lastMessage.createdAt).fromNow().replace("hace ", "")}
+            </p>
+          </div>
+        }
       </div>
     </NavLink>
   )

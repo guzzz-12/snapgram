@@ -160,3 +160,57 @@ export const updateChatsListCache = (props: UpdateChatsListCacheProps) => {
     });
   }
 }
+
+/**
+ * Actualizar la caché de la lista de chats para
+ * actualizar el preview del último mensaje recibido
+ */
+export const updateChatLastMessageCache = (props: UpdateChatsListCacheProps) => {
+  const { queryClient, newMessage } = props;
+
+  queryClient.setQueryData(["chats"], (oldData: InfiniteData<{
+    data: ChatType[];
+    hasMore: boolean;
+    nextPage: number | null;
+  }>) => {
+    if (!oldData) {
+      return oldData;
+    }
+
+    // Buscar la página que contiene el chat correspondiente al mensaje recibido
+    const chatPage = oldData.pages.find((page, _index) => {
+      return page.data.some((chat) => chat._id === newMessage.chat._id);
+    });
+
+    if (!chatPage) {
+      return oldData;
+    }
+
+    // Buscar el índice de la página del chat en la caché
+    const chatPageIndex = oldData.pages.indexOf(chatPage);
+
+    const updatedChatPage = {
+      ...chatPage,
+      data: [...chatPage.data]
+    };
+
+    // Buscar el índice del chat correspondiente al mensaje recibido
+    const updatedChatIndex = updatedChatPage.data.findIndex((chat) => chat._id === newMessage.chat._id);
+
+    if (updatedChatIndex === -1) {
+      return oldData;
+    }
+    
+    // Actualizar el chat correspondiente al mensaje recibido
+    updatedChatPage.data.splice(updatedChatIndex, 1, newMessage.chat);
+
+    // Actualizar la página del chat en la caché
+    const updatedPages = [...oldData.pages];
+    updatedPages.splice(chatPageIndex, 1, updatedChatPage);
+    
+    return {
+      ...oldData,
+      pages: updatedPages,
+    };
+  });
+}

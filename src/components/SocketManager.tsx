@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -10,10 +10,11 @@ import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { socket } from "@/utils/socket";
 import { errorMessage } from "@/utils/errorMessage";
-import { updateDeletedMessageCache } from "@/utils/updateMsgsDataCache";
+import { updateChatLastMessageCache, updateDeletedMessageCache, updateMessagesCache } from "@/utils/updateMsgsDataCache";
 
 const SocketManager = () => {
   const {pathname} = useLocation();
+  const params = useParams();
 
   const [token, setToken] = useState<string | null>(null);
 
@@ -91,9 +92,44 @@ const SocketManager = () => {
       );
     });
 
-    // Escuchar el evento de nuevo mensaje (también se escucha en useNewMessage)
+    // Escuchar el evento de mensaje eliminado
+    socket.on("deletedMessage", (data) => {
+      updateDeletedMessageCache({
+        deletedMessage: data,
+        queryClient
+      });
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("setOnlineUsers");
+      socket.off("newNotification");
+      socket.off("newPrivateMessage");
+      socket.off("deletedMessage");
+    }
+  }, [socket, token, userDocument]);
+
+
+  // Escuchar el evento de nuevo mensaje (también se escucha en useNewMessage)
+  useEffect(() => {
+    if (!userDocument) return;
+
     socket.on("newPrivateMessage", (data) => {
       const senderId = data.message.sender._id;
+      const currentChatId = params.chatId || "";
+
+      updateMessagesCache({
+        queryClient,
+        newMessage: data,
+        chatId: currentChatId
+      });
+
+      updateChatLastMessageCache({
+        queryClient,
+        newMessage: data,
+        currentUserId: userDocument._id
+      });
 
       // Mostrar toast al usuario que recibio el mensaje
       // si no está en la página del chat
@@ -112,23 +148,11 @@ const SocketManager = () => {
       }
     });
 
-    // Escuchar el evento de mensaje eliminado
-    socket.on("deletedMessage", (data) => {
-      updateDeletedMessageCache({
-        deletedMessage: data,
-        queryClient
-      });
-    });
-
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("setOnlineUsers");
-      socket.off("newNotification");
       socket.off("newPrivateMessage");
-      socket.off("deletedMessage");
     }
-  }, [socket, token, userDocument, pathname]);
+  }, [socket, userDocument, pathname, params]);
+
 
   return null;
 }

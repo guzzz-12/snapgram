@@ -1,15 +1,19 @@
 import type { ReactNode } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Pencil, Trash2Icon } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import type { MessageType } from "@/types/global";
 
 interface Props {
   messageData: MessageType;
   currentUserId: string;
+  isPending: boolean;
   children: ReactNode;
+  onDelete: (deleteFor: "me" | "all") => void;
 }
 
-const MessageDropdown = ({ messageData, currentUserId, children }: Props) => {
+const MessageDropdown = (props: Props) => {
+  const { messageData, currentUserId, isPending, children, onDelete } = props;
+
   const isCurrentUserSender = messageData.sender._id === currentUserId;
 
   return (
@@ -26,12 +30,20 @@ const MessageDropdown = ({ messageData, currentUserId, children }: Props) => {
               <span className="text-sm text-neutral-900">Editar</span>
             </DropdownMenuItem>
             
-            <DropdownMenuItem className="flex justify-start items-center gap-2 cursor-pointer">
+            <DropdownMenuItem
+              className="flex justify-start items-center gap-2 cursor-pointer"
+              disabled={isPending}
+              onClick={() => onDelete("me")}
+            >
               <Trash2Icon className="size-5 text-neutral-500" />
               <span className="text-sm text-neutral-900">Eliminar para mí</span>
             </DropdownMenuItem>
 
-            <DropdownMenuItem className="flex justify-start items-center gap-2 cursor-pointer">
+            <DropdownMenuItem
+              className="flex justify-start items-center gap-2 cursor-pointer"
+              disabled={isPending}
+              onClick={() => onDelete("all")}
+            >
               <Trash2Icon className="size-5 text-destructive opacity-50" />
               <span className="text-sm text-destructive">Eliminar para todos</span>
             </DropdownMenuItem>
@@ -40,7 +52,11 @@ const MessageDropdown = ({ messageData, currentUserId, children }: Props) => {
         }
 
         {!isCurrentUserSender &&
-          <DropdownMenuItem className="flex justify-start items-center gap-2 cursor-pointer">
+          <DropdownMenuItem
+            className="flex justify-start items-center gap-2 cursor-pointer"
+            disabled={isPending}
+            onClick={() => onDelete("me")}
+          >
             <Trash2Icon className="size-5 text-neutral-500" />
             <span className="text-sm text-neutral-900">Eliminar para mí</span>
           </DropdownMenuItem>

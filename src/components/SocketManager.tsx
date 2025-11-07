@@ -10,6 +10,7 @@ import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { socket } from "@/utils/socket";
 import { errorMessage } from "@/utils/errorMessage";
+import { updateDeletedMessageCache } from "@/utils/updateMsgsDataCache";
 
 const SocketManager = () => {
   const {pathname} = useLocation();
@@ -96,7 +97,7 @@ const SocketManager = () => {
 
       // Mostrar toast al usuario que recibio el mensaje
       // si no está en la página del chat
-      if (senderId !== userDocument._id && pathname !== `/messages/${data.chat}`) {
+      if (senderId !== userDocument._id && pathname !== `/messages/${data.chat._id}`) {
         toast(
           <NewMessageToast messageData={data.message} />,
           {
@@ -111,12 +112,21 @@ const SocketManager = () => {
       }
     });
 
+    // Escuchar el evento de mensaje eliminado
+    socket.on("deletedMessage", (data) => {
+      updateDeletedMessageCache({
+        deletedMessage: data,
+        queryClient
+      });
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("setOnlineUsers");
       socket.off("newNotification");
       socket.off("newPrivateMessage");
+      socket.off("deletedMessage");
     }
   }, [socket, token, userDocument, pathname]);
 

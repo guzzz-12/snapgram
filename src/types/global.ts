@@ -183,7 +183,14 @@ export type ChatType = {
   participants: UserType[];
   groupName: string | null;
   groupAdmin: UserType | null;
-  lastMessage: MessageType | null;
+  lastMessage: {
+    _id: string;
+    sender: string;
+    text: string | null;
+    fileUrls: string[];
+    type: "text" | "file" | "fileWithText";
+    createdAt: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
 }

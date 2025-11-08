@@ -1,13 +1,18 @@
-import type { ChatType } from "@/types/global"
 import { NavLink } from "react-router";
+import { useAuth } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import updateLocale from 'dayjs/plugin/updateLocale';
+import updateLocale from "dayjs/plugin/updateLocale";
 import { MdOutlineAttachment } from "react-icons/md";
 import { LuDot } from "react-icons/lu";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useUnreadChats } from "@/hooks/useUnreadChats";
+import { updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
+import { axiosInstance } from "@/utils/axiosInstance";
+import type { ChatType } from "@/types/global";
 
-dayjs.extend(updateLocale)
+dayjs.extend(updateLocale);
 
 dayjs.updateLocale("es", {
   relativeTime: {
@@ -41,15 +46,60 @@ const ChatItem = ({chatData}: Props) => {
 
   const lastMessage = chatData.lastMessage;
 
+  const {getToken} = useAuth();
+  
+  const queryClient = useQueryClient();
+
+  const {unreadChats, setUnreadChats} = useUnreadChats();
+
+  // Mutation para restablecer el contador de mensajes sin leer del usuario en el chat
+  const {mutate: resetUnreadMessagesCounter, isPending} = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      const {data} = await axiosInstance<{data: ChatType}>({
+        method: "PUT",
+        url: `/chats/reset-unread-count/${chatData._id}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      return data;
+    },
+    onSuccess: (data) => {
+      updateUnreadMessagesCounterCache({chat: data.data, queryClient});
+    }
+  });
+
+  // Actualizar el contador de mensajes sin leer del chat al hacer clic en el chat
+  // Restar 1 al contador global de chats con mensajes sin leer
+  const onClickHandler = () => {
+    const hasUnreadMessages = chatData.unseenMessages.some((counter) => {
+      return counter.user === user?._id;
+    });
+
+    if (hasUnreadMessages && !isPending) {
+      resetUnreadMessagesCounter();
+      setUnreadChats(unreadChats - 1);
+    }
+  }
+
   if (!otherUser || !user) return null;
+
+  // Obtener el contador de mensajes sin leer del usuario en el chat
+  const unReadMessagesCounter = chatData.unseenMessages.find(counter => {
+    return counter.user === user._id
+  })!
 
   return (
     <NavLink
       key={chatData._id}
-      to={`/messages/${chatData._id}`}
       className={({isActive}) => (
         `flex justify-start items-center gap-2 px-4 py-3 border-b hover:bg-gray-100 cursor-pointer last:mb-0 ${isActive ? "bg-slate-200" : ""}`
       )}
+      to={`/messages/${chatData._id}`}
+      onClick={onClickHandler}
     >
       <Avatar className="w-[40px] h-[40px] shrink-0 outline-2 outline-white">
         <AvatarImage
@@ -95,10 +145,10 @@ const ChatItem = ({chatData}: Props) => {
       </div>
 
       {/* Mostrar la cantidad de mensajes no leidos en el chat */}
-      {chatData.unseenMessages.length > 0 &&
+      {unReadMessagesCounter.count > 0 &&
         <div className="flex justify-center items-center min-w-[18px] h-[18px] p-1 bg-red-600 rounded-full shrink-0 outline-2 outline-white">
           <span className="text-xs font-semibold text-white">
-            {chatData.unseenMessages.length > 99 ? "99+" : chatData.unseenMessages.length}
+            {unReadMessagesCounter.count > 99 ? "99+" : unReadMessagesCounter.count}
           </span>
         </div>
       }

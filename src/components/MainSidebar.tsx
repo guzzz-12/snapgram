@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
+import { useUnreadChats } from "@/hooks/useUnreadChats";
 import logo from "@/assets/logo-simple.webp";
 
 const MainSidebar = () => {
@@ -22,6 +23,8 @@ const MainSidebar = () => {
   const {user, loadingUser} = useCurrentUser();
 
   const {unseenNotifications} = useUnseenNotifications();
+
+  const {unreadChats} = useUnreadChats();
 
   const {signOut} = useClerk();
 
@@ -68,6 +71,7 @@ const MainSidebar = () => {
             href="/messages"
             title="Mensajes"
             Icon={LuMessageCircle}
+            badge={unreadChats > 0 ? unreadChats : undefined}
           />
 
           <MainSidebarItem
@@ -125,7 +129,7 @@ const MainSidebar = () => {
 
       <SidebarFooter className="mb-4">
         <Button
-          className="flex justify-start items-center gap-2 h-full py-2 cursor-pointer"
+          className="flex justify-start items-center gap-2 h-full py-2 bg-neutral-100 shadow cursor-pointer"
           variant="ghost"
           size="default"
           onClick={() => signOut()}

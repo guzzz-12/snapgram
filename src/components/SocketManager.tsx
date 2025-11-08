@@ -8,9 +8,10 @@ import NewMessageToast from "./NewMessageToast";
 import { useSocketStore } from "@/hooks/useSocket";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { socket } from "@/utils/socket";
 import { errorMessage } from "@/utils/errorMessage";
-import { updateChatLastMessageCache, updateDeletedMessageCache, updateMessagesCache } from "@/utils/updateMsgsDataCache";
+import { updateChatLastMessageCache, updateDeletedMessageCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
 
 const SocketManager = () => {
   const {pathname} = useLocation();
@@ -25,6 +26,8 @@ const SocketManager = () => {
   const queryClient = useQueryClient();
 
   const { increaseNotificationsCount } = useUnseenNotifications();
+
+  const { unreadChats, addToUnreadChats } = useUnreadChats();
 
   // Consultar el token de autenticación
   useEffect(() => {
@@ -131,6 +134,17 @@ const SocketManager = () => {
         currentUserId: userDocument._id
       });
 
+      // Actualizar el contador de mensajes no leidos al recipiente
+      if (userDocument._id !== senderId) {
+        updateUnreadMessagesCounterCache({
+          chat: data.chat,
+          queryClient
+        });
+  
+        addToUnreadChats(data.chat._id);
+      }
+
+
       // Mostrar toast al usuario que recibio el mensaje
       // si no está en la página del chat
       if (senderId !== userDocument._id && pathname !== `/messages/${data.chat._id}`) {
@@ -151,7 +165,7 @@ const SocketManager = () => {
     return () => {
       socket.off("newPrivateMessage");
     }
-  }, [socket, userDocument, pathname, params]);
+  }, [socket, userDocument, pathname, params, unreadChats]);
 
 
   return null;

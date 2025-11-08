@@ -118,6 +118,68 @@ export const updateDeletedMessageCache = (props: UpdateDeletedMsgCacheProps) => 
 }
 
 
+/** Actualizar el contador de mensajes no leídos del chat en la caché */
+export const updateUnreadMessagesCounterCache = (props: {chat: ChatType, queryClient: QueryClient}) => {
+  const { queryClient, chat } = props;
+
+  queryClient.setQueryData(["chats"], (oldData: InfiniteData<{
+    data: ChatType[];
+    hasMore: boolean;
+    nextPage: number | null;
+  }>) => {
+    if (!oldData) {
+      return oldData;
+    }
+
+    // Buscar la página que contiene el chat actualizado
+    const chatPage = oldData.pages.find((page) => {
+      return page.data.some((chatItem) => chatItem._id === chat._id)
+    });
+
+    if (!chatPage) {
+      return oldData;
+    }
+
+    // Buscar el índice de la página que contiene el chat actualizado
+    const updatedChatPageIndex = oldData.pages.findIndex((page) => {
+      return page.data.some((chatItem) => chatItem._id === chat._id)
+    });
+
+    if (updatedChatPageIndex === -1) {
+      return oldData;
+    }
+
+    // Crear una copia de la página que contiene el chat actualizado
+    const updatedChatPage = {
+      ...chatPage,
+      data: [...chatPage.data]
+    };
+
+    // Buscar el índice del chat actualizado en la página
+    const updatedChatIndex = updatedChatPage.data.findIndex((chatItem) => {
+      return chatItem._id === chat._id;
+    });
+
+    if (updatedChatIndex === -1) {
+      return oldData;
+    }
+
+    // Actualizar el chat en la data
+    updatedChatPage.data.splice(updatedChatIndex, 1, chat);
+
+    // Actualizar la página del chat en la caché
+    const updatedPages = [...oldData.pages];
+    updatedPages.splice(updatedChatPageIndex, 1, updatedChatPage);
+
+    // Retornar la caché actualizada
+    return {
+      ...oldData,
+      pages: updatedPages
+    };
+  });
+}
+
+
 /**
  * Actualizar la caché de la lista de chats para agregar
  * el nuevo chat a la lista de chats del usuario recipiente
@@ -187,8 +249,11 @@ export const updateChatLastMessageCache = (props: UpdateChatsListCacheProps) => 
     }
 
     // Buscar el índice de la página del chat en la caché
-    const chatPageIndex = oldData.pages.indexOf(chatPage);
+    const chatPageIndex = oldData.pages.findIndex((page) => {
+      return page.data.some((chat) => chat._id === newMessage.chat._id)
+    });
 
+    // Crear una copia de la página del chat actualizado
     const updatedChatPage = {
       ...chatPage,
       data: [...chatPage.data]

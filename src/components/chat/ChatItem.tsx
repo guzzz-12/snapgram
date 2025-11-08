@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import updateLocale from "dayjs/plugin/updateLocale";
 import { MdOutlineAttachment } from "react-icons/md";
 import { LuDot } from "react-icons/lu";
+import UnreadMsgsCounterBadge from "./UnreadMsgsCounterBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
@@ -101,15 +102,25 @@ const ChatItem = ({chatData}: Props) => {
       to={`/messages/${chatData._id}`}
       onClick={onClickHandler}
     >
-      <Avatar className="w-[40px] h-[40px] shrink-0 outline-2 outline-white">
-        <AvatarImage
-          className="w-full h-full object-cover"
-          src={otherUser.profilePicture}
-        />
-        <AvatarFallback>
-          {otherUser.username.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      <div className="relative shrink-0">
+        <Avatar className="w-[40px] h-[40px] outline-2 outline-white">
+          <AvatarImage
+            className="w-full h-full object-cover"
+            src={otherUser.profilePicture}
+          />
+          <AvatarFallback>
+            {otherUser.username.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+
+        {/* Contador de mensajes sin leer */}
+        <div className="absolute -bottom-1 -right-1 z-10">
+          <UnreadMsgsCounterBadge
+            className="flex min-[900px]:hidden"
+            counter={unReadMessagesCounter}
+          />
+        </div>
+      </div>
 
       <div className="hidden min-[900px]:flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
         <p className="w-full text-sm text-neutral-900 font-semibold truncate">
@@ -144,14 +155,11 @@ const ChatItem = ({chatData}: Props) => {
         }
       </div>
 
-      {/* Mostrar la cantidad de mensajes no leidos en el chat */}
-      {unReadMessagesCounter && unReadMessagesCounter.count > 0 &&
-        <div className="flex justify-center items-center min-w-[18px] h-[18px] p-1 bg-red-600 rounded-full shrink-0 outline-2 outline-white">
-          <span className="text-xs font-semibold text-white">
-            {unReadMessagesCounter.count > 99 ? "99+" : unReadMessagesCounter.count}
-          </span>
-        </div>
-      }
+      {/* Contador de mensajes sin leer */}
+      <UnreadMsgsCounterBadge
+        className="hidden min-[900px]:flex"
+        counter={unReadMessagesCounter}
+      />
     </NavLink>
   )
 }

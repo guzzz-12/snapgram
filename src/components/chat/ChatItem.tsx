@@ -50,7 +50,7 @@ const ChatItem = ({chatData}: Props) => {
   
   const queryClient = useQueryClient();
 
-  const {unreadChats, setUnreadChats} = useUnreadChats();
+  const {removeFromUnreadChats} = useUnreadChats();
 
   // Mutation para restablecer el contador de mensajes sin leer del usuario en el chat
   const {mutate: resetUnreadMessagesCounter, isPending} = useMutation({
@@ -81,7 +81,7 @@ const ChatItem = ({chatData}: Props) => {
 
     if (hasUnreadMessages && !isPending) {
       resetUnreadMessagesCounter();
-      setUnreadChats(unreadChats - 1);
+      removeFromUnreadChats(chatData._id);
     }
   }
 
@@ -90,7 +90,7 @@ const ChatItem = ({chatData}: Props) => {
   // Obtener el contador de mensajes sin leer del usuario en el chat
   const unReadMessagesCounter = chatData.unseenMessages.find(counter => {
     return counter.user === user._id
-  })!
+  });
 
   return (
     <NavLink
@@ -145,7 +145,7 @@ const ChatItem = ({chatData}: Props) => {
       </div>
 
       {/* Mostrar la cantidad de mensajes no leidos en el chat */}
-      {unReadMessagesCounter.count > 0 &&
+      {unReadMessagesCounter && unReadMessagesCounter.count > 0 &&
         <div className="flex justify-center items-center min-w-[18px] h-[18px] p-1 bg-red-600 rounded-full shrink-0 outline-2 outline-white">
           <span className="text-xs font-semibold text-white">
             {unReadMessagesCounter.count > 99 ? "99+" : unReadMessagesCounter.count}

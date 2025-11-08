@@ -29,7 +29,7 @@ const App = () => {
 
   const {setUser, setLoadingUser} = useCurrentUser();
   const {setUnseenNotifications} = useUnseenNotifications();
-  const {setUnreadChats} = useUnreadChats();
+  const {addToUnreadChats} = useUnreadChats();
 
   // Consultar la data del usuario autenticado
   const {data, isFetching, error} = useQuery({
@@ -72,12 +72,12 @@ const App = () => {
   });
 
   // Consultar la cantidad de chats con mesajes sin leer
-  const {data: unreadChatsCount} = useQuery({
+  const {data: unreadChatsIds} = useQuery({
     queryKey: ["unseenMessagesCount"],
     queryFn: async () => {
       const token = await getToken();
 
-      const {data} = await axiosInstance<{data: number}>({
+      const {data} = await axiosInstance<{data: string[]}>({
         method: "GET",
         url: "/chats/get-unread-chats",
         headers: {
@@ -107,10 +107,10 @@ const App = () => {
 
   // Actualizar el state del contador de chats sin leer
   useEffect(() => {
-    if (unreadChatsCount && unreadChatsCount > 0) {
-      setUnreadChats(unreadChatsCount);
+    if (unreadChatsIds && unreadChatsIds.length > 0) {
+      addToUnreadChats(unreadChatsIds);
     }
-  }, [unreadChatsCount]);
+  }, [unreadChatsIds]);
 
   if (error) {
     toast.error(errorMessage(error));

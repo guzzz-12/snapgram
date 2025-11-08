@@ -109,6 +109,7 @@ const UsersModalList = ({setTemporaryChat}: Props) => {
         groupAdmin: null,
         groupName: null,
         lastMessage: null,
+        unseenMessages: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

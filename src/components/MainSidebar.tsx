@@ -71,7 +71,7 @@ const MainSidebar = () => {
             href="/messages"
             title="Mensajes"
             Icon={LuMessageCircle}
-            badge={unreadChats > 0 ? unreadChats : undefined}
+            badge={unreadChats.length > 0 ? unreadChats.length : undefined}
           />
 
           <MainSidebarItem

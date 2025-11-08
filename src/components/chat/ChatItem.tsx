@@ -93,6 +93,15 @@ const ChatItem = ({chatData}: Props) => {
           </div>
         }
       </div>
+
+      {/* Mostrar la cantidad de mensajes no leidos en el chat */}
+      {chatData.unseenMessages.length > 0 &&
+        <div className="flex justify-center items-center min-w-[18px] h-[18px] p-1 bg-red-600 rounded-full shrink-0 outline-2 outline-white">
+          <span className="text-xs font-semibold text-white">
+            {chatData.unseenMessages.length > 99 ? "99+" : chatData.unseenMessages.length}
+          </span>
+        </div>
+      }
     </NavLink>
   )
 }

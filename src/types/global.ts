@@ -191,6 +191,11 @@ export type ChatType = {
     type: "text" | "file" | "fileWithText";
     createdAt: string;
   } | null;
+  unseenMessages: {
+    _id: string;
+    user: string;
+    count: number
+  }[];
   createdAt: string;
   updatedAt: string;
 }

@@ -28,12 +28,12 @@ const NewMessageToast = ({ messageData }: Props) => {
       </div>
 
       <div className="flex flex-col w-full h-full overflow-hidden">
-        <p className="w-full text-sm text-neutral-900">
+        <p className="w-full text-sm text-neutral-900 leading-tight">
           <span className="font-semibold">{sender.fullName}</span> ha enviado un mensaje.
         </p>
 
         {text &&
-          <span className="w-full mt-2 text-xs text-neutral-700 italic line-clamp-3">
+          <span className="w-full mt-1 text-xs text-neutral-700 italic line-clamp-3">
             {text}
           </span>
         }

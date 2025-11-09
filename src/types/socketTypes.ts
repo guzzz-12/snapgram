@@ -25,9 +25,16 @@ export type NewMessageEventData = {
   isNewChat: boolean;
 }
 
+export type TypingEventData = {
+  user: Pick<UserType, "_id" | "fullName" | "username" | "profilePicture">;
+  chatId: string;
+}
+
 // Eventos de socket.io que el cliente envía
 export interface ClientEvents {
   getOnlineUsers: ({userId}: {userId: string}) => void;
+  typing: (data: TypingEventData) => void;
+  stoppedTyping: ({chatId, userId}: {userId: string, chatId: string}) => void;
 }
 
 // Eventos de socket.io que el servidor envía
@@ -36,4 +43,6 @@ export interface ServerEvents {
   newNotification: (notification: NotificationEventData) => void;
   newPrivateMessage: (newMessage: NewMessageEventData) => void;
   deletedMessage: (deletedMessage: MessageType) => void;
+  typing: (data: TypingEventData) => void;
+  stoppedTyping: ({chatId, userId}: {userId: string, chatId: string}) => void;
 }

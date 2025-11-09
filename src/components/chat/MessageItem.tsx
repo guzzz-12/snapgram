@@ -98,7 +98,7 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
           {/* Contenido de texto del mensaje (si lo tiene) */}
           {messageData.text && (
             <p className={cn("w-full text-sm whitespace-pre-wrap", (isCurrentUserSender && !isDeleted) ? "text-neutral-100" : isDeleted ? "text-neutral-500 italic" : "text-neutral-900")}>
-              <Twemoji className="[&>img]:!inline" text={messageData.text} />
+              <Twemoji className="[&>img]:!inline break-words" text={messageData.text} />
             </p>
           )}
           

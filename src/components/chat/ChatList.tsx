@@ -8,6 +8,7 @@ import ChatItem from "./ChatItem";
 import { Input } from "@/components/ui/input";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType } from "@/types/global";
@@ -23,6 +24,8 @@ const ChatList = ({ headerHeight, temporaryChatItem }: Props) => {
   const {getToken} = useAuth();
 
   const {user} = useCurrentUser();
+
+  const {usersTyping} = useUsersTyping();
 
   // Función para consultar los chats
   const getChats = async (page: number) => {
@@ -98,11 +101,20 @@ const ChatList = ({ headerHeight, temporaryChatItem }: Props) => {
           </div>
         }
 
+        {/* Chat temporal (se muestra al seleccionar un usuario por primera vez) */}
         {!isLoading && temporaryChatItem && 
-          <ChatItem chatData={temporaryChatItem}/>
+          <ChatItem chatData={temporaryChatItem} usersTyping={[]}/>
         }
 
-        {chats.map((chat) => <ChatItem key={chat._id} chatData={chat} />)}
+        {chats.map((chat) => {
+          return (
+            <ChatItem
+              key={chat._id}
+              chatData={chat}
+              usersTyping={usersTyping}
+            />
+          )
+        })}
 
         {chats.length === 0 && !temporaryChatItem && !isLoading &&
           <div className="flex flex-col justify-center items-center w-full px-4 py-5">

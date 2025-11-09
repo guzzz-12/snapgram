@@ -5,12 +5,14 @@ import dayjs from "dayjs";
 import updateLocale from "dayjs/plugin/updateLocale";
 import { MdOutlineAttachment } from "react-icons/md";
 import { LuDot } from "react-icons/lu";
+import { BeatLoader } from "react-spinners";
 import UnreadMsgsCounterBadge from "./UnreadMsgsCounterBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
 import { axiosInstance } from "@/utils/axiosInstance";
+import type { TypingEventData } from "@/types/socketTypes";
 import type { ChatType } from "@/types/global";
 
 dayjs.extend(updateLocale);
@@ -38,9 +40,10 @@ dayjs.updateLocale("es", {
 
 interface Props {
   chatData: ChatType;
+  usersTyping: TypingEventData[];
 }
 
-const ChatItem = ({chatData}: Props) => {
+const ChatItem = ({chatData, usersTyping}: Props) => {
   const {user} = useCurrentUser();
 
   const otherUser = chatData.participants.find((participant) => participant._id !== user?._id);
@@ -93,6 +96,11 @@ const ChatItem = ({chatData}: Props) => {
     return counter.user === user._id
   });
 
+  // Verificar si el usuario que está escribiendo
+  const isUserTyping = usersTyping.find((typing) => {
+    return (typing.chatId == chatData._id && typing.user._id !== user._id);
+  });
+
   return (
     <NavLink
       key={chatData._id}
@@ -120,6 +128,18 @@ const ChatItem = ({chatData}: Props) => {
             counter={unReadMessagesCounter}
           />
         </div>
+
+        {/* Indicador de usuario que está escribiendo */}
+        {isUserTyping &&
+          <div className="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-white/50 rounded-full min-[900px]:hidden z-5">
+            <BeatLoader
+              className="opacity-80"
+              size={8}
+              color="#4F39F6"
+              speedMultiplier={0.8}
+            />
+          </div>
+        }
       </div>
 
       <div className="hidden min-[900px]:flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
@@ -128,7 +148,7 @@ const ChatItem = ({chatData}: Props) => {
         </p>
         
         {/* Mostrar el último mensaje del chat */}
-        {lastMessage &&
+        {lastMessage && !isUserTyping &&
           <div className="flex items-center gap-0.5 w-full text-xs text-neutral-700 font-light overflow-hidden">
             <span className="shrink-0">
               {lastMessage.sender === user._id && "Tú:"}
@@ -151,6 +171,14 @@ const ChatItem = ({chatData}: Props) => {
             <p className="shrink-0">
               {dayjs(lastMessage.createdAt).fromNow().replace("hace ", "")}
             </p>
+          </div>
+        }
+
+        {isUserTyping &&
+          <div className="w-full text-xs text-neutral-700 font-light italic">
+            <span className="shrink-0">
+              Escribiendo...
+            </span>
           </div>
         }
       </div>

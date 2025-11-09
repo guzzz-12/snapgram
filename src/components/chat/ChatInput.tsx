@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction, type WheelEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type Dispatch, type SetStateAction, type WheelEvent } from "react";
 import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
@@ -6,13 +6,19 @@ import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { Image, Mic, Smile } from "lucide-react";
 import { toast } from "sonner";
+import { BeatLoader } from "react-spinners";
 import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import useImagePicker from "@/hooks/useImagePicker";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { ChatType, MessageType } from "@/types/global";
+import type { TypingEventData } from "@/types/socketTypes";
+import { socket } from "@/utils/socket";
 
 interface Props {
   wrapperHeight: number;
@@ -23,6 +29,8 @@ interface Props {
 
 const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const stopTypingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const navigate = useNavigate();
 
@@ -33,6 +41,10 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Pro
   const queryClient = useQueryClient();
 
   const {selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
+
+  const {user: currentUser} = useCurrentUser();
+
+  const {usersTyping} = useUsersTyping();
 
   // Limpiar los estados al salir de la página
   useEffect(() => {
@@ -99,6 +111,53 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Pro
     },
   });
 
+  // Función debounced para emitir el evento de typing
+  const emitTypingDebounced = useCallback((payload: TypingEventData) => {
+    // Reiniciar el timer de typing si existe
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current);
+    }
+
+    // Reiniciar el timer de stoppedTyping si existe
+    if (stopTypingTimerRef.current) {
+      clearTimeout(stopTypingTimerRef.current);
+    }
+
+    // Emitir el evento de typing
+    typingTimerRef.current = setTimeout(() => {
+      socket.emit("typing", payload);
+      
+      // Emitir el evento de stoppedTyping
+      stopTypingTimerRef.current = setTimeout(() => {
+        socket.emit("stoppedTyping", {
+          chatId: payload.chatId,
+          userId: payload.user._id
+        });
+      }, 1000);
+
+    }, 250);
+  }, [socket]);
+
+  // Change handler del textarea
+  const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    if (!currentUser || !chatId) {
+      return;
+    }
+
+    setMessageText(e.currentTarget.value);
+
+    // Emitir el evento de typing y el evento de stoppedTyping
+    emitTypingDebounced({
+      chatId,
+      user: {
+        _id: currentUser._id,
+        username: currentUser.username,
+        fullName: currentUser.fullName,
+        profilePicture: currentUser.profilePicture
+      }
+    });
+  };
+
   // Detener la propagación del evento scroll del picker al textarea
   // para que el picker sea scrolleable con el mouse
   const handleScrollInterception = (e: WheelEvent<HTMLDivElement>) => {
@@ -110,11 +169,48 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Pro
     e.currentTarget.scrollTop += e.deltaY;
   };
 
+  // Filtrar los usuarios que estan escribiendo en el chat activo
+  const usersCurrentlyTyping = usersTyping.filter(el => {
+    return (el.user._id !== currentUser?._id && el.chatId === chatId);
+  });
+
   return (
     <div
       style={{height: `${wrapperHeight}px`}}
-      className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-white"
+      className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-white border-t"
     >
+      {/* Mostrar los usuarios que estan escribiendo */}
+      {usersCurrentlyTyping.length > 0 &&
+        <div className="absolute -top-3 left-3 flex justify-center items-center px-2 py-1.5 -translate-y-[100%] rounded-lg border shadow bg-slate-200 z-10">
+          <div className="flex flex-col gap-2">
+            {usersCurrentlyTyping.slice(0, 5).map((el) => (
+              <div
+                key={el.user._id}
+                className="flex justify-start items-center gap-2"
+              >
+                <Avatar className="w-5 h-5 shrink-0 outline-2 outline-white">
+                  <AvatarImage
+                    className="w-full h-full object-cover"
+                    src={el.user.profilePicture}
+                  />
+
+                  <AvatarFallback className="w-full h-full object-cover">
+                    {el.user.fullName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+
+                <BeatLoader
+                  className="opacity-80"
+                  size={9}
+                  color="#4F39F6"
+                  speedMultiplier={0.8}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      }
+
       {selectedImagePreviews.length > 0 &&
         <div className="absolute -top-1 left-1 flex justify-start items-center gap-2 max-w-[80%] bg-slate-100 shadow border rounded-md translate-x-[24px] -translate-y-[100%] overflow-x-hidden z-50">
           <div className="px-4 py-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
@@ -165,7 +261,7 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Pro
           placeholder="Escribe algo..."
           disabled={submitting}
           value={messageText}
-          onChange={(e) => setMessageText(e.target.value)}
+          onChange={onChangeHandler}
         />
       </div>
 
@@ -201,15 +297,15 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Pro
       }
 
       {/* Input oculto del selector de imagen */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          hidden
-          multiple
-          disabled={submitting}
-          accept="image/png, image/jpg, image/jpeg, image/webp"
-          onChange={onImagePickHandler}
-        />
+      <input
+        ref={fileInputRef}
+        type="file"
+        hidden
+        multiple
+        disabled={submitting}
+        accept="image/png, image/jpg, image/jpeg, image/webp"
+        onChange={onImagePickHandler}
+      />
     </div>
   )
 }

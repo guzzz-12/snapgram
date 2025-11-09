@@ -4,5 +4,11 @@
       "source": "/(.*)",
       "destination": "/"
     }
+  ],
+  "crons": [
+    {
+      "path": "https://snapgram-backend-1fv0.onrender.com/api/keep-alive",
+      "schedule": "*/15 * * * *"
+    }
   ]
 }

@@ -18,7 +18,7 @@ import NoAuthRoute from "@/components/NoAuthRoute";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
-import { useUnreadChats } from "./hooks/useUnreadChats";
+import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { UserType } from "@/types/global";
@@ -30,6 +30,17 @@ const App = () => {
   const {setUser, setLoadingUser} = useCurrentUser();
   const {setUnseenNotifications} = useUnseenNotifications();
   const {addToUnreadChats} = useUnreadChats();
+
+  // Consultar endpoint keep-alive del servidor para inicializarlo
+  // en caso de estar deshabilitado por inactividad.
+  useEffect(() => {
+    axiosInstance({
+      method: "GET",
+      url: "/keep-alive"
+    })
+    .then(() => {})
+    .catch(() => {});
+  }, []);
 
   // Consultar la data del usuario autenticado
   const {data, isFetching, error} = useQuery({

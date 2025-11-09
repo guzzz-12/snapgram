@@ -12,6 +12,7 @@ import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { socket } from "@/utils/socket";
 import { errorMessage } from "@/utils/errorMessage";
 import { updateChatLastMessageCache, updateDeletedMessageCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
+import { useUsersTyping } from "@/hooks/useUsersTyping";
 
 const SocketManager = () => {
   const {pathname} = useLocation();
@@ -28,6 +29,8 @@ const SocketManager = () => {
   const { increaseNotificationsCount } = useUnseenNotifications();
 
   const { unreadChats, addToUnreadChats } = useUnreadChats();
+
+  const { addToUsersTyping, removeFromUsersTyping } = useUsersTyping();
 
   // Consultar el token de autenticación
   useEffect(() => {
@@ -103,6 +106,16 @@ const SocketManager = () => {
       });
     });
 
+    // Escuchar evento de escribiendo
+    socket.on("typing", (data) => {
+      addToUsersTyping(data);
+    });
+
+    // Escuchar evento de dejar de escribir
+    socket.on("stoppedTyping", (data) => {
+      removeFromUsersTyping(data.userId);
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
@@ -110,6 +123,8 @@ const SocketManager = () => {
       socket.off("newNotification");
       socket.off("newPrivateMessage");
       socket.off("deletedMessage");
+      socket.off("typing");
+      socket.off("stoppedTyping");
     }
   }, [socket, token, userDocument]);
 
@@ -143,7 +158,6 @@ const SocketManager = () => {
   
         addToUnreadChats(data.chat._id);
       }
-
 
       // Mostrar toast al usuario que recibio el mensaje
       // si no está en la página del chat

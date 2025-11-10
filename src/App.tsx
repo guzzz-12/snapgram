@@ -28,7 +28,7 @@ import type { UserType } from "@/types/global";
 const PING_RETRY = 6;
 
 const App = () => {
-  const {isSignedIn} = useUser();
+  const {isSignedIn, isLoaded} = useUser();
   const {getToken, userId} = useAuth();
 
   const [serverStarted, setServerStarted] = useState(false);
@@ -150,16 +150,10 @@ const App = () => {
   const isLoading = loadingUser || loadingNotifications || loadingUnreadChats;
 
   // Mostrar el loading mientras se inicia el servidor y se cargan los datos
-  if ((!serverStarted && !serverError) || isLoading) {
+  if ((!serverStarted && !serverError) || !isLoaded || isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 h-screen w-full bg-neutral-50">
+      <div className="flex justify-center items-center gap-2 h-screen w-full bg-neutral-50">
         <Loader2Icon className="size-[40px] text-[#4F39F6] animate-spin" />
-
-        {!isLoading &&
-          <p className="text-center text-neutral-700">
-            Cargando tu experiencia, un momento por favor...
-          </p>
-        }
       </div>
     )
   }

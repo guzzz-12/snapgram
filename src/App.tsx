@@ -29,12 +29,12 @@ const PING_RETRY = 6;
 
 const App = () => {
   const {isSignedIn, isLoaded} = useUser();
-  const {getToken, userId} = useAuth();
+  const {getToken, userId, signOut} = useAuth();
 
   const [serverStarted, setServerStarted] = useState(false);
   const [serverError, setServerError] = useState(false);
 
-  const {setUser, setLoadingUser} = useCurrentUser();
+  const {user: currentUser, setUser, setLoadingUser} = useCurrentUser();
   const {setUnseenNotifications} = useUnseenNotifications();
   const {addToUnreadChats} = useUnreadChats();
 
@@ -63,8 +63,8 @@ const App = () => {
   }, [status, failureCount]);
 
   // Consultar la data del usuario autenticado
-  const {data, isLoading: loadingUser, error: userError} = useQuery({
-    queryKey: ["user"],
+  const {data: userData, isLoading: loadingUser, error: userError} = useQuery({
+    queryKey: ["user", userId],
     queryFn: async () => {
       const token = await getToken();
 
@@ -79,8 +79,20 @@ const App = () => {
       return data.data;
     },
     enabled: !!userId && serverStarted,
+    retry: 2,
     refetchOnWindowFocus: false
   });
+
+  // Cerrar sesión en caso de error al consultar el usuario
+  useEffect(() => {
+    if (userError) {
+      signOut()
+      .then(() => {
+        toast.error("Ocurrió un error al iniciar sesión.");
+      })
+      .catch((_error) => {});
+    }
+  }, [userError]);
 
   // Consultar la cantidad de notificaciones no vistas
   const {data: unseenNotificationsCount, isLoading: loadingNotifications} = useQuery({
@@ -98,7 +110,8 @@ const App = () => {
       
       return data.data;
     },
-    enabled: !!userId && serverStarted,
+    enabled: serverStarted && !!currentUser,
+    retry: 2,
     refetchOnWindowFocus: false
   });
 
@@ -118,7 +131,8 @@ const App = () => {
       
       return data.data;
     },
-    enabled: !!userId && serverStarted,
+    enabled: serverStarted && !!currentUser,
+    retry: 2,
     refetchOnWindowFocus: false
   });
 
@@ -126,10 +140,10 @@ const App = () => {
   useEffect(() => {
     setLoadingUser(loadingUser);
 
-    if (data) {
-      setUser(data);
+    if (userData) {
+      setUser(userData);
     }
-  }, [data, loadingUser]);
+  }, [userData, loadingUser]);
 
   // Actualizar el state del contador de notificaciones no vistas
   useEffect(() => {

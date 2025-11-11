@@ -1,4 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import type { UserWithStories } from "@/types/global";
 
 interface Props {
@@ -7,22 +8,30 @@ interface Props {
 }
 
 const StoryCardRounded = ({ userData, setOpenUserId }: Props) => {
+  const {user} = useCurrentUser();
+
   return (
-    <button
-      className="relative w-[80px] h-[80px] rounded-full shrink-0 border-4 border-[#4F39F6] cursor-pointer overflow-hidden"
-      onClick={() => setOpenUserId(userData._id)}
-    >
-      <Avatar className="w-full h-full">
-        <AvatarImage
-          className="w-full h-full object-cover"
-          src={userData.profilePicture  || "/default_avatar.webp"}
-          alt={userData.username}
-        />
-        <AvatarFallback className="w-full h-full object-cover">
-          {userData.username.charAt(0)}
-        </AvatarFallback>
-      </Avatar>
-    </button>
+    <div className="flex flex-col justify-between items-center gap-0.5 w-[80px] overflow-hidden">
+      <button
+        className="relative w-[80px] h-[80px] rounded-full shrink-0 border-4 border-[#4F39F6] cursor-pointer overflow-hidden"
+        onClick={() => setOpenUserId(userData._id)}
+      >
+        <Avatar className="w-full h-full">
+          <AvatarImage
+            className="w-full h-full object-cover"
+            src={userData.profilePicture  || "/default_avatar.webp"}
+            alt={userData.username}
+          />
+          <AvatarFallback className="w-full h-full object-cover">
+            {userData.username.charAt(0)}
+          </AvatarFallback>
+        </Avatar>
+      </button>
+
+      <p className="w-full text-center text-sm text-neutral-700 truncate">
+        {user?._id === userData._id ? "Tu historia" : userData.username}
+      </p>
+    </div>
   )
 }
 

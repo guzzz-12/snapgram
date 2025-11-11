@@ -38,22 +38,24 @@ const SelectedImagesPreviews = (props: Props) => {
         </button>
       )}
 
-      <button
-        className="p-2 cursor-pointer"
-        type="button"
-        disabled={isPending}
-        onClick={() => {
-          if (selectedImagePreviews.length >= 10) {
-            toast.error(`Puedes seleccionar un máximo de 10 imágenes.`);
-            return false;
-          }
+      {selectedImagePreviews.length > 0 &&
+        <button
+          className="p-2 cursor-pointer"
+          type="button"
+          disabled={isPending}
+          onClick={() => {
+            if (selectedImagePreviews.length >= 10) {
+              toast.error(`Puedes seleccionar un máximo de 10 imágenes.`);
+              return false;
+            }
 
-          fileInputRef.current?.click()
-        }}
-      >
-        <PlusCircle className="size-10 text-neutral-600 stroke-1" aria-hidden />
-        <span className="sr-only">Adjuntar otra imagen</span>
-      </button>
+            fileInputRef.current?.click()
+          }}
+        >
+          <PlusCircle className="size-10 text-neutral-600 stroke-1" aria-hidden />
+          <span className="sr-only">Adjuntar otra imagen</span>
+        </button>
+      }
 
       <div className="flex justify-start items-center gap-3 w-full">
         {selectedImagePreviews.map((preview, i) => (

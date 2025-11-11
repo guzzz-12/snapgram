@@ -11,8 +11,8 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useClampedText from "@/hooks/useClampedText";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { UserType } from "@/types/global";
 import { cn } from "@/lib/utils";
+import type { UserType } from "@/types/global";
 
 interface Props {
   userData: UserType;
@@ -74,7 +74,8 @@ const ProfileHeader = ({ userData }: Props) => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: ["user", userData.clerkId]});
-      await queryClient.invalidateQueries({queryKey: ["followers", userData._id]});
+      await queryClient.invalidateQueries({queryKey: ["followers"]});
+      await queryClient.invalidateQueries({queryKey: ["following"]});
     },
     onError: (error) => {
       toast.error(errorMessage(error));

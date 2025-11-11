@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
+import { cn } from "@/lib/utils";
 import type { FollowedType, UserType } from "@/types/global";
 
 interface Props {
@@ -16,10 +17,12 @@ interface Props {
 
 const FollowedItem = ({ data, userData }: Props) => {
   const {followedData: {_id: followedId, clerkId: followedClerkId, fullName, username, profilePicture}} = data;
+
+  console.log({data, userData});
   
   const followBtnRef = useRef<HTMLButtonElement>(null);
 
-  const {getToken, userId: currentUserClerkId} = useAuth();
+  const {getToken} = useAuth();
 
   const queryClient = useQueryClient();
 
@@ -39,7 +42,8 @@ const FollowedItem = ({ data, userData }: Props) => {
       });
     },
     onSuccess: async () => {
-      queryClient.invalidateQueries({queryKey: ["followers", userData?._id]});
+      queryClient.invalidateQueries({queryKey: ["followers"]});
+      queryClient.invalidateQueries({queryKey: ["following"]});
     },
     onError: (error) => {
       toast.error(errorMessage(error));
@@ -74,11 +78,11 @@ const FollowedItem = ({ data, userData }: Props) => {
         </div>
       </Link>
 
-      {followedClerkId !== currentUserClerkId &&
+      {followedClerkId !== userData?.clerkId &&
         <Button
           ref={followBtnRef}
-          className="text-current cursor-pointer transition-none hover:text-destructive hover:border-destructive hover:bg-destructive/5"
-          variant="outline"
+          className={cn("bg-[#4F39F6] hover:bg-red-700 text-white rounded-full cursor-pointer")}
+          variant="default"
           size="sm"
           disabled={isPending}
           onClick={() => mutate()}

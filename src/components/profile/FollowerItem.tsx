@@ -7,8 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { FollowerType, UserType } from "@/types/global";
 import { cn } from "@/lib/utils";
+import type { FollowerType, UserType } from "@/types/global";
 
 interface Props {
   data: FollowerType;
@@ -101,13 +101,13 @@ const FollowerItem = ({ data, userData }: Props) => {
       {followerClerkId !== currentUserClerkId &&
         <Button
           ref={followBtnRef}
-          className={cn("text-current cursor-pointer transition-none", isFollowingBack && "hover:text-destructive hover:border-destructive hover:bg-destructive/5")}
-          variant="outline"
+          className={cn("bg-[#4F39F6] hover:bg-[#331fcf] text-white rounded-full cursor-pointer", isFollowingBack && "hover:text-white hover:bg-red-700")}
+          variant="default"
           size="sm"
           disabled={isPending}
           onClick={() => mutate()}
         >
-          {isFollowingBack ? "Siguiendo" : "Seguir"}
+          {isFollowingBack ? "Siguiendo" : "Seguir también"}
         </Button>
       }
     </li>

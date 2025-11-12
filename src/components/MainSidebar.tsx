@@ -15,6 +15,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import logo from "@/assets/logo-simple.webp";
+import { Separator } from "./ui/separator";
 
 const MainSidebar = () => {
   const createPostBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -130,8 +131,11 @@ const MainSidebar = () => {
 
       <SidebarFooter className="flex flex-col gap-3 min-[1280px]:hidden">
         <ProfileLinkItem user={user!} />
+        <Separator className="w-full bg-neutral-200" />
         <LogoutItem />
       </SidebarFooter>
+
+      <Separator className="w-full bg-neutral-200" />
 
       <div className="w-full px-4 pt-2 pb-4">
         <p className="text-xs text-neutral-500">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
 import { CircleChevronLeft, CircleChevronRight, EllipsisVertical, Pause, Play, Trash2, X } from "lucide-react";
@@ -102,7 +103,7 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
         }}
         className="w-auto h-[95vh] p-0 aspect-[1/1.7] border-none [&>button]:hidden"
       >
-        <div className="relative flex flex-col gap-4 w-full h-full">
+        <div className="relative flex flex-col gap-4 w-full h-full overflow-hidden">
           {stories.length > 1 && (
             <>
               <div className="absolute top-0 left-0 flex justify-center items-center h-full px-1 translate-x-[-90%] z-10">
@@ -148,30 +149,37 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
               ))}
             </div>
 
-            <div className="flex justify-start items-center gap-3 pt-4">
-              <Avatar className="w-8 h-8 shrink-0">
-                <AvatarImage
-                  className="w-full h-full object-cover"
-                  src={storiesUser?.profilePicture}
-                />
-                <AvatarFallback className="w-full h-full object-cover">
-                  {storiesUser?.fullName.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+            <div className="flex justify-start items-center gap-3 w-full pt-4">
+              <Link
+                className="flex justify-start items-center gap-2 w-full overflow-hidden"
+                to={`/profile/${storiesUser?.clerkId}`}
+              >
+                <Avatar className="w-8 h-8 shrink-0">
+                  <AvatarImage
+                    className="w-full h-full object-cover"
+                    src={storiesUser?.profilePicture}
+                  />
+                  <AvatarFallback className="w-full h-full object-cover">
+                    {storiesUser?.fullName.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
 
-              <div className="flex flex-col gap-0.5 w-full overflow-hidden">
-                <p className="text-sm text-white font-semibold truncate">
-                  {storiesUser?.fullName}
-                </p>
-                <p
-                  className="text-xs text-neutral-300 truncate"
-                  title={dayjs(currentStory?.updatedAt).format("MMMM D, YYYY - hh:mm A")}
-                >
-                  {dayjs(currentStory?.updatedAt).format("MM-D-YYYY")}
-                </p>
-              </div>
+                <div className="flex flex-col gap-0.5 w-full overflow-hidden">
+                  <p className="w-full text-sm text-white font-semibold truncate">
+                    {storiesUser?.fullName}
+                  </p>
 
-              <div className="flex items-center gap-1">
+                  <p
+                    className="text-xs text-neutral-300 truncate"
+                    title={dayjs(currentStory?.updatedAt).format("MMMM D, YYYY - hh:mm A")}
+                  >
+                    {dayjs(currentStory?.updatedAt).format("MM-D-YYYY")}
+                  </p>
+                </div>
+              </Link>
+
+
+              <div className="flex items-center gap-1 ml-auto">
                 <button
                   className="p-1 text-white cursor-pointer"
                   onClick={() => setIsPaused(paused => !paused)}

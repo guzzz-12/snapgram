@@ -17,8 +17,6 @@ interface Props {
 
 const FollowedItem = ({ data, userData }: Props) => {
   const {followedData: {_id: followedId, clerkId: followedClerkId, fullName, username, profilePicture}} = data;
-
-  console.log({data, userData});
   
   const followBtnRef = useRef<HTMLButtonElement>(null);
 

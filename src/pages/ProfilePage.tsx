@@ -42,7 +42,8 @@ const ProfilePage = () => {
   const {data: userData, isLoading: loadingUser, error: userError} = useQuery({
     queryKey: ["user", userClerkId],
     queryFn: getUser,
-    enabled: !!userClerkId
+    enabled: !!userClerkId,
+    refetchOnWindowFocus: false
   });
 
   if (!loadingUser && !userData) {

@@ -29,7 +29,7 @@ const Layout = () => {
           <MainSidebar />
         }
 
-        <section className="grow bg-slate-50 overflow-x-hidden">
+        <section className="grow bg-slate-100 overflow-x-hidden">
           <Outlet />
         </section>
 

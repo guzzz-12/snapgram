@@ -98,10 +98,10 @@ const ConnectionsPage = () => {
   const notifications = data?.pages.flatMap(page => page.data) || [];
   
   return (
-    <main className="pageWrapper gap-10">
+    <main className="pageWrapper gap-10 pr-10">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
 
-      <section className="flex flex-col gap-0 w-full max-w-[900px] mx-auto">
+      <section className="flex flex-col gap-0 w-full max-w-[700px] mx-auto">
         <div className="flex justify-between items-start gap-8 w-full">
           <div className="w-full mb-6">
             <h1 className="text-2xl font-semibold">

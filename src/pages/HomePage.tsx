@@ -1,12 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { IoFileTrayStackedOutline } from "react-icons/io5";
+import { MdOutlineExplore } from "react-icons/md";
 import { toast } from "sonner";
 import PostCard from "@/components/posts/PostCard";
 import StoriesSlider from "@/components/stories/StoriesSlider";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import RightSidebar from "@/components/RightSidebar";
+import NewUserScreen from "@/components/home/NewUserScreen";
+import { Separator } from "@/components/ui/separator";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -14,6 +19,8 @@ import type { PostWithLikes } from "@/types/global";
 
 const HomePage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
+
+  const [followingCount, setFollowingCount] = useState(0);
 
   const {getToken} = useAuth();
 
@@ -39,7 +46,8 @@ const HomePage = () => {
     return data;
   }
 
-  const {data, error, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
+  // Consultar los posts
+  const {data, error, isLoading: loadingPosts, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
     queryKey: ["posts"],
     queryFn: ({pageParam}) => getPosts(pageParam),
     initialPageParam: 1,
@@ -49,11 +57,36 @@ const HomePage = () => {
 
   const {isIntersecting} = useIntersectionObserver({ data, paginationRef });
 
+  // Consultar la siguiente página de posts al scrollear al bottom
   useEffect(() => {
     if (isIntersecting && hasNextPage) {
       fetchNextPage();
     }
   }, [isIntersecting, hasNextPage]);
+
+  // Consultar el número de seguidos del usuario
+  const {data: followingCountData, isLoading: loadingFollowingCount} = useQuery({
+    queryKey: ["following-count"],
+    queryFn: async () => {
+      const token = await getToken();
+
+      const {data} = await axiosInstance<{data: number}>({
+        method: "GET",
+        url: "/follows/get-following-count",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      return data;
+    }
+  });
+
+  useEffect(() => {
+    if (followingCountData) {
+      setFollowingCount(followingCountData.data);
+    }
+  }, [followingCountData]);
 
   const posts = data?.pages.flatMap(page => page.data) || [];
 
@@ -62,14 +95,48 @@ const HomePage = () => {
   }
 
   return (
-    <main className="pageWrapper">
-      <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
+    <main className="pageWrapper pr-10">
+      <SidebarTrigger className="absolute top-4 left-4 flex justify-center items-center md:hidden cursor-pointer z-[10]" />
 
-      <div className="w-full max-w-[600px] h-full mx-auto shrink-[2]">
+      <div className="w-full max-w-[800px] h-full mx-auto shrink-[2]">
         <StoriesSlider />
+
+        {/* Mostrar esta pantalla si el usuario no sigue a nadie y no tiene posts */}
+        {!loadingFollowingCount && followingCount === 0 && posts.length === 0 && !loadingPosts &&
+          <NewUserScreen />
+        }
+
+        {/* Mostrar esta pantalla si el usuario está siguiendo a otros pero no hay posts */}
+        {!loadingFollowingCount && followingCount > 0 && posts.length === 0 && !loadingPosts &&
+          <>
+            <div className="flex justify-center items-start w-full h-full max-w-[500px] mx-auto">
+              <div className="flex flex-col justify-center items-center w-full p-10 bg-white rounded-lg">
+                <IoFileTrayStackedOutline className="mb-2 size-[100px] text-[#4F39F6] [&>path]:stroke-[15px]"/>
+
+                <h1 className="text-2xl text-center text-neutral-700">
+                  No hay publicaciones disponibles
+                </h1>
+
+                <Separator className="w-full my-4" />
+
+                <p className="mb-3 text-center text-neutral-600 leading-tight">
+                  Explora y descubre contenido popular y cuentas <br /> que se adapten a tus pasiones.
+                </p>
+
+                <Link
+                  className="flex justify-center items-center gap-1 w-full px-4 py-2 text-sm text-white uppercase rounded-full bg-[#4F39F6] hover:bg-[#4F39F6]/60 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                  to="/discover"
+                >
+                  <MdOutlineExplore className="size-[27px] text-neutral-50" />
+                  Explorar
+                </Link>
+              </div>
+            </div>
+          </>
+        }
         
-        <section className="flex flex-col gap-6 w-full">
-          {isLoading &&
+        <section className="flex flex-col gap-6 w-full max-w-[600px] mx-auto">
+          {loadingPosts &&
             Array(2).fill(0).map((_, i) => (
               <PostCardSkeleton key={i} />
             ))

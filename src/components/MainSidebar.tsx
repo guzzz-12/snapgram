@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { useClerk, UserButton } from "@clerk/clerk-react";
-import { CirclePlus, ImagePlus, LogOut, TypeOutline } from "lucide-react";
+import { useClerk } from "@clerk/clerk-react";
+import { CirclePlus, ImagePlus, TypeOutline } from "lucide-react";
 import { GoHomeFill } from "react-icons/go";
 import { LuMessageCircle, LuSearch, LuUserRound } from "react-icons/lu";
 import { MdNotifications } from "react-icons/md";
 import MainSidebarItem from "./MainSidebarItem";
+import ProfileLinkItem from "./ProfileLinkItem";
+import LogoutItem from "./LogoutItem";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "./ui/sidebar";
-import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -127,33 +128,16 @@ const MainSidebar = () => {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="mb-4">
-        <Button
-          className="flex justify-start items-center gap-2 h-full py-2 bg-neutral-100 shadow cursor-pointer"
-          variant="ghost"
-          size="default"
-          onClick={() => signOut()}
-        >
-          <div
-            className="flex items-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <UserButton />
-          </div>
-
-          <div className="flex flex-col justify-center items-start gap-0 text-left overflow-hidden">
-            <p className="w-full text-sm font-semibold text-neutral-900 truncate">
-              {user?.fullName}
-            </p>
-            
-            <p className="w-full text-xs text-left text-neutral-500 truncate">
-              {user?.email}
-            </p>
-          </div>
-
-          <LogOut className="ml-auto size-4 text-neutral-500 shrink-0" />
-        </Button>
+      <SidebarFooter className="flex flex-col gap-3 min-[1280px]:hidden">
+        <ProfileLinkItem user={user!} />
+        <LogoutItem />
       </SidebarFooter>
+
+      <div className="w-full px-4 pt-2 pb-4">
+        <p className="text-xs text-neutral-500">
+          &copy; {new Date().getFullYear()} - Desarrollado por <span className="font-semibold">Jesús Guzmán</span>
+        </p>
+      </div>
     </Sidebar>
   )
 }

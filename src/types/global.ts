@@ -45,7 +45,7 @@ export type PostType = {
   user: UserType;
   content: string;
   imageUrls: string[];
-  postType: "textWithImage" | "text" | "image";
+  postType: "textWithImage" | "text" | "image" | "repost";
   changeLog: ChangeLogType[];
   createdAt: string;
   updatedAt: string;
@@ -62,7 +62,8 @@ export type PostWithLikes = {
   };
   content: string;
   imageUrls: string[];
-  postType: "textWithImage" | "text" | "image";
+  postType: "textWithImage" | "text" | "image" | "repost";
+  originalPost: PostType | null;
   likes: LikeType[];
   isLiked: boolean;
   likesCount: number;

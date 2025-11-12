@@ -8,6 +8,7 @@ import PostModal from "./PostModal";
 import LikesPopover from "@/components/likes/LikesPopover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { PostWithLikes } from "@/types/global";
@@ -29,6 +30,9 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
 
   const queryClient = useQueryClient();
 
+  const {setOpen} = useCreatePublicationModal();
+
+  // Mutation para dar/quitar like al post
   const likeMutation = useMutation({
     mutationFn: async () => {
       const token = await getToken();
@@ -148,7 +152,12 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
           className="gap-1 grow text-base font-normal bg-neutral-100 cursor-pointer hover:bg-neutral-200"
           variant="ghost"
           size="default"
-          onClick={() => {}}
+          onClick={() => setOpen({
+            open: true,
+            publicationType: "post",
+            isRepost: true,
+            repostedPostId: postData._id
+          })}
         >
           <Share2 className="size-4.5" aria-hidden />
           Compartir

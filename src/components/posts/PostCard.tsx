@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type HTMLAttributes } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { Twemoji } from "react-emoji-render";
-import Slider from "react-slick";
 import { toast } from "sonner";
 import PostHeader from "./PostCardHeader";
+import PostCardSlider from "./PostCardSlider";
 import PostCardFooter from "./PostCardFooter";
 import CreatePostInput from "./CreatePostInput";
 import SharedPostCard from "./SharedPostCard";
@@ -15,7 +15,6 @@ import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { hashtagParser } from "@/utils/hashtagsParser";
 import { cn } from "@/lib/utils";
-import { SLIDER_SETTINGS } from "@/utils/constants";
 import type { PostWithLikes } from "@/types/global";
 
 interface Props {
@@ -153,36 +152,7 @@ const PostCard = ({ postData, isModal, className }: Props) => {
 
       {/* Contenido del post */}
       {postData.postType !== "repost" &&
-        <Slider
-          className="postCardSlider"
-          {...SLIDER_SETTINGS}
-        >
-          {postData.imageUrls.map((imageUrl, index) => (
-            <Link
-              key={index}
-              to={`/post/${postData._id}`}
-              style={{
-                filter: "blur(15px)",
-                backgroundImage: `url(${imageUrl})`
-              }}
-              className="relative w-full aspect-[4/3] rounded-lg bg-neutral-200 overflow-hidden cursor-pointer"
-            >
-              <div
-                style={{
-                  filter: "blur(15px)",
-                  backgroundImage: `url(${imageUrl})`
-                }}
-                className="absolute top-0 left-0 w-full h-full opacity-70 bg-cover bg-center bg-no-repeat z-0"
-              />
-              
-              <img
-                className="relative w-full h-full object-contain z-30"
-                src={imageUrl}
-                alt={`Post de ${postData.user.fullName}`}
-              />
-            </Link>
-          ))}
-        </Slider>
+        <PostCardSlider data={postData} />
       }
 
       {/* Contenido del repost */}

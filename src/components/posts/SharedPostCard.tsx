@@ -1,11 +1,10 @@
 import { Link } from "react-router";
-import Slider from "react-slick";
 import dayjs from "dayjs";
 import { FaLock } from "react-icons/fa";
+import PostCardSlider from "./PostCardSlider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import type { PostType } from "@/types/global";
-import { SLIDER_SETTINGS } from "@/utils/constants";
 
 interface Props {
   data: PostType;
@@ -67,36 +66,7 @@ const SharedPostCard = ({data}: Props) => {
           </p>
 
           {data.imageUrls.length > 0 &&
-            <Slider
-              className="postCardSlider"
-              {...SLIDER_SETTINGS}
-            >
-              {data.imageUrls.map((imageUrl, index) => (
-                <Link
-                  key={index}
-                  to={`/post/${data._id}`}
-                  style={{
-                    filter: "blur(15px)",
-                    backgroundImage: `url(${imageUrl})`
-                  }}
-                  className="relative w-full aspect-[4/3] rounded-lg bg-neutral-200 overflow-hidden cursor-pointer"
-                >
-                  <div
-                    style={{
-                      filter: "blur(15px)",
-                      backgroundImage: `url(${imageUrl})`
-                    }}
-                    className="absolute top-0 left-0 w-full h-full opacity-70 bg-cover bg-center bg-no-repeat z-0"
-                  />
-                  
-                  <img
-                    className="relative w-full h-full object-contain z-30"
-                    src={imageUrl}
-                    alt={`Post de ${data.user.fullName}`}
-                  />
-                </Link>
-              ))}
-            </Slider>
+            <PostCardSlider data={data} />
           }
         </>
       }

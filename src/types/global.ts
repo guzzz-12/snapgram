@@ -68,6 +68,7 @@ export type PostWithLikes = {
   isLiked: boolean;
   likesCount: number;
   commentsCount: number;
+  sharedCount: number;
   changeLog: ChangeLogType[];
   createdAt: string;
   updatedAt: string;

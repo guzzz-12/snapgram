@@ -98,19 +98,19 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
             <TooltipTrigger asChild>
               <div className="flex items-center gap-1.5">
                 <span className="text-sm text-neutral-700 font-semibold">
-                  {6}
+                  {postData.sharedCount}
                 </span>
 
                 <Share2 className="size-5 text-neutral-500" aria-hidden />
 
                 <span className="sr-only">
-                  Este post ha sido compartido {6} veces
+                  {postData.sharedCount > 0 ? `Este post ha sido compartido ${postData.sharedCount} veces` : "Este post aún no ha sido compartido"}
                 </span>
               </div>
             </TooltipTrigger>
 
             <TooltipContent>
-              {6} Compartidos
+              {postData.sharedCount} Compartidos
             </TooltipContent>
           </Tooltip>
         </div>

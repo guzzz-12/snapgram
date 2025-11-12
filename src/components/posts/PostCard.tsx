@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import PostHeader from "./PostCardHeader";
 import PostCardFooter from "./PostCardFooter";
 import CreatePostInput from "./CreatePostInput";
+import SharedPostCard from "./SharedPostCard";
 import { Button } from "../ui/button";
 import useClampedText from "@/hooks/useClampedText";
 import { errorMessage } from "@/utils/errorMessage";
@@ -150,36 +151,44 @@ const PostCard = ({ postData, isModal, className }: Props) => {
         </div>
       )}
 
-      <Slider
-        className="postCardSlider"
-        {...SLIDER_SETTINGS}
-      >
-        {postData.imageUrls.map((imageUrl, index) => (
-          <Link
-            key={index}
-            to={`/post/${postData._id}`}
-            style={{
-              filter: "blur(15px)",
-              backgroundImage: `url(${imageUrl})`
-            }}
-            className="relative w-full aspect-[4/3] rounded-lg bg-neutral-200 overflow-hidden cursor-pointer"
-          >
-            <div
+      {/* Contenido del post */}
+      {postData.postType !== "repost" &&
+        <Slider
+          className="postCardSlider"
+          {...SLIDER_SETTINGS}
+        >
+          {postData.imageUrls.map((imageUrl, index) => (
+            <Link
+              key={index}
+              to={`/post/${postData._id}`}
               style={{
                 filter: "blur(15px)",
                 backgroundImage: `url(${imageUrl})`
               }}
-              className="absolute top-0 left-0 w-full h-full opacity-70 bg-cover bg-center bg-no-repeat z-0"
-            />
-            
-            <img
-              className="relative w-full h-full object-contain z-30"
-              src={imageUrl}
-              alt={`Post de ${postData.user.fullName}`}
-            />
-          </Link>
-        ))}
-      </Slider>
+              className="relative w-full aspect-[4/3] rounded-lg bg-neutral-200 overflow-hidden cursor-pointer"
+            >
+              <div
+                style={{
+                  filter: "blur(15px)",
+                  backgroundImage: `url(${imageUrl})`
+                }}
+                className="absolute top-0 left-0 w-full h-full opacity-70 bg-cover bg-center bg-no-repeat z-0"
+              />
+              
+              <img
+                className="relative w-full h-full object-contain z-30"
+                src={imageUrl}
+                alt={`Post de ${postData.user.fullName}`}
+              />
+            </Link>
+          ))}
+        </Slider>
+      }
+
+      {/* Contenido del repost */}
+      {postData.postType === "repost" &&
+        <SharedPostCard data={postData.originalPost!} />
+      }
 
       <PostCardFooter
         postData={postData}

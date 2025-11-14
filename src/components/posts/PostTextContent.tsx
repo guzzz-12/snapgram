@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Twemoji } from "react-emoji-render";
-import { Button } from "@/components/ui/button";
+import SeeMoreBtn from "@/components/SeeMoreBtn";
 import useClampedText from "@/hooks/useClampedText";
 import { hashtagParser } from "@/utils/hashtagsParser";
 import type { PostWithLikes } from "@/types/global";
@@ -12,14 +12,13 @@ interface Props {
 
 const PostTextContent = ({ postData }: Props) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
-  const showClampBtnRef = useRef<"shouldShow" | "shouldNotShow">("shouldNotShow");
 
   const {
     isClamped,
     showFullText,
     setShowFullText,
     setIsClamped
-  } = useClampedText({ textContentRef, showClampBtnRef });
+  } = useClampedText({ textContentRef, clampedTextData: postData.content });
 
   return (
     <div className="mb-3 px-3">
@@ -32,17 +31,12 @@ const PostTextContent = ({ postData }: Props) => {
         </Twemoji>
       </p>
       
-      {showClampBtnRef.current === "shouldShow" &&
-        <Button
-          className="inline-block p-0 text-blue-900 cursor-pointer"
-          variant="link"
-          onClick={() => {
-            setShowFullText(!showFullText);
-            setIsClamped(!isClamped);
-          }}
-        >
-          {!isClamped ? "Ver menos..." : "Ver más..."}
-        </Button>
+      {isClamped &&
+        <SeeMoreBtn
+          isClamped={isClamped}
+          setIsClamped={setIsClamped}
+          setShowFullText={setShowFullText}
+        />
       }
     </div>
   )

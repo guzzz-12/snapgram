@@ -1,13 +1,17 @@
 import { useEffect, useState, type RefObject } from "react";
 
 interface Props {
+  /** Referencia del elemento HTML que contiene el texto truncado */
   textContentRef: RefObject<HTMLParagraphElement | null>;
-  showClampBtnRef: RefObject<"shouldShow" | "shouldNotShow">;
-  clampedText?: string;
+  /** El texto en la data de la publicación.
+   * Al editar la publicación esta dependencia restablece el observer
+   * y recalcula si el texto actualizado está truncado.
+   */
+  clampedTextData: string;
 }
 
 const useClampedText = (props: Props) => {
-  const { textContentRef, showClampBtnRef, clampedText } = props;
+  const { textContentRef, clampedTextData } = props;
 
   const [showFullText, setShowFullText] = useState(false);
   const [isClamped, setIsClamped] = useState(false);
@@ -22,12 +26,6 @@ const useClampedText = (props: Props) => {
     });
 
     if (textContentRef.current) {
-      // Verificar si el texto está inicialmente truncado
-      const isInitiallyClamped = textContentRef.current.scrollHeight > textContentRef.current.clientHeight;
-
-      // Verificar si debería mostrarse el botón de "Ver más..." en el primer render
-      showClampBtnRef.current = isInitiallyClamped ? "shouldShow" : "shouldNotShow";
-
       resizeObserver.observe(textContentRef.current);
     }
 
@@ -35,7 +33,7 @@ const useClampedText = (props: Props) => {
       resizeObserver.disconnect();
     }
 
-  }, [clampedText]);
+  }, [clampedTextData]);
 
   return { isClamped, showFullText, setShowFullText, setIsClamped };
 }

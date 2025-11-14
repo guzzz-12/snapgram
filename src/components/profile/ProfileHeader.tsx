@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { Calendar, MapPin, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import ProfileEditModal from "./ProfileEditModal";
+import SeeMoreBtn from "@/components/SeeMoreBtn";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -21,7 +22,6 @@ interface Props {
 const ProfileHeader = ({ userData }: Props) => {
   const avatarRef = useRef<HTMLDivElement | null>(null);
   const textContentRef = useRef<HTMLParagraphElement>(null);
-  const showClampBtnRef = useRef<"shouldShow" | "shouldNotShow">("shouldNotShow");
 
   const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
   const [avatarHeight, setAvatarHeight] = useState(0);
@@ -37,7 +37,7 @@ const ProfileHeader = ({ userData }: Props) => {
     showFullText,
     setShowFullText,
     setIsClamped
-  } = useClampedText({ textContentRef, showClampBtnRef, clampedText: userData.bio });
+  } = useClampedText({ textContentRef, clampedTextData: userData.bio });
 
   useEffect(() => {
     if (avatarRef.current) {
@@ -187,17 +187,12 @@ const ProfileHeader = ({ userData }: Props) => {
               {userData.bio}
             </p>
 
-            {showClampBtnRef.current === "shouldShow" &&
-              <Button
-                className="inline-block my-1 p-0 text-blue-900 cursor-pointer"
-                variant="link"
-                onClick={() => {
-                  setShowFullText(!showFullText);
-                  setIsClamped(!isClamped);
-                }}
-              >
-                {!isClamped ? "Ver menos..." : "Ver más..."}
-              </Button>
+            {isClamped &&
+              <SeeMoreBtn
+                isClamped={isClamped}
+                setIsClamped={setIsClamped}
+                setShowFullText={setShowFullText}
+              />
             }
           </div>
 

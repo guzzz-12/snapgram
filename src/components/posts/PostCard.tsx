@@ -9,6 +9,7 @@ import PostCardSlider from "./PostCardSlider";
 import PostCardFooter from "./PostCardFooter";
 import CreatePostInput from "./CreatePostInput";
 import SharedPostCard from "./SharedPostCard";
+import SeeMoreBtn from "@/components/SeeMoreBtn";
 import { Button } from "../ui/button";
 import useClampedText from "@/hooks/useClampedText";
 import { errorMessage } from "@/utils/errorMessage";
@@ -25,7 +26,6 @@ interface Props {
 
 const PostCard = ({ postData, isModal, className }: Props) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
-  const showClampBtnRef = useRef<"shouldShow" | "shouldNotShow">("shouldNotShow");
 
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
@@ -48,7 +48,7 @@ const PostCard = ({ postData, isModal, className }: Props) => {
     showFullText,
     setShowFullText,
     setIsClamped
-  } = useClampedText({ textContentRef, showClampBtnRef });
+  } = useClampedText({ textContentRef, clampedTextData: postData.content });
 
   const {mutate, isPending} = useMutation({
     mutationFn: async () => {
@@ -135,17 +135,12 @@ const PostCard = ({ postData, isModal, className }: Props) => {
             </Twemoji>
           </p>
           
-          {showClampBtnRef.current === "shouldShow" &&
-            <Button
-              className="inline-block p-0 text-blue-900 cursor-pointer"
-              variant="link"
-              onClick={() => {
-                setShowFullText(!showFullText);
-                setIsClamped(!isClamped);
-              }}
-            >
-              {!isClamped ? "Ver menos..." : "Ver más..."}
-            </Button>
+          {isClamped &&
+            <SeeMoreBtn
+              isClamped={isClamped}
+              setIsClamped={setIsClamped}
+              setShowFullText={setShowFullText}
+            />
           }
         </div>
       )}

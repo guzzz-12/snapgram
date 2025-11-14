@@ -11,6 +11,7 @@ import PostCardFooter from "@/components/posts/PostCardFooter";
 import PostTextContent from "@/components/posts/PostTextContent";
 import PostCommentInput from "@/components/posts/PostCommentInput";
 import CommentsList from "@/components/comments/CommentsList";
+import SharedPostCard from "@/components/posts/SharedPostCard";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,7 +19,6 @@ import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { SLIDER_SETTINGS } from "@/utils/constants";
-import { cn } from "@/lib/utils";
 import type { Comment, PostWithLikes } from "@/types/global";
 
 const PostPage = () => {
@@ -140,6 +140,7 @@ const PostPage = () => {
     )
   }
 
+  //! TODO: Crear el layout de la página not found
   if (!postData) {
     return (
       <main className="flex justify-center items-center w-full h-full">
@@ -149,7 +150,7 @@ const PostPage = () => {
   }
 
   return (
-    <main className={cn("pageWrapper h-screen p-0 overflow-y-hidden", postData.postType === "text" && "bg-black")}>
+    <main className="pageWrapper h-screen p-0 overflow-y-hidden">
       {/* Botón para salir del post */}
       <Tooltip>
         <TooltipTrigger asChild>
@@ -171,7 +172,7 @@ const PostPage = () => {
 
       {/* Contenido del post de tipo texto */}
       {postData.postType === "text" &&
-        <section className="flex flex-col w-full max-w-[600px] h-full mx-auto py-4">
+        <section className="flex flex-col w-full max-w-[700px] h-full mx-auto py-4">
           <div className="w-full h-full bg-white rounded-t-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
             <PostCardHeader
               className="mb-3 px-4 pt-3"
@@ -204,12 +205,53 @@ const PostPage = () => {
             />
           </div>
 
-          <PostCommentInput className="rounded-b-md" postId={postData._id} />
+          <PostCommentInput className="shadow rounded-b-md" postId={postData._id} />
+        </section>
+      }
+
+      {/* Contenido del post de tipo repost (post compartido) */}
+      {postData.postType === "repost" &&
+        <section className="flex flex-col w-full max-w-[700px] h-full mx-auto py-4">
+          <div className="w-full h-full bg-white rounded-t-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+            <PostCardHeader
+              className="mb-3 px-4 pt-3"
+              postData={postData}
+              setisEditingPost={setIsEditingPost}
+            />
+
+            <Separator className="my-3" />
+
+            {/* Formulario para editar el post */}
+            {isEditingPost && (
+              <EditPostForm
+                postData={postData}
+                textContent={textContent}
+                setTextContent={setTextContent}
+                setIsEditingPost={setIsEditingPost}
+              />
+            )}
+
+            {postData.content && !isEditingPost && (
+              <PostTextContent postData={postData} />
+            )}
+
+            <div className="mb-3 px-3">
+              <SharedPostCard data={postData.originalPost!} />
+            </div>
+
+            <PostCardFooter className="mb-2 px-3" postData={postData} />
+
+            <CommentsList
+              className="px-3 py-2"
+              comments={comments}
+              isLoading={loadingComments}
+            />
+          </div>
         </section>
       }
 
       {/* Contenido del post de tipo imagen o texto + imagen */}
-      {postData.postType !== "text" &&
+      {(postData.postType == "image" || postData.postType == "textWithImage") &&
         <section className="flex w-full h-full bg-black overflow-hidden">
           {/* Columna izquierda: Slider de imágenes del post */}
           <div className="w-full h-full overflow-hidden">

@@ -15,7 +15,7 @@ const NotificationToast = ({ notificationData }: Props) => {
 
   return (
     <Link
-      className="flex justify-start items-center gap-2 min-w-[270px] max-w-[300px] p-4 bg-[#4F39F6] rounded-md border shadow-md"
+      className="flex justify-start items-center gap-2 min-w-[270px] max-w-[300px] p-4 bg-neutral-200 rounded-md border shadow-md"
       to={notificationLink}
     >
       <div className="flex items-center h-full shrink-0">
@@ -31,10 +31,18 @@ const NotificationToast = ({ notificationData }: Props) => {
       </div>
 
       <div className="w-full h-full overflow-hidden">
-        <p className="text-sm text-neutral-50">
-          <span className="font-semibold">{sender.fullName}</span>
+        <p className="text-sm text-neutral-900">
+          {type === "like" && "A "}
+
+          <span className="font-semibold">
+            {sender.fullName}
+          </span>
+
           {" "}
-          {NOTIFICATIONS_TEXT_MAP[type]}
+
+          <span className="font-normal">
+            {NOTIFICATIONS_TEXT_MAP[type]}
+          </span>
         </p>
       </div>
     </Link>

@@ -1,4 +1,4 @@
-import type { ChatType, MessageType, UserType } from "./global";
+import type { ChatType, MessageType, Notifications, UserType } from "./global";
 
 export type OnlineUser = {
   clerkUserId: string;
@@ -7,7 +7,7 @@ export type OnlineUser = {
 
 export type NotificationEventData = {
   _id: string;
-  notificationType: "follow" | "like" | "comment" | "reply";
+  notificationType: Notifications;
   originalPostId: string | null;
   recipientId: string;
   sender: {

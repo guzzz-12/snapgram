@@ -1,16 +1,27 @@
+import { useRef } from "react";
 import { Link } from "react-router";
 import dayjs from "dayjs";
 import { FaLock } from "react-icons/fa";
 import PostCardSlider from "./PostCardSlider";
+import SeeMoreBtn from "@/components/SeeMoreBtn";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import useClampedText from "@/hooks/useClampedText";
 import type { PostType } from "@/types/global";
+import { cn } from "@/lib/utils";
 
 interface Props {
   data: PostType;
 }
 
 const SharedPostCard = ({data}: Props) => {
+  const textRef = useRef<HTMLParagraphElement>(null);
+
+  const {isClamped, showFullText, setIsClamped, setShowFullText} = useClampedText({
+    textContentRef: textRef,
+    clampedTextData: data.content
+  });
+
   const isOriginalPostDeleted = !data._id;
 
   return (
@@ -61,9 +72,23 @@ const SharedPostCard = ({data}: Props) => {
             </div>
           </Link>
 
-          <p className="mb-2 text-sm text-neutral-900 line-clamp-6">
-            {data.content}
-          </p>
+          <div>
+            <p
+              ref={textRef}
+              className={cn("text-sm text-neutral-900", showFullText ? "line-clamp-none" : "line-clamp-6")}
+            >
+              {data.content}
+            </p>
+
+            {/* El botón de ver más no se muestra al expandir el texto */}
+            {isClamped &&
+              <SeeMoreBtn
+                isClamped={isClamped}
+                setIsClamped={setIsClamped}
+                setShowFullText={setShowFullText}
+              />
+            }
+          </div>
 
           {data.imageUrls.length > 0 &&
             <PostCardSlider data={data} />

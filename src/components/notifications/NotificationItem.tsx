@@ -9,38 +9,22 @@ import { toast } from "sonner";
 import NotificationIcon from "./NotificationIcon";
 import DeleteConfirmModal from "../DeleteConfirmModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { Comment, NotificationType, PostType, UserType } from "@/types/global";
+import type { NotificationType } from "@/types/global";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { NOTIFICATIONS_TEXT_MAP } from "@/utils/constants";
+import { generateNotificationLink } from "@/utils/generateNotificationLink";
 import { cn } from "@/lib/utils";
 
 interface Props {
   data: NotificationType;
 }
 
-// La notificación se hizo sobre un post cuando es like o comment
-const isItemPost = (item: any): item is PostType => {
-  if (!item) return false;
-  return "postType" in item;
-}
-
-// La notificación se hizo sobre un user cuando es follow
-const isItemUser = (item: any): item is UserType => {
-  if (!item) return false;
-  return "clerkId" in item;
-}
-
-// La notificación se hizo sobre un comment cuando es reply
-const isItemComment = (item: any): item is Comment => {
-  if (!item) return false;
-  return "commentType" in item;
-}
-
+/** Item de la lista de la página de notificaciones */
 const NotificationItem = ({ data }: Props) => {
-  const { sender, notificationType, onItem, isSeen, isRead } = data;
+  const { sender, notificationType, onItem, isSeen, isRead, originalPost } = data;
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [showDropdownTrigger, setShowDropdownTrigger] = useState(false);
@@ -90,10 +74,11 @@ const NotificationItem = ({ data }: Props) => {
     }
   });
 
-  // Determinar el user del item de la notificacion segun el tipo de notificacion
-  // const notificationUser = (isItemPost(onItem) || isItemComment(onItem)) ? onItem.user : onItem;
-
-  const notificationLink = data.originalPost ? `/post/${data.originalPost._id}` : isItemUser(onItem) ? `/profile/${onItem.clerkId}` : "/";
+  // Generar el link de la notificacion
+  const notificationLink = generateNotificationLink({
+    type: notificationType,
+    onItemId: ("clerkId" in onItem ? onItem.clerkId : notificationType === "reply" ? originalPost?._id : onItem._id) || ""
+  });
 
   return (
     <div

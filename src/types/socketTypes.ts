@@ -10,6 +10,7 @@ export type NotificationEventData = {
   notificationType: Notifications;
   originalPostId: string | null;
   recipientId: string;
+  onItemId: string;
   sender: {
     _id: string;
     clerkId: string;

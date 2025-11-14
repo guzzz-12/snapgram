@@ -2,15 +2,16 @@ import { Link } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NOTIFICATIONS_TEXT_MAP } from "@/utils/constants";
 import type { NotificationEventData } from "@/types/socketTypes"
+import { generateNotificationLink } from "@/utils/generateNotificationLink";
 
 interface Props {
   notificationData: NotificationEventData;
 }
 
 const NotificationToast = ({ notificationData }: Props) => {
-  const {notificationType: type, sender} = notificationData;
+  const {notificationType: type, sender, onItemId} = notificationData;
 
-  const notificationLink = type === "follow" ? `/profile/${sender.clerkId}` : `/post/${notificationData?.originalPostId}`
+  const notificationLink = generateNotificationLink({type, onItemId});
 
   return (
     <Link

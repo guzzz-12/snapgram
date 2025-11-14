@@ -26,7 +26,7 @@ const LogoutItem = () => {
 
   return (
     <Button
-      className={cn("h-auto py-4 text-neutral-600 cursor-pointer", isSigningOut && "pointer-events-none")}
+      className={cn("w-full h-auto !px-2 py-4 text-neutral-600 cursor-pointer", isSigningOut && "pointer-events-none")}
       variant="ghost"
       disabled={isSigningOut}
       onClick={onClickHandler}

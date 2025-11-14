@@ -5,17 +5,19 @@ import { CirclePlus, ImagePlus, TypeOutline } from "lucide-react";
 import { GoHomeFill } from "react-icons/go";
 import { LuMessageCircle, LuSearch, LuUserRound } from "react-icons/lu";
 import { MdNotifications } from "react-icons/md";
+import { AiOutlineMenu } from "react-icons/ai";
 import MainSidebarItem from "./MainSidebarItem";
 import ProfileLinkItem from "./ProfileLinkItem";
 import LogoutItem from "./LogoutItem";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "./ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { Separator } from "./ui/separator";
+import { Button } from "./ui/button";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import logo from "@/assets/logo-simple.webp";
-import { Separator } from "./ui/separator";
 
 const MainSidebar = () => {
   const createPostBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -129,10 +131,32 @@ const MainSidebar = () => {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="flex flex-col gap-3 min-[1280px]:hidden">
-        <ProfileLinkItem user={user!} />
-        <Separator className="w-full bg-neutral-200" />
-        <LogoutItem />
+      <SidebarFooter className="flex flex-col gap-3 px-4 min-[1280px]:hidden">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className="justify-start h-auto mb-3 py-3 cursor-pointer"
+              variant="ghost"
+              size="lg"
+            >
+              <AiOutlineMenu className="size-6 text-neutral-700" aria-hidden/>
+              <span className="text-base text-neutral-900">Más</span>
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent className="w-[220px]">
+            <DropdownMenuItem className="w-full p-0">
+              <ProfileLinkItem user={user!} />
+            </DropdownMenuItem>
+
+            <Separator className="w-full bg-neutral-200" />
+
+            <DropdownMenuItem className="w-full p-0">
+              <LogoutItem />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
       </SidebarFooter>
 
       <Separator className="w-full bg-neutral-200" />

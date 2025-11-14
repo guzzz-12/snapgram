@@ -1,9 +1,10 @@
 import type { ComponentProps, HTMLAttributes } from "react";
-import { FaCommentAlt, FaReply, FaHeart, FaUserPlus } from "react-icons/fa";
+import { FaCommentAlt, FaReply, FaHeart, FaUserPlus, FaShareAlt } from "react-icons/fa";
 import { cn } from "@/lib/utils";
+import type { Notifications } from "@/types/global";
 
 interface Props {
-  notificationType: "follow" | "like" | "comment" | "reply";
+  notificationType: Notifications;
   className?: HTMLAttributes<HTMLElement>["className"];
   props?: ComponentProps<"div">
 }
@@ -13,6 +14,7 @@ const IconMap = {
   like: FaHeart,
   comment: FaCommentAlt,
   reply: FaReply,
+  postShared: FaShareAlt
 }
 
 

@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { NOTIFICATIONS_TEXT_MAP } from "@/utils/constants";
 import type { NotificationEventData } from "@/types/socketTypes"
 
 interface Props {
@@ -31,11 +32,8 @@ const NotificationToast = ({ notificationData }: Props) => {
       <div className="w-full h-full overflow-hidden">
         <p className="text-sm text-neutral-50">
           <span className="font-semibold">{sender.fullName}</span>
-          &nbsp;
-          {type === "follow" && "te comenzó a seguir."}
-          {type === "like" && "le gustó tu publicación."}
-          {type === "comment" && "comentó tu publicación."}
-          {type === "reply" && "respondió a tu comentario en una publicación."}
+          {" "}
+          {NOTIFICATIONS_TEXT_MAP[type]}
         </p>
       </div>
     </Link>

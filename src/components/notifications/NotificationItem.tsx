@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
+import { NOTIFICATIONS_TEXT_MAP } from "@/utils/constants";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -22,16 +23,19 @@ interface Props {
 
 // La notificación se hizo sobre un post cuando es like o comment
 const isItemPost = (item: any): item is PostType => {
+  if (!item) return false;
   return "postType" in item;
 }
 
 // La notificación se hizo sobre un user cuando es follow
 const isItemUser = (item: any): item is UserType => {
+  if (!item) return false;
   return "clerkId" in item;
 }
 
 // La notificación se hizo sobre un comment cuando es reply
 const isItemComment = (item: any): item is Comment => {
+  if (!item) return false;
   return "commentType" in item;
 }
 
@@ -133,7 +137,13 @@ const NotificationItem = ({ data }: Props) => {
 
         <div className="flex flex-col justify-center items-start gap-0 w-full overflow-hidden">
           <p className="text-[15px] text-neutral-900 leading-tight">
-            <span>{notificationType === "like" ? "A " : ""}</span> <span className="font-semibold">{sender.fullName}</span> {notificationType === "follow" ? "comenzó a seguirte" : notificationType === "like" ? "le gustó tu publicación" : notificationType === "comment" ? "comentó en tu publicación" : "respondió a tu comentario en una publicación"}
+            <span>{notificationType === "like" ? "A " : ""}</span>
+            
+            <span className="font-semibold">
+              {sender.fullName}
+            </span> {" "}
+
+            {NOTIFICATIONS_TEXT_MAP[notificationType]}
           </p>
 
           <span

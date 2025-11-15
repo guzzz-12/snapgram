@@ -6,11 +6,14 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import CreateStoryModal from "@/components/stories/CreateStoryModal";
 import CreatePostModal from "@/components/posts/CreatePostModal";
 import SocketManager from "@/components/SocketManager";
+import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
 
 const Layout = () => {
   const {pathname} = useLocation();
 
   const {isLoaded} = useUser();
+
+  useTitleNotificationsCounter();
 
   if (!isLoaded) {
     return null;

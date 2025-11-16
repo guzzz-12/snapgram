@@ -5,9 +5,9 @@ import { useAuth } from "@clerk/clerk-react";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import PostModal from "./PostModal";
+import PostCardFooterBtn from "./PostCardFooterBtn";
 import LikesPopover from "@/components/likes/LikesPopover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -116,52 +116,51 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
         </div>
       </div>
       
-      <div className="flex justify-between items-center gap-1 w-full text-neutral-700 text-sm font-semibold border-t pt-2">
-        <Button
-          className="gap-1 grow text-base font-normal bg-neutral-100 cursor-pointer hover:bg-neutral-200"
-          variant="ghost"
-          size="default"
+      <div className="flex justify-between items-center gap-1 w-full pt-2 text-neutral-700 text-sm font-semibold border-t overflow-hidden">
+        <PostCardFooterBtn
           disabled={likeMutation.isPending}
-          onClick={() => likeMutation.mutate()}
+          callback={() => likeMutation.mutate()}
         >
           <Heart
-            className="size-4.5"
+            className="size-4.5 shrink-0"
             fill={postData.isLiked ? "red" : "none"}
             stroke={postData.isLiked ? "red" : "currentColor"}
             aria-hidden
           />
 
-          Me gusta
-        </Button>
+          <span className="hidden min-[550px]:block min-[999px]:hidden min-[1150px]:inline">
+            Me gusta
+          </span>
+        </PostCardFooterBtn>
 
-        <Button
-          className="gap-1 grow text-base font-normal bg-neutral-100 cursor-pointer hover:bg-neutral-200"
-          variant="ghost"
-          size="default"
-          onClick={() => {
+        <PostCardFooterBtn
+          disabled={false}
+          callback={() => {
             if (!isModal) {
               setOpenPostModal?.(true);
             }
           }}
         >
-          <MessageCircle className="size-4.5" aria-hidden />
-          Comentar
-        </Button>
+          <MessageCircle className="size-4.5 shrink-0" aria-hidden />
+          <span className="hidden min-[550px]:block min-[999px]:hidden min-[1150px]:inline">
+            Comentar
+          </span>
+        </PostCardFooterBtn>
 
-        <Button
-          className="gap-1 grow text-base font-normal bg-neutral-100 cursor-pointer hover:bg-neutral-200"
-          variant="ghost"
-          size="default"
-          onClick={() => setOpen({
+        <PostCardFooterBtn
+          disabled={false}
+          callback={() => setOpen({
             open: true,
             publicationType: "post",
             isRepost: true,
             repostedPostId: postData._id
           })}
         >
-          <Share2 className="size-4.5" aria-hidden />
-          Compartir
-        </Button>
+          <Share2 className="size-4.5 shrink-0" aria-hidden />
+          <span className="hidden min-[550px]:block min-[999px]:hidden min-[1150px]:inline">
+            Compartir
+          </span>
+        </PostCardFooterBtn>
       </div>
     </div>
   )

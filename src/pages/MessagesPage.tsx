@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { AxiosError } from "axios";
@@ -25,6 +25,8 @@ const MessagesPage = () => {
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   const {chatId} = useParams<{chatId: string}>();
+  const [searchParams] = useSearchParams();
+  const chatTypeParam = searchParams.get("type") as "all" | "group" | null;
 
   const navigate = useNavigate();
 
@@ -132,6 +134,7 @@ const MessagesPage = () => {
       <ChatList
         headerHeight={headerHeight}
         temporaryChatItem={temporaryChat}
+        chatTypeParam={chatTypeParam}
       />
 
       <section className="flex flex-col justify-start w-full overflow-hidden">
@@ -175,6 +178,7 @@ const MessagesPage = () => {
               recipientId={recipientId}
               setTemporaryChat={setTemporaryChat}
               chatId={chatId}
+              chatTypeParam={chatTypeParam}
             />
           </>
         }
@@ -184,9 +188,10 @@ const MessagesPage = () => {
             <div className="flex justify-center items-center w-[120px] h-[120px] mb-2 shrink-0 rounded-full border-2 border-neutral-600">
               <LuSendHorizontal className="size-16 text-neutral-600 stroke-1" />
             </div>
-
+            
             <h1 className="text-xl">
-              Enviar mensaje
+              {chatTypeParam === "all" && "Enviar mensaje"}
+              {chatTypeParam === "group" && "Crear grupo"}
             </h1>
 
             <p className="mb-5 text-center text-sm text-neutral-600">

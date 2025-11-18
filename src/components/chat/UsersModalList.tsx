@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -21,6 +21,8 @@ const UsersModalList = ({setTemporaryChat}: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const chatTypeParam = searchParams.get("type") as "all" | "group" | null;
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -139,7 +141,7 @@ const UsersModalList = ({setTemporaryChat}: Props) => {
           className="px-4 py-2 text-base text-white bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
           variant="default"
         >
-          Enviar mensaje
+          {chatTypeParam === "group" ? "Crear grupo" : "Enviar mensaje"}
         </Button>
       </DialogTrigger>
 

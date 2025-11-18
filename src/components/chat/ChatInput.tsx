@@ -16,18 +16,19 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
+import { socket } from "@/utils/socket";
 import type { ChatType, MessageType } from "@/types/global";
 import type { TypingEventData } from "@/types/socketTypes";
-import { socket } from "@/utils/socket";
 
 interface Props {
   wrapperHeight: number;
   recipientId: string;
   chatId: string | undefined;
+  chatTypeParam: "all" | "group" | null;
   setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
-const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Props) => {
+const ChatInput = ({ wrapperHeight, recipientId, chatId, chatTypeParam, setTemporaryChat }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const stopTypingTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -101,7 +102,7 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, setTemporaryChat }: Pro
       };
 
       if (data.isNewChat) {
-        await queryClient.invalidateQueries({queryKey: ["chats"]});
+        await queryClient.invalidateQueries({queryKey: ["chats", chatTypeParam || "all"]});
         setTemporaryChat(null);
         navigate(`/messages/${data.chat!._id}`, {replace: true});
       }

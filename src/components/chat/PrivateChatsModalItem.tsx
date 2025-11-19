@@ -7,7 +7,7 @@ interface Props {
   userData: UserType;
 }
 
-const UsersModalItem = ({ userData }: Props) => {
+const PrivateChatsModalItem = ({ userData }: Props) => {
   return (
     <Label
       id={userData._id}
@@ -40,4 +40,4 @@ const UsersModalItem = ({ userData }: Props) => {
   )
 }
 
-export default UsersModalItem
+export default PrivateChatsModalItem

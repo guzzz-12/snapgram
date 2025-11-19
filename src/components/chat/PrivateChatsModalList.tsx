@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import UsersModalItem from "./UsersModalItem";
+import UsersModalItem from "./PrivateChatsModalItem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,10 @@ interface Props {
   setTemporaryChat: (chat: ChatType) => void;
 }
 
-const UsersModalList = ({setTemporaryChat}: Props) => {
+const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const chatTypeParam = searchParams.get("type") as "all" | "group" | null;
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -66,7 +64,7 @@ const UsersModalList = ({setTemporaryChat}: Props) => {
 
   // Consultar el chat con el usuario seleccionado
   const {refetch, isRefetching: isLoadingChat, error: loadingChatError} = useQuery({
-    queryKey: ["get-chat-by-participant", selectedUserId],
+    queryKey: ["get-private-chat-by-participant", selectedUserId],
     queryFn: async () => {
       const token = await getToken();
 
@@ -141,7 +139,7 @@ const UsersModalList = ({setTemporaryChat}: Props) => {
           className="px-4 py-2 text-base text-white bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
           variant="default"
         >
-          {chatTypeParam === "group" ? "Crear grupo" : "Enviar mensaje"}
+          Enviar mensaje
         </Button>
       </DialogTrigger>
 
@@ -219,4 +217,4 @@ const UsersModalList = ({setTemporaryChat}: Props) => {
   )
 }
 
-export default UsersModalList
+export default PrivateChatsModalList

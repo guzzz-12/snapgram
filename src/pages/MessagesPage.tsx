@@ -10,7 +10,7 @@ import ChatHeader from "@/components/chat/ChatHeader";
 import ChatContent from "@/components/chat/ChatContent";
 import ChatInput from "@/components/chat/ChatInput";
 import ChatList from "@/components/chat/ChatList";
-import UsersModalList from "@/components/chat/UsersModalList";
+import PrivateChatsModalList from "@/components/chat/PrivateChatsModalList";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -198,7 +198,7 @@ const MessagesPage = () => {
               Envia mensajes a tus amigos o grupos
             </p>
 
-            <UsersModalList setTemporaryChat={setTemporaryChat} />
+            <PrivateChatsModalList setTemporaryChat={setTemporaryChat} />
           </div>
         }
       </section>

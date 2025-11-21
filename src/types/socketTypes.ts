@@ -42,7 +42,7 @@ export interface ClientEvents {
 export interface ServerEvents {
   setOnlineUsers: (onlineUsers: OnlineUser[]) => void;
   newNotification: (notification: NotificationEventData) => void;
-  newPrivateMessage: (newMessage: NewMessageEventData) => void;
+  newMessage: (newMessage: NewMessageEventData) => void;
   deletedMessage: (deletedMessage: MessageType) => void;
   typing: (data: TypingEventData) => void;
   stoppedTyping: ({chatId, userId}: {userId: string, chatId: string}) => void;

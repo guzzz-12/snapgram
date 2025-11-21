@@ -17,7 +17,7 @@ export const useNewMessage = (props: Props) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    socket.on("newPrivateMessage", (newMessage) => {
+    socket.on("newMessage", (newMessage) => {
       if (newMessage.chat._id === chatId) {
         // Actualizar la caché de los mensajes para actualizar la bandeja de entrada del chat
         updateMessagesCache({ queryClient, chatId, newMessage });
@@ -29,7 +29,7 @@ export const useNewMessage = (props: Props) => {
     });
 
     return () => {
-      socket.off("newPrivateMessage");
+      socket.off("newMessage");
     };
   }, [chatId, currentUserId]);
 

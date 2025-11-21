@@ -121,7 +121,7 @@ const SocketManager = () => {
       socket.off("disconnect");
       socket.off("setOnlineUsers");
       socket.off("newNotification");
-      socket.off("newPrivateMessage");
+      socket.off("newMessage");
       socket.off("deletedMessage");
       socket.off("typing");
       socket.off("stoppedTyping");
@@ -133,7 +133,7 @@ const SocketManager = () => {
   useEffect(() => {
     if (!userDocument) return;
 
-    socket.on("newPrivateMessage", (data) => {
+    socket.on("newMessage", (data) => {
       const senderId = data.message.sender._id;
       const currentChatId = params.chatId || "";
 
@@ -177,7 +177,7 @@ const SocketManager = () => {
     });
 
     return () => {
-      socket.off("newPrivateMessage");
+      socket.off("newMessage");
     }
   }, [socket, userDocument, pathname, params, unreadChats]);
 

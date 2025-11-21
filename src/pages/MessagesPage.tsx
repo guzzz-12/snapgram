@@ -11,6 +11,7 @@ import ChatContent from "@/components/chat/ChatContent";
 import ChatInput from "@/components/chat/ChatInput";
 import ChatList from "@/components/chat/ChatList";
 import PrivateChatsModalList from "@/components/chat/PrivateChatsModalList";
+import CreateGroupChatModal from "@/components/chat/CreateGroupChatModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -123,9 +124,9 @@ const MessagesPage = () => {
   const chat = messagesData?.pages[0]?.data.chat || null;
 
   // Obtener el destinatario del chat
-  const recipient = temporaryChat ? temporaryChat.participants.find((user) => user._id !== currentUser?._id) : chat?.participants.find((user) => user._id !== currentUser?._id);
+  const recipients = temporaryChat ? temporaryChat.participants.filter((user) => user._id !== currentUser?._id) : chat?.participants.filter((user) => user._id !== currentUser?._id);
 
-  const recipientId = recipient?._id || "";
+  const recipientIds = recipients?.map((recipient) => recipient._id) || [];
 
   return (
     <main className="flex w-full h-[100vh] bg-white overflow-hidden">
@@ -158,14 +159,15 @@ const MessagesPage = () => {
           </>
         }
 
-        {chatId && recipient && !isLoading &&
+        {chatId && recipientIds.length > 0 && !isLoading &&
           <>
-            <ChatHeader recipient={recipient} headerRef={headerRef} />
+            <ChatHeader
+              chatData={temporaryChat || chat}
+              headerRef={headerRef}
+            />
 
             <ChatContent
-              chatId={chatId}
-              currentUser={currentUser}
-              recipient={recipient}
+              chatData={temporaryChat || chat}
               messages={messages}
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
@@ -174,8 +176,8 @@ const MessagesPage = () => {
             />
 
             <ChatInput
+              chatData={temporaryChat || chat}
               wrapperHeight={headerHeight}
-              recipientId={recipientId}
               setTemporaryChat={setTemporaryChat}
               chatId={chatId}
               chatTypeParam={chatTypeParam}
@@ -198,7 +200,13 @@ const MessagesPage = () => {
               Envia mensajes a tus amigos o grupos
             </p>
 
-            <PrivateChatsModalList setTemporaryChat={setTemporaryChat} />
+            {chatTypeParam === "all" &&
+              <PrivateChatsModalList setTemporaryChat={setTemporaryChat} />
+            }
+
+            {chatTypeParam === "group" &&
+              <CreateGroupChatModal />
+            }
           </div>
         }
       </section>

@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { Loader2Icon } from "lucide-react";
 import MessageItem from "./MessageItem";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { socket } from "@/utils/socket";
-import type { MessageType, UserType } from "@/types/global";
+import type { ChatType, MessageType } from "@/types/global";
 
 interface Props {
-  chatId: string;
+  chatData: ChatType | null;
   messages: MessageType[];
-  currentUser: UserType | null;
-  recipient: UserType | null;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   paginationRef: RefObject<HTMLDivElement | null>;
@@ -17,9 +16,7 @@ interface Props {
 
 const ChatContent = (props: Props) => {
   const {
-    chatId,
-    currentUser,
-    recipient,
+    chatData,
     messages,
     hasNextPage,
     isFetchingNextPage,
@@ -30,6 +27,12 @@ const ChatContent = (props: Props) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [scrollFromBottom, setScrollFromBottom] = useState(0);
+
+  const {user: currentUser} = useCurrentUser();
+
+  const chatParticipants = chatData?.participants || [];
+  
+  const recipient = chatData?.type === "private" ? chatParticipants.find((p) => p._id !== currentUser?._id) : chatData?.groupAdmin;
 
   // Calcular la distancia scrolleada desde el fondo de la bandeja de mensajes
   useEffect(() => {
@@ -54,23 +57,23 @@ const ChatContent = (props: Props) => {
         wrapperRef.current.removeEventListener("scroll", scrollHandler);
       }
     }
-  }, [chatId]);
+  }, [chatData]);
 
   // Scrollear al bottom al enviar/recibir un nuevo mensaje
   useEffect(() => {
-    socket.on("newPrivateMessage", (newMessage) => {
+    socket.on("newMessage", (newMessage) => {
       // Si el scroll es menor o igual a 300px, scrollear al bottom
-      if (scrollFromBottom <= 300 && chatId === newMessage.message.chat) {
+      if (scrollFromBottom <= 300 && chatData?._id === newMessage.message.chat) {
         wrapperRef.current!.scrollTop = wrapperRef.current!.scrollHeight;
       }
     });
 
     return () => {
-      socket.off("newPrivateMessage");
+      socket.off("newMessage");
     }
-  }, [socket, chatId, scrollFromBottom]);
+  }, [socket, chatData, scrollFromBottom]);
 
-  if (!currentUser || !recipient) return null;
+  if (!currentUser || !recipient || !chatData) return null;
 
   return (
     <div

@@ -21,14 +21,14 @@ import type { ChatType, MessageType } from "@/types/global";
 import type { TypingEventData } from "@/types/socketTypes";
 
 interface Props {
+  chatData: ChatType | null;
   wrapperHeight: number;
-  recipientId: string;
   chatId: string | undefined;
   chatTypeParam: "all" | "group" | null;
   setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
-const ChatInput = ({ wrapperHeight, recipientId, chatId, chatTypeParam, setTemporaryChat }: Props) => {
+const ChatInput = ({ wrapperHeight, chatData, chatTypeParam, setTemporaryChat }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const stopTypingTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -62,16 +62,21 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, chatTypeParam, setTempo
 
   // Mutation para enviar el mensaje
   const {mutate, isPending: submitting} = useMutation({
-    mutationKey: ["send-private-message", chatId],
+    mutationKey: ["send-private-message", chatData?._id],
     mutationFn: async () => {
       const token = await getToken();
 
       const formData = new FormData();
       formData.append("text", messageText);
-      formData.append("recipientId", recipientId);
 
-      if (chatId && !chatId.startsWith("temp_")) {
-        formData.append("chatId", chatId);
+      const participants = chatData?.participants.map(user => user._id) || [];
+
+      participants.forEach(participant => {
+        formData.append("recipientIds[]", participant);
+      });
+
+      if (chatData && !chatData._id.startsWith("temp_")) {
+        formData.append("chatId", chatData._id);
       }
 
       selectedImageFiles.forEach(file => formData.append("file", file));
@@ -82,7 +87,7 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, chatTypeParam, setTempo
         chat: ChatType | null;
       }>({
         method: "POST",
-        url: `/messages/send-private`,
+        url: `/messages/send`,
         data: formData,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -141,7 +146,7 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, chatTypeParam, setTempo
 
   // Change handler del textarea
   const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    if (!currentUser || !chatId) {
+    if (!currentUser || !chatData) {
       return;
     }
 
@@ -149,7 +154,7 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, chatTypeParam, setTempo
 
     // Emitir el evento de typing y el evento de stoppedTyping
     emitTypingDebounced({
-      chatId,
+      chatId: chatData._id,
       user: {
         _id: currentUser._id,
         username: currentUser.username,
@@ -172,7 +177,7 @@ const ChatInput = ({ wrapperHeight, recipientId, chatId, chatTypeParam, setTempo
 
   // Filtrar los usuarios que estan escribiendo en el chat activo
   const usersCurrentlyTyping = usersTyping.filter(el => {
-    return (el.user._id !== currentUser?._id && el.chatId === chatId);
+    return (el.user._id !== currentUser?._id && el.chatId === chatData?._id);
   });
 
   return (

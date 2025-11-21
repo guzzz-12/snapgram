@@ -46,7 +46,9 @@ interface Props {
 const ChatItem = ({chatData, usersTyping}: Props) => {
   const {user} = useCurrentUser();
 
-  const otherUser = chatData.participants.find((participant) => participant._id !== user?._id);
+  const chatParticipants = chatData?.participants || [];
+
+  const otherUser = chatData.type === "private" ? chatParticipants.find((p) => p._id !== user?._id) : chatData.groupAdmin;
 
   const lastMessage = chatData.lastMessage;
 
@@ -144,7 +146,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
 
       <div className="hidden min-[900px]:flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
         <p className="w-full text-sm text-neutral-900 font-semibold truncate">
-          {otherUser.fullName}
+          {chatData.type === "group" ? chatData.groupName : otherUser.fullName}
         </p>
         
         {/* Mostrar el último mensaje del chat */}

@@ -98,7 +98,7 @@ const ChatList = ({ headerHeight, temporaryChatItem, chatTypeParam }: Props) => 
   }
 
   return (
-    <aside className="flex flex-col w-fit min-[900px]:w-[320px] h-full pb-6 border-r overflow-hidden">
+    <aside className="flex flex-col w-[320px] h-full pb-6 border-r overflow-hidden">
       <div
         style={{ height: `calc(${headerHeight}px + 1px)` }}
         className="flex flex-col justify-center items-start w-full bg-white border-b"

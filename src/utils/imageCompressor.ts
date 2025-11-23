@@ -3,7 +3,11 @@ import browserImageCompression from "browser-image-compression";
 /**
  * Comprimir una imagen a webp o convertirla en base64
  */
-export const imageProcessor = async (file: File, resultType: "file" | "base64"): Promise<File | string> => {
+export const imageProcessor = async (
+  file: File,
+  resultType: "file" | "base64",
+  maxSize?: number
+): Promise<File | string> => {
   try {
     if (resultType === "base64") {
       return new Promise((resolve, reject) => {
@@ -22,7 +26,7 @@ export const imageProcessor = async (file: File, resultType: "file" | "base64"):
     const compressedImage = await browserImageCompression(file, {
       fileType: "image/webp",
       maxSizeMB: 5,
-      maxWidthOrHeight: 4000,
+      maxWidthOrHeight: maxSize || 4000,
       initialQuality: 0.75,
       useWebWorker: true
     });

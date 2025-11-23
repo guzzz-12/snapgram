@@ -4,11 +4,13 @@ import { imageProcessor } from "@/utils/imageCompressor";
 
 interface Props {
   fileInputRef: RefObject<HTMLInputElement | null>;
+  maxSize?: number;
 }
 
-const useImagePicker = ({ fileInputRef }: Props) => {
+const useImagePicker = ({ fileInputRef, maxSize }: Props) => {
   const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
   const [selectedImagePreviews, setSelectedImagePreviews] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const onImagePickHandler = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -19,16 +21,25 @@ const useImagePicker = ({ fileInputRef }: Props) => {
         return false;
       }
 
+      setIsProcessing(true);
+
       const filesArray = Array.from(files!);
 
-      const imagePreviewsPromises = filesArray.map((file) => imageProcessor(file, "base64") as Promise<string>);
-      const filesPromises = filesArray.map((file) => imageProcessor(file, "file") as Promise<File>);
+      const imagePreviewsPromises = filesArray.map((file) => {
+        return imageProcessor(file, "base64", maxSize) as Promise<string>
+      });
+      
+      const filesPromises = filesArray.map((file) => {
+        return imageProcessor(file, "file", maxSize) as Promise<File>
+      });
 
       const imagesBase64 = await Promise.all(imagePreviewsPromises);
       const compressedImages = await Promise.all(filesPromises);
 
       setSelectedImagePreviews(prev => [...imagesBase64, ...prev]);
       setSelectedImageFiles(prev => [...compressedImages, ...prev]);
+
+      setIsProcessing(false);
     };
 
     // Limpiar el ref del input luego de seleccionar la imagen
@@ -43,7 +54,8 @@ const useImagePicker = ({ fileInputRef }: Props) => {
     selectedImagePreviews,
     setSelectedImageFiles,
     setSelectedImagePreviews,
-    onImagePickHandler
+    onImagePickHandler,
+    isProcessing
   };
 }
 

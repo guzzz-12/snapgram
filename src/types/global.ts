@@ -187,6 +187,7 @@ export type ChatType = {
   participants: UserType[];
   groupName: string | null;
   groupAdmin: UserType | null;
+  groupPicture: string | null;
   lastMessage: {
     _id: string;
     sender: string;

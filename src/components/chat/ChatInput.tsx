@@ -21,9 +21,8 @@ import type { ChatType, MessageType } from "@/types/global";
 import type { TypingEventData } from "@/types/socketTypes";
 
 interface Props {
-  chatData: ChatType | null;
+  chatData: ChatType | null | undefined;
   wrapperHeight: number;
-  chatId: string | undefined;
   chatTypeParam: "all" | "group" | null;
   setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }

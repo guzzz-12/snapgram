@@ -107,7 +107,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
     <NavLink
       key={chatData._id}
       className={({isActive}) => (
-        `flex justify-start items-center gap-2 px-4 py-3 border-b hover:bg-gray-100 cursor-pointer last:mb-0 ${isActive ? "bg-slate-200" : ""}`
+        `flex justify-start items-center gap-2 px-4 py-3 border-b hover:bg-gray-100 cursor-pointer last:mb-0 ${isActive ? "bg-[#4F39F6]/10" : ""}`
       )}
       to={`/messages/${chatData._id}`}
       onClick={onClickHandler}
@@ -116,10 +116,10 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
         <Avatar className="w-[40px] h-[40px] outline-2 outline-white">
           <AvatarImage
             className="w-full h-full object-cover"
-            src={otherUser.profilePicture}
+            src={chatData.type === "private" ? otherUser.profilePicture : chatData.groupPicture!}
           />
           <AvatarFallback>
-            {otherUser.username.charAt(0).toUpperCase()}
+            {chatData.type === "private" ? otherUser.fullName.charAt(0).toUpperCase() : chatData.groupName!.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
 
@@ -133,7 +133,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
 
         {/* Indicador de usuario que está escribiendo */}
         {isUserTyping &&
-          <div className="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-white/50 rounded-full min-[900px]:hidden z-5">
+          <div className="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-white/50 rounded-full z-5">
             <BeatLoader
               className="opacity-80"
               size={8}
@@ -144,7 +144,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
         }
       </div>
 
-      <div className="hidden min-[900px]:flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
+      <div className="flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
         <p className="w-full text-sm text-neutral-900 font-semibold truncate">
           {chatData.type === "group" ? chatData.groupName : otherUser.fullName}
         </p>

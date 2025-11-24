@@ -7,7 +7,6 @@ import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import ChatListItemSkeleton from "./ChatListItemSkeleton";
 import ChatItem from "./ChatItem";
-// import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
@@ -113,14 +112,14 @@ const ChatList = ({ headerHeight, temporaryChatItem, chatTypeParam }: Props) => 
         >
           <TabsList className="w-full h-full gap-2 p-0 bg-white rounded-md">
             <TabsTrigger
-              className="w-full h-full !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
+              className="w-full h-full !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
               value="all"
             >
               Chats
             </TabsTrigger>
 
             <TabsTrigger
-              className="w-full h-full !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
+              className="w-full h-full !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
               value="group"
             >
               Tus Grupos

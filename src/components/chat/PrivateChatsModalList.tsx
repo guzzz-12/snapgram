@@ -108,6 +108,7 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
         type: "private",
         groupAdmin: null,
         groupName: null,
+        groupPicture: null,
         lastMessage: null,
         unseenMessages: [],
         createdAt: new Date().toISOString(),

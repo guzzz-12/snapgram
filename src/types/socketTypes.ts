@@ -46,4 +46,5 @@ export interface ServerEvents {
   deletedMessage: (deletedMessage: MessageType) => void;
   typing: (data: TypingEventData) => void;
   stoppedTyping: ({chatId, userId}: {userId: string, chatId: string}) => void;
+  groupUpdated: (data: ChatType) => void;
 }

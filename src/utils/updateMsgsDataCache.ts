@@ -19,6 +19,11 @@ interface UpdateChatsListCacheProps {
   currentUserId: string;
 }
 
+interface UpdateUpdatedChatCacheProps {
+  queryClient: QueryClient;
+  updatedGroup: ChatType;
+}
+
 /**
  * Actualizar la caché de los mensajes al recibir un nuevo mensaje
  * para actualizar la bandeja de entrada del chat en tiempo real
@@ -122,7 +127,7 @@ export const updateDeletedMessageCache = (props: UpdateDeletedMsgCacheProps) => 
 export const updateUnreadMessagesCounterCache = (props: {chat: ChatType, queryClient: QueryClient}) => {
   const { queryClient, chat } = props;
 
-  queryClient.setQueryData(["chats"], (oldData: InfiniteData<{
+  queryClient.setQueryData(["chats", "all"], (oldData: InfiniteData<{
     data: ChatType[];
     hasMore: boolean;
     nextPage: number | null;
@@ -191,7 +196,7 @@ export const updateChatsListCache = (props: UpdateChatsListCacheProps) => {
   const isRecipient = newMessage.message.sender._id !== currentUserId;
 
   if (isNewChat && isRecipient) {
-    queryClient.setQueryData(["chats"], (oldData: InfiniteData<{
+    queryClient.setQueryData(["chats", "all"], (oldData: InfiniteData<{
       data: ChatType[];
       hasMore: boolean;
       nextPage: number | null;
@@ -230,7 +235,7 @@ export const updateChatsListCache = (props: UpdateChatsListCacheProps) => {
 export const updateChatLastMessageCache = (props: UpdateChatsListCacheProps) => {
   const { queryClient, newMessage } = props;
 
-  queryClient.setQueryData(["chats"], (oldData: InfiniteData<{
+  queryClient.setQueryData(["chats", "all"], (oldData: InfiniteData<{
     data: ChatType[];
     hasMore: boolean;
     nextPage: number | null;
@@ -273,6 +278,72 @@ export const updateChatLastMessageCache = (props: UpdateChatsListCacheProps) => 
     const updatedPages = [...oldData.pages];
     updatedPages.splice(chatPageIndex, 1, updatedChatPage);
     
+    return {
+      ...oldData,
+      pages: updatedPages,
+    };
+  });
+}
+
+/**
+ * Actualizar la caché de la lista de chats al actualizar un chat
+ */
+export const updateGroupChatCache = (props: UpdateUpdatedChatCacheProps) => {
+  const { queryClient, updatedGroup } = props;
+
+  // Actualizar la caché del chat (grupo) actualizado
+  queryClient.setQueryData(["chat", updatedGroup._id], (oldData: ChatType) => {
+    if (!oldData) {
+      return oldData;
+    }
+
+    return updatedGroup;
+  });
+
+  // Actualizar la caché del item del grupo en la lista de chats
+  queryClient.setQueryData(["chats", "all"], (oldData: InfiniteData<{
+    data: ChatType[];
+    hasMore: boolean;
+    nextPage: number | null;
+  }>) => {
+    if (!oldData) {
+      return oldData;
+    }
+
+    // Buscar la página que contiene el chat actualizado
+    const chatPage = oldData.pages.find((page, _index) => {
+      return page.data.some((chat) => chat._id === updatedGroup._id);
+    });
+
+    if (!chatPage) {
+      return oldData;
+    }
+
+    // Buscar el índice de la página del chat actualiazado
+    const chatPageIndex = oldData.pages.findIndex((page) => {
+      return page.data.some((chat) => chat._id === updatedGroup._id)
+    });
+
+    // Crear una copia de la página del chat actualizado
+    const updatedChatPage = {
+      ...chatPage,
+      data: [...chatPage.data]
+    };
+
+    // Buscar el índice del chat actualizado
+    const updatedChatIndex = updatedChatPage.data.findIndex((chat) => chat._id === updatedGroup._id);
+
+    if (updatedChatIndex === -1) {
+      return oldData;
+    }
+
+    // Reemplazar el chat en la página por el chat actualizado
+    updatedChatPage.data.splice(updatedChatIndex, 1, updatedGroup);
+
+    // Actualizar la página del chat en la caché
+    const updatedPages = [...oldData.pages];
+    updatedPages.splice(chatPageIndex, 1, updatedChatPage);
+
     return {
       ...oldData,
       pages: updatedPages,

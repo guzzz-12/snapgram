@@ -1,34 +1,85 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+import { useAuth } from "@clerk/clerk-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
 import MessageItem from "./MessageItem";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { socket } from "@/utils/socket";
+import { axiosInstance } from "@/utils/axiosInstance";
+import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType, MessageType } from "@/types/global";
 
 interface Props {
-  chatData: ChatType | null;
-  messages: MessageType[];
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  paginationRef: RefObject<HTMLDivElement | null>;
-  chatBottomRef: RefObject<HTMLDivElement | null>;
+  chatData: ChatType | null | undefined;
 }
 
-const ChatContent = (props: Props) => {
-  const {
-    chatData,
-    messages,
-    hasNextPage,
-    isFetchingNextPage,
-    paginationRef,
-    chatBottomRef,
-  } = props;
+const ChatContent = ({ chatData }: Props) => {
 
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const paginationRef = useRef<HTMLDivElement>(null);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  const navigate = useNavigate();
 
   const [scrollFromBottom, setScrollFromBottom] = useState(0);
 
   const {user: currentUser} = useCurrentUser();
+
+  const {getToken} = useAuth();
+
+  // Función para consultar los mensajes
+  const getMessages = async (page: number) => {
+    const token = await getToken();
+
+    const {data} = await axiosInstance<{
+      data: {
+        messages: MessageType[];
+        chat: ChatType;
+      }
+      hasMore: boolean;
+      nextPage: number | null;
+    }>({
+      method: "GET",
+      url: `/messages/chat/${chatData?._id}`,
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      params: {
+        page,
+        limit: 5
+      }
+    });
+
+    return data;
+  };
+
+  // Consultar los mensajes del chat
+  const {data: messagesData, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, error} = useInfiniteQuery({
+    queryKey: ["messages", chatData?._id],
+    queryFn: ({pageParam}) => getMessages(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
+    enabled: Boolean(chatData && !chatData._id.startsWith("temp_")),
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
+
+  // Observar si la referencia de la paginación es visible en el viewport
+  const {isIntersecting} = useIntersectionObserver({
+    data: messagesData,
+    paginationRef
+  });
+
+  // Cargar la siguiente página de mensajes al llegar al top del chat
+  useEffect(() => {
+    if (isIntersecting && !isLoading) {
+      fetchNextPage();
+    }
+  }, [isIntersecting, isLoading]);
 
   const chatParticipants = chatData?.participants || [];
   
@@ -72,6 +123,18 @@ const ChatContent = (props: Props) => {
       socket.off("newMessage");
     }
   }, [socket, chatData, scrollFromBottom]);
+
+  if (error) {
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      navigate("/messages", {replace: true});
+    }
+
+    toast.error(errorMessage(error));
+  }
+
+  // Invertir el orden de los mensajes
+  // para corregir la dirección de la paginación
+  const messages = messagesData?.pages.flatMap((page) => page.data.messages).reverse() || [];
 
   if (!currentUser || !recipient || !chatData) return null;
 

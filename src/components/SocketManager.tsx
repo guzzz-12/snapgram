@@ -9,10 +9,10 @@ import { useSocketStore } from "@/hooks/useSocket";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
-import { socket } from "@/utils/socket";
-import { errorMessage } from "@/utils/errorMessage";
-import { updateChatLastMessageCache, updateDeletedMessageCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
+import { errorMessage } from "@/utils/errorMessage";
+import { updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
+import { socket } from "@/utils/socket";
 
 const SocketManager = () => {
   const {pathname} = useLocation();
@@ -116,6 +116,14 @@ const SocketManager = () => {
       removeFromUsersTyping(data.userId);
     });
 
+    // Escuchar evento de grupo actualizado
+    socket.on("groupUpdated", (data) => {
+      updateGroupChatCache({
+        queryClient,
+        updatedGroup: data
+      })
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
@@ -125,8 +133,9 @@ const SocketManager = () => {
       socket.off("deletedMessage");
       socket.off("typing");
       socket.off("stoppedTyping");
+      socket.off("groupUpdated");
     }
-  }, [socket, token, userDocument]);
+  }, [socket, token, userDocument, queryClient]);
 
 
   // Escuchar el evento de nuevo mensaje (también se escucha en useNewMessage)

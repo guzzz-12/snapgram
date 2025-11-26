@@ -5,14 +5,15 @@ import type { UserType } from "@/types/global";
 
 interface Props {
   isOpen: boolean;
+  keyword?: string;
 }
 
 /** Función para consultar los usuarios que pueden ser agregados al chat */
-export const getUsersList = ({ isOpen }: Props) => {
+export const getUsersList = ({ isOpen, keyword }: Props) => {
   const { getToken } = useAuth();
 
   // Función para consultar los usuarios que pueden ser agregados al chat
-  const getUsers = async (page: number) => {
+  const getUsers = async (page: number, keyword: string | undefined) => {
     const token = await getToken();
 
     const {data} = await axiosInstance<{
@@ -21,13 +22,14 @@ export const getUsersList = ({ isOpen }: Props) => {
       nextPage: number | null;
     }>({
       method: "GET",
-      url: "/chats/get-users-to-chat",
+      url: "/users/search",
       headers: {
         Authorization: `Bearer ${token}`
       },
       params: {
         page,
-        limit: 5
+        limit: 5,
+        keyword
       }
     });
 
@@ -36,9 +38,9 @@ export const getUsersList = ({ isOpen }: Props) => {
 
   // Consultar la lista de usuarios para crear el grupo
   const {data: users, error: usersError, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["get-users-list"],
+    queryKey: ["get-users-list", keyword],
     initialPageParam: 1,
-    queryFn: ({pageParam}) => getUsers(pageParam),
+    queryFn: ({pageParam}) => getUsers(pageParam, keyword),
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,
     enabled: isOpen

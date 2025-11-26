@@ -47,4 +47,15 @@ export interface ServerEvents {
   typing: (data: TypingEventData) => void;
   stoppedTyping: ({chatId, userId}: {userId: string, chatId: string}) => void;
   groupUpdated: (data: ChatType) => void;
+  userLeftGroup: (data:{
+    groupId: string;
+    operation: "leave" | "kick";
+    user: {
+      _id: string;
+      clerkId: string;
+      fullName: string;
+      username: string;
+      profilePicture: string;
+    }
+  }) => void;
 }

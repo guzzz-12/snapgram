@@ -215,7 +215,7 @@ export type MessageType = {
   seenBy: UserType[];
   deletedFor: string[];
   deletedForAll: boolean;
-  type: "text" | "file" | "fileWithText";
+  type: "text" | "file" | "fileWithText" | "userAddedToGroup" | "userLeftGroup" | "userKickedFromGroup";
   createdAt: string;
   updatedAt: string;
 }

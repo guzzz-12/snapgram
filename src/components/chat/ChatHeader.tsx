@@ -1,16 +1,23 @@
 import { useRef, useState, type RefObject } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
 import { Ellipsis, Loader2Icon } from "lucide-react";
 import { FiLock } from "react-icons/fi";
 import { BsTrash3 } from "react-icons/bs";
-import { MdLogout } from "react-icons/md";
-import { CiImageOn } from "react-icons/ci";
+import { MdLogout, MdOutlinePersonAddAlt } from "react-icons/md";
+import { FaRegImage } from "react-icons/fa";
+import { toast } from "sonner";
 import UpdateGroupImgModal from "./UpdateGroupImgModal";
+import AddMemberToGroupModal from "./AddMemberToGroupModal";
+import LeaveOrKickFromGroupModal from "./LeaveOrKickFromGroupModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useImagePicker from "@/hooks/useImagePicker";
+import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
 import type { ChatType } from "@/types/global";
 
@@ -24,11 +31,52 @@ interface Props {
 const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // State del modal de agregar miembros al grupo
+  const [openAddMemberModal, setOpenAddMemberModal] = useState(false);
+
+  // State del modal de eliminar miembro del grupo
+  const [modalState, setModalState] = useState<{isOpen: boolean, operation: "Abandonar" | "Eliminar" | null}>({
+    isOpen: false,
+    operation: null
+  });
+
+  const navigate = useNavigate();
+
+  const {getToken} = useAuth();
+  
+  const queryClient = useQueryClient();
+
   const {user: currentUser} = useCurrentUser();
 
   const {isProcessing, selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({
     fileInputRef,
     maxSize: 1000
+  });
+
+  // Mutation para abandonar el grupo
+  const {mutate: leaveGroup, isPending: isPendingLeaving} = useMutation({
+    mutationFn: async () => {
+      if (!chatData || !currentUser) return;
+
+      const token = await getToken();
+
+      const {data} = await axiosInstance<{data: ChatType}>({
+        method: "PUT",
+        url: `/chats/group/${chatData._id}/leave`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ["chats", "all"]});
+      navigate("/messages?type=all", {replace: true});
+    },
+    onError: (error) => {
+      toast.error(errorMessage(error));
+    }
   });
 
   const chatParticipants = chatData?.participants || [];
@@ -41,6 +89,26 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
 
   return (
     <>
+      <AddMemberToGroupModal
+        isOpen={openAddMemberModal}
+        chatData={chatData}
+        setIsOpen={setOpenAddMemberModal}
+      />
+
+      <LeaveOrKickFromGroupModal
+        title={
+          modalState.operation === "Abandonar" ? "Abandonar grupo" :
+          modalState.operation === "Eliminar" ?
+          `Eliminar a ${recipient?.fullName.split(" ")[0]} del grupo` :
+          ""
+        }
+        confirmBtnText={modalState.operation}
+        modalState={modalState}
+        isPending={isPendingLeaving}
+        callback={() => leaveGroup()}
+        setModalState={setModalState}
+      />
+
       {isLoading &&
         <>
           <div
@@ -142,22 +210,37 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
                     className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <CiImageOn className="size-5 text-neutral-500" />
+                    <FaRegImage className="size-5 text-neutral-900" />
                     <span className="text-sm text-neutral-900">
                       Cambiar imagen del grupo
                     </span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer">
-                    <MdLogout className="size-5 text-neutral-500" />
+                  <DropdownMenuItem
+                    className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer"
+                    onClick={() => setOpenAddMemberModal(true)}
+                  >
+                    <MdOutlinePersonAddAlt className="size-6 text-neutral-900" />
                     <span className="text-sm text-neutral-900">
-                      Abandonar grupo
+                      Agregar miembros
                     </span>
                   </DropdownMenuItem>
 
+                  {chatData.groupAdmin?._id !== currentUser?._id &&
+                    <DropdownMenuItem
+                      className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer"
+                      onClick={() => setModalState({isOpen: true, operation: "Abandonar"})}
+                    >
+                      <MdLogout className="size-5 text-neutral-500" />
+                      <span className="text-sm text-neutral-900">
+                        Abandonar grupo
+                      </span>
+                    </DropdownMenuItem>
+                  }
+
                   {currentUser?.clerkId === chatData?.groupAdmin?.clerkId &&
                     <DropdownMenuItem className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer">
-                      <BsTrash3 className="size-5 text-destructive/60" />
+                      <BsTrash3 className="size-5 text-destructive/90" />
                       <span className="text-sm text-destructive">
                         Eliminar grupo
                       </span>

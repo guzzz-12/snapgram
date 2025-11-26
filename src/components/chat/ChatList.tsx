@@ -122,7 +122,7 @@ const ChatList = ({ headerHeight, temporaryChatItem, chatTypeParam }: Props) => 
               className="w-full h-full !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
               value="group"
             >
-              Tus Grupos
+              Grupos
             </TabsTrigger>
           </TabsList>
         </Tabs>

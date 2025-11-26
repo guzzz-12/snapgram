@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import GroupChatModalItem from "./GroupChatModalItem";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getUsersList } from "@/utils/getUsersList";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { ChatType, UserType } from "@/types/global";
+import type { ChatType } from "@/types/global";
 
 const CreateGroupChatModal = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,29 +37,6 @@ const CreateGroupChatModal = () => {
       inputRef.current.focus();
     }
   }, [isOpen]);
-
-  // Función para consultar los usuarios que pueden ser agregados al chat
-  const getUsers = async (page: number) => {
-    const token = await getToken();
-
-    const {data} = await axiosInstance<{
-      data: UserType[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: "/chats/get-users-to-chat",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        page,
-        limit: 5
-      }
-    });
-
-    return data;
-  }
 
   // Función para crear el grupo
   const createGroupChat = async () => {
@@ -83,16 +61,6 @@ const CreateGroupChatModal = () => {
     return data;
   }
 
-  // Consultar la lista de usuarios para crear el grupo
-  const {data: users, error: usersError, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["get-users-list"],
-    initialPageParam: 1,
-    queryFn: ({pageParam}) => getUsers(pageParam),
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
-    enabled: isOpen
-  });
-
   // Mutation para crear el grupo
   const {mutate: createGroupChatMutation, isPending: isCreatingGroup} = useMutation({
     mutationFn: createGroupChat,
@@ -104,6 +72,15 @@ const CreateGroupChatModal = () => {
       toast.error(errorMessage(error));
     }
   });
+
+  const {
+    users,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    usersError
+  } = getUsersList({ isOpen });
 
   const {isIntersecting} = useIntersectionObserver({ data: users, paginationRef });
 

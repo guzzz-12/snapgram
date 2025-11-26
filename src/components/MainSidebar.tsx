@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { useClerk } from "@clerk/clerk-react";
 import { CirclePlus, ImagePlus, TypeOutline } from "lucide-react";
 import { GoHomeFill } from "react-icons/go";
@@ -18,9 +18,12 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import logo from "@/assets/logo-simple.webp";
+import { cn } from "@/lib/utils";
 
 const MainSidebar = () => {
   const createPostBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  const {pathname} = useLocation();
 
   const [createPostBtnWidth, setCreatePostBtnWidth] = useState(0);
   
@@ -29,8 +32,6 @@ const MainSidebar = () => {
   const {unseenNotifications} = useUnseenNotifications();
 
   const {unreadChats} = useUnreadChats();
-
-  const {signOut} = useClerk();
 
   const {setOpen: openCreateStoryModal} = useCreatePublicationModal();
 
@@ -131,7 +132,7 @@ const MainSidebar = () => {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="flex flex-col gap-3 px-4 min-[1280px]:hidden">
+      <SidebarFooter className={cn("flex flex-col gap-3 px-4", !pathname.startsWith("/messages") && "min-[1280px]:hidden" )}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

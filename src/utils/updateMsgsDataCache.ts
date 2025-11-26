@@ -13,10 +13,15 @@ interface UpdateDeletedMsgCacheProps {
   deletedMessage: MessageType;
 }
 
-interface UpdateChatsListCacheProps {
+interface AddNewChatProps {
   queryClient: QueryClient;
   newMessage: NewMessageEventData;
   currentUserId: string;
+}
+
+interface AddNewGroupProps {
+  queryClient: QueryClient;
+  newGroup: ChatType;
 }
 
 interface UpdateUpdatedChatCacheProps {
@@ -188,8 +193,9 @@ export const updateUnreadMessagesCounterCache = (props: {chat: ChatType, queryCl
 /**
  * Actualizar la caché de la lista de chats para agregar
  * el nuevo chat a la lista de chats del usuario recipiente
+ * al recibir el primer mensaje de un chat que aún no existe en su lista
 */
-export const updateChatsListCache = (props: UpdateChatsListCacheProps) => {
+export const addNewChatToChatsListCache = (props: AddNewChatProps) => {
   const { queryClient, newMessage, currentUserId } = props;
 
   const isNewChat = newMessage.isNewChat;
@@ -232,7 +238,7 @@ export const updateChatsListCache = (props: UpdateChatsListCacheProps) => {
  * Actualizar la caché de la lista de chats para
  * actualizar el preview del último mensaje recibido
  */
-export const updateChatLastMessageCache = (props: UpdateChatsListCacheProps) => {
+export const updateChatLastMessageCache = (props: AddNewChatProps) => {
   const { queryClient, newMessage } = props;
 
   queryClient.setQueryData(["chats", "all"], (oldData: InfiniteData<{
@@ -347,6 +353,37 @@ export const updateGroupChatCache = (props: UpdateUpdatedChatCacheProps) => {
     return {
       ...oldData,
       pages: updatedPages,
+    };
+  });
+}
+
+/**
+ * Agregar el item del nuevo grupo a la caché
+ * de la lista de chats del usuario recipiente
+ */
+export const addNewGroupToChatsListCache = (props: AddNewGroupProps) => {
+  const { queryClient, newGroup } = props;
+
+  queryClient.setQueryData(["chats", "all"], (oldData: InfiniteData<{
+    data: ChatType[];
+    hasMore: boolean;
+    nextPage: number | null;
+  }>) => {
+    if (!oldData) {
+      return oldData;
+    }
+
+    const updatedPages = [...oldData.pages];
+
+    updatedPages.unshift({
+      data: [newGroup],
+      hasMore: false, 
+      nextPage: null
+    });
+
+    return {
+      ...oldData,
+      pages: updatedPages
     };
   });
 }

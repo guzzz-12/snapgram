@@ -156,18 +156,24 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
               />
               
               <AvatarFallback>
-                {chatData?.type === "group" ? "👥" : recipient?.fullName.charAt(0).toUpperCase()}
+                {chatData?.type === "group" ? chatData.groupName?.charAt(0).toUpperCase() : recipient?.fullName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             <div className="flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
               <p className="w-full font-semibold text-neutral-900 truncate">
                 {chatData?.type === "group" ? chatData.groupName : recipient?.fullName}
-              </p>  
+              </p>
 
               {chatData?.type !== "group" &&
-                <p className="w-full text-sm text-neutral-700 truncate">
+                <p className="w-full text-xs text-neutral-700 truncate">
                   @{recipient?.username}
+                </p>
+              }
+
+              {chatData?.type === "group" &&
+                <p className="w-full text-xs text-neutral-700 truncate">
+                  Creado por {chatData.groupAdmin?.fullName}
                 </p>
               }
             </div>

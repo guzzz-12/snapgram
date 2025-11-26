@@ -1,7 +1,8 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
-import { useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import ChatHeader from "./ChatHeader";
 import ChatContent from "./ChatContent";
@@ -22,6 +23,8 @@ const ChatInbox = (props: Props) => {
   const {chatId, temporaryChat, headerHeight, setHeaderHeight, setTemporaryChat} = props;
 
   const headerRef = useRef<HTMLDivElement>(null);
+
+  const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
   const chatTypeParam = searchParams.get("type") as "all" | "group" | null;
@@ -57,6 +60,10 @@ const ChatInbox = (props: Props) => {
   });
 
   if (chatError) {
+    if (chatError instanceof AxiosError && chatError.response?.status === 404) {
+      navigate("/messages?type=all", {replace: true});
+    }
+
     toast.error(errorMessage(chatError));
   }
 

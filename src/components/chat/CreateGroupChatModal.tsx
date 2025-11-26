@@ -65,7 +65,7 @@ const CreateGroupChatModal = () => {
   const {mutate: createGroupChatMutation, isPending: isCreatingGroup} = useMutation({
     mutationFn: createGroupChat,
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({queryKey: ["chats"]});
+      await queryClient.invalidateQueries({queryKey: ["chats", "all"]});
       navigate(`/messages/${data?.data._id}`);
     },
     onError: (error: any) => {

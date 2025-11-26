@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { errorMessage } from "@/utils/errorMessage";
-import { updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
+import { addNewGroupToChatsListCache, updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
 import { socket } from "@/utils/socket";
 
 const SocketManager = () => {
@@ -114,6 +114,15 @@ const SocketManager = () => {
     // Escuchar evento de dejar de escribir
     socket.on("stoppedTyping", (data) => {
       removeFromUsersTyping(data.userId);
+    });
+
+    // Escuchar evento de grupo creado
+    // y actualizar la lista de chats
+    socket.on("groupCreated", (data) => {
+      addNewGroupToChatsListCache({
+        queryClient,
+        newGroup: data
+      })
     });
 
     // Escuchar evento de grupo actualizado

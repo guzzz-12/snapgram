@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { socket } from "@/utils/socket";
-import { updateChatsListCache, updateMessagesCache } from "@/utils/updateMsgsDataCache";
+import { addNewChatToChatsListCache, updateMessagesCache } from "@/utils/updateMsgsDataCache";
 
 interface Props {
   chatId: string;
@@ -25,7 +25,7 @@ export const useNewMessage = (props: Props) => {
 
       // Actualizar la caché de la lista de chats para agregar
       // el nuevo chat a la lista de chats del usuario recipiente
-      updateChatsListCache({ queryClient, newMessage, currentUserId });
+      addNewChatToChatsListCache({ queryClient, newMessage, currentUserId });
     });
 
     return () => {

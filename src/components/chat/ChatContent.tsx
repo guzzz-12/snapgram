@@ -6,6 +6,7 @@ import { AxiosError } from "axios";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import MessageItem from "./MessageItem";
+import UserLeftOrKickedOrAddedMessageItem from "./UserLeftOrKickedOrAddedMessageItem";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { socket } from "@/utils/socket";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -154,13 +155,24 @@ const ChatContent = ({ chatData }: Props) => {
       }
 
       <ul className="flex flex-col gap-6 w-full p-6">
-        {messages.map((message) => (
-          <MessageItem
-            key={message._id}
-            currentUserId={currentUser._id}
-            messageData={message}
-          />
-        ))}
+        {messages.map((message) => {
+          if (["userLeftGroup", "userKickedFromGroup", "userAddedToGroup"].includes(message.type)) {
+            return (
+              <UserLeftOrKickedOrAddedMessageItem
+                key={message._id}
+                messageData={message}
+              />
+            )
+          }
+
+          return (
+            <MessageItem
+              key={message._id}
+              currentUserId={currentUser._id}
+              messageData={message}
+            />
+          )
+        })}
       </ul>
 
       <div ref={chatBottomRef} className="w-full h-1" />

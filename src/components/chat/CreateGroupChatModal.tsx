@@ -2,15 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { SearchX } from "lucide-react";
+import { FiSearch } from "react-icons/fi";
 import { toast } from "sonner";
 import GroupChatModalItem from "./GroupChatModalItem";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useDebounce } from "@/hooks/useDebounce";
 import { getUsersList } from "@/utils/getUsersList";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -22,6 +26,7 @@ const CreateGroupChatModal = () => {
 
   const navigate = useNavigate();
 
+  const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [selectedUsersIds, setSelectedUsersIds] = useState<string[]>([]);
@@ -31,6 +36,8 @@ const CreateGroupChatModal = () => {
   const queryClient = useQueryClient();
 
   const {user: currentUser} = useCurrentUser();
+
+  const {debouncedValue} = useDebounce(searchTerm);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -80,7 +87,7 @@ const CreateGroupChatModal = () => {
     isFetchingNextPage,
     fetchNextPage,
     usersError
-  } = getUsersList({ isOpen });
+  } = getUsersList({ isOpen, keyword: debouncedValue });
 
   const {isIntersecting} = useIntersectionObserver({ data: users, paginationRef });
 
@@ -115,14 +122,14 @@ const CreateGroupChatModal = () => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="py-4">
-        <DialogHeader className="pb-4 border-b">
+      <DialogContent className="gap-0 py-4">
+        <DialogHeader className="mb-4 pb-4 border-b">
           <DialogTitle className="text-center">
             Nuevo grupo
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-2 shrink-0">
+        <div className="flex flex-col gap-2 shrink-0 mb-4 px-2 py-4 rounded-md bg-neutral-100">
           <Label
             htmlFor="name"
             className="text-sm text-neutral-900"
@@ -133,6 +140,7 @@ const CreateGroupChatModal = () => {
           <Input
             ref={inputRef}
             id="name"
+            className="bg-white"
             placeholder="Grupo de amigos y familiares"
             disabled={isCreatingGroup}
             value={groupName}
@@ -140,47 +148,74 @@ const CreateGroupChatModal = () => {
           />
         </div>
 
-        <p className="text-sm text-neutral-900 font-medium">
-          Agregar miembros al grupo
-        </p>
+        <div className="flex flex-col gap-3 w-full px-2 py-4 rounded-md bg-neutral-100">
+          <p className="text-sm text-neutral-900 font-medium">
+            Agregar miembros al grupo
+          </p>
 
-        <ul className="flex flex-col gap-2 w-full max-h-[450px] grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-          
-          {/* Indicador de loading */}
-          {isLoading &&
-            Array(5).fill(0).map((_, i) => {
+          {/* Buscador de usuarios */}
+          <div className="relative">
+            <FiSearch className="absolute left-2 top-1/2 size-5 text-neutral-500 translate-y-[-50%]" />
+            <Input
+              ref={inputRef}
+              id="name"
+              className="pl-9 bg-white"
+              type="search"
+              placeholder="Busca por nombre o usuario..."
+              disabled={false}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <Separator className="w-full bg-neutral-300" />
+
+          <ul className="flex flex-col gap-2 w-full max-h-[450px] grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+            {/* Indicador de loading */}
+            {isLoading &&
+              Array(3).fill(0).map((_, i) => {
+                return (
+                  <li key={i} className="w-full">
+                    <Skeleton className="flex justify-start items-center gap-3 w-full p-2 bg-neutral-300">
+                      <Skeleton className="w-[40px] h-[40px] shrink-0 rounded-full bg-neutral-100" />
+                      <div className="flex flex-col justify-center items-start gap-2 w-full">
+                        <Skeleton className="w-[80%] h-4 rounded bg-neutral-100" />
+                        <Skeleton className="w-1/3 h-3 rounded bg-neutral-100" />
+                      </div>
+                    </Skeleton>
+                  </li>
+                )
+              })
+            }
+            
+            {!isLoading && debouncedValue && usersData.length === 0 &&
+            <li className="flex justify-center items-center gap-1 w-full p-3 rounded-md bg-white">
+              <SearchX className="size-6 text-neutral-700 shrink-0 stroke-1" />
+              <p className="text-sm text-neutral-700">
+                No se encontraron resultados
+              </p>
+            </li>
+          }
+
+            {!isLoading && usersData.map((user) => {
               return (
-                <li key={i} className="w-full">
-                  <Skeleton className="flex justify-start items-center gap-3 w-full p-2 bg-neutral-300">
-                    <Skeleton className="w-[40px] h-[40px] shrink-0 rounded-full bg-neutral-100" />
-                    <div className="flex flex-col justify-center items-start gap-2 w-full">
-                      <Skeleton className="w-[80%] h-4 rounded bg-neutral-100" />
-                      <Skeleton className="w-1/3 h-3 rounded bg-neutral-100" />
-                    </div>
-                  </Skeleton>
+                <li key={user._id} className="w-full">
+                  <GroupChatModalItem
+                    key={user._id}
+                    className="bg-white"
+                    userData={user}
+                    setSelectedUsersIds={setSelectedUsersIds}
+                  />
                 </li>
               )
-            })
-          }
+            })}
+            {hasNextPage && !isFetchingNextPage &&
+              <div ref={paginationRef} className="w-full h-10" />
+            }
+          </ul>
+        </div>
 
-          {!isLoading && usersData.map((user) => {
-            return (
-              <li key={user._id} className="w-full">
-                <GroupChatModalItem
-                  key={user._id}
-                  userData={user}
-                  setSelectedUsersIds={setSelectedUsersIds}
-                />
-              </li>
-            )
-          })}
-
-          {hasNextPage && !isFetchingNextPage &&
-            <div ref={paginationRef} className="w-full h-10" />
-          }
-        </ul>
-
-        <div className="w-full pt-4 pb-3 start-0 border-t">
+        <div className="w-full mt-4">
           <Button
             className="w-full py-5 text-sm text-white bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
             variant="default"

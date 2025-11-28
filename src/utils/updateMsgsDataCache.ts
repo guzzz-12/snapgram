@@ -29,6 +29,11 @@ interface UpdateUpdatedChatCacheProps {
   updatedGroup: ChatType;
 }
 
+interface UpdateDeletedGroupCacheProps {
+  queryClient: QueryClient;
+  deletedGroupId: string;
+}
+
 /**
  * Actualizar la caché de los mensajes al recibir un nuevo mensaje
  * para actualizar la bandeja de entrada del chat en tiempo real
@@ -380,6 +385,50 @@ export const addNewGroupToChatsListCache = (props: AddNewGroupProps) => {
       hasMore: false, 
       nextPage: null
     });
+
+    return {
+      ...oldData,
+      pages: updatedPages
+    };
+  });
+}
+
+/**
+ * Eliminar de la cache el item del grupo eliminado
+ */
+export const deleteGroupFromChatsListCache = (props: UpdateDeletedGroupCacheProps) => {
+  const { queryClient, deletedGroupId } = props;
+
+  queryClient.setQueryData(["chats", "all"], (oldData: InfiniteData<{
+    data: ChatType[];
+    hasMore: boolean;
+    nextPage: number | null;
+  }>) => {
+    if (!oldData) {
+      return oldData;
+    }
+
+    // Buscar en la caché el índice de la página que contiene el chat eliminado
+    const chatPageIndex = oldData.pages.findIndex((page, _index) => {
+      return page.data.some((chat) => chat._id === deletedGroupId);
+    });
+
+    // Buscar la caché de la página del chat eliminado
+    const chatPage = oldData.pages[chatPageIndex];
+
+    if (!chatPage) {
+      return oldData;
+    }
+
+    // Filtar el chat eliminado de la caché
+    const updatedChatPage = {
+      ...chatPage,
+      data: chatPage.data.filter((chat) => chat._id !== deletedGroupId)
+    };
+
+    // Actualizar la caché de la página del grupo eliminado
+    const updatedPages = [...oldData.pages];
+    updatedPages.splice(chatPageIndex, 1, updatedChatPage);
 
     return {
       ...oldData,

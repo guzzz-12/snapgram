@@ -122,7 +122,7 @@ const CreateGroupChatModal = () => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="gap-0 py-4">
+      <DialogContent className="gap-0 max-h-[90vh] py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
         <DialogHeader className="mb-4 pb-4 border-b">
           <DialogTitle className="text-center">
             Nuevo grupo
@@ -170,7 +170,7 @@ const CreateGroupChatModal = () => {
 
           <Separator className="w-full bg-neutral-300" />
 
-          <ul className="flex flex-col gap-2 w-full max-h-[450px] grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <ul className="flex flex-col gap-2 w-full max-h-[400px] grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
             {/* Indicador de loading */}
             {isLoading &&
               Array(3).fill(0).map((_, i) => {

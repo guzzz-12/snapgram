@@ -1,17 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { FiSearch } from "react-icons/fi";
+import { SearchX } from "lucide-react";
 import { toast } from "sonner";
 import UsersModalItem from "./PrivateChatsModalItem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup } from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import { useDebounce } from "@/hooks/useDebounce";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { ChatType, UserType } from "@/types/global";
+import { getUsersList } from "@/utils/getUsersList";
+import type { ChatType } from "@/types/global";
 
 interface Props {
   setTemporaryChat: (chat: ChatType) => void;
@@ -19,46 +24,27 @@ interface Props {
 
 const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
 
+  const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   const { getToken } = useAuth();
 
-  // Función para consultar los usuarios que pueden ser agregados al chat
-  const getUsers = async (page: number) => {
-    const token = await getToken();
+  const {debouncedValue} = useDebounce(searchTerm);
 
-    const {data} = await axiosInstance<{
-      data: UserType[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: "/chats/get-users-to-chat",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        page,
-        limit: 5
-      }
-    });
-
-    return data;
-  }
-
-  // Consultar la lista de usuarios para iniciar un chat
-  const {data: users, error: usersError, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["get-users-list"],
-    initialPageParam: 1,
-    queryFn: ({pageParam}) => getUsers(pageParam),
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
-    enabled: isOpen
-  });
+  // Consultar los usuarios que pueden ser agregados al chat
+  const {
+    users,
+    isLoading,
+    isFetchingNextPage,
+    usersError,
+    hasNextPage,
+    fetchNextPage
+  } = getUsersList({ isOpen, keyword: debouncedValue });
 
   const usersData = users?.pages.flatMap((page) => page.data) ?? [];
 
@@ -109,6 +95,7 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
         groupAdmin: null,
         groupName: null,
         groupPicture: null,
+        groupDescription: null,
         lastMessage: null,
         unseenMessages: [],
         createdAt: new Date().toISOString(),
@@ -133,6 +120,7 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
       onOpenChange={(open) => {
         setIsOpen(open);
         setSelectedUserId(null);
+        setSearchTerm("");
       }}
     >
       <DialogTrigger asChild>
@@ -151,10 +139,26 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
           </DialogTitle>
         </DialogHeader>
 
+        {/* Buscador de usuarios */}
+        <div className="relative">
+          <FiSearch className="absolute left-2 top-1/2 size-5 text-neutral-500 translate-y-[-50%]" />
+
+          <Input
+            ref={inputRef}
+            id="name"
+            className="pl-9"
+            type="search"
+            placeholder="Busca por nombre o usuario..."
+            disabled={false}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         <ul className="flex flex-col gap-2 w-full max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           {/* Indicador de loading */}
           {isLoading &&
-            Array(5).fill(0).map((_, i) => {
+            Array(3).fill(0).map((_, i) => {
               return (
                 <li key={i} className="w-full">
                   <Skeleton className="flex justify-start items-center gap-3 w-full p-2 bg-neutral-300">
@@ -167,6 +171,15 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
                 </li>
               )
             })
+          }
+
+          {!isLoading && debouncedValue && usersData.length === 0 &&
+            <li className="flex justify-center items-center gap-1 w-full">
+              <SearchX className="size-6 text-neutral-600 shrink-0 stroke-1" />
+              <p className="text-sm text-neutral-600">
+                No se encontraron resultados
+              </p>
+            </li>
           }
 
           <RadioGroup
@@ -183,7 +196,7 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
           </RadioGroup>
 
           {isFetchingNextPage &&
-            Array(5).fill(0).map((_, i) => {
+            Array(3).fill(0).map((_, i) => {
               return (
                 <li key={i} className="w-full">
                   <Skeleton className="flex justify-start items-center gap-3 w-full p-2 bg-neutral-300">

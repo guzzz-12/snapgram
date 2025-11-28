@@ -1,20 +1,61 @@
 import { type Dispatch, type SetStateAction } from "react";
+import { useNavigate } from "react-router";
+import { useAuth } from "@clerk/clerk-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { errorMessage } from "@/utils/errorMessage";
+import { axiosInstance } from "@/utils/axiosInstance";
+import type { ChatType, UserType } from "@/types/global";
 
 type Operation = "Abandonar" | "Eliminar" | null;
 
 interface Props {
-  title: string;
-  confirmBtnText: Operation;
-  isPending: boolean;
-  modalState: { isOpen: boolean; operation: Operation };
+  chatData: ChatType | null | undefined;
+  modalState: { isOpen: boolean; operation: Operation; kickedUser?: UserType };
   setModalState: Dispatch<SetStateAction<{ isOpen: boolean; operation: Operation }>>;
-  callback: () => void;
 }
 
 const LeaveOrKickFromGroupModal = (props: Props) => {
-  const { title, confirmBtnText, isPending, modalState, setModalState, callback } = props;
+  const { chatData, modalState, setModalState } = props;
+
+  const headerText = modalState.operation === "Eliminar" ? `Eliminar a ${modalState.kickedUser?.fullName.split(" ")[0]} del grupo` : `Salir de ${chatData?.groupName}`;
+
+  const navigate = useNavigate();
+
+  const {getToken} = useAuth();
+
+  const queryClient = useQueryClient();
+
+  const {user: currentUser} = useCurrentUser();
+
+  // Mutation para abandonar el grupo
+  const {mutate: leaveGroup, isPending} = useMutation({
+    mutationFn: async () => {
+      if (!chatData || !currentUser) return;
+
+      const token = await getToken();
+
+      const {data} = await axiosInstance<{data: ChatType}>({
+        method: "PUT",
+        url: `/chats/group/${chatData._id}/leave`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ["chats", "all"]});
+      navigate("/messages?type=all", {replace: true});
+    },
+    onError: (error) => {
+      toast.error(errorMessage(error));
+    }
+  });
 
   return (
     <Dialog
@@ -30,7 +71,7 @@ const LeaveOrKickFromGroupModal = (props: Props) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {title}
+            {headerText}
           </DialogTitle>
         </DialogHeader>
 
@@ -50,9 +91,9 @@ const LeaveOrKickFromGroupModal = (props: Props) => {
             size="sm"
             variant="destructive"
             disabled={isPending}
-            onClick={callback}
+            onClick={() => leaveGroup()}
           >
-            {confirmBtnText}
+            {modalState.operation}
           </Button>
         </DialogFooter>
       </DialogContent>

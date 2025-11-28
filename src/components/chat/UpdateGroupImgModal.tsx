@@ -1,38 +1,34 @@
-import { type ChangeEvent, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { useRef } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import { useMutation } from "@tanstack/react-query";
-import { Loader2Icon } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ImagePlus, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import useImagePicker from "@/hooks/useImagePicker";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType } from "@/types/global";
 
 interface Props {
   groupId: string;
-  isProcessingImage: boolean;
-  selectedImagePreviews: string[];
-  selectedImageFiles: File[];
-  setSelectedImagePreviews: Dispatch<SetStateAction<string[]>>;
-  setSelectedImageFiles: Dispatch<SetStateAction<File[]>>;
-  fileInputRef: RefObject<HTMLInputElement | null>;
-  onImagePickHandler: (e: ChangeEvent<HTMLInputElement>) => Promise<false | undefined>;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }
 
 const UpdateGroupImgModal = (props: Props) => {  
-  const {
-    groupId,
-    isProcessingImage,
-    selectedImagePreviews,
-    selectedImageFiles,
+  const { groupId, isOpen, setIsOpen } = props;
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const {isProcessing, selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({
     fileInputRef,
-    setSelectedImageFiles,
-    setSelectedImagePreviews,
-    onImagePickHandler,
-  } = props;
+    maxSize: 1000
+  });
 
   const {getToken} = useAuth();
+
+  const queryClient = useQueryClient();
 
   const updateGroupImg = async () => {
     const token = await getToken();
@@ -55,8 +51,10 @@ const UpdateGroupImgModal = (props: Props) => {
   const {mutate, isPending} = useMutation({
     mutationFn: updateGroupImg,
     onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["groupInfo", groupId]});
       setSelectedImageFiles([]);
       setSelectedImagePreviews([]);
+      setIsOpen(false);
     },
     onError: (error) => {
       toast.error(errorMessage(error));
@@ -65,9 +63,11 @@ const UpdateGroupImgModal = (props: Props) => {
 
   return (
     <Dialog
-      open={isProcessingImage || selectedImageFiles.length > 0}
+      open={isOpen}
       onOpenChange={(isOpen) => {
-        if (isPending || isProcessingImage) return;
+        if (isPending || isProcessing) return;
+
+        setIsOpen(isOpen);
 
         if (!isOpen) {
           setSelectedImageFiles([]);  
@@ -75,6 +75,8 @@ const UpdateGroupImgModal = (props: Props) => {
         }
       }}
     >
+      <DialogOverlay className="bg-black/70" />
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -90,13 +92,25 @@ const UpdateGroupImgModal = (props: Props) => {
               mutate();
             }}
           >
-            {isProcessingImage &&
+            {isProcessing &&
               <div className="flex justify-center items-center gap-2 w-full shrink-0 aspect-[4/3] rounded-md overflow-hidden border">
                 <Loader2Icon className="size-6 text-[#4F39F6] animate-spin stroke-1" />
                 <span className="text-center text-sm text-neutral-600">
                   Procesando imagen...
                 </span>
               </div>
+            }
+
+            {!isProcessing && selectedImageFiles.length === 0 &&
+              <button
+                className="flex flex-col justify-center items-center gap-1 w-full aspect-[4/3] p-2 rounded-md border border-dashed border-blue-600 bg-neutral-100 hover:bg-neutral-200 cursor-pointer transition-colors"
+                disabled={isPending || isProcessing}
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <ImagePlus className="size-10 text-blue-600 stroke-1" aria-hidden />
+                Seleccionar imagen
+              </button>
             }
 
             {selectedImagePreviews.length > 0 &&
@@ -127,6 +141,7 @@ const UpdateGroupImgModal = (props: Props) => {
                 onClick={() => {
                   setSelectedImageFiles([]);
                   setSelectedImagePreviews([]);
+                  setIsOpen(false);
                 }}
               >
                 Cancelar

@@ -1,9 +1,9 @@
 import { type Dispatch, type SetStateAction } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { errorMessage } from "@/utils/errorMessage";
@@ -32,7 +32,7 @@ const LeaveOrKickFromGroupModal = (props: Props) => {
   const {user: currentUser} = useCurrentUser();
 
   // Mutation para abandonar el grupo
-  const {mutate: leaveGroup, isPending} = useMutation({
+  const {mutate: leaveGroup, isPending: isLeaving} = useMutation({
     mutationFn: async () => {
       if (!chatData || !currentUser) return;
 
@@ -57,43 +57,78 @@ const LeaveOrKickFromGroupModal = (props: Props) => {
     }
   });
 
+  // Mutation para expulsar a un usuario del grupo
+  const {mutate: kickUser, isPending: isKicking} = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      const {data} = await axiosInstance<{data: ChatType}>({
+        method: "PUT",
+        url: `/chats/group/${chatData?._id}/kick`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        data: {
+          participantId: modalState.kickedUser?._id
+        }
+      });
+
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["groupInfo", chatData?._id]});
+      toast.success(`Has expulsado a ${modalState.kickedUser?.fullName.split(" ")[0]} del grupo`);
+      setModalState(prev => ({...prev, isOpen: false}));
+    },
+    onError: (error) => {
+      toast.error(errorMessage(error));
+    }
+  });
+
   return (
     <Dialog
       open={modalState.isOpen}
       onOpenChange={(isOpen) => {
-        if (!isPending && !isOpen) {
+        if (!isLeaving && !isOpen) {
           setModalState(prev => ({...prev, isOpen: false}));
         }
       }}
     >
       <DialogOverlay className="bg-black/70" />
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="w-full !max-w-[340px]">
+        <DialogHeader className="overflow-hidden">
+          <DialogTitle className="w-full font-medium truncate">
             {headerText}
           </DialogTitle>
         </DialogHeader>
 
         <DialogFooter>
           <Button
-            className="cursor-pointer"
+            className="w-[90px] cursor-pointer"
             size="sm"
             variant="outline"
-            disabled={isPending}
+            disabled={isLeaving || isKicking}
             onClick={() => setModalState(prev => ({...prev, isOpen: false}))}
           >
             Cancelar
           </Button>
 
           <Button
-            className="cursor-pointer"
+            className="w-[90px] cursor-pointer"
             size="sm"
             variant="destructive"
-            disabled={isPending}
-            onClick={() => leaveGroup()}
+            disabled={isLeaving || isKicking}
+            onClick={() => {
+              if (modalState.operation === "Abandonar") {
+                leaveGroup();
+              } else if (modalState.operation === "Eliminar") {
+                kickUser();
+              }
+            }}
           >
-            {modalState.operation}
+            {modalState.operation === "Abandonar" ? "Salir" : "Eliminar"}
           </Button>
         </DialogFooter>
       </DialogContent>

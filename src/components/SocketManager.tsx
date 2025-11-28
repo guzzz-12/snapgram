@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { errorMessage } from "@/utils/errorMessage";
-import { addNewGroupToChatsListCache, updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
+import { addNewGroupToChatsListCache, deleteGroupFromChatsListCache, updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
 import { socket } from "@/utils/socket";
 
 const SocketManager = () => {
@@ -130,6 +130,15 @@ const SocketManager = () => {
       updateGroupChatCache({
         queryClient,
         updatedGroup: data
+      })
+    });
+
+    // Escuchar evento de grupo eliminado
+    // y eliminar el item del grupo de la lista de chats
+    socket.on("groupDeleted", (groupId) => {
+      deleteGroupFromChatsListCache({
+        queryClient,
+        deletedGroupId: groupId
       })
     });
 

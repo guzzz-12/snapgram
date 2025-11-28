@@ -48,6 +48,7 @@ export interface ServerEvents {
   stoppedTyping: ({chatId, userId}: {userId: string, chatId: string}) => void;
   groupCreated: (data: ChatType) => void;
   groupUpdated: (data: ChatType) => void;
+  groupDeleted: (groupId: string) => void;
   userLeftGroup: (data:{
     groupId: string;
     operation: "leave" | "kick";

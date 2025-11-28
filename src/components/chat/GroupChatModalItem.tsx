@@ -1,15 +1,17 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, HTMLAttributes, SetStateAction } from "react";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { UserType } from "@/types/global";
+import { cn } from "@/lib/utils";
 
 interface Props {
   userData: UserType;
+  className?: HTMLAttributes<HTMLElement>["className"];
   setSelectedUsersIds: Dispatch<SetStateAction<string[]>>;
 }
 
-const GroupChatModalItem = ({ userData, setSelectedUsersIds }: Props) => {
+const GroupChatModalItem = ({ userData, className, setSelectedUsersIds }: Props) => {
   const onCheckedChange = (checked: boolean) => {
     if (checked) {
       setSelectedUsersIds((prev) => [...prev, userData._id]);
@@ -21,7 +23,7 @@ const GroupChatModalItem = ({ userData, setSelectedUsersIds }: Props) => {
   return (
     <Label
       id={userData._id}
-      className="flex justify-start items-center gap-4 p-2 rounded-md bg-transparent hover:bg-[#4F39F6]/10 cursor-pointer"
+      className={cn("flex justify-start items-center gap-4 p-2 rounded-md bg-transparent hover:bg-[#4F39F6]/10 cursor-pointer", className)}
     >
       <div className="flex justify-start items-center gap-2 w-full">
         <Avatar className="w-[45px] h-[45px] shrink-0">

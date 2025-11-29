@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import { socket } from "@/utils/socket";
 const SocketManager = () => {
   const {pathname} = useLocation();
   const params = useParams();
+  const navigate = useNavigate();
 
   const [token, setToken] = useState<string | null>(null);
 
@@ -139,7 +140,12 @@ const SocketManager = () => {
       deleteGroupFromChatsListCache({
         queryClient,
         deletedGroupId: groupId
-      })
+      });
+
+      // Salir de la página del grupo eliminado si está en ella
+      if (pathname === `/messages/${groupId}`) {
+        navigate("/messages?type=all", {replace: true});
+      }
     });
 
     return () => {
@@ -153,7 +159,7 @@ const SocketManager = () => {
       socket.off("stoppedTyping");
       socket.off("groupUpdated");
     }
-  }, [socket, token, userDocument, queryClient]);
+  }, [socket, token, userDocument, queryClient, navigate, pathname]);
 
 
   // Escuchar el evento de nuevo mensaje (también se escucha en useNewMessage)

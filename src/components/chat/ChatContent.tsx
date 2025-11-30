@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
+import GroupInboxHeader from "./GroupInboxHeader";
 import MessageItem from "./MessageItem";
 import UserLeftOrKickedOrAddedMessageItem from "./UserLeftOrKickedOrAddedMessageItem";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -152,6 +153,10 @@ const ChatContent = ({ chatData }: Props) => {
 
       {hasNextPage &&
         <div ref={paginationRef} className="w-full h-6" />
+      }
+
+      { chatData.type === "group" && 
+        <GroupInboxHeader groupData={chatData} />
       }
 
       <ul className="flex flex-col gap-6 w-full p-6">

@@ -8,6 +8,7 @@ import { FaRegImage } from "react-icons/fa";
 import UpdateGroupImgModal from "./UpdateGroupImgModal";
 import AddMemberToGroupModal from "./AddMemberToGroupModal";
 import LeaveOrKickFromGroupModal from "./LeaveOrKickFromGroupModal";
+import DeleteGroupModal from "./DeleteGroupModal";
 import GroupInfoModal from "./GroupInfoModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -36,6 +37,8 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
   const [openGroupInfoModal, setOpenGroupInfoModal] = useState(false);
 
   const [openUpdateGroupImgModal, setOpenUpdateGroupImgModal] = useState(false);
+
+  const [openDeleteGroupModal, setOpenDeleteGroupModal] = useState(false);
 
   const {user: currentUser} = useCurrentUser();
 
@@ -71,6 +74,12 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
         chatData={chatData}
         modalState={modalState}
         setModalState={setModalState}
+      />
+
+      <DeleteGroupModal
+        isOpen={openDeleteGroupModal}
+        setIsOpen={setOpenDeleteGroupModal}
+        groupData={chatData}
       />
 
       {isLoading &&
@@ -208,7 +217,10 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
                   }
 
                   {currentUser?.clerkId === chatData?.groupAdmin?.clerkId &&
-                    <DropdownMenuItem className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer">
+                    <DropdownMenuItem
+                      className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer"
+                      onClick={() => setOpenDeleteGroupModal(true)}
+                    >
                       <BsTrash3 className="size-5 text-destructive/90" aria-hidden />
                       <span className="text-sm text-destructive">
                         Eliminar grupo

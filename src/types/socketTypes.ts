@@ -49,15 +49,6 @@ export interface ServerEvents {
   groupCreated: (data: ChatType) => void;
   groupUpdated: (data: ChatType) => void;
   groupDeleted: (groupId: string) => void;
-  userLeftGroup: (data:{
-    groupId: string;
-    operation: "leave" | "kick";
-    user: {
-      _id: string;
-      clerkId: string;
-      fullName: string;
-      username: string;
-      profilePicture: string;
-    }
-  }) => void;
+  userLeftGroup: (data: ChatType) => void;
+  userJoinedGroup: (data: ChatType) => void;
 }

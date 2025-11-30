@@ -188,6 +188,7 @@ export type ChatType = {
   groupName: string | null;
   groupAdmin: UserType | null;
   groupPicture: string | null;
+  groupDescription: string | null;
   lastMessage: {
     _id: string;
     sender: string;

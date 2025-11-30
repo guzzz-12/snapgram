@@ -64,7 +64,7 @@ const DeleteGroupModal = ({ groupData, isOpen, setIsOpen }: Props) => {
             ¿Eliminar {groupData?.groupName}?
           </DialogTitle>
 
-          <DialogDescription>
+          <DialogDescription asChild>
             <div className="flex justify-start items-center gap-2 w-full">
               <IoWarningOutline className="size-8 text-orange-600 shrink-0" />
               <p className="text-sm text-neutral-700">

@@ -108,8 +108,14 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
           className="flex justify-between items-center gap-4 w-full px-6 py-2 bg-white border-b"
         >
           <Link
-            to={`/profile/${recipient?.clerkId}`}
+            to={chatData?.type === "group" ? "#" : `/profile/${recipient?.clerkId}`}
             className="flex justify-start items-center gap-4 overflow-hidden"
+            onClick={(e) => {
+              if(chatData?.type === "group") {
+                e.preventDefault();
+                setOpenGroupInfoModal(true);
+              }
+            }}
           >
             <Avatar className="w-[50px] h-[50px] shrink-0 outline-2 outline-white">
               <AvatarImage 

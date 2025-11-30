@@ -148,6 +148,23 @@ const SocketManager = () => {
       }
     });
 
+    // Escuchar evento de usuario removido del grupo
+    socket.on("userLeftGroup", (data) => {
+      updateGroupChatCache({
+        queryClient,
+        updatedGroup: data
+      })
+    });
+
+    // Escuchar evento de usuario agregado al grupo
+    // y actualizar la lista de chats del nuevo miembro
+    socket.on("userJoinedGroup", (data) => {
+      addNewGroupToChatsListCache({
+        queryClient,
+        newGroup: data
+      })
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
@@ -157,7 +174,11 @@ const SocketManager = () => {
       socket.off("deletedMessage");
       socket.off("typing");
       socket.off("stoppedTyping");
+      socket.off("groupCreated");
       socket.off("groupUpdated");
+      socket.off("groupDeleted");
+      socket.off("userLeftGroup");
+      socket.off("userJoinedGroup");
     }
   }, [socket, token, userDocument, queryClient, navigate, pathname]);
 

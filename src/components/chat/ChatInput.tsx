@@ -61,7 +61,7 @@ const ChatInput = ({ wrapperHeight, chatData, chatTypeParam, setTemporaryChat }:
 
   // Mutation para enviar el mensaje
   const {mutate, isPending: submitting} = useMutation({
-    mutationKey: ["send-private-message", chatData?._id],
+    mutationKey: ["send-message", chatData?._id],
     mutationFn: async () => {
       const token = await getToken();
 

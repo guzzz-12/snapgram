@@ -55,6 +55,7 @@ const UpdateGroupImgModal = (props: Props) => {
       setSelectedImageFiles([]);
       setSelectedImagePreviews([]);
       setIsOpen(false);
+      toast.success("Imagen del grupo actualizada con éxito");
     },
     onError: (error) => {
       toast.error(errorMessage(error));

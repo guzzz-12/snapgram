@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FiSearch } from "react-icons/fi";
 import { SearchX } from "lucide-react";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { getUsersList } from "@/utils/getUsersList";
 import type { ChatType } from "@/types/global";
+import { restoreDeletedChatCache } from "@/utils/updateMsgsDataCache";
 
 interface Props {
   setTemporaryChat: (chat: ChatType) => void;
@@ -33,6 +34,8 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   const { getToken } = useAuth();
+
+  const queryClient = useQueryClient();
 
   const {debouncedValue} = useDebounce(searchTerm);
 
@@ -54,13 +57,22 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
     queryFn: async () => {
       const token = await getToken();
 
-      const {data} = await axiosInstance<{data: ChatType}>({
+      const {data} = await axiosInstance<{
+        data: ChatType;
+        isChatRestored: boolean;
+    }>({
         method: "GET",
         url: `/chats/participant/${selectedUserId}`,
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+
+      // Agregar el nuevo chat a la lista de chats del usuario recipiente
+      // al recibir el primer mensaje de un chat que aun no existe en su lista
+      if (data.isChatRestored) {
+        restoreDeletedChatCache({queryClient, restoredChat: data.data});
+      }
 
       return data.data;
     },

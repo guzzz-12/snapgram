@@ -34,6 +34,11 @@ interface UpdateDeletedGroupCacheProps {
   deletedGroupId: string;
 }
 
+interface RestoreDeletedChatProps {
+  queryClient: QueryClient;
+  restoredChat: ChatType;
+}
+
 /**
  * Actualizar la caché de los mensajes al recibir un nuevo mensaje
  * para actualizar la bandeja de entrada del chat en tiempo real
@@ -429,6 +434,38 @@ export const deleteGroupFromChatsListCache = (props: UpdateDeletedGroupCacheProp
     // Actualizar la caché de la página del grupo eliminado
     const updatedPages = [...oldData.pages];
     updatedPages.splice(chatPageIndex, 1, updatedChatPage);
+
+    return {
+      ...oldData,
+      pages: updatedPages
+    };
+  });
+}
+
+/**
+ * Restaurar el item del chat eliminado a la caché
+ * de la lista de chats del usuario remitente
+ */
+export const restoreDeletedChatCache = (props: RestoreDeletedChatProps) => {
+  const { queryClient, restoredChat } = props;
+
+  queryClient.setQueryData(["chats", "all"], (oldData: InfiniteData<{
+    data: ChatType[];
+    hasMore: boolean;
+    nextPage: number | null;
+  }>) => {
+    if (!oldData) {
+      return oldData;
+    }
+
+    // Agregar el chat restaurado a la caché
+    const updatedPages = [...oldData.pages];
+
+    updatedPages.unshift({
+      data: [restoredChat],
+      hasMore: false, 
+      nextPage: null
+    });
 
     return {
       ...oldData,

@@ -10,6 +10,7 @@ import AddMemberToGroupModal from "./AddMemberToGroupModal";
 import LeaveOrKickFromGroupModal from "./LeaveOrKickFromGroupModal";
 import DeleteGroupModal from "./DeleteGroupModal";
 import GroupInfoModal from "./GroupInfoModal";
+import DeletePrivateChatModal from "./DeletePrivateChatModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,6 +40,8 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
   const [openUpdateGroupImgModal, setOpenUpdateGroupImgModal] = useState(false);
 
   const [openDeleteGroupModal, setOpenDeleteGroupModal] = useState(false);
+  
+  const [openDeletePrivateChatModal, setOpenDeletePrivateChatModal] = useState(false);
 
   const {user: currentUser} = useCurrentUser();
 
@@ -80,6 +83,12 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
         isOpen={openDeleteGroupModal}
         setIsOpen={setOpenDeleteGroupModal}
         groupData={chatData}
+      />
+
+      <DeletePrivateChatModal
+        chatData={chatData}
+        isOpen={openDeletePrivateChatModal}
+        setIsOpen={setOpenDeletePrivateChatModal}
       />
 
       {isLoading &&
@@ -162,7 +171,10 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
             <DropdownMenuContent>
               {chatData?.type === "private" &&
                 <>
-                  <DropdownMenuItem className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer">
+                  <DropdownMenuItem
+                    className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer"
+                    onClick={() => setOpenDeletePrivateChatModal(true)}
+                  >
                     <BsTrash3 className="size-5 text-destructive/60" aria-hidden />
                     <span className="text-sm text-destructive">
                       Eliminar chat

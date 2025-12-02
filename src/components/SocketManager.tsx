@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { errorMessage } from "@/utils/errorMessage";
-import { addNewGroupToChatsListCache, deleteGroupFromChatsListCache, updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
+import { addNewChatToChatsListCache, addNewGroupToChatsListCache, deleteGroupFromChatsListCache, updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
 import { socket } from "@/utils/socket";
 
 const SocketManager = () => {
@@ -191,10 +191,21 @@ const SocketManager = () => {
       const senderId = data.message.sender._id;
       const currentChatId = params.chatId || "";
 
-      updateMessagesCache({
+      // Actualizar la caché de los mensajes para actualizar la bandeja de entrada del chat
+      if (data.chat._id === currentChatId) {
+        updateMessagesCache({
+          queryClient,
+          chatId: currentChatId,
+          newMessage: data
+        });
+      }
+
+      // Agregar el nuevo chat a la lista de chats del usuario recipiente
+      // al recibir el primer mensaje de un chat que aun no existe en su lista
+      addNewChatToChatsListCache({
         queryClient,
         newMessage: data,
-        chatId: currentChatId
+        currentUserId: userDocument._id
       });
 
       updateChatLastMessageCache({

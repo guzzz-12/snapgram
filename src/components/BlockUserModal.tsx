@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -14,6 +14,8 @@ const BlockUserModal = () => {
   const navigate = useNavigate();
 
   const {getToken} = useAuth();
+
+  const queryClient = useQueryClient();
 
   const {open, blockedUser, operation, setOpen, setBlockedUser} = useBlockUserModal();
 
@@ -48,6 +50,8 @@ const BlockUserModal = () => {
       return data;
     },
     onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["blocked-users"]});
+
       setBlockedUser(null);
       setOpen(false);
 

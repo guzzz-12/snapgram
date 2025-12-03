@@ -5,6 +5,7 @@ import MainSidebar from "@/components/MainSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import CreateStoryModal from "@/components/stories/CreateStoryModal";
 import CreatePostModal from "@/components/posts/CreatePostModal";
+import BlockUserModal from "@/components/BlockUserModal";
 import SocketManager from "@/components/SocketManager";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
 
@@ -27,6 +28,8 @@ const Layout = () => {
         <CreatePostModal />
 
         <CreateStoryModal />
+
+        <BlockUserModal />
 
         {!pathname.startsWith("/post") &&        
           <MainSidebar />

@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { Calendar, MapPin, Pencil } from "lucide-react";
+import { RiUserForbidLine } from "react-icons/ri";
 import { toast } from "sonner";
 import ProfileEditModal from "./ProfileEditModal";
 import SeeMoreBtn from "@/components/SeeMoreBtn";
@@ -14,6 +15,8 @@ import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
 import type { UserType } from "@/types/global";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { useBlockUserModal } from "@/hooks/useBlockUserModal";
 
 interface Props {
   userData: UserType;
@@ -38,6 +41,8 @@ const ProfileHeader = ({ userData }: Props) => {
     setShowFullText,
     setIsClamped
   } = useClampedText({ textContentRef, clampedTextData: userData.bio });
+
+  const {setOpen: setBlockUserModalOpen, setOperation, setBlockedUser} = useBlockUserModal();
 
   useEffect(() => {
     if (avatarRef.current) {
@@ -159,16 +164,40 @@ const ProfileHeader = ({ userData }: Props) => {
             }
 
             {(user?._id !== userData._id) &&
-              <Button
-                className={cn("shrink-0 cursor-pointer", userData.isFollowing && "hover:text-red-600 hover:border-red-600 hover:bg-red-50")}
-                variant="outline"
-                disabled={isPending}
-                onMouseEnter={onMouseFollowBtnEnter}
-                onMouseLeave={onMouseFollowBtnLeave}
-                onClick={() => mutate()}
-              >
-                {userData.isFollowing ? "Siguiendo" : "Seguir"}
-              </Button>
+              <div className="flex justify-center items-center gap-3">
+                <Button
+                  className={cn("shrink-0 rounded-full cursor-pointer", userData.isFollowing && "hover:text-red-600 hover:border-red-600 hover:bg-red-50")}
+                  variant="outline"
+                  disabled={isPending}
+                  onMouseEnter={onMouseFollowBtnEnter}
+                  onMouseLeave={onMouseFollowBtnLeave}
+                  onClick={() => mutate()}
+                >
+                  {userData.isFollowing ? "Siguiendo" : "Seguir"}
+                </Button>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button 
+                      className="shrink-0 rounded-full border-destructive cursor-pointer"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        setBlockUserModalOpen(true);
+                        setBlockedUser(userData);
+                        setOperation("block");
+                      }}
+                    >
+                      <RiUserForbidLine className="size-5 text-destructive" aria-hidden />
+                      <span className="sr-only">Bloquear a {userData.fullName}</span>
+                    </Button>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    Bloquear a {userData.fullName.split(" ")[0]}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             }
           </div>
 

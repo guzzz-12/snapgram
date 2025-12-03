@@ -2,21 +2,23 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import dayjs from "dayjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import { Calendar, MapPin, Pencil } from "lucide-react";
+import { Calendar, MapPin, MoreHorizontal, Pencil } from "lucide-react";
 import { RiUserForbidLine } from "react-icons/ri";
 import { toast } from "sonner";
 import ProfileEditModal from "./ProfileEditModal";
+import BlockedUsersListModal from "./BlockedUsersListModal";
 import SeeMoreBtn from "@/components/SeeMoreBtn";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useClampedText from "@/hooks/useClampedText";
+import { useBlockUserModal } from "@/hooks/useBlockUserModal";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
 import type { UserType } from "@/types/global";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { useBlockUserModal } from "@/hooks/useBlockUserModal";
 
 interface Props {
   userData: UserType;
@@ -29,6 +31,7 @@ const ProfileHeader = ({ userData }: Props) => {
   const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
   const [avatarHeight, setAvatarHeight] = useState(0);
   const [openEditModal, setOpenEditModal] = useState(false);
+  const [openBlockedUsersModal, setOpenBlockedUsersModal] = useState(false);
 
   const {user} = useCurrentUser();
   const {getToken} = useAuth();
@@ -109,6 +112,11 @@ const ProfileHeader = ({ userData }: Props) => {
         onClose={(open: boolean) => setOpenEditModal(open)}
       />
 
+      <BlockedUsersListModal
+        isOpen={openBlockedUsersModal}
+        setIsOpen={setOpenBlockedUsersModal}
+      />
+
       <div
         style={{
           backgroundImage: `url(${userData.coverPhoto || "/placeholder_image.webp"})`,
@@ -153,14 +161,31 @@ const ProfileHeader = ({ userData }: Props) => {
             </div>
 
             {user?._id === userData._id &&
-              <Button
-                className="shrink-0 cursor-pointer"
-                variant="outline"
-                onClick={() => setOpenEditModal(true)}
-              >
-                <Pencil />
-                <span>Editar</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={cn("flex justify-center items-center w-9 h-9 p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 cursor-pointer transition-colors", isPending && "pointer-events-none")}>
+                    <MoreHorizontal />
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    className="flex justify-start items-center gap-2 cursor-pointer"
+                    onClick={() => setOpenEditModal(true)}
+                  >
+                    <Pencil className="size-5 text-neutral-700" aria-hidden />
+                    <span>Editar perfil</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="flex justify-start items-center gap-2 cursor-pointer"
+                    onClick={() => setOpenBlockedUsersModal(true)}
+                  >
+                    <RiUserForbidLine className="size-5 text-neutral-700" aria-hidden />
+                    <span>Perfiles bloqueados</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             }
 
             {(user?._id !== userData._id) &&
@@ -177,7 +202,7 @@ const ProfileHeader = ({ userData }: Props) => {
                 </Button>
 
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Button 
                       className="shrink-0 rounded-full border-destructive cursor-pointer"
                       variant="outline"

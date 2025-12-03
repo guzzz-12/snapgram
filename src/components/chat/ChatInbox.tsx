@@ -1,14 +1,18 @@
-import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
+import { IoWarningOutline } from "react-icons/io5";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import ChatHeader from "./ChatHeader";
 import ChatContent from "./ChatContent";
 import ChatInput from "./ChatInput";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
+import { socket } from "@/utils/socket";
 import type { ChatType } from "@/types/global";
 
 interface Props {
@@ -31,59 +35,127 @@ const ChatInbox = (props: Props) => {
 
   const {getToken} = useAuth();
 
-  useEffect(() => {
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.clientHeight);
-    }
-  }, []);
-
-  const getChat = async (chatId: string) => {
-    const token = await getToken();
-
-    const {data} = await axiosInstance<{data: ChatType}>({
-      method: "GET",
-      url: `/chats/${chatId}`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    return data.data;
-  };
+  const [isBlocked, setIsBlocked] = useState<{
+    blockedBy: string | null;
+    blockedUser: string | null;
+  }>({
+    blockedBy: null,
+    blockedUser: null
+  });
 
   // Query para consultar la data del chat
-  const {data: chat, isLoading, error: chatError} = useQuery({
+  const {data: chat, isFetching, error: chatError} = useQuery({
     queryKey: ["chat", chatId],
-    queryFn: () => getChat(chatId),
+    queryFn: async () => {
+      const token = await getToken();
+
+      const {data} = await axiosInstance<{
+        data: ChatType;
+        isBlocked: {
+          blockedBy: string | null;
+          blockedUser: string | null;
+        };
+      }>({
+        method: "GET",
+        url: `/chats/${chatId}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setIsBlocked(data.isBlocked);
+
+      return data.data;
+    },
     enabled: !!chatId,
     refetchOnWindowFocus: false
   });
 
+  const {user: currentUser} = useCurrentUser();
+  const otherUser = chat?.participants.find((p) => p._id !== currentUser?._id);
+
+  useEffect(() => {
+    // Calcular el height del header del inbox
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.clientHeight);
+    }
+
+    // Escuchar evento de usuario bloqueado/desbloqueado
+    socket.on("userBlocked", (data) => {
+      const {user, blockedUser, operation} = data;
+
+      if (operation === "unblock") {
+        setIsBlocked({
+          blockedBy: null,
+          blockedUser: null
+        });
+      }
+
+      if (operation === "block") {
+        setIsBlocked({
+          blockedBy: user._id,
+          blockedUser: blockedUser._id
+        });
+      }
+    });
+
+    return () => {
+      socket.off("userBlocked");
+    };
+  }, [socket]);
+
   if (chatError) {
-    if (chatError instanceof AxiosError && chatError.response?.status === 404) {
+    const isClientError = chatError instanceof AxiosError && chatError.response?.status.toString().startsWith("4");
+
+    if (isClientError && chatError.response?.status === 404) {
       navigate("/messages?type=all", {replace: true});
     }
 
     toast.error(errorMessage(chatError));
   }
 
+  /** Verificar si hay bloqueo entre ambos usuarios y quién bloqueó a quién */
+  const userBlockedMe = isBlocked.blockedUser === currentUser?._id;
+
   return (
     <div className="flex flex-col w-full h-full">
       <ChatHeader
         chatData={temporaryChat || chat}
-        isLoading={isLoading}
+        isLoading={isFetching}
         headerHeight={headerHeight}
+        blockData={isBlocked}
         headerRef={headerRef}
       />
 
       <ChatContent chatData={temporaryChat || chat} />
 
-      <ChatInput
-        chatData={temporaryChat || chat}
-        wrapperHeight={headerHeight}
-        setTemporaryChat={setTemporaryChat}
-        chatTypeParam={chatTypeParam}
-      />
+      {!isFetching && !isBlocked.blockedBy && !isBlocked.blockedUser &&
+        <ChatInput
+          chatData={temporaryChat || chat}
+          wrapperHeight={headerHeight}
+          setTemporaryChat={setTemporaryChat}
+          chatTypeParam={chatTypeParam}
+        />
+      }
+
+      {/* Mensaje que se muestra en lugar del input cuando hay un bloqueo entre ambos usuarios */}
+      {!isFetching && isBlocked.blockedUser &&
+        <div className="flex items-center justify-center gap-2 w-full p-3 border-t border-orange-600">
+          <IoWarningOutline className="size-8 text-orange-600 shrink-0" />
+
+          <span className="text-sm text-center font-medium text-neutral-600">
+            {userBlockedMe && `No puedes enviar mensajes en esta conversación porque ${otherUser?.fullName.split(" ")[0]} te ha bloqueado.`}
+
+            {!userBlockedMe && `No puedes enviar mensajes en esta conversación porque bloqueaste a ${otherUser?.fullName.split(" ")[0]}`}
+          </span>
+        </div>
+      }
+
+      {isFetching &&
+        <div className="flex items-center justify-center gap-2 w-full border-t">
+          <Skeleton className="w-full h-[60px] rounded-none" />
+        </div>
+      }
     </div>
   )
 }

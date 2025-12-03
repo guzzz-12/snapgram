@@ -17,15 +17,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import type { ChatType } from "@/types/global";
 import { cn } from "@/lib/utils";
+import { useBlockUserModal } from "@/hooks/useBlockUserModal";
 
 interface Props {
   chatData: ChatType | null | undefined;
   isLoading: boolean;
   headerHeight: number;
+  /** Información sobre el bloqueo entre los dos usuarios del chat privado */
+  blockData: { blockedBy: string | null; blockedUser: string | null };
   headerRef: RefObject<HTMLDivElement | null>;
 }
 
-const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => {
+const ChatHeader = ({ chatData, isLoading, headerHeight, blockData, headerRef }: Props) => {
   // State del modal de agregar miembros al grupo
   const [openAddMemberModal, setOpenAddMemberModal] = useState(false);
 
@@ -45,7 +48,12 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
 
   const {user: currentUser} = useCurrentUser();
 
+  const {setOpen: setOpenBlockedUserModal, setBlockedUser, setOperation} = useBlockUserModal();
+
   const chatParticipants = chatData?.participants || [];
+
+  /** Verificar si hay bloqueo entre ambos usuarios y quién bloqueó a quién */
+  const userBlockedMe = blockData.blockedUser === currentUser?._id;
 
   // Si el chat es privado, mostrar el avatar del otro usuario
   // Si el chat es de grupo, mostrar el avatar del admin del grupo
@@ -168,7 +176,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
               </button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent>
+            <DropdownMenuContent className="translate-x-[-1rem]">
               {chatData?.type === "private" &&
                 <>
                   <DropdownMenuItem
@@ -181,12 +189,22 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, headerRef }: Props) => 
                     </span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer">
-                    <FiLock className="size-5 text-neutral-500" aria-hidden />
-                    <span className="text-sm text-neutral-900">
-                      Bloquear a {recipient?.fullName.split(" ")[0]}
-                    </span>
-                  </DropdownMenuItem>
+                  {/* El modal de confirmación del bloqueo/desbloqueo está en el layout principal */}
+                  {!userBlockedMe &&
+                    <DropdownMenuItem
+                      className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer"
+                      onClick={() => {
+                        setOpenBlockedUserModal(true);
+                        setBlockedUser(recipient);
+                        setOperation(blockData.blockedUser ? "unblock" : "block");
+                      }}
+                    >
+                      <FiLock className="size-5 text-neutral-500" aria-hidden />
+                      <span className="text-sm text-neutral-900">
+                        {blockData.blockedUser ? "Desbloquear" : "Bloquear"} a {recipient?.fullName.split(" ")[0]}
+                      </span>
+                    </DropdownMenuItem>
+                  }
                 </>
               }
 

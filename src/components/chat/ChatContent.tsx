@@ -17,9 +17,10 @@ import type { ChatType, MessageType } from "@/types/global";
 
 interface Props {
   chatData: ChatType | null | undefined;
+  isLoadingChatData: boolean;
 }
 
-const ChatContent = ({ chatData }: Props) => {
+const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const paginationRef = useRef<HTMLDivElement>(null);
@@ -60,12 +61,12 @@ const ChatContent = ({ chatData }: Props) => {
   };
 
   // Consultar los mensajes del chat
-  const {data: messagesData, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, error} = useInfiniteQuery({
+  const {data: messagesData, isLoading: isLoadingMessages, isFetchingNextPage, hasNextPage, fetchNextPage, error} = useInfiniteQuery({
     queryKey: ["messages", chatData?._id],
     queryFn: ({pageParam}) => getMessages(pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    enabled: Boolean(chatData && !chatData._id.startsWith("temp_")),
+    enabled: Boolean(!isLoadingChatData && chatData && !chatData._id.startsWith("temp_")),
     retry: 2,
     refetchOnWindowFocus: false,
   });
@@ -78,14 +79,10 @@ const ChatContent = ({ chatData }: Props) => {
 
   // Cargar la siguiente página de mensajes al llegar al top del chat
   useEffect(() => {
-    if (isIntersecting && !isLoading) {
+    if (isIntersecting && !isLoadingMessages) {
       fetchNextPage();
     }
-  }, [isIntersecting, isLoading]);
-
-  const chatParticipants = chatData?.participants || [];
-  
-  const recipient = chatData?.type === "private" ? chatParticipants.find((p) => p._id !== currentUser?._id) : chatData?.groupAdmin;
+  }, [isIntersecting, isLoadingMessages]);
 
   // Calcular la distancia scrolleada desde el fondo de la bandeja de mensajes
   useEffect(() => {
@@ -138,8 +135,6 @@ const ChatContent = ({ chatData }: Props) => {
   // para corregir la dirección de la paginación
   const messages = messagesData?.pages.flatMap((page) => page.data.messages).reverse() || [];
 
-  if (!currentUser || !recipient || !chatData) return null;
-
   return (
     <div
       ref={wrapperRef}
@@ -155,30 +150,32 @@ const ChatContent = ({ chatData }: Props) => {
         <div ref={paginationRef} className="w-full h-6" />
       }
 
-      { chatData.type === "group" && 
+      {chatData && chatData.type === "group" && 
         <GroupInboxHeader groupData={chatData} />
       }
 
-      <ul className="flex flex-col gap-6 w-full p-6">
-        {messages.map((message) => {
-          if (["userLeftGroup", "userKickedFromGroup", "userAddedToGroup"].includes(message.type)) {
+      {!isLoadingChatData && currentUser &&
+        <ul className="flex flex-col gap-6 w-full p-6">
+          {messages.map((message) => {
+            if (["userLeftGroup", "userKickedFromGroup", "userAddedToGroup"].includes(message.type)) {
+              return (
+                <UserLeftOrKickedOrAddedMessageItem
+                  key={message._id}
+                  messageData={message}
+                />
+              )
+            }
+
             return (
-              <UserLeftOrKickedOrAddedMessageItem
+              <MessageItem
                 key={message._id}
+                currentUserId={currentUser._id}
                 messageData={message}
               />
             )
-          }
-
-          return (
-            <MessageItem
-              key={message._id}
-              currentUserId={currentUser._id}
-              messageData={message}
-            />
-          )
-        })}
-      </ul>
+          })}
+        </ul>
+      }
 
       <div ref={chatBottomRef} className="w-full h-1" />
     </div>

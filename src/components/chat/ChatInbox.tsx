@@ -127,7 +127,10 @@ const ChatInbox = (props: Props) => {
         headerRef={headerRef}
       />
 
-      <ChatContent chatData={temporaryChat || chat} />
+      <ChatContent
+        chatData={temporaryChat || chat}
+        isLoadingChatData={isFetching}
+      />
 
       {!isFetching && !isBlocked.blockedBy && !isBlocked.blockedUser &&
         <ChatInput

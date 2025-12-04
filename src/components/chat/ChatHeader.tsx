@@ -1,6 +1,6 @@
 import { useState, type RefObject } from "react";
 import { Link } from "react-router";
-import { Ellipsis, Info, Loader2Icon } from "lucide-react";
+import { Ellipsis, Info } from "lucide-react";
 import { FiLock } from "react-icons/fi";
 import { BsTrash3 } from "react-icons/bs";
 import { MdLogout, MdOutlinePersonAddAlt } from "react-icons/md";
@@ -15,9 +15,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useBlockUserModal } from "@/hooks/useBlockUserModal";
 import type { ChatType } from "@/types/global";
 import { cn } from "@/lib/utils";
-import { useBlockUserModal } from "@/hooks/useBlockUserModal";
 
 interface Props {
   chatData: ChatType | null | undefined;
@@ -100,23 +100,17 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData, headerRef }:
       />
 
       {isLoading &&
-        <>
-          <div
-            style={{height: `${headerHeight}px`}}
-            className="flex justify-start gap-3 w-full px-6 py-2 bg-white border-b"
-          >
-            <Skeleton className="w-[50px] h-[50px] shrink-0 rounded-full bg-neutral-200" />
+        <div
+          style={{height: `${headerHeight}px`}}
+          className="flex justify-start gap-3 w-full px-6 py-2 bg-white border-b"
+        >
+          <Skeleton className="w-[50px] h-[50px] shrink-0 rounded-full bg-neutral-200" />
 
-            <div className="flex flex-col justify-center items-start gap-2 w-full">
-              <Skeleton className="w-[60%] h-4 rounded bg-neutral-200" />
-              <Skeleton className="w-1/4 h-3 rounded bg-neutral-200" />
-            </div>
+          <div className="flex flex-col justify-center items-start gap-2 w-full">
+            <Skeleton className="w-[60%] h-4 rounded bg-neutral-200" />
+            <Skeleton className="w-1/4 h-3 rounded bg-neutral-200" />
           </div>
-
-          <div className="flex justify-center items-center w-full h-full">
-            <Loader2Icon className="size-8 text-neutral-600 animate-spin" />
-          </div>
-        </>
+        </div>
       }
 
       {!isLoading &&

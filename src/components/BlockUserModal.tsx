@@ -30,6 +30,7 @@ const BlockUserModal = () => {
         data: {
           user: UserType;
           operation: "block" | "unblock";
+          chatId: string | null;
         }
       }>({
         method: "PUT",
@@ -49,8 +50,13 @@ const BlockUserModal = () => {
 
       return data;
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       await queryClient.invalidateQueries({queryKey: ["blocked-users"]});
+
+      // Invalidar la cache del chat con el usuario bloqueado/desbloqueado
+      if (data && data.data.chatId) {
+        await queryClient.invalidateQueries({queryKey: ["chat", data.data.chatId]});
+      }
 
       setBlockedUser(null);
       setOpen(false);

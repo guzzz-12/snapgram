@@ -57,5 +57,7 @@ export interface ServerEvents {
     user: UserType;
     /** El usuario bloqueado/desbloqueado */
     blockedUser: UserType;
+    /** El chat con el usuario bloqueado/desbloqueado (si existe) */
+    chatId: string | null;
   }) => void;
 }

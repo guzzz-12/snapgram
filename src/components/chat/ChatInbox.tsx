@@ -82,7 +82,10 @@ const ChatInbox = (props: Props) => {
 
     // Escuchar evento de usuario bloqueado/desbloqueado
     socket.on("userBlocked", (data) => {
-      const {user, blockedUser, operation} = data;
+      const {user, blockedUser, operation, chatId: blockedChatId} = data;
+
+      // Ignorar el evento si no es el chat activo
+      if (blockedChatId !== chatId) return;
 
       if (operation === "unblock") {
         setIsBlocked({
@@ -102,7 +105,7 @@ const ChatInbox = (props: Props) => {
     return () => {
       socket.off("userBlocked");
     };
-  }, [socket]);
+  }, [socket, chatId]);
 
   if (chatError) {
     const isClientError = chatError instanceof AxiosError && chatError.response?.status.toString().startsWith("4");

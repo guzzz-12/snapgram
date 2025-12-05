@@ -18,3 +18,8 @@ export const NOTIFICATIONS_TEXT_MAP: Record<NotificationType["notificationType"]
   "reply": "respondió a tu comentario en una publicación.",
   "postShared": "compartió tu publicación."
 }
+
+export const ACCOUNT_STATUS = {
+  isBlocked: "is_blocked",
+  accountDisabled: "account_disabled"
+}

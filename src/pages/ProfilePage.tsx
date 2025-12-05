@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { axiosInstance } from "@/utils/axiosInstance";
+import { ACCOUNT_STATUS } from "@/utils/constants";
 import type { UserType } from "@/types/global";
 
 const ProfilePage = () => {
@@ -54,10 +55,14 @@ const ProfilePage = () => {
 
   if (userError) {
     const isClientError = userError instanceof AxiosError;
-    const isUnavailable = isClientError && userError.response?.status === 403;
+
+    const message = isClientError && userError.response?.data.message;
+
+    const isBlocked = message === ACCOUNT_STATUS.isBlocked;
+    const isDisabled = message === ACCOUNT_STATUS.accountDisabled;
     const isNotFound = isClientError && userError.response?.status === 404;
 
-    if (isUnavailable) {
+    if (isBlocked || isDisabled) {
       return (
         <main className="flex justify-center items-center w-full h-screen">
           <section className="flex flex-col justify-center items-center w-full max-w-[600px] mx-auto p-6 bg-white shadow border rounded-md">

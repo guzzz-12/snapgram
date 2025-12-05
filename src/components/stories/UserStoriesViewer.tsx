@@ -103,7 +103,7 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
         }}
         className="w-auto h-[95vh] p-0 aspect-[1/1.7] border-none [&>button]:hidden"
       >
-        <div className="relative flex flex-col gap-4 w-full h-full overflow-hidden">
+        <div className="relative flex flex-col gap-4 w-full h-full">
           {stories.length > 1 && (
             <>
               <div className="absolute top-0 left-0 flex justify-center items-center h-full px-1 translate-x-[-90%] z-10">

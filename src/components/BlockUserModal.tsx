@@ -53,6 +53,8 @@ const BlockUserModal = () => {
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({queryKey: ["blocked-users"]});
 
+      await queryClient.invalidateQueries({queryKey: ["user", data?.data.user.clerkId]});
+
       // Invalidar la cache del chat con el usuario bloqueado/desbloqueado
       if (data && data.data.chatId) {
         await queryClient.invalidateQueries({queryKey: ["chat", data.data.chatId]});

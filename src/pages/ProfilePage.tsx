@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router";
+import { Navigate, useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
+import { AxiosError } from "axios";
+import { FaUserTimes } from "react-icons/fa";
 import { toast } from "sonner";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileHeaderSkeleton from "@/components/posts/ProfileHeaderSkeleton";
 import PostsTabContent from "@/components/profile/PostsTabContent";
 import FollowersTabContent from "@/components/profile/FollowersTabContent";
 import FollowingTabContent from "@/components/profile/FollowingTabContent";
+import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -15,6 +18,7 @@ import type { UserType } from "@/types/global";
 
 const ProfilePage = () => {
   const {userClerkId} = useParams<{userClerkId: string}>();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("posts");
 
@@ -39,19 +43,50 @@ const ProfilePage = () => {
     return data.data;
   }
 
+  // Query para consultar los datos del usuario
   const {data: userData, isLoading: loadingUser, error: userError} = useQuery({
     queryKey: ["user", userClerkId],
     queryFn: getUser,
     enabled: !!userClerkId,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
-  if (!loadingUser && !userData) {
-    toast.error("Usuario no encontrado.");
-    return <Navigate to="/" replace />
-  }
-
   if (userError) {
+    const isClientError = userError instanceof AxiosError;
+    const isUnavailable = isClientError && userError.response?.status === 403;
+    const isNotFound = isClientError && userError.response?.status === 404;
+
+    if (isUnavailable) {
+      return (
+        <main className="flex justify-center items-center w-full h-screen">
+          <section className="flex flex-col justify-center items-center w-full max-w-[600px] mx-auto p-6 bg-white shadow border rounded-md">
+            <FaUserTimes className="block mb-5 size-[80px] text-neutral-700 shrink-0" />
+  
+            <h1 className="text-center text-xl font-semibold text-neutral-700">
+              Este perfil no está disponible actualmente.
+            </h1>
+
+            <p className="mb-5 text-center text-sm text-neutral-600">
+              Es posible que el usuario haya desactivado su cuenta, <br /> te haya bloqueado o lo hayas bloqueado.
+            </p>
+
+            <Button
+              className="w-[100px] cursor-pointer"
+              onClick={() => navigate("/", {replace: true})}
+            >
+              Volver
+            </Button>
+          </section>
+        </main>
+      )
+    }
+
+    if (isNotFound) {
+      toast.error("Usuario no encontrado.");
+      return <Navigate to="/" replace />
+    }
+
     toast.error("Error al obtener el usuario.");
   }
 

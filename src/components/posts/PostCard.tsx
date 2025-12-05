@@ -152,7 +152,7 @@ const PostCard = ({ postData, isModal, className }: Props) => {
 
       {/* Contenido del repost */}
       {postData.postType === "repost" &&
-        <SharedPostCard data={postData.originalPost!} />
+        <SharedPostCard data={postData.originalPost} />
       }
 
       <PostCardFooter

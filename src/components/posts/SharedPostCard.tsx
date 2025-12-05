@@ -11,7 +11,7 @@ import type { PostType } from "@/types/global";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  data: PostType;
+  data: PostType | null | undefined;
 }
 
 const SharedPostCard = ({data}: Props) => {
@@ -19,10 +19,11 @@ const SharedPostCard = ({data}: Props) => {
 
   const {isClamped, showFullText, setIsClamped, setShowFullText} = useClampedText({
     textContentRef: textRef,
-    clampedTextData: data.content
+    clampedTextData: data?.content || ""
   });
 
-  const isOriginalPostDeleted = !data._id;
+  // Chequear si el post original (el post que fue reposteado) ha sido borrado
+  const isOriginalPostDeleted = !data || !data._id;
 
   return (
     <div className="flex flex-col w-full p-4 border rounded-md bg-neutral-100">

@@ -12,6 +12,7 @@ export type UserType = {
   followersCount: number;
   followingCount: number;
   isFollowing: boolean; // true si el usuario actual sigue al usuario consultado
+  isDisabled: boolean;
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;

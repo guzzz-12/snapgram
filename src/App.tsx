@@ -64,13 +64,13 @@ const App = () => {
 
   // Consultar la data del usuario autenticado
   const {data: userData, isLoading: loadingUser, error: userError} = useQuery({
-    queryKey: ["user", userId],
+    queryKey: ["me"],
     queryFn: async () => {
       const token = await getToken();
 
       const {data} = await axiosInstance<{data: UserType}>({
         method: "GET",
-        url: `/users/${userId}`,
+        url: "/users/me",
         headers: {
           Authorization: `Bearer ${token}`
         }

@@ -4,9 +4,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { Calendar, MapPin, MoreHorizontal, Pencil } from "lucide-react";
 import { RiUserForbidLine } from "react-icons/ri";
+import { MdNoAccounts } from "react-icons/md";
 import { toast } from "sonner";
 import ProfileEditModal from "./ProfileEditModal";
 import BlockedUsersListModal from "./BlockedUsersListModal";
+import DisableAccountModal from "./DisableAccountModal";
 import SeeMoreBtn from "@/components/SeeMoreBtn";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -32,6 +34,7 @@ const ProfileHeader = ({ userData }: Props) => {
   const [avatarHeight, setAvatarHeight] = useState(0);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openBlockedUsersModal, setOpenBlockedUsersModal] = useState(false);
+  const [openDisableAccountModal, setOpenDisableAccountModal] = useState(false);
 
   const {user} = useCurrentUser();
   const {getToken} = useAuth();
@@ -117,6 +120,11 @@ const ProfileHeader = ({ userData }: Props) => {
         setIsOpen={setOpenBlockedUsersModal}
       />
 
+      <DisableAccountModal
+        isOpen={openDisableAccountModal}
+        setIsOpen={setOpenDisableAccountModal}
+      />
+
       <div
         style={{
           backgroundImage: `url(${userData.coverPhoto || "/placeholder_image.webp"})`,
@@ -183,6 +191,14 @@ const ProfileHeader = ({ userData }: Props) => {
                   >
                     <RiUserForbidLine className="size-5 text-neutral-700" aria-hidden />
                     <span>Perfiles bloqueados</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="flex justify-start items-center gap-2 bg-destructive/5 cursor-pointer"
+                    onClick={() => setOpenDisableAccountModal(true)}
+                  >
+                    <MdNoAccounts className="size-5 text-destructive" aria-hidden />
+                    <span className="text-destructive">Deshabilitar cuenta</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

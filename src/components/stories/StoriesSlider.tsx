@@ -20,7 +20,7 @@ const StoriesSlider = () => {
   const [showLeftArrow, setShowLeftArrow] = useState(true);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
 
   const getStories = async (page: number) => {
     const token = await getToken();
@@ -44,6 +44,7 @@ const StoriesSlider = () => {
     return data;
   };
 
+  // Consultar las stories
   const {data, error, isLoading: loading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
     queryKey: ["stories"],
     queryFn: ({pageParam}) => getStories(pageParam),
@@ -95,6 +96,11 @@ const StoriesSlider = () => {
 
   const usersWithStories = data?.pages.flatMap((page) => page.data) || [];
 
+  // Colocar los stories del usuario actual al principio del slider
+  const myStories = usersWithStories.find((user) => user.clerkId === userId);
+  const otherStories = usersWithStories.filter((user) => user.clerkId !== userId);
+  const sortedStories = [myStories, ...otherStories];
+
   if (error) {
     toast.error(errorMessage(error));
   }
@@ -104,7 +110,7 @@ const StoriesSlider = () => {
   }
 
   return (
-    <div className="relative max-w-full mb-6 overflow-x-hidden">
+    <div className="relative max-w-full mb-6 min-xl:mr-4 overflow-x-hidden">
       {/* Botones del slider */}
       <button
         className={cn("absolute top-0 left-0 flex justify-center items-center h-full px-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10", showLeftArrow ? "flex" : "hidden")}
@@ -135,7 +141,7 @@ const StoriesSlider = () => {
 
       <section
         ref={scrollRef}
-        className="w-full overflow-x-auto scrollbar-none"
+        className="w-full px-4 py-2 bg-white rounded-lg overflow-x-auto scrollbar-none"
         onScroll={onScrollHandler}
       >
         <UserStoriesViewer
@@ -150,13 +156,17 @@ const StoriesSlider = () => {
             <StoryCardSkeletonRounded key={i} />
           ))}
 
-          {usersWithStories.map((user) => (
-            <StoryCardRounded
-              key={user._id}
-              userData={user}
-              setOpenUserId={(userId) => setOpenUserId(userId)}
-            />
-          ))}
+          {sortedStories.map((data) => {
+            if (!data) return null;
+
+            return (
+              <StoryCardRounded
+                key={data._id}
+                userData={data}
+                setOpenUserId={(userId) => setOpenUserId(userId)}
+              />
+            )
+          })}
 
           {isFetchingNextPage && Array.from({ length: 10 }).map((_, i) => (
             <StoryCardSkeletonRounded key={i} />

@@ -7,17 +7,18 @@ import { SearchX } from "lucide-react";
 import { toast } from "sonner";
 import UsersModalItem from "./PrivateChatsModalItem";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useDebounce } from "@/hooks/useDebounce";
+import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { getUsersList } from "@/utils/getUsersList";
-import type { ChatType } from "@/types/global";
 import { restoreDeletedChatCache } from "@/utils/updateMsgsDataCache";
+import type { ChatType } from "@/types/global";
 
 interface Props {
   setTemporaryChat: (chat: ChatType) => void;
@@ -30,8 +31,9 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  const {isOpen, setIsOpen} = usePrivateChatsListModal();
 
   const { getToken } = useAuth();
 
@@ -116,6 +118,8 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
 
       navigate(`/messages/${tempChatId}`);
     }
+
+    setIsOpen(false);
   }
 
   if (usersError) {
@@ -135,15 +139,6 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
         setSearchTerm("");
       }}
     >
-      <DialogTrigger asChild>
-        <Button
-          className="px-4 py-2 text-base text-white bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
-          variant="default"
-        >
-          Enviar mensaje
-        </Button>
-      </DialogTrigger>
-
       <DialogContent className="pt-4 pb-2">
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="text-center">

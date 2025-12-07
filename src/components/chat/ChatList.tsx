@@ -1,16 +1,19 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
 import { ImUsers } from "react-icons/im";
 import { FaUsers } from "react-icons/fa6";
-import { useAuth } from "@clerk/clerk-react";
+import { HiOutlinePencilAlt } from "react-icons/hi";
 import { toast } from "sonner";
 import ChatListItemSkeleton from "./ChatListItemSkeleton";
 import ChatItem from "./ChatItem";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
+import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType } from "@/types/global";
@@ -27,6 +30,8 @@ const ChatList = ({ headerHeight, temporaryChatItem, chatTypeParam }: Props) => 
   const {chatId} = useParams<{chatId: string}>();
 
   const navigate = useNavigate();
+
+  const {setIsOpen: setOpenPrivateChatsModal} = usePrivateChatsListModal();
 
   const {getToken} = useAuth();
 
@@ -98,9 +103,20 @@ const ChatList = ({ headerHeight, temporaryChatItem, chatTypeParam }: Props) => 
 
   return (
     <aside className="flex flex-col w-[320px] h-full pb-6 border-r overflow-hidden">
+      <Button
+        className="h-auto py-3 text-white rounded-none bg-[#4F39F6] hover:bg-[#331fcf] hover:text-white cursor-pointer"
+        variant="ghost"
+        onClick={() => setOpenPrivateChatsModal(true)}
+      >
+        <HiOutlinePencilAlt className="size-6 shrink-0 text-white" aria-hidden />
+        <span className="">
+          Nuevo mensaje
+        </span>
+      </Button>
+
       <div
         style={{ height: `calc(${headerHeight}px + 1px)` }}
-        className="flex flex-col justify-center items-start w-full bg-white border-b"
+        className="flex flex-col justify-center items-start w-full bg-white border-y"
       >
         <Tabs
           className="w-full h-full rounded-sm"

@@ -6,6 +6,8 @@ import ChatInbox from "@/components/chat/ChatInbox";
 import PrivateChatsModalList from "@/components/chat/PrivateChatsModalList";
 import CreateGroupChatModal from "@/components/chat/CreateGroupChatModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
 import type { ChatType } from "@/types/global";
 
 const MessagesPage = () => {
@@ -15,6 +17,8 @@ const MessagesPage = () => {
 
   const [headerHeight, setHeaderHeight] = useState(60);
   const [temporaryChat, setTemporaryChat] = useState<ChatType | null>(null);
+
+  const {setIsOpen: setOpenPrivateChatsModal} = usePrivateChatsListModal();
 
   // Ocultar/mostrar el scrollbar del body
   useEffect(() => {
@@ -28,6 +32,8 @@ const MessagesPage = () => {
   return (
     <main className="flex w-full h-[100vh] bg-white overflow-hidden">
       <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
+
+      <PrivateChatsModalList setTemporaryChat={setTemporaryChat}/>
       
       <ChatList
         headerHeight={headerHeight}
@@ -62,7 +68,13 @@ const MessagesPage = () => {
             </p>
 
             {chatTypeParam === "all" &&
-              <PrivateChatsModalList setTemporaryChat={setTemporaryChat} />
+              <Button
+                className="px-4 py-2 text-base text-white bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
+                variant="default"
+                onClick={() => setOpenPrivateChatsModal(true)}
+              >
+                Nuevo mensaje
+              </Button>
             }
 
             {chatTypeParam === "group" &&

@@ -55,7 +55,7 @@ const DeletePrivateChatModal = ({chatData, isOpen, setIsOpen}: Props) => {
     }
   });
 
-  if (!chatData) return null;
+  if (!chatData || !otherUser) return null;
 
   return (
     <Dialog

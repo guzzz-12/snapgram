@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { useMutation } from "@tanstack/react-query";
 import { IoWarningOutline } from "react-icons/io5";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -50,17 +50,15 @@ const DisableAccountModal = ({isOpen, setIsOpen}: Props) => {
         setIsOpen(open);
       }}
     >
-      <DialogOverlay className="bg-black/70" />
-
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>¿Deshabilitar tu cuenta?</DialogTitle>
+          <DialogTitle>¿Desactivar tu cuenta?</DialogTitle>
           <Separator className="w-full my-2 bg-neutral-200" />
           <DialogDescription asChild>
             <div className="flex justify-start items-center gap-2 w-full">
-              <IoWarningOutline className="size-8 text-orange-600 shrink-0" />
+              <IoWarningOutline className="size-8 text-destructive shrink-0" />
               <p className="text-sm text-neutral-700">
-                Si deshabilitas tu cuenta se ocultarán tu perfil y todas tus publicaciones. Podrás reactivar tu cuenta nuevamente en cualquier momento iniciando sesión.
+                Si desactivas tu cuenta se ocultarán tu perfil y todas tus publicaciones. Podrás reactivar tu cuenta nuevamente en cualquier momento iniciando sesión.
               </p>
             </div>
           </DialogDescription>

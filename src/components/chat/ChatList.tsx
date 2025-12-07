@@ -104,12 +104,12 @@ const ChatList = ({ headerHeight, temporaryChatItem, chatTypeParam }: Props) => 
   return (
     <aside className="flex flex-col w-[320px] h-full pb-6 border-r overflow-hidden">
       <Button
-        className="h-auto py-3 text-white rounded-none bg-[#4F39F6] hover:bg-[#331fcf] hover:text-white cursor-pointer"
+        className="h-auto py-4 cursor-pointer"
         variant="ghost"
         onClick={() => setOpenPrivateChatsModal(true)}
       >
-        <HiOutlinePencilAlt className="size-6 shrink-0 text-white" aria-hidden />
-        <span className="">
+        <HiOutlinePencilAlt className="size-6 shrink-0 text-neutral-700" aria-hidden />
+        <span className="text-base text-neutral-900 font-normal">
           Nuevo mensaje
         </span>
       </Button>

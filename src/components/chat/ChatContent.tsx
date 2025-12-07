@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -9,9 +9,9 @@ import GroupInboxHeader from "./GroupInboxHeader";
 import MessageItem from "./MessageItem";
 import UserLeftOrKickedOrAddedMessageItem from "./UserLeftOrKickedOrAddedMessageItem";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { socket } from "@/utils/socket";
 import { axiosInstance } from "@/utils/axiosInstance";
-import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType, MessageType } from "@/types/global";
 
@@ -21,12 +21,12 @@ interface Props {
 }
 
 const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
-
   const wrapperRef = useRef<HTMLDivElement>(null);
   const paginationRef = useRef<HTMLDivElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
+  const params = useParams();
 
   const [scrollFromBottom, setScrollFromBottom] = useState(0);
 
@@ -53,7 +53,7 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
       },
       params: {
         page,
-        limit: 5
+        limit: 10
       }
     });
 
@@ -74,28 +74,37 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
   // Observar si la referencia de la paginación es visible en el viewport
   const {isIntersecting} = useIntersectionObserver({
     data: messagesData,
-    paginationRef
+    paginationRef,
+    threshold: 0.1
   });
 
   // Cargar la siguiente página de mensajes al llegar al top del chat
   useEffect(() => {
     if (isIntersecting && !isLoadingMessages) {
-      fetchNextPage();
+      wrapperRef.current!.scrollTop = 50;
+      fetchNextPage()
     }
   }, [isIntersecting, isLoadingMessages]);
+
+  // Scrollear al bottom de la bandeja de mensajes al entrar al chat
+  useEffect(() => {
+    if (wrapperRef.current && !isLoadingMessages && chatData) {
+      wrapperRef.current.scrollTop = wrapperRef.current.scrollHeight;
+    }
+  }, [chatData, isLoadingMessages, params.chatId]);
 
   // Calcular la distancia scrolleada desde el fondo de la bandeja de mensajes
   useEffect(() => {
     const scrollHandler = (_e: Event) => {
-      if (!wrapperRef.current) return;
-
-      // Height total de la bandeja de mensajes incluyendo el scroll
-      const scrollHeight = wrapperRef.current.scrollHeight;
-
-      // Distancia scrolleada desde el fondo de la bandeja
-      const scrollDistance = scrollHeight - (wrapperRef.current.scrollTop + wrapperRef.current!.clientHeight);
-
-      setScrollFromBottom(scrollDistance);
+      if (wrapperRef.current) {
+        // Height total de la bandeja de mensajes incluyendo el scroll
+        const scrollHeight = wrapperRef.current.scrollHeight;
+  
+        // Distancia scrolleada desde el fondo de la bandeja
+        const scrollDistance = scrollHeight - (wrapperRef.current.scrollTop + wrapperRef.current!.clientHeight);
+  
+        setScrollFromBottom(scrollDistance);
+      }
     }
 
     if (wrapperRef.current) {
@@ -117,10 +126,6 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
         wrapperRef.current!.scrollTop = wrapperRef.current!.scrollHeight;
       }
     });
-
-    return () => {
-      socket.off("newMessage");
-    }
   }, [socket, chatData, scrollFromBottom]);
 
   if (error) {
@@ -140,18 +145,18 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
       ref={wrapperRef}
       className="w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
     >
+      {chatData && chatData.type === "group" && 
+        <GroupInboxHeader groupData={chatData} />
+      }
+
       {isFetchingNextPage &&
         <div className="flex justify-center items-center w-full py-2">
           <Loader2Icon className="size-5 text-neutral-600 animate-spin" />
         </div>
       }
 
-      {hasNextPage &&
+      {hasNextPage && !isFetchingNextPage &&
         <div ref={paginationRef} className="w-full h-6" />
-      }
-
-      {chatData && chatData.type === "group" && 
-        <GroupInboxHeader groupData={chatData} />
       }
 
       {!isLoadingChatData && currentUser &&

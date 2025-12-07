@@ -29,7 +29,7 @@ const SocketManager = () => {
 
   const { increaseNotificationsCount } = useUnseenNotifications();
 
-  const { unreadChats, addToUnreadChats } = useUnreadChats();
+  const { addToUnreadChats } = useUnreadChats();
 
   const { addToUsersTyping, removeFromUsersTyping } = useUsersTyping();
 
@@ -170,7 +170,6 @@ const SocketManager = () => {
       socket.off("disconnect");
       socket.off("setOnlineUsers");
       socket.off("newNotification");
-      socket.off("newMessage");
       socket.off("deletedMessage");
       socket.off("typing");
       socket.off("stoppedTyping");
@@ -183,7 +182,7 @@ const SocketManager = () => {
   }, [socket, token, userDocument, queryClient, navigate, pathname]);
 
 
-  // Escuchar el evento de nuevo mensaje (también se escucha en useNewMessage)
+  // Escuchar el evento de nuevo mensaje
   useEffect(() => {
     if (!userDocument) return;
 
@@ -224,9 +223,18 @@ const SocketManager = () => {
         addToUnreadChats(data.chat._id);
       }
 
+      const groupMessagesTypes = ["userLeftGroup", "userAddedToGroup", "userKickedFromGroup"];
+
       // Mostrar toast al usuario que recibio el mensaje
-      // si no está en la página del chat
-      if (senderId !== userDocument._id && pathname !== `/messages/${data.chat._id}`) {
+      // si no está en la página del chat y si no es
+      // un mensaje relacionado con usuarios
+      // agregados o removidos de los grupos
+      if (
+        userDocument._id !== senderId &&
+        !groupMessagesTypes.includes(data.message.type) &&
+        data.message.type && senderId !== userDocument._id &&
+        pathname !== `/messages/${data.chat._id}`
+      ) {
         toast(
           <NewMessageToast messageData={data.message} />,
           {
@@ -244,7 +252,7 @@ const SocketManager = () => {
     return () => {
       socket.off("newMessage");
     }
-  }, [socket, userDocument, pathname, params, unreadChats]);
+  }, [socket, userDocument, pathname, params]);
 
 
   return null;

@@ -218,6 +218,11 @@ export type MessageType = {
   deletedFor: string[];
   deletedForAll: boolean;
   type: "text" | "file" | "fileWithText" | "userAddedToGroup" | "userLeftGroup" | "userKickedFromGroup";
+  userWhoLeft: UserType | null;
+  kickedBy: UserType | null;
+  kickedUser: UserType | null;
+  addedBy: UserType | null;
+  addedUser: UserType | null;
   createdAt: string;
   updatedAt: string;
 }

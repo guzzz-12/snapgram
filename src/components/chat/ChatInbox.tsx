@@ -67,7 +67,7 @@ const ChatInbox = (props: Props) => {
 
       return data.data;
     },
-    enabled: !!chatId,
+    enabled: !!chatId && !temporaryChat,
     refetchOnWindowFocus: false
   });
 

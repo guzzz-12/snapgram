@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import dayjs from "dayjs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { MessageType } from "@/types/global";
 
 interface Props {
@@ -12,45 +12,108 @@ interface Props {
  * ha sido agregado, ha abandonado o ha sido expulsado de un grupo
 */
 const UserLeftOrKickedOrAddedMessageItem = ({ messageData }: Props) => {
-  const { sender, type } = messageData;
+  const { addedUser, addedBy, userWhoLeft, kickedUser, kickedBy, type } = messageData;
 
   return (
-    <div className="flex justify-center items-center w-full">
-      <div className="relative flex justify-center items-center w-fit px-4 py-1 rounded-sm bg-orange-200">
-        <Link
-          className="flex justify-start items-center gap-1"
-          to={`/profile/${sender.clerkId}`}
-        >
-          <Avatar className="w-[20px] h-[20px] shrink-0 rounded-full outline-2 outline-white">
-            <AvatarImage
-              className="w-full h-full object-cover object-center"
-              src={sender.profilePicture}
-            />
-            <AvatarFallback  className="w-full h-full object-cover object-center">
-              {sender.fullName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+    <div className="relative flex justify-center items-center w-fit mx-auto">
+      {type === "userLeftGroup" &&
+        <p className="px-4 py-1 rounded-sm bg-orange-200">
+          <Link
+            className="whitespace-nowrap"
+            to={`/profile/${userWhoLeft?.clerkId}`}
+          >
+            <span className="text-xs font-semibold text-blue-700">
+              {userWhoLeft?.fullName.split(" ")[0]}
+            </span>
+          </Link>
 
-          <span className="text-xs font-semibold text-blue-700">
-            {sender.fullName.split(" ")[0]}
+          {" "}
+
+          <span className="text-xs text-center text-neutral-700 whitespace-nowrap">
+            salió del grupo.
           </span>
-        </Link>
-
-        &nbsp;
-
-        <p className="w-full text-xs text-center text-neutral-700 truncate">
-          {type === "userLeftGroup" && "ha abandonado el grupo"}
-          {type === "userKickedFromGroup" && "ha sido expulsado del grupo"}
-          {type === "userAddedToGroup" && "fue agregado al grupo"}
         </p>
+      }
 
-        <span
-          className="absolute bottom-0 right-0 text-[10px] text-neutral-500 translate-y-[100%]"
-          title={dayjs(messageData.createdAt).format("[El] DD/MM/YYYY [a las] hh:mm a")}
-        >
-          {dayjs(messageData.createdAt).format("DD/MM/YYYY")}
-        </span>
-      </div>
+      {type === "userAddedToGroup" &&
+        <p className="px-4 py-1 rounded-sm bg-orange-200">
+          <Link
+            className="whitespace-nowrap"
+            to={`/profile/${addedBy?.clerkId}`}
+          >
+            <span className="text-xs font-semibold text-blue-700 whitespace-nowrap">
+              {addedBy?.fullName.split(" ")[0]}
+            </span>
+          </Link>
+
+          {" "}
+
+          <span className="text-xs text-center text-neutral-700 whitespace-nowrap">
+            agregó a
+          </span>
+
+          {" "}
+
+          <Link
+            className=""
+            to={`/profile/${addedUser?.clerkId}`}
+          >
+            <span className="text-xs font-semibold text-blue-700 whitespace-nowrap">
+              {addedUser?.fullName.split(" ")[0]}
+            </span>
+          </Link>
+
+          {" "}
+
+          <span className="text-xs text-center text-neutral-700 whitespace-nowrap">
+            al grupo.
+          </span>
+        </p>
+      }
+
+
+      {type === "userKickedFromGroup" &&
+        <p className="px-4 py-1 rounded-sm bg-orange-200">
+          <Link
+            className="whitespace-nowrap"
+            to={`/profile/${kickedBy?.clerkId}`}
+          >
+            <span className="text-xs font-semibold text-blue-700 whitespace-nowrap">
+              {kickedBy?.fullName.split(" ")[0]}
+            </span>
+          </Link>
+
+          {" "}
+
+          <span className="text-xs text-center text-neutral-700 whitespace-nowrap">
+            eliminó a
+          </span>
+
+          {" "}
+
+          <Link
+            className="whitespace-nowrap"
+            to={`/profile/${kickedUser?.clerkId}`}
+          >
+            <span className="text-xs font-semibold text-blue-700 whitespace-nowrap">
+              {kickedUser?.fullName.split(" ")[0]}
+            </span>
+          </Link>
+
+          {" "}
+
+          <span className="text-xs text-center text-neutral-700 whitespace-nowrap">
+            del grupo.
+          </span>
+        </p>
+      }
+
+      <span
+        className="absolute bottom-0 right-0 text-[10px] text-neutral-500 translate-y-[100%]"
+        title={dayjs(messageData.createdAt).format("[El] DD/MM/YYYY [a las] hh:mm a")}
+      >
+        {dayjs(messageData.createdAt).format("DD/MM/YYYY")}
+      </span>
     </div>
   )
 }

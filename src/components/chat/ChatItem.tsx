@@ -50,6 +50,8 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
 
   const otherUser = chatData.type === "private" ? chatParticipants.find((p) => p._id !== user?._id) : chatData.groupAdmin;
 
+  const otherUserExists = chatData.type === "private" && !!otherUser;
+
   const lastMessage = chatData.lastMessage;
 
   const {getToken} = useAuth();
@@ -91,7 +93,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
     }
   }
 
-  if (!otherUser || !user) return null;
+  if (!user) return null;
 
   // Obtener el contador de mensajes sin leer del usuario en el chat
   const unReadMessagesCounter = chatData.unseenMessages.find(counter => {
@@ -102,6 +104,12 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
   const isUserTyping = usersTyping.find((typing) => {
     return (typing.chatId == chatData._id && typing.user._id !== user._id);
   });
+
+  // Si el chat es private y el otro usuario no existe, mostrar el avatar default
+  const avatar = chatData.type === "private" && otherUserExists ? otherUser.profilePicture : chatData.type === "private" && !otherUserExists ? "/default-avatar.webp" : chatData.groupPicture;
+
+  // Si el chat es private y el otro usuario no existe, mostrar "Usuario de Snapgram"
+  const name = chatData.type === "private" && otherUserExists ? otherUser.fullName : chatData.type === "private" && !otherUserExists ? "Usuario de Snapgram" : chatData.groupName;
 
   return (
     <NavLink
@@ -116,10 +124,10 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
         <Avatar className="w-[40px] h-[40px] outline-2 outline-white">
           <AvatarImage
             className="w-full h-full object-cover"
-            src={chatData.type === "private" ? otherUser.profilePicture : chatData.groupPicture!}
+            src={avatar!}
           />
           <AvatarFallback>
-            {chatData.type === "private" ? otherUser.fullName.charAt(0).toUpperCase() : chatData.groupName!.charAt(0).toUpperCase()}
+            {name?.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
 
@@ -146,7 +154,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
 
       <div className="flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
         <p className="w-full text-sm text-neutral-900 font-semibold truncate">
-          {chatData.type === "group" ? chatData.groupName : otherUser.fullName}
+          {name}
         </p>
         
         {/* Mostrar el último mensaje del chat */}

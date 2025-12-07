@@ -73,6 +73,7 @@ const ChatInbox = (props: Props) => {
 
   const {user: currentUser} = useCurrentUser();
   const otherUser = chat?.participants.find((p) => p._id !== currentUser?._id);
+  const otherUserExists = chat?.type === "private" && !!otherUser;
 
   useEffect(() => {
     // Calcular el height del header del inbox
@@ -135,7 +136,7 @@ const ChatInbox = (props: Props) => {
         isLoadingChatData={isFetching}
       />
 
-      {!isFetching && !isBlocked.blockedBy && !isBlocked.blockedUser &&
+      {!isFetching && otherUserExists && !isBlocked.blockedBy && !isBlocked.blockedUser &&
         <ChatInput
           chatData={temporaryChat || chat}
           wrapperHeight={headerHeight}
@@ -144,15 +145,17 @@ const ChatInbox = (props: Props) => {
         />
       }
 
-      {/* Mensaje que se muestra en lugar del input cuando hay un bloqueo entre ambos usuarios */}
-      {!isFetching && isBlocked.blockedUser &&
+      {/* Mensaje que se muestra en lugar del input cuando hay un bloqueo entre ambos usuarios o si el otro usuario eliminó su cuenta */}
+      {!isFetching && (isBlocked.blockedUser || !otherUserExists) &&
         <div className="flex items-center justify-center gap-2 w-full p-3 border-t border-orange-600">
           <IoWarningOutline className="size-8 text-orange-600 shrink-0" />
 
           <span className="text-sm text-center font-medium text-neutral-600">
-            {userBlockedMe && `No puedes enviar mensajes en esta conversación porque ${otherUser?.fullName.split(" ")[0]} te ha bloqueado.`}
+            {otherUserExists && userBlockedMe && `No puedes enviar mensajes en esta conversación porque ${otherUser?.fullName.split(" ")[0]} te ha bloqueado.`}
 
-            {!userBlockedMe && `No puedes enviar mensajes en esta conversación porque bloqueaste a ${otherUser?.fullName.split(" ")[0]}`}
+            {otherUserExists && !userBlockedMe && `No puedes enviar mensajes en esta conversación porque bloqueaste a ${otherUser?.fullName.split(" ")[0]}`}
+
+            {!otherUserExists && "No puedes enviar mensajes en esta conversación porque esta cuenta no existe."}
           </span>
         </div>
       }

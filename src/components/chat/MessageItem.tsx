@@ -18,8 +18,9 @@ interface Props {
 }
 
 const MessageItem = ({ currentUserId, messageData }: Props) => {
-  const isCurrentUserSender = messageData.sender._id === currentUserId;
-  const messageUser = messageData.sender;
+  const isCurrentUserSender = messageData.sender?._id === currentUserId;
+  const messageSender = messageData.sender;
+  const senderExists = Boolean(messageData.sender);
 
   const {getToken} = useAuth();
 
@@ -45,20 +46,23 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
     }
   });
 
-  const isDeleted = messageData.deletedFor.includes(currentUserId) || messageData.deletedForAll;
+  const isMessageDeleted = messageData.deletedFor.includes(currentUserId) || messageData.deletedForAll;
 
   return (
     <li className="flex justify-start gap-2 w-full">
       {!isCurrentUserSender &&
-        <Link to={`/profile/${messageUser.clerkId}`}>
+        <Link
+          to={senderExists ? `/profile/${messageSender.clerkId}` : "#"}
+          className={cn(senderExists ? "pointer-events-auto" : "pointer-events-none")}
+        >
           <Avatar className="w-[30px] h-[30px] shrink-0 border">
             <AvatarImage
               className="w-full h-full object-cover"
-              src={messageUser.profilePicture}
+              src={senderExists ? messageSender.profilePicture : "/default-avatar.webp"}
             />
             
             <AvatarFallback>
-              {messageUser.fullName.charAt(0).toUpperCase()}
+              {senderExists ? messageSender.fullName.charAt(0).toUpperCase() : "U"}
             </AvatarFallback>
           </Avatar>
         </Link>
@@ -68,17 +72,17 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
         style={{ justifyContent: isCurrentUserSender ? "flex-end" : "flex-start" }}
         className="flex w-full"
       >
-        <div className={cn("flex flex-col w-full max-w-[80%] min-[1200px]:w-[50%] px-4 py-2 rounded-md shadow", (isCurrentUserSender && !isDeleted) ? "bg-[#4F39F6]" : isDeleted ? "bg-neutral-50" : "bg-slate-200")}>
+        <div className={cn("flex flex-col w-full max-w-[80%] min-[1200px]:w-[50%] px-4 py-2 rounded-md shadow", (isCurrentUserSender && !isMessageDeleted) ? "bg-[#4F39F6]" : isMessageDeleted ? "bg-neutral-50" : "bg-slate-200")}>
           {/* Header del mensaje */}
           <div className="flex justify-between items-center gap-2 w-full overflow-hidden">
             <Link
-              to={`/profile/${messageUser.clerkId}`}
-              className={cn("max-w-full text-sm font-semibold truncate", (isCurrentUserSender && !isDeleted) ? "text-white" : "text-blue-600")}
+              to={senderExists ? `/profile/${messageSender.clerkId}` : "#"}
+              className={cn("max-w-full text-sm font-semibold truncate", (isCurrentUserSender && !isMessageDeleted) ? "text-white" : "text-blue-600", senderExists ? "pointer-events-auto" : "pointer-events-none")}
             >
-              {messageUser.fullName}
+              {senderExists ? messageSender.fullName : "Usuario de Snapgram"}
             </Link>
 
-            {!isDeleted &&
+            {!isMessageDeleted &&
               <MessageDropdown
                 messageData={messageData}
                 currentUserId={currentUserId}
@@ -97,7 +101,7 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
 
           {/* Contenido de texto del mensaje (si lo tiene) */}
           {messageData.text && (
-            <p className={cn("w-full text-sm whitespace-pre-wrap", (isCurrentUserSender && !isDeleted) ? "text-neutral-100" : isDeleted ? "text-neutral-500 italic" : "text-neutral-900")}>
+            <p className={cn("w-full text-sm whitespace-pre-wrap", (isCurrentUserSender && !isMessageDeleted) ? "text-neutral-100" : isMessageDeleted ? "text-neutral-500 italic" : "text-neutral-900")}>
               <Twemoji className="[&>img]:!inline break-words" text={messageData.text} />
             </p>
           )}
@@ -131,7 +135,7 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
           )}
 
           <p
-            className={cn("w-full mt-1 text-right text-[10px]", (isCurrentUserSender && !isDeleted) ? "text-neutral-300" : "text-neutral-600")}
+            className={cn("w-full mt-1 text-right text-[10px]", (isCurrentUserSender && !isMessageDeleted) ? "text-neutral-300" : "text-neutral-600")}
             title={dayJsInstance(messageData.createdAt).format("DD/MM/YYYY - hh:mm A")}
           >
             {dayJsInstance(messageData.createdAt).format("DD/MM/YYYY")}

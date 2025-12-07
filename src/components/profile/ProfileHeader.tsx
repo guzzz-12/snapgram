@@ -5,10 +5,12 @@ import { useAuth } from "@clerk/clerk-react";
 import { Calendar, MapPin, MoreHorizontal, Pencil } from "lucide-react";
 import { RiUserForbidLine } from "react-icons/ri";
 import { MdNoAccounts } from "react-icons/md";
+import { FaRegTrashCan } from "react-icons/fa6";
 import { toast } from "sonner";
 import ProfileEditModal from "./ProfileEditModal";
 import BlockedUsersListModal from "./BlockedUsersListModal";
 import DisableAccountModal from "./DisableAccountModal";
+import DeleteAccountModal from "./DeleteAccountModal";
 import SeeMoreBtn from "@/components/SeeMoreBtn";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -35,6 +37,7 @@ const ProfileHeader = ({ userData }: Props) => {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openBlockedUsersModal, setOpenBlockedUsersModal] = useState(false);
   const [openDisableAccountModal, setOpenDisableAccountModal] = useState(false);
+  const [openDeleteAccountModal, setOpenDeleteAccountModal] = useState(false);
 
   const {user} = useCurrentUser();
   const {getToken} = useAuth();
@@ -125,6 +128,12 @@ const ProfileHeader = ({ userData }: Props) => {
         setIsOpen={setOpenDisableAccountModal}
       />
 
+      <DeleteAccountModal
+        isOpen={openDeleteAccountModal}
+        setIsOpen={setOpenDeleteAccountModal}
+        setOpenDisableAccountModal={setOpenDisableAccountModal}
+      />
+
       <div
         style={{
           backgroundImage: `url(${userData.coverPhoto || "/placeholder_image.webp"})`,
@@ -176,7 +185,7 @@ const ProfileHeader = ({ userData }: Props) => {
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent>
+                <DropdownMenuContent className="flex flex-col gap-1">
                   <DropdownMenuItem
                     className="flex justify-start items-center gap-2 cursor-pointer"
                     onClick={() => setOpenEditModal(true)}
@@ -194,11 +203,19 @@ const ProfileHeader = ({ userData }: Props) => {
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
-                    className="flex justify-start items-center gap-2 bg-destructive/5 cursor-pointer"
+                    className="flex justify-start items-center gap-2 bg-destructive/5 hover:!bg-destructive/10 cursor-pointer"
                     onClick={() => setOpenDisableAccountModal(true)}
                   >
                     <MdNoAccounts className="size-5 text-destructive" aria-hidden />
-                    <span className="text-destructive">Deshabilitar cuenta</span>
+                    <span className="text-destructive">Desactivar tu cuenta</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="flex justify-start items-center gap-2 bg-destructive/5 hover:!bg-destructive/10 cursor-pointer"
+                    onClick={() => setOpenDeleteAccountModal(true)}
+                  >
+                    <FaRegTrashCan className="size-4.5 text-destructive" aria-hidden />
+                    <span className="text-destructive">Eliminar tu cuenta</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

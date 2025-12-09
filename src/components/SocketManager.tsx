@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { errorMessage } from "@/utils/errorMessage";
-import { addNewChatToChatsListCache, addNewGroupToChatsListCache, deleteGroupFromChatsListCache, updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
+import { addNewChatToChatsListCache, addNewGroupToChatsListCache, deleteGroupFromChatsListCache, updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache, updateSeenMsgDataCache } from "@/utils/updateMsgsDataCache";
 import { socket } from "@/utils/socket";
 
 const SocketManager = () => {
@@ -165,6 +165,15 @@ const SocketManager = () => {
       })
     });
 
+    // Escuchar evento de mensaje visto
+    socket.on("messageSeenBy", (data) => {
+      updateSeenMsgDataCache({
+        queryClient,
+        chatId: data.chatId,
+        messageData: data.message,
+      })
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
@@ -178,6 +187,7 @@ const SocketManager = () => {
       socket.off("groupDeleted");
       socket.off("userLeftGroup");
       socket.off("userJoinedGroup");
+      socket.off("messageSeenBy");
     }
   }, [socket, token, userDocument, queryClient, navigate, pathname]);
 

@@ -33,9 +33,10 @@ export type TypingEventData = {
 
 // Eventos de socket.io que el cliente envía
 export interface ClientEvents {
-  getOnlineUsers: ({userId}: {userId: string}) => void;
+  getOnlineUsers: (data: {userId: string}) => void;
   typing: (data: TypingEventData) => void;
-  stoppedTyping: ({chatId, userId}: {userId: string, chatId: string}) => void;
+  stoppedTyping: (data: {userId: string, chatId: string}) => void;
+  messageSeenBy: (data: {messageId: string, chatId: string, userId: string}) => void;
 }
 
 // Eventos de socket.io que el servidor envía
@@ -45,7 +46,8 @@ export interface ServerEvents {
   newMessage: (newMessage: NewMessageEventData) => void;
   deletedMessage: (deletedMessage: MessageType) => void;
   typing: (data: TypingEventData) => void;
-  stoppedTyping: ({chatId, userId}: {userId: string, chatId: string}) => void;
+  stoppedTyping: (data: {userId: string, chatId: string}) => void;
+  messageSeenBy: (data: {message: MessageType, chatId: string, userId: string}) => void;
   groupCreated: (data: ChatType) => void;
   groupUpdated: (data: ChatType) => void;
   groupDeleted: (groupId: string) => void;

@@ -6,6 +6,7 @@ interface Props {
   paginationRef: RefObject<HTMLDivElement | null>;
 }
 
+/** Observar si la referencia de la paginación es visible en el viewport */
 const useIntersectionObserver = ({ data, threshold = 0.5, paginationRef }: Props) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
 

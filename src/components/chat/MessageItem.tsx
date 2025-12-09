@@ -1,16 +1,19 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation } from "@tanstack/react-query";
+import dayjs from "@/utils/dayJsInstance";
 import { Twemoji } from "react-emoji-render";
-import { ChevronDown } from "lucide-react";
+import { CheckCheck, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import MessageDropdown from "./MessageDropdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import dayJsInstance from "@/utils/dayJsInstance";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { MessageType } from "@/types/global";
 import { cn } from "@/lib/utils";
+import { socket } from "@/utils/socket";
+import type { MessageType } from "@/types/global";
 
 interface Props {
   currentUserId: string;
@@ -18,11 +21,54 @@ interface Props {
 }
 
 const MessageItem = ({ currentUserId, messageData }: Props) => {
+  const messageRef = useRef<HTMLDivElement>(null);
+
   const isCurrentUserSender = messageData.sender?._id === currentUserId;
   const messageSender = messageData.sender;
   const senderExists = Boolean(messageData.sender);
 
+  const [isIntersecting, setIsIntersecting] = useState(false);
+
   const {getToken} = useAuth();
+
+  const isSeen = messageData.seenBy.find(el => el.user._id !== currentUserId);
+  const seenAt = isSeen?.seenAt;
+
+  // console.log({messageData})
+
+  // Observar si el mensaje es visible en el viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsIntersecting(entry.isIntersecting);
+    }, {threshold: 0.5});
+
+    if (messageRef.current) {
+      observer.observe(messageRef.current);
+    }
+
+    return () => {
+      if (messageRef.current) {
+        observer.unobserve(messageRef.current);
+      }
+    }
+  }, []);
+
+  // Marcar el mensaje como visto
+  useEffect(() => {
+    const isRecipient = messageData.sender?._id !== currentUserId;
+
+    if (!isSeen && isIntersecting && isRecipient) {
+      socket.emit("messageSeenBy", {
+        messageId: messageData._id,
+        chatId: messageData.chat,
+        userId: currentUserId
+      });
+    }
+
+    return () => {
+      // socket.off("messageSeenBy");
+    }
+  }, [isIntersecting, socket, currentUserId, messageData, isSeen]);
 
   const {mutate, isPending} = useMutation({
     mutationFn: async (deleteFor: "me" | "all") => {
@@ -69,10 +115,21 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
       }
 
       <div
+        ref={messageRef}
         style={{ justifyContent: isCurrentUserSender ? "flex-end" : "flex-start" }}
         className="flex w-full"
       >
-        <div className={cn("flex flex-col w-full max-w-[80%] min-[1200px]:w-[50%] px-4 py-2 rounded-md shadow", (isCurrentUserSender && !isMessageDeleted) ? "bg-[#4F39F6]" : isMessageDeleted ? "bg-neutral-50" : "bg-slate-200")}>
+        <div className={cn("relative flex flex-col w-full max-w-[80%] min-[1200px]:w-[50%] px-4 py-2 rounded-md shadow", (isCurrentUserSender && !isMessageDeleted) ? "bg-[#4F39F6]" : isMessageDeleted ? "bg-neutral-50" : "bg-slate-200")}>
+          {/* Check de visto */}
+          {isSeen && isCurrentUserSender &&
+            <div
+              className="absolute -bottom-4.5 right-0"
+              title={dayjs(seenAt).format("[Visto] DD/MM/YYYY [a las] hh:mm a")}
+            >
+              <CheckCheck className="size-4.5 text-blue-600 stroke-2" />
+            </div>
+          }
+
           {/* Header del mensaje */}
           <div className="flex justify-between items-center gap-2 w-full overflow-hidden">
             <Link

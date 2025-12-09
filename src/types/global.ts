@@ -214,7 +214,10 @@ export type MessageType = {
   text: string | null;
   fileUrls: string[];
   fileIds: string[];
-  seenBy: UserType[];
+  seenBy: {
+    user: UserType;
+    seenAt: string
+  }[];
   deletedFor: string[];
   deletedForAll: boolean;
   type: "text" | "file" | "fileWithText" | "userAddedToGroup" | "userLeftGroup" | "userKickedFromGroup";

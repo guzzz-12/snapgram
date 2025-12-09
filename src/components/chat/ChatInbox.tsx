@@ -72,8 +72,12 @@ const ChatInbox = (props: Props) => {
   });
 
   const {user: currentUser} = useCurrentUser();
-  const otherUser = chat?.participants.find((p) => p._id !== currentUser?._id);
-  const otherUserExists = chat?.type === "private" && !!otherUser;
+
+  const isPrivateChat = chat?.type === "private";
+  const otherUser = isPrivateChat && chat?.participants.find((p) => p._id !== currentUser?._id);
+  const otherUserExists = isPrivateChat && !!otherUser;
+  const blockExists = isPrivateChat && !!(isBlocked.blockedBy || isBlocked.blockedUser);
+  const userBlockedMe = isBlocked.blockedUser === currentUser?._id;
 
   useEffect(() => {
     // Calcular el height del header del inbox
@@ -118,9 +122,6 @@ const ChatInbox = (props: Props) => {
     toast.error(errorMessage(chatError));
   }
 
-  /** Verificar si hay bloqueo entre ambos usuarios y quién bloqueó a quién */
-  const userBlockedMe = isBlocked.blockedUser === currentUser?._id;
-
   return (
     <div className="flex flex-col w-full h-full">
       <ChatHeader
@@ -136,7 +137,12 @@ const ChatInbox = (props: Props) => {
         isLoadingChatData={isFetching}
       />
 
-      {!isFetching && otherUserExists && !isBlocked.blockedBy && !isBlocked.blockedUser &&
+      {/*
+        Mostrar el input si:
+        1. El chat es privado, no hay bloqueo y el otro usuario existe, o
+        2. El chat es grupal (no es privado)
+      */}
+      {!isFetching && (!blockExists && otherUserExists || !isPrivateChat) &&
         <ChatInput
           chatData={temporaryChat || chat}
           wrapperHeight={headerHeight}
@@ -145,8 +151,8 @@ const ChatInbox = (props: Props) => {
         />
       }
 
-      {/* Mensaje que se muestra en lugar del input cuando hay un bloqueo entre ambos usuarios o si el otro usuario eliminó su cuenta */}
-      {!isFetching && (isBlocked.blockedUser || !otherUserExists) &&
+      {/* Mostrar mensaje cuando hay un bloqueo entre ambos usuarios en un chat privado */}
+      {!isFetching && blockExists &&
         <div className="flex items-center justify-center gap-2 w-full p-3 border-t border-orange-600">
           <IoWarningOutline className="size-8 text-orange-600 shrink-0" />
 
@@ -154,8 +160,17 @@ const ChatInbox = (props: Props) => {
             {otherUserExists && userBlockedMe && `No puedes enviar mensajes en esta conversación porque ${otherUser?.fullName.split(" ")[0]} te ha bloqueado.`}
 
             {otherUserExists && !userBlockedMe && `No puedes enviar mensajes en esta conversación porque bloqueaste a ${otherUser?.fullName.split(" ")[0]}`}
+          </span>
+        </div>
+      }
 
-            {!otherUserExists && "No puedes enviar mensajes en esta conversación porque esta cuenta no existe."}
+      {/* Mostrar mensaje cuando el otro usuario de un chat privado elimina su cuenta */}
+      {!isFetching && isPrivateChat && !otherUser &&
+        <div className="flex items-center justify-center gap-2 w-full p-3 border-t border-orange-600">
+          <IoWarningOutline className="size-8 text-orange-600 shrink-0" />
+          
+          <span className="text-sm text-center font-medium text-neutral-600">
+            No puedes enviar mensajes en esta conversación porque esta cuenta no existe.
           </span>
         </div>
       }

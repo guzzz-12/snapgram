@@ -66,7 +66,7 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
     queryFn: ({pageParam}) => getMessages(pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    enabled: Boolean(!isLoadingChatData && chatData && !chatData._id.startsWith("temp_")),
+    enabled: !isLoadingChatData && !!chatData && !chatData._id.startsWith("temp_"),
     retry: 2,
     refetchOnWindowFocus: false,
   });

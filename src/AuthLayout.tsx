@@ -1,6 +1,5 @@
 import { Link, Outlet } from "react-router";
 import { useUser } from "@clerk/clerk-react";
-import bgImage from "@/assets/bgImage.webp";
 import logo from "@/assets/logo-simple.webp";
 
 const AuthLayout = () => {  
@@ -12,13 +11,10 @@ const AuthLayout = () => {
 
   return (
     <div className="relative flex flex-col min-h-screen">
-      <img
-        className="absolute top-0 left-0 w-full h-full object-cover opacity-50"
-        src={bgImage}
-      />
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white to-[#4F39F6]/10"/>
 
-      <header className="w-full p-4 z-10">
-        <nav className="w-full max-w-[1280px] mx-auto">
+      <header className="w-full max-w-[1280px] mx-auto p-4 z-10">
+        <nav className="w-fit">
           <Link
             className="flex justify-start items-center gap-2"
             to="/"
@@ -33,9 +29,17 @@ const AuthLayout = () => {
         </nav>
       </header>
 
-      <section className="relative flex flex-col justify-center grow px-4 z-10">
+      <section className="relative flex justify-center items-center grow px-4 z-10">
         <Outlet />
       </section>
+
+      <footer className="w-full p-4 border-t border-slate-300 z-10">
+        <nav className="w-full max-w-[1280px] mx-auto">
+          <p className="text-center text-sm text-neutral-700">
+            &copy; {new Date().getFullYear()} SnapGram. Todos los derechos reservados.
+          </p>
+        </nav>
+      </footer>
     </div>
   )
 }

@@ -12,8 +12,7 @@ import MessagesPage from "@/pages/MessagesPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import DiscoverPage from "@/pages/DiscoverPage";
 import ProfilePage from "@/pages/ProfilePage";
-import LoginPage from "@/pages/LoginPage";
-import SignupPage from "@/pages/SignupPage";
+import AuthPage from "@/pages/AuthPage";
 import ErrorPage from "@/pages/ErrorPage";
 import NoAuthRoute from "@/components/NoAuthRoute";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -185,12 +184,13 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={!isSignedIn ? <AuthLayout /> : <Layout />}>
-        <Route index element={!isSignedIn ? <LoginPage /> : <HomePage />} />
+        <Route index element={!isSignedIn ? <AuthPage type="login" /> : <HomePage />} />
+        
         <Route
           path="login"
           element={
             <NoAuthRoute>
-              <LoginPage />
+              <AuthPage type="login" />
             </NoAuthRoute>
           }
         />
@@ -199,7 +199,7 @@ const App = () => {
           path="signup"
           element={
             <NoAuthRoute>
-              <SignupPage />
+              <AuthPage type="signup" />
             </NoAuthRoute>
           }
         />

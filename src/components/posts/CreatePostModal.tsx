@@ -15,6 +15,7 @@ import useImagePicker from "@/hooks/useImagePicker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
+import { imagesUploader } from "@/utils/imagesUploader";
 import type { PostType, PostWithLikes } from "@/types/global";
 
 const CreatePostModal = () => {
@@ -34,25 +35,35 @@ const CreatePostModal = () => {
   const queryClient = useQueryClient();
 
   const createPost = async () => {
-    if (!textContent && !selectedImageFiles) return;
+    if ((!textContent && selectedImageFiles.length === 0) || !user) return;
 
-    const formData = new FormData();
+    const token1 = await getToken();
 
-    if (textContent) {
-      formData.append("content", textContent);
-    }
+    // Subir las imágenes a ImageKit si las hay
+    const uploadData = selectedImageFiles.length > 0 ? await imagesUploader({
+      files: selectedImageFiles,
+      clerkToken: token1!,
+      folderName: `posts/${user._id}`,
+      currentUser: user
+    }) : [];
 
-    selectedImageFiles.forEach(file => formData.append("images", file));
+    // El primer token de acceso ya está posiblemente expirado en este punto
+    // Generar un nuevo token para la consulta de creación del post
+    // una vez que todas las imágenes ya se hayan subido a ImageKit
+    const token2 = await getToken();
 
-    const token = await getToken();
-
+    // Crear el post
     const {data} = await axiosInstance<{data: PostWithLikes}>({
       method: "POST",
       url: "/posts",
-      data: formData,
+      data: {
+        content: textContent,
+        imageUrls: uploadData.map(uData => uData.imageUrl),
+        imageFileIds: uploadData.map(uData => uData.imageFileId)
+      },
       headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token2!}`
       }
     });
 

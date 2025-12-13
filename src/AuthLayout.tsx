@@ -33,7 +33,7 @@ const AuthLayout = () => {
         <Outlet />
       </section>
 
-      <footer className="w-full p-4 border-t border-slate-300 z-10">
+      <footer className="w-full p-4 bg-white z-10">
         <nav className="w-full max-w-[1280px] mx-auto">
           <p className="text-center text-sm text-neutral-700">
             &copy; {new Date().getFullYear()} SnapGram. Todos los derechos reservados.

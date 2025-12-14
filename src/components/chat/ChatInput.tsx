@@ -40,7 +40,7 @@ const ChatInput = ({ wrapperHeight, chatData, chatTypeParam, setTemporaryChat }:
 
   const queryClient = useQueryClient();
 
-  const {selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
+  const {selectedImageFiles, selectedImagePreviews, isProcessing, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
 
   const {user: currentUser} = useCurrentUser();
 
@@ -216,20 +216,19 @@ const ChatInput = ({ wrapperHeight, chatData, chatTypeParam, setTemporaryChat }:
         </div>
       }
 
-      {selectedImagePreviews.length > 0 &&
-        <div className="absolute -top-1 left-1 flex justify-start items-center gap-2 max-w-[80%] bg-slate-100 shadow border rounded-md translate-x-[24px] -translate-y-[100%] overflow-x-hidden z-50">
-          <div className="px-4 py-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-            <SelectedImagesPreviews
-              fileInputRef={fileInputRef}
-              isPending={submitting}
-              selectedImagePreviews={selectedImagePreviews}
-              selectedImageFiles={selectedImageFiles}
-              setSelectedImagePreviews={setSelectedImagePreviews}
-              setSelectedImageFiles={setSelectedImageFiles}
-            />
-          </div>
+      <div className="absolute -top-2 left-1 flex justify-start items-center gap-2 max-w-[80%] bg-white rounded-md translate-x-[24px] -translate-y-[100%] overflow-x-hidden z-50">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <SelectedImagesPreviews
+            fileInputRef={fileInputRef}
+            processingImages={isProcessing}
+            isPending={submitting}
+            selectedImagePreviews={selectedImagePreviews}
+            selectedImageFiles={selectedImageFiles}
+            setSelectedImagePreviews={setSelectedImagePreviews}
+            setSelectedImageFiles={setSelectedImageFiles}
+          />
         </div>
-      }
+      </div>
 
       <div className="relative w-full border rounded-full overflow-hidden">
         <Popover>

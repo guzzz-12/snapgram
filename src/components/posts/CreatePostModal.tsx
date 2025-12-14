@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2Icon } from "lucide-react";
+import { ImagePlus, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import CreatePostInput from "./CreatePostInput";
 import SharedPostCard from "./SharedPostCard";
@@ -29,7 +29,7 @@ const CreatePostModal = () => {
   const {user} = useCurrentUser();
   const {open, publicationType, isRepost, repostedPostId, setOpen} = useCreatePublicationModal();
 
-  const {selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({ fileInputRef });
+  const {selectedImageFiles, selectedImagePreviews, isProcessing, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({ fileInputRef });
 
   const {getToken} = useAuth();
   const queryClient = useQueryClient();
@@ -236,15 +236,31 @@ const CreatePostModal = () => {
               setTextContent={setTextContent}
             />
 
+            {/* Adjuntar imágenes en el post (sólo si no es un repost) */}
             {!isRepost &&
-              <SelectedImagesPreviews
-                fileInputRef={fileInputRef}
-                isPending={isPending}
-                selectedImagePreviews={selectedImagePreviews}
-                selectedImageFiles={selectedImageFiles}
-                setSelectedImagePreviews={setSelectedImagePreviews}
-                setSelectedImageFiles={setSelectedImageFiles}
-              />
+              <div className="flex justify-start items-center gap-3">
+                {selectedImagePreviews.length === 0 && (
+                  <button
+                    className="cursor-pointer"
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="size-10 text-neutral-600 stroke-1" aria-hidden />
+                    <span className="sr-only">Adjuntar imágenes</span>
+                  </button>
+                )}
+
+                <SelectedImagesPreviews
+                  fileInputRef={fileInputRef}
+                  processingImages={isProcessing}
+                  isPending={isPending}
+                  selectedImagePreviews={selectedImagePreviews}
+                  selectedImageFiles={selectedImageFiles}
+                  setSelectedImagePreviews={setSelectedImagePreviews}
+                  setSelectedImageFiles={setSelectedImageFiles}
+                />
+              </div>
             }
 
             {isRepost && isRepostLoading &&

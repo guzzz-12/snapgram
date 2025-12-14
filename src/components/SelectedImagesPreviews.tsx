@@ -1,11 +1,14 @@
 import type { Dispatch, HTMLAttributes, RefObject, SetStateAction } from "react";
-import { ImagePlus, PlusCircle, X } from "lucide-react";
+import { PlusCircle, X } from "lucide-react";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { Skeleton } from "./ui/skeleton";
 import { cn } from "@/lib/utils";
 
 interface Props {
   selectedImagePreviews: string[];
   selectedImageFiles: File[];
+  processingImages: boolean;
   isPending: boolean;
   setSelectedImagePreviews: Dispatch<SetStateAction<string[]>>;
   setSelectedImageFiles: Dispatch<SetStateAction<File[]>>;
@@ -17,6 +20,7 @@ const SelectedImagesPreviews = (props: Props) => {
   const {
     selectedImagePreviews,
     selectedImageFiles,
+    processingImages,
     isPending,
     setSelectedImagePreviews,
     setSelectedImageFiles,
@@ -24,39 +28,53 @@ const SelectedImagesPreviews = (props: Props) => {
     className,
   } = props;
 
+  // El número de imagenes que se estan procesando
+  const processingCount = fileInputRef.current?.files?.length ?? 0;
+
   return (
-    <div className={cn("flex justify-start items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200", className)}>
-      {!selectedImagePreviews.length && (
-        <button
-          className="cursor-pointer"
-          type="button"
-          disabled={isPending}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <ImagePlus className="size-10 text-neutral-600 stroke-1" aria-hidden />
-          <span className="sr-only">Adjuntar imágenes</span>
-        </button>
-      )}
+    <div className={cn("flex justify-start items-center gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200", className)}>
+      {/* Botón para adjuntar más imágenes */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {selectedImagePreviews.length > 0 &&
+            <button
+              className="cursor-pointer"
+              type="button"
+              disabled={isPending}
+              onClick={() => {
+                if (selectedImagePreviews.length >= 10) {
+                  toast.error(`Puedes seleccionar un máximo de 10 imágenes.`);
+                  return false;
+                }
 
-      {selectedImagePreviews.length > 0 &&
-        <button
-          className="p-2 cursor-pointer"
-          type="button"
-          disabled={isPending}
-          onClick={() => {
-            if (selectedImagePreviews.length >= 10) {
-              toast.error(`Puedes seleccionar un máximo de 10 imágenes.`);
-              return false;
-            }
+                fileInputRef.current?.click()
+              }}
+            >
+              <PlusCircle className="size-10 text-neutral-600 stroke-1" aria-hidden />
+              <span className="sr-only">Adjuntar otra imagen</span>
+            </button>
+          }
+        </TooltipTrigger>
 
-            fileInputRef.current?.click()
-          }}
-        >
-          <PlusCircle className="size-10 text-neutral-600 stroke-1" aria-hidden />
-          <span className="sr-only">Adjuntar otra imagen</span>
-        </button>
+        <TooltipContent>
+          Adjuntar más imágenes
+        </TooltipContent>
+      </Tooltip>
+
+      {/* Mostrar un loader por cada imagen que se esté procesando */}
+      {processingImages &&
+        <div className="flex justify-start items-center gap-3">
+          {Array.from({ length: processingCount }).map((_, i) => (
+            <div
+              key={i}
+              className="flex justify-center items-center w-[120px] h-[120px] shrink-0 bg-slate-200 rounded-md"
+            >
+              <Skeleton className="w-full aspect-[4/3] rounded-md bg-neutral-300" />
+            </div>
+          ))}
+        </div>
       }
-
+      
       <div className="flex justify-start items-center gap-3 w-full">
         {selectedImagePreviews.map((preview, i) => (
           <div

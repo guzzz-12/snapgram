@@ -31,10 +31,8 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
 
   const {getToken} = useAuth();
 
-  const isSeen = messageData.seenBy.find(el => el.user._id !== currentUserId);
+  const isSeen = messageData.seenBy.find(el => el.user && el.user._id !== currentUserId);
   const seenAt = isSeen?.seenAt;
-
-  // console.log({messageData})
 
   // Observar si el mensaje es visible en el viewport
   useEffect(() => {

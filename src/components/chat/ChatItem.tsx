@@ -134,7 +134,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
         {/* Contador de mensajes sin leer */}
         <div className="absolute -bottom-1 -right-1 z-10">
           <UnreadMsgsCounterBadge
-            className="flex min-[900px]:hidden"
+            className="flex min-[950px]:hidden"
             counter={unReadMessagesCounter}
           />
         </div>
@@ -152,7 +152,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
         }
       </div>
 
-      <div className="flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
+      <div className="hidden min-[950px]:flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
         <p className="w-full text-sm text-neutral-900 font-semibold truncate">
           {name}
         </p>
@@ -195,7 +195,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
 
       {/* Contador de mensajes sin leer */}
       <UnreadMsgsCounterBadge
-        className="hidden min-[900px]:flex"
+        className="hidden min-[950px]:flex"
         counter={unReadMessagesCounter}
       />
     </NavLink>

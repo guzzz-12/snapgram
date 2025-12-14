@@ -18,9 +18,10 @@ import type { MessageType } from "@/types/global";
 interface Props {
   currentUserId: string;
   messageData: MessageType;
+  chatType: "private" | "group" | undefined;
 }
 
-const MessageItem = ({ currentUserId, messageData }: Props) => {
+const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
   const messageRef = useRef<HTMLDivElement>(null);
 
   const isCurrentUserSender = messageData.sender?._id === currentUserId;
@@ -94,7 +95,7 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
 
   return (
     <li className="flex justify-start gap-2 w-full">
-      {!isCurrentUserSender &&
+      {!isCurrentUserSender && chatType === "group" &&
         <Link
           to={senderExists ? `/profile/${messageSender.clerkId}` : "#"}
           className={cn(senderExists ? "pointer-events-auto" : "pointer-events-none")}
@@ -117,7 +118,7 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
         style={{ justifyContent: isCurrentUserSender ? "flex-end" : "flex-start" }}
         className="flex w-full"
       >
-        <div className={cn("relative flex flex-col w-full max-w-[80%] min-[1200px]:w-[50%] px-4 py-2 rounded-md shadow", (isCurrentUserSender && !isMessageDeleted) ? "bg-[#4F39F6]" : isMessageDeleted ? "bg-neutral-50" : "bg-slate-200")}>
+        <div className={cn("relative flex flex-col w-fit min-w-[150px] max-w-[80%] min-[1200px]:max-w-[60%] px-2 py-1 rounded-lg shadow", (isCurrentUserSender && !isMessageDeleted) ? "bg-[#4F39F6]" : isMessageDeleted ? "bg-neutral-50" : "bg-slate-200")}>
           {/* Check de visto */}
           {isSeen && isCurrentUserSender &&
             <div
@@ -130,12 +131,14 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
 
           {/* Header del mensaje */}
           <div className="flex justify-between items-center gap-2 w-full overflow-hidden">
-            <Link
-              to={senderExists ? `/profile/${messageSender.clerkId}` : "#"}
-              className={cn("max-w-full text-sm font-semibold truncate", (isCurrentUserSender && !isMessageDeleted) ? "text-white" : "text-blue-600", senderExists ? "pointer-events-auto" : "pointer-events-none")}
-            >
-              {senderExists ? messageSender.fullName : "Usuario de Snapgram"}
-            </Link>
+            {!isCurrentUserSender && chatType === "group" &&
+              <Link
+                to={senderExists ? `/profile/${messageSender.clerkId}` : "#"}
+                className={cn("w-fit text-sm font-semibold truncate text-blue-600", senderExists ? "pointer-events-auto" : "pointer-events-none")}
+              >
+                {senderExists ? messageSender.fullName : "Usuario de Snapgram"}
+              </Link>
+            }
 
             {!isMessageDeleted &&
               <MessageDropdown
@@ -144,8 +147,8 @@ const MessageItem = ({ currentUserId, messageData }: Props) => {
                 isPending={isPending}
                 onDelete={(deleteFor) => mutate(deleteFor)}
               >
-                <button className="flex justify-center items-center p-1 shrink-0 cursor-pointer">
-                  <ChevronDown className={cn("size-5", isCurrentUserSender ? "text-white" : "text-neutral-500")} aria-hidden />
+                <button className="absolute top-0.5 right-0 flex justify-center items-center p-1 shrink-0 translate-x-[100%] cursor-pointer z-10">
+                  <ChevronDown className="size-5 *:text-neutral-500" aria-hidden />
                   <span className="sr-only">
                     Mostrar opciones del mensaje
                   </span>

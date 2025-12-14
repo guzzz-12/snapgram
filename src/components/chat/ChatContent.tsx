@@ -143,7 +143,7 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
   return (
     <div
       ref={wrapperRef}
-      className="w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+      className="w-full h-full overflow-x-hidden overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
     >
       {chatData && chatData.type === "group" && 
         <GroupInboxHeader groupData={chatData} />
@@ -160,7 +160,7 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
       }
 
       {!isLoadingChatData && currentUser &&
-        <ul className="flex flex-col gap-6 w-full p-6">
+        <ul className="flex flex-col gap-4.5 w-full p-6">
           {messages.map((message) => {
             if (["userLeftGroup", "userKickedFromGroup", "userAddedToGroup"].includes(message.type)) {
               return (
@@ -176,6 +176,7 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
                 key={message._id}
                 currentUserId={currentUser._id}
                 messageData={message}
+                chatType={chatData?.type}
               />
             )
           })}

@@ -5,7 +5,6 @@ import ChatList from "@/components/chat/ChatList";
 import ChatInbox from "@/components/chat/ChatInbox";
 import PrivateChatsModalList from "@/components/chat/PrivateChatsModalList";
 import CreateGroupChatModal from "@/components/chat/CreateGroupChatModal";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
 import type { ChatType } from "@/types/global";
@@ -31,8 +30,6 @@ const MessagesPage = () => {
 
   return (
     <main className="flex w-full h-[100vh] bg-white overflow-hidden">
-      <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
-
       <PrivateChatsModalList setTemporaryChat={setTemporaryChat}/>
       
       <ChatList

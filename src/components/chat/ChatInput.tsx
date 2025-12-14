@@ -27,7 +27,7 @@ interface Props {
   setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
-const ChatInput = ({ wrapperHeight, chatData, chatTypeParam, setTemporaryChat }: Props) => {
+const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const stopTypingTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -180,10 +180,7 @@ const ChatInput = ({ wrapperHeight, chatData, chatTypeParam, setTemporaryChat }:
   });
 
   return (
-    <div
-      style={{height: `${wrapperHeight}px`}}
-      className="relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-white border-t"
-    >
+    <div className="relative flex justify-between items-center gap-3 w-full shrink-0 px-4 py-2 bg-white border-t">
       {/* Mostrar los usuarios que estan escribiendo */}
       {usersCurrentlyTyping.length > 0 &&
         <div className="absolute -top-3 left-3 flex justify-center items-center px-2 py-1.5 -translate-y-[100%] rounded-lg border shadow bg-slate-200 z-10">
@@ -261,7 +258,7 @@ const ChatInput = ({ wrapperHeight, chatData, chatTypeParam, setTemporaryChat }:
         </Popover>
 
         <Textarea
-          className="w-full min-h-full max-h-[80px] pl-12 border-none rounded-full resize-none scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white"
+          className="w-full min-h-full max-h-[80px] pl-12 border-none rounded-full resize-none scrollbar-none"
           placeholder="Escribe algo..."
           disabled={submitting}
           value={messageText}

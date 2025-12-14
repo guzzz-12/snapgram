@@ -11,7 +11,6 @@ import PostsTabContent from "@/components/profile/PostsTabContent";
 import FollowersTabContent from "@/components/profile/FollowersTabContent";
 import FollowingTabContent from "@/components/profile/FollowingTabContent";
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { ACCOUNT_STATUS } from "@/utils/constants";
@@ -97,8 +96,6 @@ const ProfilePage = () => {
 
   return (
     <main className="w-full min-h-screen mx-auto p-6 bg-slate-200">
-      <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
-
       <section className="w-full max-w-[900px] mx-auto">
         {loadingUser &&
           <ProfileHeaderSkeleton />

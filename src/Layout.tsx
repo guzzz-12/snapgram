@@ -4,12 +4,11 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GoInfo } from "react-icons/go";
 import { toast, Toaster } from "sonner";
-import MainSidebar from "@/components/MainSidebar";
+import Sidebar from "./components/Sidebar";
 import CreateStoryModal from "@/components/stories/CreateStoryModal";
 import CreatePostModal from "@/components/posts/CreatePostModal";
 import BlockUserModal from "@/components/BlockUserModal";
 import SocketManager from "@/components/SocketManager";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
@@ -109,27 +108,25 @@ const Layout = () => {
   }
 
   return (
-    <SidebarProvider>
+    <div className="flex w-full min-h-screen">
       <SocketManager />
 
-      <div className="flex w-full min-h-screen">
-        <CreatePostModal />
+      <CreatePostModal />
 
-        <CreateStoryModal />
+      <CreateStoryModal />
 
-        <BlockUserModal />
+      <BlockUserModal />
 
-        {!pathname.startsWith("/post") &&        
-          <MainSidebar />
-        }
+      {!pathname.startsWith("/post") &&     
+        <Sidebar />
+      }
 
-        <section className="grow bg-slate-100 overflow-x-hidden">
-          <Outlet />
-        </section>
+      <section className="grow bg-slate-100 overflow-x-hidden">
+        <Outlet />
+      </section>
 
-        <Toaster position="bottom-right" />
-      </div>
-    </SidebarProvider>
+      <Toaster position="bottom-right" />
+    </div>
   )
 }
 

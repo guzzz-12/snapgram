@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import PostCard from "@/components/posts/PostCard";
 import StoriesSlider from "@/components/stories/StoriesSlider";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import RightSidebar from "@/components/RightSidebar";
 import NewUserScreen from "@/components/home/NewUserScreen";
 import { Separator } from "@/components/ui/separator";
@@ -96,8 +95,6 @@ const HomePage = () => {
 
   return (
     <main className="pageWrapper pr-10">
-      <SidebarTrigger className="absolute top-4 left-4 flex justify-center items-center md:hidden cursor-pointer z-[10]" />
-
       <div className="w-full max-w-[800px] h-full mx-auto shrink-[2]">
         <StoriesSlider />
 

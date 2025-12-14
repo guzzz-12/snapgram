@@ -6,7 +6,6 @@ import { IoFileTrayStackedOutline } from "react-icons/io5";
 import RightSidebar from "@/components/RightSidebar";
 import NotificationsOptions from "@/components/notifications/NotificationsOptions";
 import NotificationsList from "@/components/notifications/NotificationsList";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
@@ -99,8 +98,6 @@ const ConnectionsPage = () => {
   
   return (
     <main className="pageWrapper gap-10 pr-10">
-      <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
-
       <section className="flex flex-col gap-0 w-full max-w-[700px] mx-auto">
         <div className="flex justify-between items-start gap-8 w-full">
           <div className="w-full mb-6">

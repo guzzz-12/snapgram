@@ -5,7 +5,6 @@ import FiltersBar from "@/components/discover/FiltersBar";
 import UsersSearchResults from "@/components/discover/UsersSearchResults";
 import PostsSearchResults from "@/components/discover/PostsSearchResults";
 import Placeholder from "@/components/discover/Placeholder";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const DiscoverPage = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -20,8 +19,6 @@ const DiscoverPage = () => {
 
   return (
     <main className="pageWrapper">
-      <SidebarTrigger className="absolute block md:hidden top-4 left-4 cursor-pointer z-10" />
-
       <section className="flex flex-col gap-6 w-full max-w-[900px] mx-auto">
         <div className="">
           <h1 className="text-2xl font-semibold">

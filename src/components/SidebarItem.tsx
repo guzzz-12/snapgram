@@ -1,6 +1,6 @@
 import { NavLink } from "react-router";
 import type { IconType } from "react-icons/lib";
-import { SidebarMenuItem } from "./ui/sidebar";
+import { cn } from "@/lib/utils";
 
 interface Props {
   href: string;
@@ -9,13 +9,13 @@ interface Props {
   badge?: number;
 }
 
-const MainSidebarItem = ({ href, title, Icon, badge }: Props) => {
+const SidebarItem = ({ href, title, Icon, badge }: Props) => {
   return (
-    <SidebarMenuItem>
+    <li>
       <NavLink
         to={href}
         className={({ isActive }) => (
-          `flex justify-start items-center gap-2 w-full h-full px-4 py-3 text-base rounded-md hover:!bg-[#4F39F6]/10 transition-colors [&_.sidebarIconWrapper>svg]:stroke-2 ${isActive ? "text-[#4F39F6] font-bold !bg-[#4F39F6]/10 [&_.sidebarIconWrapper>svg]:text-[#4F39F6] [&_.sidebarIconWrapper>svg]:fill-[#4F39F6]/10" : "bg-transparent font-normal [&_.sidebarIconWrapper>svg]:stroke-current [&_.sidebarIconWrapper>svg]:fill-transparent"}`
+          cn(`flex justify-center min-[950px]:justify-start items-center gap-2 w-full h-fit px-4 py-3 text-base rounded-md hover:!bg-[#4F39F6]/10 transition-colors [&_.sidebarIconWrapper>svg]:stroke-2`, isActive ? "text-[#4F39F6] font-bold !bg-[#4F39F6]/10 [&_.sidebarIconWrapper>svg]:text-[#4F39F6] [&_.sidebarIconWrapper>svg]:fill-[#4F39F6]/10" : "bg-transparent font-normal [&_.sidebarIconWrapper>svg]:stroke-current [&_.sidebarIconWrapper>svg]:fill-transparent")
         )}
       >
         <div className="sidebarIconWrapper">
@@ -27,10 +27,13 @@ const MainSidebarItem = ({ href, title, Icon, badge }: Props) => {
           
           <Icon className="!size-6 text-neutral-700" aria-hidden />
         </div>
-        {title}
+
+        <span className="hidden min-[950px]:block">
+          {title}
+        </span>
       </NavLink>
-    </SidebarMenuItem>
+    </li>
   )
 }
 
-export default MainSidebarItem
+export default SidebarItem

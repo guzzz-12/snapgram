@@ -17,7 +17,7 @@ interface Props {
 const DeleteAccountModal = ({ isOpen, setIsOpen, setOpenDisableAccountModal }: Props) => {
   const navigate = useNavigate();
 
-  const {getToken} = useAuth();
+  const {getToken, signOut} = useAuth();
 
   const [isPending, setIsPending] = useState(false);
 
@@ -42,9 +42,9 @@ const DeleteAccountModal = ({ isOpen, setIsOpen, setOpenDisableAccountModal }: P
 
       setIsPending(false);
 
-      setIsOpen(false);
+      await signOut();
 
-      navigate("/login", {replace: true});
+      setIsOpen(false);
       
     } catch (error: any) {
       toast.error(errorMessage(error));

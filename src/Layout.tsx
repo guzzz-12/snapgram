@@ -9,6 +9,7 @@ import CreateStoryModal from "@/components/stories/CreateStoryModal";
 import CreatePostModal from "@/components/posts/CreatePostModal";
 import BlockUserModal from "@/components/BlockUserModal";
 import SocketManager from "@/components/SocketManager";
+import ImagesLightbox from "@/components/ImagesLightbox";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
@@ -116,6 +117,8 @@ const Layout = () => {
       <CreateStoryModal />
 
       <BlockUserModal />
+
+      <ImagesLightbox />
 
       {!pathname.startsWith("/post") &&     
         <Sidebar />

@@ -102,7 +102,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData, headerRef }:
       {isLoading &&
         <div
           style={{height: `${headerHeight}px`}}
-          className="flex justify-start gap-3 w-full px-6 py-2 bg-white border-b"
+          className="flex justify-start gap-3 w-full px-4 py-2 bg-white border-b"
         >
           <Skeleton className="w-[50px] h-[50px] shrink-0 rounded-full bg-neutral-200" />
 
@@ -116,7 +116,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData, headerRef }:
       {!isLoading &&
         <div
           ref={headerRef}
-          className="flex justify-between items-center gap-4 w-full px-6 py-2 bg-white border-b"
+          className="flex justify-between items-center gap-4 w-full px-4 py-2 bg-white border-b"
         >
           <Link
             to={chatData?.type === "group" ? "#" : `/profile/${recipient?.clerkId}`}

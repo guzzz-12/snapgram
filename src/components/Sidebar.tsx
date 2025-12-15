@@ -4,7 +4,7 @@ import { CirclePlus, ImagePlus, TypeOutline } from "lucide-react";
 import { GoHomeFill } from "react-icons/go";
 import { LuMessageCircle, LuSearch, LuUserRound } from "react-icons/lu";
 import { MdNotifications } from "react-icons/md";
-import { AiOutlineMenu } from "react-icons/ai";
+import { FiMoreHorizontal } from "react-icons/fi";
 import SidebarItem from "./SidebarItem";
 import ProfileLinkItem from "./ProfileLinkItem";
 import LogoutItem from "./LogoutItem";
@@ -31,10 +31,12 @@ const Sidebar = () => {
 
   const {setOpen: openCreateStoryModal} = useCreatePublicationModal();
 
+  const isMessagesPage = pathname.startsWith("/messages");
+
   if (!loadingUser && !user) return null;
 
   return (
-    <aside className="flex flex-col justify-start gap-4 w-fit min-[950px]:w-[250px] shrink-0 h-screen p-4 pb-0 border-r bg-gray-50">
+    <aside className="flex flex-col justify-start gap-4 w-fit min-[950px]:w-[250px] shrink-0 min-h-screen px-1.5 pt-4 pb-0 border-r bg-gray-50">
       <Link
         className="flex justify-start items-center gap-2 w-full"
         to="/"
@@ -46,12 +48,14 @@ const Sidebar = () => {
           aria-hidden
         />
 
-        <h1 className="hidden min-[950px]:block text-lg text-neutral-900">
-          SnapGram
-        </h1>
+        <h1 className="text-neutral-900 font-semibold">
+          <span className="hidden min-[950px]:block text-lg">
+            SnapGram
+          </span>
 
-        <h1 className="block min-[950px]:hidden text-xl text-neutral-900">
-          SG
+          <span className="block min-[950px]:hidden text-xl">
+            SG
+          </span>
         </h1>
       </Link>
 
@@ -129,11 +133,11 @@ const Sidebar = () => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              className={cn("justify-start w-full h-auto mb-3 py-3 cursor-pointer", !pathname.startsWith("/messages") && "min-[1280px]:hidden")}
+              className={cn("justify-center min-[950px]:justify-start w-full h-auto mb-3 py-3 cursor-pointer", !isMessagesPage && "min-[1280px]:hidden")}
               variant="ghost"
               size="lg"
             >
-              <AiOutlineMenu className="size-6 text-neutral-700" aria-hidden/>
+              <FiMoreHorizontal className="size-6 text-neutral-700" aria-hidden />
 
               <span className="hidden min-[950px]:inline text-base text-neutral-900">
                 Más
@@ -154,7 +158,7 @@ const Sidebar = () => {
 
             <Separator className="w-full bg-neutral-200" />
 
-            <div className="block min-[950px]:hidden w-full px-4 py-3">
+            <div className="block min-[950px]:hidden w-full p-3">
               <p className="text-xs text-neutral-500">
                 &copy; {new Date().getFullYear()} - Desarrollado por <span className="font-semibold">Jesús Guzmán</span>
               </p>
@@ -164,8 +168,8 @@ const Sidebar = () => {
 
         <Separator className="w-full bg-neutral-200" />
 
-        <div className="hidden min-[950px]:block w-full px-4 pt-2 pb-3">
-          <p className="text-xs text-neutral-500">
+        <div className="hidden min-[950px]:block w-full pt-2 pb-3">
+          <p className="text-xs text-center text-neutral-500">
             &copy; {new Date().getFullYear()} - Desarrollado por <span className="font-semibold">Jesús Guzmán</span>
           </p>
         </div>

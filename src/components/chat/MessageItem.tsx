@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation } from "@tanstack/react-query";
-import dayjs from "@/utils/dayJsInstance";
 import { Twemoji } from "react-emoji-render";
-import { CheckCheck, ChevronDown } from "lucide-react";
+import { FiMoreVertical } from "react-icons/fi";
+import { CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 import MessageDropdown from "./MessageDropdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +13,7 @@ import dayJsInstance from "@/utils/dayJsInstance";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { socket } from "@/utils/socket";
+import dayjs from "@/utils/dayJsInstance";
 import { cn } from "@/lib/utils";
 import type { MessageType } from "@/types/global";
 
@@ -150,8 +151,8 @@ const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
                 isPending={isPending}
                 onDelete={(deleteFor) => mutate(deleteFor)}
               >
-                <button className="absolute top-0.5 right-0 flex justify-center items-center p-1 shrink-0 translate-x-[100%] cursor-pointer z-10">
-                  <ChevronDown className="size-5 *:text-neutral-500" aria-hidden />
+                <button className={cn("absolute top-0.5 flex justify-center items-center p-1 shrink-0 cursor-pointer z-10", isCurrentUserSender ? "left-0 translate-x-[-100%]" : "right-0 translate-x-[100%]")}>
+                  <FiMoreVertical className="size-4 *:text-neutral-600" aria-hidden />
                   <span className="sr-only">
                     Mostrar opciones del mensaje
                   </span>

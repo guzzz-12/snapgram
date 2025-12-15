@@ -160,7 +160,7 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
       }
 
       {!isLoadingChatData && currentUser &&
-        <ul className="flex flex-col gap-4.5 w-full p-6">
+        <ul className="flex flex-col gap-4.5 w-full px-4 py-6">
           {messages.map((message) => {
             if (["userLeftGroup", "userKickedFromGroup", "userAddedToGroup"].includes(message.type)) {
               return (

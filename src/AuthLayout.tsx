@@ -13,18 +13,21 @@ const AuthLayout = () => {
     <div className="relative flex flex-col min-h-screen">
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white to-[#4F39F6]/10"/>
 
-      <header className="w-full max-w-[1280px] mx-auto p-4 z-10">
+      <header className="flex justify-center min-[700px]:justify-start items-center w-full max-w-[1280px] mx-auto mb-1 min-[700px]:mb-0 p-4 z-10">
         <nav className="w-fit">
           <Link
             className="flex justify-start items-center gap-2"
             to="/"
           >
             <img
-              className="w-8 h-8"
+              className="w-10 h-10"
               src={logo}
               alt="logo"
             />
-            <h1>SnapGram</h1>
+
+            <h1 className="text-xl font-semibold">
+              SnapGram
+            </h1>
           </Link>
         </nav>
       </header>

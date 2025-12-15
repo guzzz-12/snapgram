@@ -8,11 +8,12 @@ import { CheckCheck, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import MessageDropdown from "./MessageDropdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useImagesLighbox } from "@/hooks/useImagesLightbox";
 import dayJsInstance from "@/utils/dayJsInstance";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import { cn } from "@/lib/utils";
 import { socket } from "@/utils/socket";
+import { cn } from "@/lib/utils";
 import type { MessageType } from "@/types/global";
 
 interface Props {
@@ -29,6 +30,8 @@ const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
   const senderExists = Boolean(messageData.sender);
 
   const [isIntersecting, setIsIntersecting] = useState(false);
+  
+  const {setImages, setInitialIndex, setOpen: setOpenImgsViewer} = useImagesLighbox();
 
   const {getToken} = useAuth();
 
@@ -167,11 +170,15 @@ const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
           {/* Contenido multimedia del mensaje (si lo hay) */}
           {messageData.type !== "text" && (
             <div className="grid grid-cols-3 gap-2 w-full h-auto mt-1 overflow-hidden">
-              {messageData.fileUrls.map((fileUrl) => (
+              {messageData.fileUrls.map((fileUrl, i) => (
                 <button
                   key={fileUrl}
                   className="relative w-full aspect-square bg-neutral-700 overflow-hidden cursor-pointer"
-                  onClick={() => {}}
+                  onClick={() => {
+                    setInitialIndex(i);
+                    setImages(messageData.fileUrls);
+                    setOpenImgsViewer(true);
+                  }}
                 >
                   <img
                     className="relative w-full h-full object-contain object-center z-20"

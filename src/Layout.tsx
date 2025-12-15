@@ -14,8 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
 import { useCurrentUser } from "./hooks/useCurrentUser";
+import useWindowWidth from "./hooks/useWindowWidth";
 import { errorMessage } from "./utils/errorMessage";
 import { axiosInstance } from "./utils/axiosInstance";
+import { cn } from "./lib/utils";
 
 const Layout = () => {
   const {pathname} = useLocation();
@@ -28,6 +30,8 @@ const Layout = () => {
   const queryClient = useQueryClient();
 
   const {user: currentUser} = useCurrentUser();
+
+  const {windowWidth} = useWindowWidth();
 
   useTitleNotificationsCounter();
 
@@ -63,6 +67,9 @@ const Layout = () => {
       setIsSigningOut(false);
     }
   };
+
+  const isPostPage = pathname.startsWith("/post");
+  const isMessagesPage = pathname.startsWith("/messages");
 
   if (!isLoaded || !currentUser) {
     return null;
@@ -120,8 +127,11 @@ const Layout = () => {
 
       <ImagesLightbox />
 
-      {!pathname.startsWith("/post") &&     
-        <Sidebar />
+      {/* No mostrar el sidebar en la página del post y mostrarlo en el chat si el ancho de la pantalla es mayor o igual a 700px */}
+      {!isPostPage &&
+        <div className={cn(isMessagesPage && windowWidth < 700 ? "hidden" : "block shrink-0")}>
+          <Sidebar />
+        </div>
       }
 
       <section className="grow bg-slate-100 overflow-x-hidden">

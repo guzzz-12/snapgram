@@ -8,6 +8,7 @@ import { HiOutlinePencilAlt } from "react-icons/hi";
 import { toast } from "sonner";
 import ChatListItemSkeleton from "./ChatListItemSkeleton";
 import ChatItem from "./ChatItem";
+import MobileNavSidebar from "@/components/MobileNavSidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -24,7 +25,7 @@ interface Props {
   chatTypeParam?: "all" | "group" | null;
 }
 
-const ChatList = ({ headerHeight, temporaryChatItem, chatTypeParam }: Props) => {
+const ChatList = ({ temporaryChatItem, chatTypeParam }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const {chatId} = useParams<{chatId: string}>();
@@ -102,7 +103,7 @@ const ChatList = ({ headerHeight, temporaryChatItem, chatTypeParam }: Props) => 
   }
 
   return (
-    <aside className="flex flex-col w-fit min-[950px]:w-[320px] h-full pb-6 border-r overflow-hidden">
+    <aside className="flex flex-col w-fit min-[950px]:w-[320px] h-full pb-4 min-[600px]:pb-6 border-r overflow-hidden">
       <Button
         className="h-auto py-4 rounded-none cursor-pointer"
         variant="ghost"
@@ -213,6 +214,8 @@ const ChatList = ({ headerHeight, temporaryChatItem, chatTypeParam }: Props) => 
           <div ref={paginationRef} className="w-full h-4 bg-yellow-300" />
         }
       </div>
+
+      <MobileNavSidebar />
     </aside>
   )
 }

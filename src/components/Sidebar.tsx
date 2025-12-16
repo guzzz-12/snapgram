@@ -43,7 +43,7 @@ const Sidebar = () => {
         resizeObserver.unobserve(sidebarRef.current);
       }
     }
-  }, []);
+  }, [pathname]);
   
   const {user, loadingUser} = useCurrentUser();
 

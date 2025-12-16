@@ -7,6 +7,7 @@ import { CgCalendarDates } from "react-icons/cg";
 import GroupInfoModal from "./GroupInfoModal";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useImagesLighbox } from "@/hooks/useImagesLightbox";
 import type { ChatType } from "@/types/global";
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
 
 const GroupInboxHeader = ({ groupData }: Props) => {
   const [openGroupInfoModal, setOpenGroupInfoModal] = useState(false);
+
+  const {setOpen, setImages} = useImagesLighbox();
 
   if (!groupData) {
     return null;
@@ -29,15 +32,30 @@ const GroupInboxHeader = ({ groupData }: Props) => {
       />
 
       <div className="flex flex-col justify-center items-center max-w-[60%] mx-auto">
-        <Avatar className="w-[120px] h-[120px] mb-3 shrink-0 outline-4 outline-[#4f39f6] outline-offset-2">
-          <AvatarImage
-            className="w-full h-full object-cover object-center"
-            src={groupData.groupPicture || ""}
-          />
-          <AvatarFallback className="w-full h-full text-4xl object-cover object-center bg-[#4f39f6]/15">
-            {groupData.groupName?.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <button
+          className="cursor-pointer"
+          onClick={() => {
+            if (!groupData.groupPicture) return;
+
+            setImages([groupData.groupPicture]);
+            setOpen(true);
+          }}
+        >
+          <Avatar className="w-[120px] h-[120px] mb-3 shrink-0 outline-4 outline-[#4f39f6] outline-offset-2">
+            <AvatarImage
+              className="w-full h-full object-cover object-center"
+              src={groupData.groupPicture || ""}
+              alt=""
+            />
+            <AvatarFallback className="w-full h-full text-4xl object-cover object-center bg-[#4f39f6]/15">
+              {groupData.groupName?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
+          <span className="sr-only">
+            Ver imagen del grupo {groupData.groupName}
+          </span>
+        </button>
 
         <h2 className="w-full mb-2 text-center text-xl font-semibold text-neutral-900">
           {groupData.groupName}

@@ -10,6 +10,7 @@ import CreatePostModal from "@/components/posts/CreatePostModal";
 import BlockUserModal from "@/components/BlockUserModal";
 import SocketManager from "@/components/SocketManager";
 import ImagesLightbox from "@/components/ImagesLightbox";
+import MobileNavSidebar from "./components/MobileNavSidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
@@ -120,7 +121,8 @@ const Layout = () => {
 
   return (
     <div
-      style={{paddingLeft: (isMessagesPage && windowWidth < 700) ? 0 : `${sidebarWidth}px`}}
+      // Aplicar padding a la izquierda para ajustar el sidebar en pantallas mayores a 700px
+      style={{paddingLeft: windowWidth > 700 ? `${sidebarWidth}px` : 0}}
       className="relative flex w-full min-h-screen"
     >
       <SocketManager />
@@ -133,10 +135,16 @@ const Layout = () => {
 
       <ImagesLightbox />
 
-      {/* No mostrar el sidebar en la página del post y mostrarlo en el chat si el ancho de la pantalla es mayor o igual a 700px */}
+      {/* No mostrar el sidebar en la página del post y o si el ancho de la pantalla es menor de 700px */}
       {!isPostPage &&
-        <div className={cn("fixed left-0 top-0 h-full z-10", isMessagesPage && windowWidth < 700 ? "hidden" : "block shrink-0")}>
+        <div className={cn("hidden min-[700px]:block fixed left-0 top-0 h-full shrink-0 z-10")}>
           <Sidebar />
+        </div>
+      }
+
+      {!isMessagesPage && windowWidth < 700 &&
+        <div className="fixed top-1 right-1 p-0.5 rounded-sm bg-white border z-[100]">
+          <MobileNavSidebar />
         </div>
       }
 

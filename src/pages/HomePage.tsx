@@ -94,7 +94,7 @@ const HomePage = () => {
   }
 
   return (
-    <main className="pageWrapper pr-10">
+    <main className="pageWrapper ">
       <div className="w-full max-w-[800px] h-full mx-auto shrink-[2]">
         <StoriesSlider />
 
@@ -132,7 +132,7 @@ const HomePage = () => {
           </>
         }
         
-        <section className="flex flex-col gap-6 w-full max-w-[600px] mx-auto">
+        <section className="flex flex-col gap-6 w-full max-w-[650px] mx-auto">
           {loadingPosts &&
             Array(2).fill(0).map((_, i) => (
               <PostCardSkeleton key={i} />

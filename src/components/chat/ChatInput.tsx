@@ -180,7 +180,7 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
   });
 
   return (
-    <div className="relative flex justify-between items-center gap-3 w-full shrink-0 px-4 py-2 bg-white border-t">
+    <div className="relative flex justify-between items-center gap-1.5 min-[500px]:gap-3 w-full shrink-0 px-1 min-[500px]:px-4 py-2 bg-white border-t">
       {/* Mostrar los usuarios que estan escribiendo */}
       {usersCurrentlyTyping.length > 0 &&
         <div className="absolute -top-3 left-3 flex justify-center items-center px-2 py-1.5 -translate-y-[100%] rounded-lg border shadow bg-slate-200 z-10">
@@ -267,7 +267,7 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
       </div>
 
       {messageText.length === 0 && !selectedImageFiles[0] &&
-        <div className="flex justify-between items-center gap-3">
+        <div className="flex justify-between items-center gap-1.5 min-[500px]:gap-3">
           <button
             className="cursor-pointer"
             disabled={submitting}

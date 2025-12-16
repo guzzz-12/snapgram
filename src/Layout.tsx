@@ -120,7 +120,7 @@ const Layout = () => {
 
   return (
     <div
-      style={{paddingLeft: `${sidebarWidth}px`}}
+      style={{paddingLeft: (isMessagesPage && windowWidth < 700) ? 0 : `${sidebarWidth}px`}}
       className="relative flex w-full min-h-screen"
     >
       <SocketManager />

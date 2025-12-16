@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 import { LuSendHorizontal  } from "react-icons/lu";
 import ChatList from "@/components/chat/ChatList";
@@ -18,15 +18,6 @@ const MessagesPage = () => {
   const [temporaryChat, setTemporaryChat] = useState<ChatType | null>(null);
 
   const {setIsOpen: setOpenPrivateChatsModal} = usePrivateChatsListModal();
-
-  // Ocultar/mostrar el scrollbar del body
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, []);
 
   return (
     <main className="flex w-full h-full bg-white overflow-hidden">

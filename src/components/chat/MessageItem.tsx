@@ -122,7 +122,7 @@ const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
         style={{ justifyContent: isCurrentUserSender ? "flex-end" : "flex-start" }}
         className="flex w-full"
       >
-        <div className={cn("relative flex flex-col w-fit min-w-[150px] max-w-[80%] min-[1200px]:max-w-[60%] px-2 py-1 rounded-lg shadow", (isCurrentUserSender && !isMessageDeleted) ? "bg-[#4F39F6]" : isMessageDeleted ? "bg-neutral-50" : "bg-slate-200")}>
+        <div className={cn("relative flex flex-col w-fit min-w-[150px] min-[450px]:max-w-[80%] min-[1200px]:max-w-[60%] px-2 py-1 rounded-lg shadow", (isCurrentUserSender && !isMessageDeleted) ? "bg-[#4F39F6]" : isMessageDeleted ? "bg-neutral-50" : "bg-slate-200")}>
           {/* Check de visto */}
           {isSeen && isCurrentUserSender &&
             <div

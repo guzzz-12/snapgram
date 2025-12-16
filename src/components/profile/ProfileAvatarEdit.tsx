@@ -56,7 +56,7 @@ const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePre
   const updateAvatarMutation = useMutation({
     mutationFn: onSubmitHandler,
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({queryKey: ["user", userClerkId]});
+      await queryClient.invalidateQueries({queryKey: ["user", userData.clerkId]});
       setUser(data!);
       toast.success("Avatar actualizado con éxito");
       setSelectedImageFile([]);
@@ -112,7 +112,7 @@ const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePre
         {title}
       </p>
 
-      <div className="flex justify-between items-center w-full p-4 shrink-0 bg-slate-200 rounded-lg">
+      <div className="flex justify-between items-center gap-2 w-full p-4 shrink-0 bg-slate-200 rounded-lg">
         <Avatar className="w-[120px] h-[120px] shrink-0 outline-2 outline-[#4F39F6]">
           <AvatarImage
             className="w-full h-full object-cover"
@@ -127,7 +127,7 @@ const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePre
           </AvatarFallback>
         </Avatar>
 
-        <div className="flex justify-center items-center gap-2 w-max">
+        <div className="flex flex-col min-[550px]:flex-row justify-center items-center gap-2 w-max">
           {!selectedImageFile[0] &&
             <Button
               className="border-none cursor-pointer"
@@ -137,7 +137,7 @@ const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePre
               }}
             >
               <Pencil className="size-4" aria-hidden />
-              <span>Cambiar foto</span>
+              <span>Cambiar</span>
             </Button>
           }
 
@@ -161,7 +161,7 @@ const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePre
               onClick={() => setOpenDeleteModal(true)}
             >
               <Trash2Icon className="size-4 text-destructive" aria-hidden />
-              <span>Eliminar foto</span>
+              <span>Eliminar</span>
             </Button>
           }
 

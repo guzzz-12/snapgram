@@ -19,10 +19,12 @@ import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useClampedText from "@/hooks/useClampedText";
 import { useBlockUserModal } from "@/hooks/useBlockUserModal";
+import useWindowWidth from "@/hooks/useWindowWidth";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
 import type { UserType } from "@/types/global";
+import { useImagesLighbox } from "@/hooks/useImagesLightbox";
 
 interface Props {
   userData: UserType;
@@ -32,7 +34,6 @@ const ProfileHeader = ({ userData }: Props) => {
   const avatarRef = useRef<HTMLDivElement | null>(null);
   const textContentRef = useRef<HTMLParagraphElement>(null);
 
-  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
   const [avatarHeight, setAvatarHeight] = useState(0);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openBlockedUsersModal, setOpenBlockedUsersModal] = useState(false);
@@ -43,6 +44,10 @@ const ProfileHeader = ({ userData }: Props) => {
   const {getToken} = useAuth();
 
   const queryClient = useQueryClient();
+
+  const {windowWidth} = useWindowWidth();
+
+  const {setImages, setOpen} = useImagesLighbox();
 
   const {
     isClamped,
@@ -56,17 +61,6 @@ const ProfileHeader = ({ userData }: Props) => {
   useEffect(() => {
     if (avatarRef.current) {
       setAvatarHeight(avatarRef.current.clientHeight);
-    }
-
-    const resizeHandler = (_e: UIEvent) => {
-      const width = window.innerWidth
-      setViewportWidth(width);
-    }
-
-    window.addEventListener("resize", resizeHandler);
-
-    return () => {
-      window.removeEventListener("resize", resizeHandler)
     }
   }, []);
 
@@ -111,7 +105,7 @@ const ProfileHeader = ({ userData }: Props) => {
   }
 
   return (
-    <div className="block rounded-lg bg-slate-50 shadow overflow-hidden">
+    <div className="block bg-slate-50 shadow overflow-hidden">
       <ProfileEditModal
         userData={userData}
         isOpen={openEditModal}
@@ -134,37 +128,54 @@ const ProfileHeader = ({ userData }: Props) => {
         setOpenDisableAccountModal={setOpenDisableAccountModal}
       />
 
-      <div
-        style={{
-          backgroundImage: `url(${userData.coverPhoto || "/placeholder_image.webp"})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat"
+      <button
+        className="relative w-full h-[200px] shadow-sm g-linear-to-r from-[#c8d3ff] to-[#fccee9] cursor-pointer group"
+        onClick={() => {
+          setImages([userData.coverPicture]);
+          setOpen(true);
         }}
-        className="w-full h-[200px] shadow-sm g-linear-to-r from-[#c8d3ff] to-[#fccee9]"
-      />
+      >
+        <div className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 bg-black/20 z-10 transition-opacity" />
+
+        <img
+          className="w-full h-full object-cover object-center"
+          src={userData.coverPicture || "/placeholder_image.webp"}
+          alt={`Portada de ${userData.fullName}`}
+        />
+      </button>
 
       <div className="relative flex flex-col min-[850px]:flex-row w-full">
-        <div className="absolute translate-y-[-50%] min-[850px]:static flex items-start shrink-0 pl-6 min-[850px]:translate-y-[0]">
+        <button
+          className="absolute w-fit h-fit translate-y-[-50%] min-[850px]:static flex items-start shrink-0 pl-3 min-[450px]:pl-6 group cursor-pointer z-20"
+          onClick={() => {
+            setImages([userData.profilePicture]);
+            setOpen(true);
+          }}
+        >
           <Avatar
             ref={avatarRef}
-            className="w-[120px] h-[120px] min-[850px]:w-[100px] min-[850px]:h-[100px] min-[950px]:w-[120px] min-[950px]:h-[120px] shrink-0 min-[850px]:translate-y-[-50%] outline-4 outline-white"
+            className="w-[90px] h-[90px] min-[850px]:w-[120px] min-[850px]:h-[120px] shrink-0 outline-4 outline-white bg-black"
           >
             <AvatarImage
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover group-hover:opacity-80 transition-colors"
               src={userData.profilePicture || "/default_avatar.webp"}
+              alt={`Avatar de ${userData.fullName}`}
             />
-            <AvatarFallback className="w-full h-full object-cover">
+            <AvatarFallback className="w-full h-full object-cover group-hover:opacity-80 transition-colors">
               {userData.fullName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-        </div>
+
+          <span className="sr-only">
+            Mostrar avatar de {userData.fullName}
+          </span>
+        </button>
 
         <div
           style={{
-            ...(viewportWidth < 850 ? {paddingTop: `calc(0.5 * ${avatarHeight}px + 10px)`} : {})
+            ...(windowWidth < 850 ? {paddingTop: `calc(0.5 * ${avatarHeight}px + 10px)`} : {})
           }}
-          className="w-full p-6"
+          className="w-full p-3 min-[450px]:p-6"
         >
           <div className="flex justify-between items-center mb-2">
             <div className="grow overflow-hidden">
@@ -266,22 +277,24 @@ const ProfileHeader = ({ userData }: Props) => {
             </span>
           </div>
 
-          <div className="max-h-[450px] mb-4 pt-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 border-t">
-            <p
-              ref={textContentRef}
-              className={cn("inline-block pt-2 text-left text-neutral-700 whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-3")}
-            >
-              {userData.bio}
-            </p>
+          {userData.bio &&
+            <div className="max-h-[450px] mb-4 pt-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 border-t">
+              <p
+                ref={textContentRef}
+                className={cn("inline-block pt-2 text-left text-neutral-700 whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-3")}
+              >
+                {userData.bio}
+              </p>
 
-            {isClamped &&
-              <SeeMoreBtn
-                isClamped={isClamped}
-                setIsClamped={setIsClamped}
-                setShowFullText={setShowFullText}
-              />
-            }
-          </div>
+              {isClamped &&
+                <SeeMoreBtn
+                  isClamped={isClamped}
+                  setIsClamped={setIsClamped}
+                  setShowFullText={setShowFullText}
+                />
+              }
+            </div>
+          }
 
           <div className="flex justify-start items-center gap-9">
             {userData.location &&

@@ -8,6 +8,7 @@ import PostCard from "@/components/posts/PostCard";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import { Button } from "@/components/ui/button";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import useWindowWidth from "@/hooks/useWindowWidth";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { PostWithLikes, UserType } from "@/types/global";
 
@@ -18,23 +19,11 @@ interface Props {
 const PostsTabContent = ({userData}: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [fetchingFirstPostsPage, setFetchingFirstPostsPage] = useState(true);
 
-  // Actualizar el state del ancho del viewport
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth)
-    ;}
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    }
-  }, []);
-
   const {getToken} = useAuth();
+
+  const {windowWidth} = useWindowWidth();
 
   const getUserPosts = async (page: number) => {
     const token = await getToken();
@@ -92,7 +81,7 @@ const PostsTabContent = ({userData}: Props) => {
   const loadingPosts = fetchingFirstPostsPage || isLoading || isFetchingNextPage;
 
   return (
-    <section className="flex flex-col gap-6 w-full mx-auto">
+    <section className="flex flex-col gap-6 w-full mx-auto p-2 pb-0 bg-slate-100">
       {!loadingPosts && error &&
         <div className="flex flex-col justify-center items-center gap-4">
           <div className="flex justify-center items-center gap-3">
@@ -116,8 +105,8 @@ const PostsTabContent = ({userData}: Props) => {
       {!loadingPosts && postsData.length > 0 &&
         <Masonry
           className="w-full"
-          columnsCount={windowWidth >= 1000 ? 2 : 1}
-          gutter="16px"
+          columnsCount={windowWidth >= 750 ? 2 : 1}
+          gutter="8px"
         >
           {postsData.map((post) => (
             <PostCard key={post._id} postData={post} />

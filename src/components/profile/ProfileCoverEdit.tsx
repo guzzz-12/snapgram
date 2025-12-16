@@ -46,7 +46,7 @@ const ProfileCoverEdit = ({title, userData, selectedImageFile, selectedImagePrev
   const updateCoverMutation = useMutation({
     mutationFn: onUploadCoverPicHandler,
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({queryKey: ["user", data.clerkId]});
+      await queryClient.invalidateQueries({queryKey: ["user", userData.clerkId]});
       toast.success("Imagen de portada actualizada correctamente");
       setSelectedImageFile([]);
       setSelectedImagePreview([]);
@@ -96,7 +96,7 @@ const ProfileCoverEdit = ({title, userData, selectedImageFile, selectedImagePrev
 
       <div className="relative w-full h-[270px] bg-gray-300 rounded-md overflow-hidden">
         <div className="absolute bottom-0 left-0 flex justify-end items-end w-full h-[50%] bg-linear-to-t from-black to-transparent">
-          <div className="flex justify-center items-center gap-2 w-max pb-2 pr-2">
+          <div className="flex flex-col min-[550px]:flex-row justify-center items-center gap-2 w-max pb-2 pr-2">
             {!selectedImageFile[0] &&
               <Button
                 className="border-none cursor-pointer"
@@ -105,7 +105,7 @@ const ProfileCoverEdit = ({title, userData, selectedImageFile, selectedImagePrev
                 onClick={() => coverPicInputRef.current?.click()}
               >
                 <Pencil className="size-4" aria-hidden />
-                <span>Cambiar foto</span>
+                <span>Cambiar</span>
               </Button>
             }
 
@@ -125,11 +125,11 @@ const ProfileCoverEdit = ({title, userData, selectedImageFile, selectedImagePrev
               <Button
                 className="border-none cursor-pointer"
                 variant="outline"
-                disabled={!userData.coverPhoto || isSubmitting}
+                disabled={!userData.coverPicture || isSubmitting}
                 onClick={() => deleteCoverMutation.mutate()}
               >
                 <Trash2Icon className="size-4 text-destructive" aria-hidden />
-                <span>Eliminar foto</span>
+                <span>Eliminar</span>
               </Button>
             }
 
@@ -152,7 +152,7 @@ const ProfileCoverEdit = ({title, userData, selectedImageFile, selectedImagePrev
         <img
           src={
             selectedImagePreview[0] ||
-            userData.coverPhoto ||
+            userData.coverPicture ||
             "/placeholder_image.webp"
           }
           className="w-full h-full object-cover"

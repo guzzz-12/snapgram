@@ -95,7 +95,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <main className="w-full min-h-screen mx-auto p-6 bg-slate-200">
+    <main className="w-full min-h-screen mx-auto min-[600px]:p-0 bg-slate-200">
       <section className="w-full max-w-[900px] mx-auto">
         {loadingUser &&
           <ProfileHeaderSkeleton />
@@ -107,14 +107,14 @@ const ProfilePage = () => {
       </section>
 
       {!loadingUser &&
-        <section className="w-full max-w-[900px] mx-auto">
+        <section className="w-full max-w-[900px] mx-auto px-2 bg-white">
           <Tabs
             className="w-full pb-10" 
             defaultValue={activeTab}
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <TabsList className="flex items-center w-full h-auto mx-auto my-4 px-4 py-2 bg-white shadow-sm">
+            <TabsList className="flex items-center w-full h-auto mx-auto px-4 py-2 bg-white shadow-none rounded-none border-t">
               <TabsTrigger
                 className="!text-[16px] !text-center font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
                 value="posts"

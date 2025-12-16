@@ -6,7 +6,7 @@ export type UserType = {
   username: string;
   bio: string;
   profilePicture: string;
-  coverPhoto: string;
+  coverPicture: string;
   location: string;
   postsCount: number;
   followersCount: number;

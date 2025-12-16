@@ -29,7 +29,7 @@ const MessagesPage = () => {
   }, []);
 
   return (
-    <main className="flex w-full h-[100vh] bg-white overflow-hidden">
+    <main className="flex w-full h-full bg-white overflow-hidden">
       <PrivateChatsModalList setTemporaryChat={setTemporaryChat}/>
       
       <ChatList
@@ -38,7 +38,7 @@ const MessagesPage = () => {
         chatTypeParam={chatTypeParam}
       />
 
-      <section className="flex flex-col justify-start w-full overflow-hidden">
+      <section className="flex flex-col justify-start w-full h-screen">
         {chatId &&
           <ChatInbox
             chatId={chatId}

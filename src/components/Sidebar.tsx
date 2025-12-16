@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router";
 import { CirclePlus, ImagePlus, TypeOutline } from "lucide-react";
 import { GoHomeFill } from "react-icons/go";
@@ -15,13 +15,35 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
+import useSidebarWidth from "@/hooks/useSidebarWidth";
 import logo from "@/assets/logo-simple.webp";
 import { cn } from "@/lib/utils";
 
 const Sidebar = () => {
+  const sidebarRef = useRef<HTMLElement | null>(null);
   const createPostBtnRef = useRef<HTMLButtonElement | null>(null);
 
   const {pathname} = useLocation();
+
+  const {setSidebarWidth} = useSidebarWidth();
+
+  // Calcular el width del sidebar principal
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      const sidebar = entries[0];
+      setSidebarWidth(sidebar.target.clientWidth);
+    });
+
+    if (sidebarRef.current) {
+      resizeObserver.observe(sidebarRef.current);
+    }
+
+    return () => {
+      if (sidebarRef.current) {
+        resizeObserver.unobserve(sidebarRef.current);
+      }
+    }
+  }, []);
   
   const {user, loadingUser} = useCurrentUser();
 
@@ -36,7 +58,10 @@ const Sidebar = () => {
   if (!loadingUser && !user) return null;
 
   return (
-    <aside className="flex flex-col justify-start gap-4 w-fit min-[950px]:w-[250px] shrink-0 min-h-screen px-1.5 pt-4 pb-0 border-r bg-gray-50">
+    <aside
+      ref={sidebarRef}
+      className="flex flex-col justify-start gap-4 w-fit min-[950px]:w-[250px] shrink-0 h-screen px-1.5 pt-4 pb-0 border-r bg-gray-50"
+    >
       <Link
         className="flex justify-start items-center gap-2 w-full"
         to="/"

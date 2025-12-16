@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
 import { useCurrentUser } from "./hooks/useCurrentUser";
 import useWindowWidth from "./hooks/useWindowWidth";
+import useSidebarWidth from "./hooks/useSidebarWidth";
 import { errorMessage } from "./utils/errorMessage";
 import { axiosInstance } from "./utils/axiosInstance";
 import { cn } from "./lib/utils";
@@ -32,6 +33,8 @@ const Layout = () => {
   const {user: currentUser} = useCurrentUser();
 
   const {windowWidth} = useWindowWidth();
+
+  const {sidebarWidth} = useSidebarWidth();
 
   useTitleNotificationsCounter();
 
@@ -77,7 +80,7 @@ const Layout = () => {
 
   if (currentUser.isDisabled) {
     return (
-      <main className="flex justify-center items-center w-full min-h-screen bg-slate-100">
+      <main className="flex justify-center items-center w-full min-h-[100dvh] bg-slate-100">
         <section className="flex flex-col justify-center items-center px-10 py-4 border rounded-lg bg-white shadow">
           <h1 className="mb-2 text-center text-2xl text-neutral-900 font-semibold">
             ¿Reactivar tu cuenta?
@@ -116,7 +119,10 @@ const Layout = () => {
   }
 
   return (
-    <div className="flex w-full min-h-screen">
+    <div
+      style={{paddingLeft: `${sidebarWidth}px`}}
+      className="relative flex w-full min-h-screen"
+    >
       <SocketManager />
 
       <CreatePostModal />
@@ -129,7 +135,7 @@ const Layout = () => {
 
       {/* No mostrar el sidebar en la página del post y mostrarlo en el chat si el ancho de la pantalla es mayor o igual a 700px */}
       {!isPostPage &&
-        <div className={cn(isMessagesPage && windowWidth < 700 ? "hidden" : "block shrink-0")}>
+        <div className={cn("fixed left-0 top-0 h-full z-10", isMessagesPage && windowWidth < 700 ? "hidden" : "block shrink-0")}>
           <Sidebar />
         </div>
       }

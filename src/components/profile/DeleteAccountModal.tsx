@@ -60,26 +60,23 @@ const DeleteAccountModal = ({ isOpen, setIsOpen, setOpenDisableAccountModal }: P
         setIsOpen(open);
       }}
     >
-      <DialogContent>
+      <DialogContent className="p-3 min-[400px]:p-6">
         <DialogHeader>
           <DialogTitle>Eliminar cuenta permanentemente</DialogTitle>
           <Separator className="w-full my-2 bg-neutral-200" />
           <DialogDescription asChild>
             <div className="flex justify-start items-center gap-2 w-full">
               <IoWarningOutline className="size-8 text-destructive shrink-0" />
-              <div className="flex flex-col gap-0">
+              <div className="flex flex-col gap-0 text-left">
                 <p className="text-sm text-neutral-700">
-                  Si eliminas tu cuenta se eliminarán permanentemente tus datos y todas tus publicaciones. <span className="font-semibold">Esto no se puede deshacer.</span>
-                </p>
-                <p className="text-sm text-neutral-700">
-                  Alternativamente, puedes <Button className="px-0.5 py-0 h-auto underline cursor-pointer" variant="link" disabled={isPending} onClick={() => setOpenDisableAccountModal(true)}>desactivar tu cuenta temporalmente.</Button>
+                  Si eliminas tu cuenta se eliminarán permanentemente tus datos y todas tus publicaciones. <span className="font-semibold">Esto no se puede deshacer.</span> Alternativamente, puedes <Button className="h-auto px-0.5 py-0 text-left whitespace-break-spaces underline cursor-pointer" variant="link" disabled={isPending} onClick={() => setOpenDisableAccountModal(true)}>desactivar tu cuenta temporalmente.</Button>
                 </p>
               </div>
             </div>
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter>
+        <DialogFooter className="flex flex-col items-end min-[400px]:flex-row min-[400px]:justify-end min-[400px]:items-center w-full">
           <Button
             className="w-fit cursor-pointer"
             variant="outline"

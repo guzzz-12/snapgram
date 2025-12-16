@@ -154,7 +154,7 @@ const Sidebar = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <div className="w-full mt-auto">
+      <div className="w-full mt-0 min-[700px]:mt-auto">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -190,14 +190,14 @@ const Sidebar = () => {
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
 
-        <Separator className="w-full bg-neutral-200" />
+      <Separator className="w-full mt-auto min-[700px]:mt-0 bg-neutral-200" />
 
-        <div className="hidden min-[950px]:block w-full pt-2 pb-3">
-          <p className="text-xs text-center text-neutral-500">
-            &copy; {new Date().getFullYear()} - Desarrollado por <span className="font-semibold">Jesús Guzmán</span>
-          </p>
-        </div>
+      <div className="hidden min-[950px]:block w-full pb-3">
+        <p className="text-xs text-center text-neutral-500">
+          &copy; {new Date().getFullYear()} - Desarrollado por <span className="font-semibold">Jesús Guzmán</span>
+        </p>
       </div>
     </aside>
   )

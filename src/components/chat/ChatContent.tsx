@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import MessageItem from "./MessageItem";
 import UserLeftOrKickedOrAddedMessageItem from "./UserLeftOrKickedOrAddedMessageItem";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import { updateMsgDataCache } from "@/utils/updateMsgsDataCache";
 import { socket } from "@/utils/socket";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -33,6 +34,8 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
   const {user: currentUser} = useCurrentUser();
 
   const {getToken} = useAuth();
+
+  const queryClient = useQueryClient();
 
   // Función para consultar los mensajes
   const getMessages = async (page: number) => {
@@ -119,12 +122,20 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
   }, [chatData]);
 
   // Scrollear al bottom al enviar/recibir un nuevo mensaje
+  // Escucar evento de mensaje editado
   useEffect(() => {
     socket.on("newMessage", (newMessage) => {
       // Si el scroll es menor o igual a 300px, scrollear al bottom
       if (scrollFromBottom <= 300 && chatData?._id === newMessage.message.chat) {
         wrapperRef.current!.scrollTop = wrapperRef.current!.scrollHeight;
       }
+    });
+
+    socket.on("editedMessage", (editedMessage) => {
+      updateMsgDataCache({
+        queryClient,
+        messageData: editedMessage
+      })
     });
   }, [socket, chatData, scrollFromBottom]);
 
@@ -174,8 +185,9 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
             return (
               <MessageItem
                 key={message._id}
-                currentUserId={currentUser._id}
+                currentUser={currentUser}
                 messageData={message}
+                chatData={chatData}
                 chatType={chatData?.type}
               />
             )

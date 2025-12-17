@@ -8,11 +8,12 @@ interface Props {
   currentUserId: string;
   isPending: boolean;
   children: ReactNode;
+  onEdit: (isEditing: boolean) => void;
   onDelete: (deleteFor: "me" | "all") => void;
 }
 
 const MessageDropdown = (props: Props) => {
-  const { messageData, currentUserId, isPending, children, onDelete } = props;
+  const { messageData, currentUserId, isPending, children, onEdit, onDelete } = props;
 
   const isCurrentUserSender = messageData.sender._id === currentUserId;
 
@@ -25,7 +26,10 @@ const MessageDropdown = (props: Props) => {
       <DropdownMenuContent>
         {isCurrentUserSender &&
           <>
-            <DropdownMenuItem className="flex justify-start items-center gap-2 cursor-pointer">
+            <DropdownMenuItem
+              className="flex justify-start items-center gap-2 cursor-pointer"
+              onClick={() => onEdit(true)}
+            >
               <Pencil className="size-5 text-neutral-500" />
               <span className="text-sm text-neutral-900">Editar</span>
             </DropdownMenuItem>

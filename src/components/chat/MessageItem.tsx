@@ -15,28 +15,33 @@ import { errorMessage } from "@/utils/errorMessage";
 import { socket } from "@/utils/socket";
 import dayjs from "@/utils/dayJsInstance";
 import { cn } from "@/lib/utils";
-import type { MessageType } from "@/types/global";
+import type { ChatType, MessageType, UserType } from "@/types/global";
+import MessageInputForm from "./MessageInputForm";
+import { Button } from "../ui/button";
 
 interface Props {
-  currentUserId: string;
+  currentUser: UserType;
   messageData: MessageType;
+  chatData: ChatType | null | undefined;
   chatType: "private" | "group" | undefined;
 }
 
-const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
+const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) => {
   const messageRef = useRef<HTMLDivElement>(null);
 
-  const isCurrentUserSender = messageData.sender?._id === currentUserId;
+  const isCurrentUserSender = messageData.sender?._id === currentUser._id;
   const messageSender = messageData.sender;
   const senderExists = Boolean(messageData.sender);
 
   const [isIntersecting, setIsIntersecting] = useState(false);
+  const [isEditingMessage, setIsEditingMessage] = useState(false);
+  const [messageText, setMessageText] = useState(messageData.text || "");
   
   const {setImages, setInitialIndex, setOpen: setOpenImgsViewer} = useImagesLighbox();
 
   const {getToken} = useAuth();
 
-  const isSeen = messageData.seenBy.find(el => el.user && el.user._id !== currentUserId);
+  const isSeen = messageData.seenBy.find(el => el.user && el.user._id !== currentUser._id);
   const seenAt = isSeen?.seenAt;
 
   // Observar si el mensaje es visible en el viewport
@@ -58,21 +63,49 @@ const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
 
   // Marcar el mensaje como visto
   useEffect(() => {
-    const isRecipient = messageData.sender?._id !== currentUserId;
+    const isRecipient = messageData.sender?._id !== currentUser._id;
 
     if (!isSeen && isIntersecting && isRecipient) {
       socket.emit("messageSeenBy", {
         messageId: messageData._id,
         chatId: messageData.chat,
-        userId: currentUserId
+        userId: currentUser._id
       });
     }
 
     return () => {
       // socket.off("messageSeenBy");
     }
-  }, [isIntersecting, socket, currentUserId, messageData, isSeen]);
+  }, [isIntersecting, socket, currentUser._id, messageData, isSeen]);
 
+  // Mutation para editar el mensaje
+  const {mutate: updateMessage, isPending: isSubmitting} = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      if (messageText === messageData.text) return messageData;
+
+      const {data} = await axiosInstance<{data: MessageType}>({
+        method: "PUT",
+        url: `/messages/edit/${messageData.chat}/${messageData._id}`,
+        data: {text: messageText},
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      return data;
+    },
+    onSuccess: () => {
+      setIsEditingMessage(false);
+    },
+    onError: (error) => {
+      toast.error(errorMessage(error));
+    }
+  });
+
+  // Mutation para eliminar el mensaje
   const {mutate, isPending} = useMutation({
     mutationFn: async (deleteFor: "me" | "all") => {
       const token = await getToken();
@@ -95,7 +128,7 @@ const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
     }
   });
 
-  const isMessageDeleted = messageData.deletedFor.includes(currentUserId) || messageData.deletedForAll;
+  const isMessageDeleted = messageData.deletedFor.includes(currentUser._id) || messageData.deletedForAll;
 
   return (
     <li className="flex justify-start gap-2 w-full">
@@ -147,8 +180,9 @@ const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
             {!isMessageDeleted &&
               <MessageDropdown
                 messageData={messageData}
-                currentUserId={currentUserId}
+                currentUserId={currentUser._id}
                 isPending={isPending}
+                onEdit={setIsEditingMessage}
                 onDelete={(deleteFor) => mutate(deleteFor)}
               >
                 <button className={cn("absolute top-0.5 flex justify-center items-center p-1 shrink-0 cursor-pointer z-10", isCurrentUserSender ? "left-0 translate-x-[-100%]" : "right-0 translate-x-[100%]")}>
@@ -162,11 +196,47 @@ const MessageItem = ({ currentUserId, messageData, chatType }: Props) => {
           </div>
 
           {/* Contenido de texto del mensaje (si lo tiene) */}
-          {messageData.text && (
+          {messageData.text && !isEditingMessage && (
             <p className={cn("w-full text-sm whitespace-pre-wrap", (isCurrentUserSender && !isMessageDeleted) ? "text-neutral-100" : isMessageDeleted ? "text-neutral-500 italic" : "text-neutral-900")}>
               <Twemoji className="[&>img]:!inline break-words" text={messageData.text} />
             </p>
           )}
+          
+          {/* Input de edición del mensaje */}
+          {isEditingMessage &&
+            <div className="flex flex-col gap-1 w-full">
+              <MessageInputForm
+                currentUser={currentUser}
+                chatData={chatData}
+                messageText={messageText || ""}
+                setMessageText={setMessageText}
+                submitting={isSubmitting}
+                className="bg-white"
+              />
+
+              <div className="flex justify-end items-center gap-2 w-full">
+                <Button
+                  className="p-0 text-neutral-400 cursor-pointer"
+                  variant="link"
+                  size="sm"
+                  disabled={isSubmitting}
+                  onClick={() => setIsEditingMessage(false)}
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  className="p-0 text-white cursor-pointer"
+                  variant="link"
+                  size="sm"
+                  disabled={isSubmitting}
+                  onClick={() => updateMessage()}
+                >
+                  Guardar
+                </Button>
+              </div>
+            </div>
+          }
           
           {/* Contenido multimedia del mensaje (si lo hay) */}
           {messageData.type !== "text" && (

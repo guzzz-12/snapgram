@@ -115,13 +115,13 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
     <NavLink
       key={chatData._id}
       className={({isActive}) => (
-        `flex justify-start items-center gap-2 px-4 py-3 border-b hover:bg-gray-100 cursor-pointer last:mb-0 ${isActive ? "bg-[#4F39F6]/10" : ""}`
+        `flex justify-center min-[950px]:justify-start items-center gap-2 p-2 min-[700px]:px-4 min-[700px]:py-3 border-b hover:bg-gray-100 cursor-pointer last:mb-0 ${isActive ? "bg-[#4F39F6]/10" : ""}`
       )}
       to={`/messages/${chatData._id}`}
       onClick={onClickHandler}
     >
       <div className="relative shrink-0">
-        <Avatar className="w-[40px] h-[40px] outline-2 outline-white">
+        <Avatar className="w-[40px] h-[40px] outline-2 outline-[#4F39F6]">
           <AvatarImage
             className="w-full h-full object-cover"
             src={avatar!}

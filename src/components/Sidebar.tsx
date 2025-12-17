@@ -60,7 +60,7 @@ const Sidebar = () => {
   return (
     <aside
       ref={sidebarRef}
-      className="flex flex-col justify-start gap-4 w-fit min-[950px]:w-[250px] shrink-0 h-screen px-1.5 pt-4 pb-0 border-r bg-gray-50"
+      className="flex flex-col justify-start gap-4 w-fit min-[950px]:w-[200px] min-[1100px]:w-[250px] shrink-0 h-screen px-1.5 pt-4 pb-0 border-r bg-gray-50"
     >
       <Link
         className="flex justify-start items-center gap-2 w-full"

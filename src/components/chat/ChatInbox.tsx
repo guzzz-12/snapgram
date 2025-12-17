@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
@@ -19,14 +19,11 @@ interface Props {
   chatId: string;
   temporaryChat: ChatType | null;
   headerHeight: number;
-  setHeaderHeight: Dispatch<SetStateAction<number>>;
   setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
 const ChatInbox = (props: Props) => {
-  const {chatId, temporaryChat, headerHeight, setHeaderHeight, setTemporaryChat} = props;
-
-  const headerRef = useRef<HTMLDivElement>(null);
+  const {chatId, temporaryChat, headerHeight, setTemporaryChat} = props;
 
   const navigate = useNavigate();
 
@@ -80,11 +77,6 @@ const ChatInbox = (props: Props) => {
   const userBlockedMe = isBlocked.blockedUser === currentUser?._id;
 
   useEffect(() => {
-    // Calcular el height del header del inbox
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.clientHeight);
-    }
-
     // Escuchar evento de usuario bloqueado/desbloqueado
     socket.on("userBlocked", (data) => {
       const {user, blockedUser, operation, chatId: blockedChatId} = data;
@@ -129,7 +121,6 @@ const ChatInbox = (props: Props) => {
         isLoading={isFetching}
         headerHeight={headerHeight}
         blockData={isBlocked}
-        headerRef={headerRef}
       />
 
       <ChatContent

@@ -115,7 +115,7 @@ const MessageInputForm = (props: Props) => {
       </Popover>
 
       <Textarea
-        className={cn("w-full min-h-full max-h-[80px] pl-12 border-none rounded-full resize-none scrollbar-none", className)}
+        className={cn("w-full min-h-full max-h-[80px] pl-12 border-none rounded-full resize-none scrollbar-none placeholder:whitespace-nowrap", className)}
         placeholder="Escribe algo..."
         disabled={submitting}
         value={messageText}

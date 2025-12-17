@@ -14,7 +14,7 @@ const MessagesPage = () => {
   const [searchParams] = useSearchParams();
   const chatTypeParam = searchParams.get("type") as "all" | "group" | null;
 
-  const [headerHeight, setHeaderHeight] = useState(60);
+  const [headerHeight, _setHeaderHeight] = useState(67);
   const [temporaryChat, setTemporaryChat] = useState<ChatType | null>(null);
 
   const {setIsOpen: setOpenPrivateChatsModal} = usePrivateChatsListModal();
@@ -29,13 +29,12 @@ const MessagesPage = () => {
         chatTypeParam={chatTypeParam}
       />
 
-      <section className="flex flex-col justify-start w-full h-screen">
+      <section className="flex flex-col justify-start w-full h-screen overflow-x-hidden">
         {chatId &&
           <ChatInbox
             chatId={chatId}
             temporaryChat={temporaryChat}
             headerHeight={headerHeight}
-            setHeaderHeight={setHeaderHeight}
             setTemporaryChat={setTemporaryChat}
           />
         }

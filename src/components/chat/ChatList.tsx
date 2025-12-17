@@ -25,7 +25,7 @@ interface Props {
   chatTypeParam?: "all" | "group" | null;
 }
 
-const ChatList = ({ temporaryChatItem, chatTypeParam }: Props) => {
+const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const {chatId} = useParams<{chatId: string}>();
@@ -103,9 +103,10 @@ const ChatList = ({ temporaryChatItem, chatTypeParam }: Props) => {
   }
 
   return (
-    <aside className="flex flex-col w-fit min-[950px]:w-[320px] h-full pb-4 min-[600px]:pb-6 border-r overflow-hidden">
+    <aside className="flex flex-col w-fit min-[950px]:w-[240px] shrink-0 h-full pb-4 min-[600px]:pb-6 border-r overflow-hidden">
       <Button
-        className="h-auto py-4 rounded-none cursor-pointer"
+        style={{height: `${headerHeight}px`}}
+        className="p-2 min-[700px]:py-4 rounded-none cursor-pointer"
         variant="ghost"
         onClick={() => setOpenPrivateChatsModal(true)}
       >
@@ -129,14 +130,14 @@ const ChatList = ({ temporaryChatItem, chatTypeParam }: Props) => {
         >
           <TabsList className="flex-col min-[950px]:flex-row w-full h-fit gap-0 p-0 bg-white rounded-md">
             <TabsTrigger
-              className="w-full h-full p-4 shrink-0 !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
+              className="w-full h-full px-2 py-3 min-[700px]:p-4 shrink-0 !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
               value="all"
             >
               Chats
             </TabsTrigger>
 
             <TabsTrigger
-              className="w-full h-full p-4 shrink-0 !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
+              className="w-full h-full px-2 py-3 min-[700px]:p-4 shrink-0 !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
               value="group"
             >
               Grupos

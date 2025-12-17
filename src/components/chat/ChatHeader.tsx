@@ -1,4 +1,4 @@
-import { useState, type RefObject } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { Ellipsis, Info } from "lucide-react";
 import { FiLock } from "react-icons/fi";
@@ -25,10 +25,9 @@ interface Props {
   headerHeight: number;
   /** Información sobre el bloqueo entre los dos usuarios del chat privado */
   blockData: { blockedBy: string | null; blockedUser: string | null };
-  headerRef: RefObject<HTMLDivElement | null>;
 }
 
-const ChatHeader = ({ chatData, isLoading, headerHeight, blockData, headerRef }: Props) => {
+const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => {
   // State del modal de agregar miembros al grupo
   const [openAddMemberModal, setOpenAddMemberModal] = useState(false);
 
@@ -114,10 +113,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData, headerRef }:
       }
 
       {!isLoading &&
-        <div
-          ref={headerRef}
-          className="flex justify-between items-center gap-4 w-full px-4 py-2 bg-white border-b"
-        >
+        <div className="flex justify-between items-center gap-4 w-full px-4 py-2 bg-white border-b">
           <Link
             to={chatData?.type === "group" ? "#" : `/profile/${recipient?.clerkId}`}
             className="flex justify-start items-center gap-4 overflow-hidden"

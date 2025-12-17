@@ -12,6 +12,7 @@ import PostTextContent from "@/components/posts/PostTextContent";
 import PostCommentInput from "@/components/posts/PostCommentInput";
 import CommentsList from "@/components/comments/CommentsList";
 import SharedPostCard from "@/components/posts/SharedPostCard";
+import PostNotFound from "@/components/posts/PostNotFound";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -71,7 +72,9 @@ const PostPage = () => {
 
       return data.data;
     },
-    enabled: !!postId
+    enabled: !!postId,
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
   if (postError) {
@@ -140,13 +143,8 @@ const PostPage = () => {
     )
   }
 
-  //! TODO: Crear el layout de la página not found
   if (!postData) {
-    return (
-      <main className="flex justify-center items-center w-full h-full">
-        <h1 className="text-2xl font-bold">Post not found</h1>
-      </main>
-    )
+    return <PostNotFound />
   }
 
   return (

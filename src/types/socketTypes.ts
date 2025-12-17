@@ -53,6 +53,7 @@ export interface ServerEvents {
   groupDeleted: (groupId: string) => void;
   userLeftGroup: (data: ChatType) => void;
   userJoinedGroup: (data: ChatType) => void;
+  editedMessage: (data: MessageType) => void;
   userBlocked: (data: {
     operation: "block" | "unblock";
     /** El usuario que realiza el bloqueo/desbloqueo */

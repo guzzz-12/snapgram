@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { errorMessage } from "@/utils/errorMessage";
-import { addNewChatToChatsListCache, addNewGroupToChatsListCache, deleteGroupFromChatsListCache, updateChatLastMessageCache, updateDeletedMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache, updateSeenMsgDataCache } from "@/utils/updateMsgsDataCache";
+import { addNewChatToChatsListCache, addNewGroupToChatsListCache, deleteGroupFromChatsListCache, updateChatLastMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache, updateMsgDataCache } from "@/utils/updateMsgsDataCache";
 import { socket } from "@/utils/socket";
 
 const SocketManager = () => {
@@ -101,8 +101,8 @@ const SocketManager = () => {
 
     // Escuchar el evento de mensaje eliminado
     socket.on("deletedMessage", (data) => {
-      updateDeletedMessageCache({
-        deletedMessage: data,
+      updateMsgDataCache({
+        messageData: data,
         queryClient
       });
     });
@@ -167,9 +167,8 @@ const SocketManager = () => {
 
     // Escuchar evento de mensaje visto
     socket.on("messageSeenBy", (data) => {
-      updateSeenMsgDataCache({
+      updateMsgDataCache({
         queryClient,
-        chatId: data.chatId,
         messageData: data.message,
       })
     });

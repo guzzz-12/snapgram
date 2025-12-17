@@ -8,11 +8,6 @@ interface UpdateMsgCacheProps {
   newMessage: NewMessageEventData;
 }
 
-interface UpdateDeletedMsgCacheProps {
-  queryClient: QueryClient;
-  deletedMessage: MessageType;
-}
-
 interface AddNewChatProps {
   queryClient: QueryClient;
   newMessage: NewMessageEventData;
@@ -39,9 +34,8 @@ interface RestoreDeletedChatProps {
   restoredChat: ChatType;
 }
 
-interface UpdateSeenMsgDataCacheProps {
+interface UpdateMsgDataCacheProps {
   queryClient: QueryClient;
-  chatId: string;
   messageData: MessageType;
 }
 
@@ -76,57 +70,6 @@ export const updateMessagesCache = (props: UpdateMsgCacheProps) => {
             messages: [newMessage.message, ...currentMessages],
             chat: newMessage.chat,
             isNewChat: newMessage.isNewChat
-          }
-        };
-      }
-
-      // Retornar las otras páginas sin cambios
-      return page;
-    });
-
-    // Retornar la caché actualizada
-    return {
-      ...oldData,
-      pages: newData,
-    };
-  });
-}
-
-
-/** Actualizar la caché de los mensajes al eliminar un mensaje */
-export const updateDeletedMessageCache = (props: UpdateDeletedMsgCacheProps) => {
-  const { queryClient, deletedMessage } = props;
-
-  queryClient.setQueryData(["messages", deletedMessage.chat], (oldData: InfiniteData<{
-    data: {
-      messages: MessageType[];
-      chat: ChatType;
-      isNewChat: boolean;
-    };
-    hasMore: boolean;
-    nextPage: number | null;
-  }>) => {
-    if (!oldData) {
-      return oldData;
-    }
-
-    const newData = oldData.pages.map((page, index) => {
-      if (index === 0) {
-        const updatedMessages = [...page.data.messages];
-
-        // Buscar el índice del mensaje eliminado
-        const deletedMessageIndex = updatedMessages.findIndex((message) => message._id === deletedMessage._id);
-
-        // Actualizar el mensaje eliminado
-        if (deletedMessageIndex !== -1) {
-          updatedMessages.splice(deletedMessageIndex, 1, deletedMessage);
-        }
-
-        return {
-          ...page,
-          data: {
-            ...page.data,
-            messages: updatedMessages
           }
         };
       }
@@ -481,12 +424,12 @@ export const restoreDeletedChatCache = (props: RestoreDeletedChatProps) => {
 }
 
 /**
- * Actualizar el item del mensaje visto en la caché
+ * Actualizar la data de un mensaje en la caché
  */
-export const updateSeenMsgDataCache = (props: UpdateSeenMsgDataCacheProps) => {
-  const { queryClient, chatId, messageData } = props;
+export const updateMsgDataCache = (props: UpdateMsgDataCacheProps) => {
+  const { queryClient, messageData } = props;
 
-  queryClient.setQueryData(["messages", chatId], (oldData: InfiniteData<{
+  queryClient.setQueryData(["messages", messageData.chat], (oldData: InfiniteData<{
     data: {
       messages: MessageType[];
       chat: ChatType;
@@ -499,15 +442,15 @@ export const updateSeenMsgDataCache = (props: UpdateSeenMsgDataCacheProps) => {
       return oldData;
     }
 
-    // Buscar el index del page al cual pertenece el mensaje visto
-    const pageIndex = oldData.pages.findIndex(page => page.data.chat._id === chatId);
+    // Buscar el index del page al cual pertenece el mensaje
+    const pageIndex = oldData.pages.findIndex(page => page.data.messages.some(msg => msg._id === messageData._id));
 
     const updatedPage = {...oldData.pages[pageIndex]}
 
-    // Buscar el index del mensaje visto
+    // Buscar el index del mensaje
     const messageIndex = updatedPage.data.messages.findIndex(msg => msg._id === messageData._id);
 
-    // Reemplazar el mensaje visto en la caché
+    // Reemplazar el mensaje en la caché
     updatedPage.data.messages.splice(messageIndex, 1, messageData);
 
     // Reemplazar el page en la data

@@ -7,7 +7,10 @@ import { FiMoreVertical } from "react-icons/fi";
 import { CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 import MessageDropdown from "./MessageDropdown";
+import MessageInputForm from "./MessageInputForm";
+import MessageHistoryModal from "./MessageHistoryModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useImagesLighbox } from "@/hooks/useImagesLightbox";
 import dayJsInstance from "@/utils/dayJsInstance";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -16,8 +19,6 @@ import { socket } from "@/utils/socket";
 import dayjs from "@/utils/dayJsInstance";
 import { cn } from "@/lib/utils";
 import type { ChatType, MessageType, UserType } from "@/types/global";
-import MessageInputForm from "./MessageInputForm";
-import { Button } from "../ui/button";
 
 interface Props {
   currentUser: UserType;
@@ -36,6 +37,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [isEditingMessage, setIsEditingMessage] = useState(false);
   const [messageText, setMessageText] = useState(messageData.text || "");
+  const [openMsgHistoryModal, setOpenMsgHistoryModal] = useState(false);
   
   const {setImages, setInitialIndex, setOpen: setOpenImgsViewer} = useImagesLighbox();
 
@@ -102,6 +104,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
     },
     onError: (error) => {
       toast.error(errorMessage(error));
+      setMessageText(messageData.text || "");
     }
   });
 
@@ -132,6 +135,12 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
   return (
     <li className="flex justify-start gap-2 w-full">
+      <MessageHistoryModal
+        messageData={messageData}
+        isOpen={openMsgHistoryModal}
+        setIsOpen={setOpenMsgHistoryModal}
+      />
+
       {!isCurrentUserSender && chatType === "group" &&
         <Link
           to={senderExists ? `/profile/${messageSender.clerkId}` : "#"}
@@ -270,12 +279,25 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
             </div>
           )}
 
-          <p
-            className={cn("w-full mt-1 text-right text-[10px]", (isCurrentUserSender && !isMessageDeleted) ? "text-neutral-300" : "text-neutral-600")}
-            title={dayJsInstance(messageData.createdAt).format("DD/MM/YYYY - hh:mm A")}
-          >
-            {dayJsInstance(messageData.createdAt).format("DD/MM/YYYY")}
-          </p>
+          {/* Historial de cambios del mensaje y fecha del mensaje */}
+          <div className="flex justify-between items-center gap-4 w-full my-1.5">
+            {messageData.history && messageData.history.length > 0 &&
+              <Button
+                className={cn("h-auto p-0 text-xs underline cursor-pointer", isCurrentUserSender ? "text-slate-300" : "text-blue-600")}
+                variant="link"
+                onClick={() => setOpenMsgHistoryModal(true)}
+              >
+                Editado
+              </Button>
+            }
+
+            <p
+              className={cn("w-full text-right text-[10px]", (isCurrentUserSender && !isMessageDeleted) ? "text-neutral-300" : "text-neutral-600")}
+              title={dayJsInstance(messageData.createdAt).format("DD/MM/YYYY - hh:mm A")}
+            >
+              {dayJsInstance(messageData.createdAt).format("DD/MM/YYYY")}
+            </p>
+          </div>
         </div>
       </div>
     </li>

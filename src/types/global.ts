@@ -226,6 +226,11 @@ export type MessageType = {
   kickedUser: UserType | null;
   addedBy: UserType | null;
   addedUser: UserType | null;
+  history: {
+    _id: string;
+    previousContent: string;
+    editedAt: string
+  }[] | null;
   createdAt: string;
   updatedAt: string;
 }

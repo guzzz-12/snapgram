@@ -85,7 +85,7 @@ const PostCommentInput = ({postId, className}: Props) => {
   }, []);
 
   return (
-    <div className={cn("relative flex justify-between items-center gap-3 w-full shrink-0 px-6 py-4 bg-neutral-100 border-t", className)}>
+    <div className={cn("relative flex justify-between items-center gap-3 w-full shrink-0 px-3 py-2 bg-neutral-100 border-t", className)}>
       {selectedImagePreviews.length > 0 &&
         <div className="absolute -top-1 right-1 p-1.5 -translate-x-[100%] -translate-y-[100%] bg-neutral-300 rounded-sm shadow overflow-hidden">
           <button

@@ -60,7 +60,7 @@ const CreateCommentInput = (props : Props) => {
       </Popover>
 
       <Textarea
-        className={cn("w-full min-h-auto max-h-[150px] pl-12 py-4 bg-white border-none rounded-sm resize-none scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white", className)}
+        className={cn("w-full min-h-auto max-h-[150px] pl-12 py-2 min-[500px]:py-4 bg-white border-none rounded-sm resize-none scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white placeholder:whitespace-nowrap", className)}
         placeholder={placeholder || "Escribe un comentario..."}
         disabled={isPending}
         value={textContent}

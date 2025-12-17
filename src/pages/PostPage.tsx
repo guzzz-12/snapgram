@@ -150,7 +150,7 @@ const PostPage = () => {
   }
 
   return (
-    <main className="pageWrapper h-screen p-0 overflow-y-hidden">
+    <main className="h-auto min-[950px]:h-screen p-0 min-[950px]:overflow-y-hidden">
       {/* Botón para salir del post */}
       <Tooltip>
         <TooltipTrigger asChild>
@@ -251,8 +251,8 @@ const PostPage = () => {
       }
 
       {/* Contenido del post de tipo imagen o texto + imagen */}
-      {(postData.postType == "image" || postData.postType == "textWithImage") &&
-        <section className="flex w-full h-full bg-black overflow-hidden">
+      {(postData.postType == "image" || postData.postType === "textWithImage") &&
+        <section className="flex flex-col min-[950px]:flex-row w-full h-full bg-black overflow-hidden">
           {/* Columna izquierda: Slider de imágenes del post */}
           <div className="w-full h-full overflow-hidden">
             <Slider
@@ -263,7 +263,7 @@ const PostPage = () => {
               {postData.imageUrls.map((imageUrl, index) => (
                 <div
                   key={index}
-                  className="relative w-full h-screen bg-black overflow-hidden"
+                  className="relative w-full h-[80vh] min-[950px]:h-screen bg-black overflow-hidden"
                 >
                   <div
                     style={{
@@ -284,7 +284,7 @@ const PostPage = () => {
           </div>
 
           {/* Columna derecha (autor, información del post, comentarios) */}
-          <div className="flex flex-col gap-3 w-min h-full shrink-0 pb-0 overflow-hidden bg-neutral-50">
+          <div className="flex flex-col gap-3 w-full min-[950px]:w-min h-full shrink-0 pb-0 overflow-hidden bg-neutral-50">
             <div className="w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
               <PostCardHeader
                 className="p-3 pb-0"

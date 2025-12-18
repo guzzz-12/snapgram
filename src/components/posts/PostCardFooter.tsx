@@ -48,6 +48,7 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: ["posts"]});
       await queryClient.invalidateQueries({queryKey: ["posts", postData._id]});
+      await queryClient.invalidateQueries({queryKey: ["likes", "likedPosts"]});
       
       if (searchTerm) {
         await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});

@@ -10,6 +10,7 @@ import ProfileHeaderSkeleton from "@/components/posts/ProfileHeaderSkeleton";
 import PostsTabContent from "@/components/profile/PostsTabContent";
 import FollowersTabContent from "@/components/profile/FollowersTabContent";
 import FollowingTabContent from "@/components/profile/FollowingTabContent";
+import LikedPostsTabContent from "@/components/profile/LikedPostsTabContent";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -22,7 +23,7 @@ const ProfilePage = () => {
 
   const [activeTab, setActiveTab] = useState("posts");
 
-  const {getToken} = useAuth();
+  const {getToken, userId} = useAuth();
 
   // Restablecer el tab default al cambiar de usuario
   useEffect(() => {
@@ -114,7 +115,7 @@ const ProfilePage = () => {
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <TabsList className="flex items-center w-full h-auto mx-auto px-4 py-2 bg-white shadow-none rounded-none border-t">
+            <TabsList className="flex justify-start items-center w-full h-auto mx-auto px-4 py-2 bg-white shadow-none rounded-none border-t overflow-x-auto">
               <TabsTrigger
                 className="!text-[16px] !text-center font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
                 value="posts"
@@ -135,6 +136,16 @@ const ProfilePage = () => {
               >
                 {userData?.followingCount} Siguiendo
               </TabsTrigger>
+
+              {/* Mostrar los likes del usuario autenticado, no de otros perfiles */}
+              {userClerkId === userId &&
+                <TabsTrigger
+                  className="text-[16px] font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                  value="likes"
+                >
+                  Me gusta
+                </TabsTrigger>
+              }
             </TabsList>
 
             <TabsContent className="w-full" value="posts">
@@ -148,6 +159,13 @@ const ProfilePage = () => {
             <TabsContent className="w-full" value="following">
               {userData && <FollowingTabContent userData={userData} />}
             </TabsContent>
+
+            {/* Mostrar los likes del usuario autenticado, no de otros perfiles */}
+            {userClerkId === userId &&
+              <TabsContent className="w-full" value="likes">
+                {userData && <LikedPostsTabContent userData={userData} />}
+              </TabsContent>
+            }
           </Tabs>
         </section>
       }

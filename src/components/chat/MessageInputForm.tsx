@@ -1,4 +1,4 @@
-import { useCallback, useRef, type ChangeEvent, type Dispatch, type HTMLAttributes, type SetStateAction, type WheelEvent } from "react";
+import { useCallback, useEffect, useRef, type ChangeEvent, type Dispatch, type HTMLAttributes, type SetStateAction, type WheelEvent } from "react";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { Smile } from "lucide-react";
@@ -22,8 +22,27 @@ interface Props {
 const MessageInputForm = (props: Props) => {
   const { currentUser, chatData, submitting, messageText, setMessageText, className } = props;
 
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const stopTypingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Hacer focus en el input al montar
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const textarea = inputRef.current!;
+
+      textarea.focus();
+
+      const contentLength = textarea.value.length;
+
+      textarea.setSelectionRange(contentLength, contentLength);
+    }, 250);
+
+    return () => {
+      clearTimeout(timeout);
+      setMessageText("");
+    };
+  }, []);
 
   // Función debounced para emitir el evento de typing
   const emitTypingDebounced = useCallback((payload: TypingEventData) => {
@@ -115,6 +134,7 @@ const MessageInputForm = (props: Props) => {
       </Popover>
 
       <Textarea
+        ref={inputRef}
         className={cn("w-full min-h-full max-h-[80px] pl-12 border-none rounded-full resize-none scrollbar-none placeholder:whitespace-nowrap", className)}
         placeholder="Escribe algo..."
         disabled={submitting}

@@ -117,14 +117,14 @@ const ChatInbox = (props: Props) => {
   return (
     <div className="flex flex-col w-full h-full">
       <ChatHeader
-        chatData={temporaryChat || chat}
+        chatData={chat || temporaryChat}
         isLoading={isFetching}
         headerHeight={headerHeight}
         blockData={isBlocked}
       />
 
       <ChatContent
-        chatData={temporaryChat || chat}
+        chatData={chat || temporaryChat}
         isLoadingChatData={isFetching}
       />
 
@@ -135,7 +135,7 @@ const ChatInbox = (props: Props) => {
       */}
       {!isFetching && (!blockExists && otherUserExists || !isPrivateChat) &&
         <ChatInput
-          chatData={temporaryChat || chat}
+          chatData={chat || temporaryChat}
           wrapperHeight={headerHeight}
           setTemporaryChat={setTemporaryChat}
           chatTypeParam={chatTypeParam}

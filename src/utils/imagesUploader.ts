@@ -5,7 +5,7 @@ import type { UserType } from "@/types/global";
 interface Props {
   files: File[];
   clerkToken: string;
-  currentUser: UserType;
+  currentUser: UserType | null;
   folderName: string;
 }
 
@@ -17,6 +17,10 @@ type Signature = {
 
 /** Subir imagen(es) a ImageKit */
 export const imagesUploader = async (props: Props) => {
+  if (!props.currentUser) {
+    return [];
+  }
+
   const { files, clerkToken, currentUser, folderName } = props;
 
   if (!files || files.length === 0) {

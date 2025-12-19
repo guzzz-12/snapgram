@@ -13,6 +13,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
+import { imagesUploader } from "@/utils/imagesUploader";
 import type { ChatType, MessageType } from "@/types/global";
 
 interface Props {
@@ -56,22 +57,19 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
   const {mutate, isPending: submitting} = useMutation({
     mutationKey: ["send-message", chatData?._id],
     mutationFn: async () => {
-      const token = await getToken();
+      const token1 = await getToken();
+      
+      // Subir las imágenes a ImageKit si las hay
+      const uploadData = selectedImageFiles.length > 0 ? await imagesUploader({
+        files: selectedImageFiles,
+        clerkToken: token1!,
+        folderName: `chats/${chatData?._id}`,
+        currentUser
+      }) : [];
 
-      const formData = new FormData();
-      formData.append("text", messageText);
+      const token2 = await getToken();
 
       const participants = chatData?.participants.map(user => user._id) || [];
-
-      participants.forEach(participant => {
-        formData.append("recipientIds[]", participant);
-      });
-
-      if (chatData && !chatData._id.startsWith("temp_")) {
-        formData.append("chatId", chatData._id);
-      }
-
-      selectedImageFiles.forEach(file => formData.append("file", file));
 
       const {data} = await axiosInstance<{
         data: MessageType;
@@ -80,10 +78,16 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
       }>({
         method: "POST",
         url: `/messages/send`,
-        data: formData,
+        data: {
+          text: messageText,
+          chatId: chatData?._id,
+          recipientIds: participants,
+          imagesUrls: uploadData.map(uData => uData.imageUrl),
+          imagesFileIds: uploadData.map(uData => uData.imageFileId)
+        },
         headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
+          Authorization: `Bearer ${token2}`,
+          "Content-Type": "application/json"
         }
       });
 
@@ -151,6 +155,7 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
       <div className="absolute -top-2 left-1 flex justify-start items-center gap-2 max-w-[80%] bg-white rounded-md translate-x-[24px] -translate-y-[100%] overflow-x-hidden z-50">
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           <SelectedImagesPreviews
+            className="bg-[#4F39F6]/20"
             fileInputRef={fileInputRef}
             processingImages={isProcessing}
             isPending={submitting}
@@ -193,11 +198,11 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
 
       {(messageText.length > 0 || selectedImageFiles[0]) &&
         <button
-          className="p-1 text-sm text-blue-700 font-semibold cursor-pointer hover:underline"
+          className="p-1 text-sm text-blue-700 font-semibold cursor-pointer hover:underline disabled:cursor-not-allowed disabled:text-neutral-400"
           disabled={submitting}
           onClick={() => mutate()}
         >
-          Enviar
+          { submitting ? "Enviando..." : "Enviar" }
         </button>
       }
 

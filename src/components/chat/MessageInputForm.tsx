@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useRef, type ChangeEvent, type Dispatch, type HTMLAttributes, type SetStateAction, type WheelEvent } from "react";
+import { useEffect, useRef, type ChangeEvent, type Dispatch, type HTMLAttributes, type SetStateAction, type WheelEvent } from "react";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { Smile } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import type { TypingEventData } from "@/types/socketTypes";
-import { socket } from "@/utils/socket";
+import useTypingEvent from "@/hooks/useTypingEvent";
 import type { ChatType, UserType } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -23,8 +22,6 @@ const MessageInputForm = (props: Props) => {
   const { currentUser, chatData, submitting, messageText, setMessageText, className } = props;
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const stopTypingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Hacer focus en el input al montar
   useEffect(() => {
@@ -44,32 +41,8 @@ const MessageInputForm = (props: Props) => {
     };
   }, []);
 
-  // Función debounced para emitir el evento de typing
-  const emitTypingDebounced = useCallback((payload: TypingEventData) => {
-    // Reiniciar el timer de typing si existe
-    if (typingTimerRef.current) {
-      clearTimeout(typingTimerRef.current);
-    }
-
-    // Reiniciar el timer de stoppedTyping si existe
-    if (stopTypingTimerRef.current) {
-      clearTimeout(stopTypingTimerRef.current);
-    }
-
-    // Emitir el evento de typing
-    typingTimerRef.current = setTimeout(() => {
-      socket.emit("typing", payload);
-      
-      // Emitir el evento de stoppedTyping
-      stopTypingTimerRef.current = setTimeout(() => {
-        socket.emit("stoppedTyping", {
-          chatId: payload.chatId,
-          userId: payload.user._id
-        });
-      }, 1000);
-
-    }, 250);
-  }, [socket]);
+  // Emitir evento de typing cuando el usuario escribe el mensaje
+  const {emitTypingDebounced} = useTypingEvent();
 
   // Change handler del textarea
   const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {

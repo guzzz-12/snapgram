@@ -31,8 +31,10 @@ const SelectedImagesPreviews = (props: Props) => {
   // El número de imagenes que se estan procesando
   const processingCount = fileInputRef.current?.files?.length ?? 0;
 
+  if (!selectedImagePreviews.length && !processingImages) return null;
+
   return (
-    <div className={cn("flex justify-start items-center gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200", className)}>
+    <div className={cn("flex justify-start items-center gap-3 p-1 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200", className)}>
       {/* Botón para adjuntar más imágenes */}
       <Tooltip>
         <TooltipTrigger asChild>

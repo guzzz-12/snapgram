@@ -76,7 +76,7 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
       const uploadData = hasFiles ? await filesUploader({
         files: recordedFile ? [recordedFile] : selectedImageFiles,
         clerkToken: token1!,
-        folderName: `chats/${chatData?._id}`,
+        folderName: `/chats/${chatData?._id}`,
         currentUser
       }) : [];
 

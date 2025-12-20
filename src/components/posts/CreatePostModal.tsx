@@ -43,7 +43,7 @@ const CreatePostModal = () => {
     const uploadData = selectedImageFiles.length > 0 ? await filesUploader({
       files: selectedImageFiles,
       clerkToken: token1!,
-      folderName: `posts/${user._id}`,
+      folderName: `/posts/${user._id}`,
       currentUser: user
     }) : [];
 

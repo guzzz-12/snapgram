@@ -10,6 +10,7 @@ import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
+import { useUsersRecordingAudio } from "@/hooks/useUsersRecordingAudio";
 import { errorMessage } from "@/utils/errorMessage";
 import { addNewChatToChatsListCache, addNewGroupToChatsListCache, deleteGroupFromChatsListCache, updateChatLastMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache, updateMsgDataCache } from "@/utils/updateMsgsDataCache";
 import { socket } from "@/utils/socket";
@@ -32,6 +33,8 @@ const SocketManager = () => {
   const { addToUnreadChats } = useUnreadChats();
 
   const { addToUsersTyping, removeFromUsersTyping } = useUsersTyping();
+
+  const {addToUsersRecordingAudio, removeFromUsersRecordingAudio} = useUsersRecordingAudio();
 
   // Consultar el token de autenticación
   useEffect(() => {
@@ -115,6 +118,16 @@ const SocketManager = () => {
     // Escuchar evento de dejar de escribir
     socket.on("stoppedTyping", (data) => {
       removeFromUsersTyping(data.userId);
+    });
+
+    // Escuchar evento de grabando audio
+    socket.on("recordingAudio", (data) => {
+      addToUsersRecordingAudio(data);
+    });
+
+    // Escuchar evento de grabación de audio terminada
+    socket.on("stoppedRecordingAudio", (data) => {
+      removeFromUsersRecordingAudio(data.user._id);
     });
 
     // Escuchar evento de grupo creado

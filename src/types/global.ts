@@ -1,3 +1,5 @@
+export type MessageTypes = "text" | "image" | "audio" | "imageWithText" | "userAddedToGroup" | "userLeftGroup" | "userKickedFromGroup";
+
 export type UserType = {
   _id: string;
   clerkId: string;
@@ -220,7 +222,7 @@ export type MessageType = {
   }[];
   deletedFor: string[];
   deletedForAll: boolean;
-  type: "text" | "file" | "fileWithText" | "userAddedToGroup" | "userLeftGroup" | "userKickedFromGroup";
+  type: MessageTypes;
   userWhoLeft: UserType | null;
   kickedBy: UserType | null;
   kickedUser: UserType | null;

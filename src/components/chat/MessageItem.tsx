@@ -221,6 +221,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
                 setMessageText={setMessageText}
                 submitting={isSubmitting}
                 className="bg-white"
+                isSending={false}
               />
 
               <div className="flex justify-end items-center gap-2 w-full">
@@ -247,8 +248,8 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
             </div>
           }
           
-          {/* Contenido multimedia del mensaje (si lo hay) */}
-          {messageData.type !== "text" && (
+          {/* Contenido de imagen del mensaje (si lo hay) */}
+          {["image", "imageWithText"].includes(messageData.type) && (
             <div className="grid grid-cols-3 gap-2 w-full h-auto mt-1 overflow-hidden">
               {messageData.fileUrls.map((fileUrl, i) => (
                 <button
@@ -278,6 +279,17 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
               ))}
             </div>
           )}
+
+          {/* Mensaje de audio */}
+          {messageData.type === "audio" &&
+          <div className="w-full">
+            <audio
+              className=""
+              controls
+              src={messageData.fileUrls[0]}
+            />
+          </div>
+          }
 
           {/* Historial de cambios del mensaje y fecha del mensaje */}
           <div className="flex justify-between items-center gap-4 w-full my-1.5">

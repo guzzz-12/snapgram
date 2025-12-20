@@ -36,6 +36,8 @@ export interface ClientEvents {
   getOnlineUsers: (data: {userId: string}) => void;
   typing: (data: TypingEventData) => void;
   stoppedTyping: (data: {userId: string, chatId: string}) => void;
+  recordingAudio: (data: TypingEventData) => void;
+  stoppedRecordingAudio: (data: TypingEventData) => void;
   messageSeenBy: (data: {messageId: string, chatId: string, userId: string}) => void;
 }
 
@@ -47,6 +49,8 @@ export interface ServerEvents {
   deletedMessage: (deletedMessage: MessageType) => void;
   typing: (data: TypingEventData) => void;
   stoppedTyping: (data: {userId: string, chatId: string}) => void;
+  recordingAudio: (data: TypingEventData) => void;
+  stoppedRecordingAudio: (data: TypingEventData) => void;
   messageSeenBy: (data: {message: MessageType, chatId: string, userId: string}) => void;
   groupCreated: (data: ChatType) => void;
   groupUpdated: (data: ChatType) => void;

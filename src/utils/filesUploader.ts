@@ -16,7 +16,7 @@ type Signature = {
 }
 
 /** Subir imagen(es) a ImageKit */
-export const imagesUploader = async (props: Props) => {
+export const filesUploader = async (props: Props) => {
   if (!props.currentUser) {
     return [];
   }
@@ -65,8 +65,8 @@ export const imagesUploader = async (props: Props) => {
 
   return uploadData
   .map(data => ({
-    imageUrl: data.url,
-    imageFileId: data.fileId
+    fileUrl: data.url,
+    fileId: data.fileId
   }))
-  .filter((data) => data.imageUrl && data.imageFileId);
+  .filter((data) => data.fileUrl && data.fileId);
 }

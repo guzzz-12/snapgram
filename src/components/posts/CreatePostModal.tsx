@@ -15,7 +15,7 @@ import useImagePicker from "@/hooks/useImagePicker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import { imagesUploader } from "@/utils/imagesUploader";
+import { filesUploader } from "@/utils/filesUploader";
 import type { PostType, PostWithLikes } from "@/types/global";
 
 const CreatePostModal = () => {
@@ -40,7 +40,7 @@ const CreatePostModal = () => {
     const token1 = await getToken();
 
     // Subir las imágenes a ImageKit si las hay
-    const uploadData = selectedImageFiles.length > 0 ? await imagesUploader({
+    const uploadData = selectedImageFiles.length > 0 ? await filesUploader({
       files: selectedImageFiles,
       clerkToken: token1!,
       folderName: `posts/${user._id}`,
@@ -58,8 +58,8 @@ const CreatePostModal = () => {
       url: "/posts",
       data: {
         content: textContent,
-        imageUrls: uploadData.map(uData => uData.imageUrl),
-        imageFileIds: uploadData.map(uData => uData.imageFileId)
+        imageUrls: uploadData.map(uData => uData.fileUrl),
+        imageFileIds: uploadData.map(uData => uData.fileId)
       },
       headers: {
         "Content-Type": "application/json",

@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { IoIosRecording } from "react-icons/io";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { MessageType } from "@/types/global";
 
@@ -7,7 +8,7 @@ interface Props {
 }
 
 const NewMessageToast = ({ messageData }: Props) => {
-  const { sender, chat, text, fileUrls } = messageData;
+  const { sender, chat, text, type, fileUrls } = messageData;
   const notificationLink = `/messages/${chat}`
 
   return (
@@ -38,12 +39,21 @@ const NewMessageToast = ({ messageData }: Props) => {
           </span>
         }
 
-        {fileUrls.length > 0 &&
+        {(type === "image" || type === "imageWithText") &&
           <div className="w-full h-[80px] mt-1">
             <img
               className="w-full h-full object-cover object-center"
               src={fileUrls[0]}
             />
+          </div>
+        }
+
+        {type === "audio" &&
+          <div className="flex justify-start items-center gap-2 w-full mt-0">
+            <IoIosRecording className="size-8 shrink-0 text-[#4F39F6]" />
+            <p className="w-full mt-1 text-sm text-neutral-700 font-semibold">
+              Nota de voz
+            </p>
           </div>
         }
       </div>

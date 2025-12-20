@@ -1,7 +1,9 @@
 import { useEffect, useRef, type ChangeEvent, type Dispatch, type HTMLAttributes, type SetStateAction, type WheelEvent } from "react";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
+import { FaMicrophone } from "react-icons/fa";
 import { Smile } from "lucide-react";
+import AudioFileItem from "./AudioFileItem";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import useTypingEvent from "@/hooks/useTypingEvent";
@@ -13,13 +15,18 @@ interface Props {
   chatData: ChatType | null | undefined;
   submitting: boolean;
   messageText: string;
+  isRecording?: boolean;
+  recordingTime?: string;
+  recordedFile?: File | null;
+  isSending: boolean;
+  clearRecording?: () => void;
   setMessageText: Dispatch<SetStateAction<string>>;
   /** Clases opcionales del textarea */
   className?: HTMLAttributes<HTMLTextAreaElement>["className"];
 }
 
 const MessageInputForm = (props: Props) => {
-  const { currentUser, chatData, submitting, messageText, setMessageText, className } = props;
+  const { currentUser, chatData, submitting, messageText, isRecording, isSending, recordingTime, clearRecording, recordedFile, setMessageText, className } = props;
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -76,7 +83,30 @@ const MessageInputForm = (props: Props) => {
   };
 
   return (
-    <div className={cn("relative w-full border rounded-full overflow-hidden")}>
+    <div className={cn("relative w-full border rounded-full overflow-hidden", (isRecording || recordedFile) ? "border-[#4F39F6]" : "border-input")}>
+      {isRecording &&
+        <div className="absolute top-0 left-4 flex justify-start items-center gap-2 w-full h-full bg-white z-[100]">
+          <FaMicrophone className="size-7 text-[#4F39F6] animate-pulse duration-100" />
+          <span className="block text-base text-neutral-700">
+            {recordingTime}
+          </span>
+
+          <p className="absolute top-1/2 left-[50%] translate-x-[-50%] translate-y-[-50%] w-full text-sm text-center text-neutral-700 font-semibold">
+            Grabando audio...
+          </p>
+        </div>
+      }
+
+      {!isRecording && recordedFile && recordingTime && clearRecording &&
+        <div className="absolute top-0 left-4 w-full h-full bg-white z-[100]">
+          <AudioFileItem
+            recordingDuration={recordingTime}
+            clearRecording={clearRecording}
+            isSending={isSending}
+          />
+        </div>
+      }
+
       <Popover>
         <PopoverTrigger asChild>
           <button

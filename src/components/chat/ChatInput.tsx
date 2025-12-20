@@ -5,15 +5,17 @@ import { useAuth } from "@clerk/clerk-react";
 import { Image, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { BeatLoader } from "react-spinners";
+import { FaRegCircleStop } from "react-icons/fa6";
 import MessageInputForm from "./MessageInputForm";
 import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import useImagePicker from "@/hooks/useImagePicker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
+import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
-import { imagesUploader } from "@/utils/imagesUploader";
+import { filesUploader } from "@/utils/filesUploader";
 import type { ChatType, MessageType } from "@/types/global";
 
 interface Props {
@@ -35,6 +37,8 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
   const queryClient = useQueryClient();
 
   const {selectedImageFiles, selectedImagePreviews, isProcessing, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
+
+  const {isRecording, recordingTime, clearRecording, recordedFile, startRecording, stopRecording} = useAudioRecording();
 
   const {user: currentUser} = useCurrentUser();
 
@@ -58,10 +62,15 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
     mutationKey: ["send-message", chatData?._id],
     mutationFn: async () => {
       const token1 = await getToken();
+
+      const hasText = messageText.length > 0;
+      const hasImages = selectedImageFiles.length > 0;
+      const hasAudio = recordedFile;
+      const hasFiles = hasImages || hasAudio;
       
-      // Subir las imágenes a ImageKit si las hay
-      const uploadData = selectedImageFiles.length > 0 ? await imagesUploader({
-        files: selectedImageFiles,
+      // Subir los archivos a ImageKit si los hay
+      const uploadData = hasFiles ? await filesUploader({
+        files: recordedFile ? [recordedFile] : selectedImageFiles,
         clerkToken: token1!,
         folderName: `chats/${chatData?._id}`,
         currentUser
@@ -82,8 +91,9 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
           text: messageText,
           chatId: chatData?._id,
           recipientIds: participants,
-          imagesUrls: uploadData.map(uData => uData.imageUrl),
-          imagesFileIds: uploadData.map(uData => uData.imageFileId)
+          type: hasText && hasImages ? "imageWithText" : hasImages ? "image" : hasAudio ? "audio" : "text",
+          fileUrls: uploadData.map(uData => uData.fileUrl),
+          fileIds: uploadData.map(uData => uData.fileId)
         },
         headers: {
           Authorization: `Bearer ${token2}`,
@@ -97,6 +107,7 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
       setMessageText("");
       setSelectedImageFiles([]);
       setSelectedImagePreviews([]);
+      clearRecording();
 
       if(fileInputRef.current) {
         fileInputRef.current.value = ""
@@ -119,7 +130,7 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
   });
 
   return (
-    <div className="relative flex justify-between items-center gap-1.5 min-[500px]:gap-3 w-full shrink-0 px-1 min-[500px]:px-4 py-2 bg-white border-t">
+    <div className="relative flex justify-between items-center gap-1.5 min-[500px]:gap-2 w-full shrink-0 px-1 min-[500px]:px-4 py-2 bg-white border-t">
       {/* Mostrar los usuarios que estan escribiendo */}
       {usersCurrentlyTyping.length > 0 &&
         <div className="absolute -top-3 left-3 flex justify-center items-center px-2 py-1.5 -translate-y-[100%] rounded-lg border shadow bg-slate-200 z-10">
@@ -173,30 +184,51 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
         messageText={messageText}
         setMessageText={setMessageText}
         submitting={submitting}
+        recordingTime={recordingTime}
+        isRecording={isRecording}
+        clearRecording={clearRecording}
+        recordedFile={recordedFile}
+        isSending={submitting}
       />
 
       {messageText.length === 0 && !selectedImageFiles[0] &&
         <div className="flex justify-between items-center gap-1.5 min-[500px]:gap-3">
-          <button
-            className="cursor-pointer"
-            disabled={submitting}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Image className="text-neutral-600" aria-hidden />
-            <span className="sr-only">Adjuntar imágenes</span>
-          </button>
+          {(!isRecording && !recordedFile) &&
+            <button
+              className="cursor-pointer"
+              disabled={submitting}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Image className="text-neutral-600" aria-hidden />
+              <span className="sr-only">Adjuntar imágenes</span>
+            </button>
+          }
 
-          <button
-            className="cursor-pointer"
-            disabled={submitting}
-          >
-            <Mic className="text-neutral-600" aria-hidden />
-            <span className="sr-only">Enviar audio</span>
-          </button>
+          {(!isRecording && !recordedFile) &&
+            <button
+              className="cursor-pointer"
+              disabled={submitting}
+              onClick={startRecording}
+            >
+              <Mic className="text-neutral-600" aria-hidden />
+              <span className="sr-only">Grabar audio</span>
+            </button>
+          }
+
+          {isRecording &&
+            <button
+              className="cursor-pointer"
+              disabled={submitting}
+              onClick={stopRecording}
+            >
+              <FaRegCircleStop className="size-6 text-red-700" aria-hidden />
+              <span className="sr-only">Detener audio</span>
+            </button>
+          }
         </div>
       }
 
-      {(messageText.length > 0 || selectedImageFiles[0]) &&
+      {(messageText.length > 0 || selectedImageFiles[0] || recordedFile) &&
         <button
           className="p-1 text-sm text-blue-700 font-semibold cursor-pointer hover:underline disabled:cursor-not-allowed disabled:text-neutral-400"
           disabled={submitting}

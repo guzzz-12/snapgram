@@ -26,13 +26,15 @@ const MessageDropdown = (props: Props) => {
       <DropdownMenuContent>
         {isCurrentUserSender &&
           <>
-            <DropdownMenuItem
-              className="flex justify-start items-center gap-2 cursor-pointer"
-              onClick={() => onEdit(true)}
-            >
-              <Pencil className="size-5 text-neutral-500" />
-              <span className="text-sm text-neutral-900">Editar</span>
-            </DropdownMenuItem>
+            {messageData.type !== "audio" &&
+              <DropdownMenuItem
+                className="flex justify-start items-center gap-2 cursor-pointer"
+                onClick={() => onEdit(true)}
+              >
+                <Pencil className="size-5 text-neutral-500" />
+                <span className="text-sm text-neutral-900">Editar</span>
+              </DropdownMenuItem>
+            }
             
             <DropdownMenuItem
               className="flex justify-start items-center gap-2 cursor-pointer"

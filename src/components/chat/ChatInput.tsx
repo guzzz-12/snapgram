@@ -3,13 +3,12 @@ import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { Image, Mic } from "lucide-react";
-import { FaMicrophone } from "react-icons/fa";
 import { toast } from "sonner";
-import { BeatLoader } from "react-spinners";
 import { FaRegCircleStop } from "react-icons/fa6";
 import MessageInputForm from "./MessageInputForm";
+import UsersTypingIndicator from "./UsersTypingIndicator";
+import UsersRecordingAudioIndicator from "./UsersRecordingAudioIndicator";
 import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import useImagePicker from "@/hooks/useImagePicker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
@@ -141,76 +140,13 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
   return (
     <div className="relative flex justify-between items-center gap-1.5 min-[500px]:gap-2 w-full shrink-0 px-1 min-[500px]:px-4 py-2 bg-white border-t">
       {(usersCurrentlyTyping.length > 0 || usersCurrentlyRecordingAudio.length > 0) &&
-        <>
-          <div className="absolute -top-3 left-3 flex flex-col items-start gap-1 px-2 py-1.5 -translate-y-[100%] rounded-lg border shadow bg-slate-200 z-10">
-            {/* Mostrar los usuarios que estan escribiendo */}
-            {usersCurrentlyTyping.length > 0 &&
-              <div className="flex justify-start items-center gap-2">
-                {usersCurrentlyTyping.map((el, i) => (
-                  <div
-                    key={el.user._id}
-                    className="flex justify-start items-center gap-1"
-                  >
-                    <Avatar
-                      style={{
-                        transform: `translateX(-${i > 0 ? 10 : 0}px)`
-                      }}
-                      className="w-5 h-5 shrink-0 outline-2 outline-white"
-                    >
-                      <AvatarImage
-                        className="w-full h-full object-cover"
-                        src={el.user.profilePicture}
-                      />
+        <div className="absolute -top-3 left-3 flex flex-col items-start gap-1 px-2 py-1.5 -translate-y-[100%] rounded-lg border shadow bg-slate-200 z-10">
+          {/* Mostrar los usuarios que estan escribiendo */}
+          <UsersTypingIndicator usersTyping={usersCurrentlyTyping} />
 
-                      <AvatarFallback className="w-full h-full object-cover">
-                        {el.user.fullName.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                ))}
-
-                <BeatLoader
-                  className="opacity-80"
-                  size={9}
-                  color="#4F39F6"
-                  speedMultiplier={0.8}
-                />
-              </div>
-            }
-
-            {/* Mostrar los usuarios que estan grabando notas de voz */}
-            {usersCurrentlyRecordingAudio.length > 0 &&
-              <div className="flex justify-start items-center gap-2">
-                <div className="flex justify-start items-center gap-2">
-                  {usersCurrentlyRecordingAudio.map((el, i) => (
-                    <div
-                      key={el.user._id}
-                      className="flex justify-start items-center gap-1"
-                    >
-                      <Avatar
-                        style={{
-                          transform: `translateX(-${i > 0 ? 10 : 0}px)`
-                        }}
-                        className="w-5 h-5 shrink-0 outline-2 outline-white"
-                      >
-                        <AvatarImage
-                          className="w-full h-full object-cover"
-                          src={el.user.profilePicture}
-                        />
-
-                        <AvatarFallback className="w-full h-full object-cover">
-                          {el.user.fullName.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                  ))}
-
-                  <FaMicrophone className="size-5 text-[#4F39F6] animate-pulse duration-100" />
-                </div>
-              </div>
-            }
-          </div>
-        </>
+          {/* Mostrar los usuarios que estan grabando notas de voz */}
+          <UsersRecordingAudioIndicator usersRecordingAudio={usersCurrentlyRecordingAudio} />
+        </div>
       }
 
       <div className="absolute -top-2 left-1 flex justify-start items-center gap-2 max-w-[80%] bg-white rounded-md translate-x-[24px] -translate-y-[100%] overflow-x-hidden z-50">

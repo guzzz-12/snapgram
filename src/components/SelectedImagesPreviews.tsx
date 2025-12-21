@@ -65,7 +65,13 @@ const SelectedImagesPreviews = (props: Props) => {
 
       {/* Mostrar un loader por cada imagen que se esté procesando */}
       {processingImages &&
-        <div className="flex justify-start items-center gap-3">
+        <div className="relative flex justify-start items-center gap-3">
+          <div className="absolute top-[50%] left-[50%] w-full translate-x-[-50%] translate-y-[-50%]">
+            <p className="text-center text-sm text-neutral-900 font-semibold">
+              Procesando...
+            </p>
+          </div>
+
           {Array.from({ length: processingCount }).map((_, i) => (
             <div
               key={i}

@@ -248,9 +248,14 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
             </div>
           }
           
-          {/* Contenido de imagen del mensaje (si lo hay) */}
+          {/* Imágenes del mensaje (si las hay) */}
           {["image", "imageWithText"].includes(messageData.type) && (
-            <div className="grid grid-cols-3 gap-2 w-full h-auto mt-1 overflow-hidden">
+            <div
+              style={{
+                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))"
+              }}
+              className="grid gap-2 w-full h-auto mt-1 overflow-hidden"
+            >
               {messageData.fileUrls.map((fileUrl, i) => (
                 <button
                   key={fileUrl}
@@ -282,9 +287,9 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
           {/* Mensaje de audio */}
           {messageData.type === "audio" &&
-          <div className="w-full">
+          <div className="w-full p-2 overflow-hidden">
             <audio
-              className=""
+              className="block w-full min-w-[200px] h-[40px] rounded-full shadow"
               controls
               src={messageData.fileUrls[0]}
             />

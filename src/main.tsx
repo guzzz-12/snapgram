@@ -7,6 +7,7 @@ import { ImageKitProvider } from "@imagekit/react";
 import { ErrorBoundary } from "react-error-boundary";
 import App from "./App.tsx";
 import ErrorPage from "./pages/ErrorPage.tsx";
+import { CheckCryptoKeysProvider } from "./providers/CheckCryptoKeysProvider.tsx";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "yet-another-react-lightbox/styles.css";
@@ -41,7 +42,9 @@ const MyApp = () => {
         <BrowserRouter>
           <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
             <ErrorBoundary FallbackComponent={Fallback}>
-              <App />
+              <CheckCryptoKeysProvider>
+                <App />
+              </CheckCryptoKeysProvider>
             </ErrorBoundary>
           </ImageKitProvider>
         </BrowserRouter>

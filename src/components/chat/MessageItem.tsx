@@ -17,8 +17,9 @@ import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { socket } from "@/utils/socket";
 import dayjs from "@/utils/dayJsInstance";
-import { cn } from "@/lib/utils";
+import { decryptMessageText } from "@/utils/decryptMessageText";
 import type { ChatType, MessageType, UserType } from "@/types/global";
+import { cn } from "@/lib/utils";
 
 interface Props {
   currentUser: UserType;
@@ -36,14 +37,24 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [isEditingMessage, setIsEditingMessage] = useState(false);
-  const [messageText, setMessageText] = useState(messageData.text || "");
+  const [message, setMessage] = useState(messageData);
+  const [messageText, setMessageText] = useState("");
   const [openMsgHistoryModal, setOpenMsgHistoryModal] = useState(false);
+
+  // Descifrar el texto del mensaje cifrado para ambos usuarios
+  useEffect(() => {
+    decryptMessageText(messageData, isCurrentUserSender)
+    .then(decryptedMessage => {
+      setMessage(decryptedMessage);
+      setMessageText(decryptedMessage.text || "");
+    });
+  }, [messageData, isCurrentUserSender]);
   
   const {setImages, setInitialIndex, setOpen: setOpenImgsViewer} = useImagesLighbox();
 
   const {getToken} = useAuth();
 
-  const isSeen = messageData.seenBy.find(el => el.user && el.user._id !== currentUser._id);
+  const isSeen = message.seenBy.find(el => el.user && el.user._id !== currentUser._id);
   const seenAt = isSeen?.seenAt;
 
   // Observar si el mensaje es visible en el viewport
@@ -65,12 +76,12 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
   // Marcar el mensaje como visto
   useEffect(() => {
-    const isRecipient = messageData.sender?._id !== currentUser._id;
+    const isRecipient = message.sender?._id !== currentUser._id;
 
     if (!isSeen && isIntersecting && isRecipient) {
       socket.emit("messageSeenBy", {
-        messageId: messageData._id,
-        chatId: messageData.chat,
+        messageId: message._id,
+        chatId: message.chat,
         userId: currentUser._id
       });
     }
@@ -78,18 +89,18 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
     return () => {
       // socket.off("messageSeenBy");
     }
-  }, [isIntersecting, socket, currentUser._id, messageData, isSeen]);
+  }, [isIntersecting, socket, currentUser._id, message, isSeen]);
 
   // Mutation para editar el mensaje
   const {mutate: updateMessage, isPending: isSubmitting} = useMutation({
     mutationFn: async () => {
       const token = await getToken();
 
-      if (messageText === messageData.text) return messageData;
+      if (messageText === message.text) return message;
 
       const {data} = await axiosInstance<{data: MessageType}>({
         method: "PUT",
-        url: `/messages/edit/${messageData.chat}/${messageData._id}`,
+        url: `/messages/edit/${message.chat}/${message._id}`,
         data: {text: messageText},
         headers: {
           Authorization: `Bearer ${token}`,
@@ -104,7 +115,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
     },
     onError: (error) => {
       toast.error(errorMessage(error));
-      setMessageText(messageData.text || "");
+      setMessageText(message.text || "");
     }
   });
 
@@ -115,7 +126,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
       const {data} = await axiosInstance<{data: MessageType}>({
         method: "DELETE",
-        url: `/messages/delete/${messageData.chat}/${messageData._id}`,
+        url: `/messages/delete/${message.chat}/${message._id}`,
         params: {
           deleteFor
         },
@@ -131,7 +142,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
     }
   });
 
-  const isMessageDeleted = messageData.deletedFor.includes(currentUser._id) || messageData.deletedForAll;
+  const isMessageDeleted = message.deletedFor.includes(currentUser._id) || message.deletedForAll;
 
   return (
     <li className="flex justify-start gap-2 w-full">
@@ -188,7 +199,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
             {!isMessageDeleted &&
               <MessageDropdown
-                messageData={messageData}
+                messageData={message}
                 currentUserId={currentUser._id}
                 isPending={isPending}
                 onEdit={setIsEditingMessage}
@@ -205,9 +216,9 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
           </div>
 
           {/* Contenido de texto del mensaje (si lo tiene) */}
-          {messageData.text && !isEditingMessage && (
+          {message.text && !isEditingMessage && (
             <p className={cn("w-full text-sm whitespace-pre-wrap", (isCurrentUserSender && !isMessageDeleted) ? "text-neutral-100" : isMessageDeleted ? "text-neutral-500 italic" : "text-neutral-900")}>
-              <Twemoji className="[&>img]:!inline break-words" text={messageData.text} />
+              <Twemoji className="[&>img]:!inline break-words" text={message.text} />
             </p>
           )}
           
@@ -249,20 +260,20 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
           }
           
           {/* Imágenes del mensaje (si las hay) */}
-          {["image", "imageWithText"].includes(messageData.type) && (
+          {["image", "imageWithText"].includes(message.type) && (
             <div
               style={{
                 gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))"
               }}
               className="grid gap-2 w-full h-auto mt-1 overflow-hidden"
             >
-              {messageData.fileUrls.map((fileUrl, i) => (
+              {message.fileUrls.map((fileUrl, i) => (
                 <button
                   key={fileUrl}
                   className="relative w-full aspect-square bg-neutral-700 overflow-hidden cursor-pointer"
                   onClick={() => {
                     setInitialIndex(i);
-                    setImages(messageData.fileUrls);
+                    setImages(message.fileUrls);
                     setOpenImgsViewer(true);
                   }}
                 >
@@ -286,19 +297,19 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
           )}
 
           {/* Mensaje de audio */}
-          {messageData.type === "audio" &&
+          {message.type === "audio" &&
           <div className="w-full p-2 overflow-hidden">
             <audio
               className="block w-full min-w-[200px] h-[40px] rounded-full shadow"
               controls
-              src={messageData.fileUrls[0]}
+              src={message.fileUrls[0]}
             />
           </div>
           }
 
           {/* Historial de cambios del mensaje y fecha del mensaje */}
           <div className="flex justify-between items-center gap-4 w-full my-1.5">
-            {messageData.history && messageData.history.length > 0 &&
+            {message.history && message.history.length > 0 &&
               <Button
                 className={cn("h-auto p-0 text-xs underline cursor-pointer", isCurrentUserSender ? "text-slate-300" : "text-blue-600")}
                 variant="link"
@@ -310,9 +321,9 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
             <p
               className={cn("w-full text-right text-[10px]", (isCurrentUserSender && !isMessageDeleted) ? "text-neutral-300" : "text-neutral-600")}
-              title={dayJsInstance(messageData.createdAt).format("DD/MM/YYYY - hh:mm A")}
+              title={dayJsInstance(message.createdAt).format("DD/MM/YYYY - hh:mm A")}
             >
-              {dayJsInstance(messageData.createdAt).format("DD/MM/YYYY")}
+              {dayJsInstance(message.createdAt).format("DD/MM/YYYY")}
             </p>
           </div>
         </div>

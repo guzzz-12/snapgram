@@ -13,6 +13,7 @@ import ImagesLightbox from "@/components/ImagesLightbox";
 import MobileNavSidebar from "./components/MobileNavSidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import CreateCryptoKeysModal from "@/components/chat/CreateCryptoKeysModal";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
 import { useCurrentUser } from "./hooks/useCurrentUser";
 import useWindowWidth from "./hooks/useWindowWidth";
@@ -134,6 +135,8 @@ const Layout = () => {
       <BlockUserModal />
 
       <ImagesLightbox />
+
+      <CreateCryptoKeysModal />
 
       {/* No mostrar el sidebar en la página del post y o si el ancho de la pantalla es menor de 700px */}
       {!isPostPage &&

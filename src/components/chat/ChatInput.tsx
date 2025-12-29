@@ -17,16 +17,18 @@ import { useUsersRecordingAudio } from "@/hooks/useUsersRecordingAudio";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { filesUploader } from "@/utils/filesUploader";
+import { convertJWKToCryptoKey, encryptHybrid } from "@/utils/hybridCrypto";
 import type { ChatType, MessageType } from "@/types/global";
 
 interface Props {
   chatData: ChatType | null | undefined;
   wrapperHeight: number;
   chatTypeParam: "all" | "group" | null;
+  recipientPublicKey: JsonWebKey | null;
   setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
-const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
+const ChatInput = ({ chatData, chatTypeParam, recipientPublicKey, setTemporaryChat }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const navigate = useNavigate();
@@ -83,6 +85,32 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
 
       const participants = chatData?.participants.map(user => user._id) || [];
 
+      const senderPublicJWKKey = localStorage.getItem("publicKey");
+      let parsedPublicKey: JsonWebKey | null = null;
+
+      if (senderPublicJWKKey) {
+        parsedPublicKey = JSON.parse(senderPublicJWKKey);
+      }
+
+      if (!parsedPublicKey) {
+        throw new Error("No pudimos obtener tus claves de cifrado o aún no las has creado.");
+      }
+
+      if (!recipientPublicKey) {
+        throw new Error("Este usuario aún no ha creado sus claves de cifrado.");
+      }
+
+      // Convertir las llaves públicas de cifrado de JsonWebKey a CryptoKey
+      const senderKey = await convertJWKToCryptoKey(parsedPublicKey, "public");
+      const recipientKey = await convertJWKToCryptoKey(recipientPublicKey, "public");
+
+      // Encriptar el mensaje
+      const {content: encryptedMessage, keyForRecipient, keyForSender, iv} = await encryptHybrid(
+        messageText,
+        recipientKey,
+        senderKey
+      );
+
       const {data} = await axiosInstance<{
         data: MessageType;
         isNewChat: boolean;
@@ -91,12 +119,15 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat }: Props) => {
         method: "POST",
         url: `/messages/send`,
         data: {
-          text: messageText,
+          text: encryptedMessage,
           chatId: chatData?._id,
           recipientIds: participants,
           type: hasText && hasImages ? "imageWithText" : hasImages ? "image" : hasAudio ? "audio" : "text",
           fileUrls: uploadData.map(uData => uData.fileUrl),
-          fileIds: uploadData.map(uData => uData.fileId)
+          fileIds: uploadData.map(uData => uData.fileId),
+          senderCryptoKey: keyForSender,
+          recipientCryptoKey: keyForRecipient,
+          initVector: iv
         },
         headers: {
           Authorization: `Bearer ${token2}`,

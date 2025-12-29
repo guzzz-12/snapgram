@@ -30,7 +30,7 @@ const ChatInbox = (props: Props) => {
   const [searchParams] = useSearchParams();
   const chatTypeParam = searchParams.get("type") as "all" | "group" | null;
 
-  const {getToken} = useAuth();
+  const [recipientPublicKey, setRecipientPublicKey] = useState<JsonWebKey | null>(null);
 
   const [isBlocked, setIsBlocked] = useState<{
     blockedBy: string | null;
@@ -39,6 +39,8 @@ const ChatInbox = (props: Props) => {
     blockedBy: null,
     blockedUser: null
   });
+
+  const {getToken} = useAuth();
 
   // Query para consultar la data del chat
   const {data: chat, isFetching, error: chatError} = useQuery({
@@ -75,6 +77,31 @@ const ChatInbox = (props: Props) => {
   const otherUserExists = isPrivateChat && !!otherUser;
   const blockExists = isPrivateChat && !!(isBlocked.blockedBy || isBlocked.blockedUser);
   const userBlockedMe = isBlocked.blockedUser === currentUser?._id;
+
+  // Query para consultar la clave de cifrado del recipiente
+  const {data, isLoading: loadingRecipientCryptoKey} = useQuery({
+    queryKey: ["recipientCryptoKey", chatId],
+    queryFn: async () => {
+      if (!otherUser) return null;
+
+      const token = await getToken();
+
+      const {data} = await axiosInstance<{publicKey: JsonWebKey}>({
+        method: "GET",
+        url: `/crypto-keys/get-user-public-key/${otherUser._id}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setRecipientPublicKey(data.publicKey);
+
+      return data;
+    },
+    retry: 1,
+    enabled: !!otherUser,
+    refetchOnWindowFocus: false
+  });
 
   useEffect(() => {
     // Escuchar evento de usuario bloqueado/desbloqueado
@@ -114,18 +141,20 @@ const ChatInbox = (props: Props) => {
     toast.error(errorMessage(chatError));
   }
 
+  const isLoadingData = loadingRecipientCryptoKey || isFetching;
+
   return (
     <div className="flex flex-col w-full h-full">
       <ChatHeader
         chatData={chat || temporaryChat}
-        isLoading={isFetching}
+        isLoading={isLoadingData}
         headerHeight={headerHeight}
         blockData={isBlocked}
       />
 
       <ChatContent
         chatData={chat || temporaryChat}
-        isLoadingChatData={isFetching}
+        isLoadingChatData={isLoadingData}
       />
 
       {/*
@@ -133,17 +162,18 @@ const ChatInbox = (props: Props) => {
         1. El chat es privado, no hay bloqueo y el otro usuario existe, o
         2. El chat es grupal (no es privado)
       */}
-      {!isFetching && (!blockExists && otherUserExists || !isPrivateChat) &&
+      {!isLoadingData && (!blockExists && otherUserExists || !isPrivateChat) &&
         <ChatInput
           chatData={chat || temporaryChat}
           wrapperHeight={headerHeight}
           setTemporaryChat={setTemporaryChat}
           chatTypeParam={chatTypeParam}
+          recipientPublicKey={recipientPublicKey}
         />
       }
 
       {/* Mostrar mensaje cuando hay un bloqueo entre ambos usuarios en un chat privado */}
-      {!isFetching && blockExists &&
+      {!isLoadingData && blockExists &&
         <div className="flex items-center justify-center gap-2 w-full p-3 border-t border-orange-600">
           <IoWarningOutline className="size-8 text-orange-600 shrink-0" />
 
@@ -156,7 +186,7 @@ const ChatInbox = (props: Props) => {
       }
 
       {/* Mostrar mensaje cuando el otro usuario de un chat privado elimina su cuenta */}
-      {!isFetching && isPrivateChat && !otherUser &&
+      {!isLoadingData && isPrivateChat && !otherUser &&
         <div className="flex items-center justify-center gap-2 w-full p-3 border-t border-orange-600">
           <IoWarningOutline className="size-8 text-orange-600 shrink-0" />
           
@@ -166,7 +196,7 @@ const ChatInbox = (props: Props) => {
         </div>
       }
 
-      {isFetching &&
+      {isLoadingData &&
         <div className="flex items-center justify-center gap-2 w-full border-t">
           <Skeleton className="w-full h-[60px] rounded-none" />
         </div>

@@ -30,7 +30,8 @@ const ChatInbox = (props: Props) => {
   const [searchParams] = useSearchParams();
   const chatTypeParam = searchParams.get("type") as "all" | "group" | null;
 
-  const [recipientPublicKey, setRecipientPublicKey] = useState<JsonWebKey | null>(null);
+  const [tempChatPublicKey, setTempChatPublicKey] = useState<JsonWebKey | null>(null);
+  const [publicKeys, setPublicKeys] = useState<{userId: string; publicKey: JsonWebKey }[]>([]);
 
   const [isBlocked, setIsBlocked] = useState<{
     blockedBy: string | null;
@@ -43,7 +44,7 @@ const ChatInbox = (props: Props) => {
   const {getToken} = useAuth();
 
   // Query para consultar la data del chat
-  const {data: chat, isFetching, error: chatError} = useQuery({
+  const {data: existingChat, isFetching: fetchingExistingChat, error: chatError} = useQuery({
     queryKey: ["chat", chatId],
     queryFn: async () => {
       const token = await getToken();
@@ -72,34 +73,57 @@ const ChatInbox = (props: Props) => {
 
   const {user: currentUser} = useCurrentUser();
 
+  const chat = temporaryChat || existingChat;
   const isPrivateChat = chat?.type === "private";
   const otherUser = isPrivateChat && chat?.participants.find((p) => p._id !== currentUser?._id);
   const otherUserExists = isPrivateChat && !!otherUser;
   const blockExists = isPrivateChat && !!(isBlocked.blockedBy || isBlocked.blockedUser);
   const userBlockedMe = isBlocked.blockedUser === currentUser?._id;
 
-  // Query para consultar la clave de cifrado del recipiente
-  const {data, isLoading: loadingRecipientCryptoKey} = useQuery({
-    queryKey: ["recipientCryptoKey", chatId],
+  // Query para consultar la clave de cifrado del usuario del chat temporal
+  const {data: tempChatPublicKeyData, isLoading: loadingTempChatPublicKey} = useQuery({
+    queryKey: ["tempChatPublicKey", temporaryChat?._id],
     queryFn: async () => {
-      if (!otherUser) return null;
-
       const token = await getToken();
 
-      const {data} = await axiosInstance<{publicKey: JsonWebKey}>({
+      const {data} = await axiosInstance<{data: JsonWebKey}>({
         method: "GET",
-        url: `/crypto-keys/get-user-public-key/${otherUser._id}`,
+        url: `/crypto-keys/get-user-public-key/${chatId.replace("temp_", "")}`,
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
 
-      setRecipientPublicKey(data.publicKey);
+      setTempChatPublicKey(data.data);
+
+      return data;
+    },
+    enabled: !!temporaryChat,
+    retry: 1,
+    refetchOnWindowFocus: false
+  });
+
+  // Query para consultar la clave de cifrado de todos los recipientes del chat
+  // Aplica para chats privados y grupales pero no para chats temporales
+  const {data, isLoading: loadingRecipientsCryptoKey} = useQuery({
+    queryKey: ["recipientsCryptoKeys", chatId],
+    queryFn: async () => {
+      const token = await getToken();
+
+      const {data} = await axiosInstance<{publicKeys: {userId: string, publicKey: JsonWebKey}[]}>({
+        method: "GET",
+        url: `/crypto-keys/get-recipients-public-keys/${chatId}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setPublicKeys(data.publicKeys);
 
       return data;
     },
     retry: 1,
-    enabled: !!otherUser,
+    enabled: !!chatId && !chatId.startsWith("temp_"),
     refetchOnWindowFocus: false
   });
 
@@ -141,19 +165,19 @@ const ChatInbox = (props: Props) => {
     toast.error(errorMessage(chatError));
   }
 
-  const isLoadingData = loadingRecipientCryptoKey || isFetching;
+  const isLoadingData = loadingRecipientsCryptoKey || loadingTempChatPublicKey || fetchingExistingChat;
 
   return (
     <div className="flex flex-col w-full h-full">
       <ChatHeader
-        chatData={chat || temporaryChat}
+        chatData={chat}
         isLoading={isLoadingData}
         headerHeight={headerHeight}
         blockData={isBlocked}
       />
 
       <ChatContent
-        chatData={chat || temporaryChat}
+        chatData={chat}
         isLoadingChatData={isLoadingData}
       />
 
@@ -164,11 +188,13 @@ const ChatInbox = (props: Props) => {
       */}
       {!isLoadingData && (!blockExists && otherUserExists || !isPrivateChat) &&
         <ChatInput
-          chatData={chat || temporaryChat}
+          chatData={chat}
           wrapperHeight={headerHeight}
           setTemporaryChat={setTemporaryChat}
           chatTypeParam={chatTypeParam}
-          recipientPublicKey={recipientPublicKey}
+          recipientsPublicKeys={
+            temporaryChat ? [{userId: temporaryChat._id, publicKey: tempChatPublicKey!}] : publicKeys
+          }
         />
       }
 

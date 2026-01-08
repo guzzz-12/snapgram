@@ -1,15 +1,38 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { IoIosRecording } from "react-icons/io";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { MessageType } from "@/types/global";
+import { decryptMessage } from "@/utils/decryptMessageText";
+import type { MessageType, UserType } from "@/types/global";
 
 interface Props {
   messageData: MessageType;
+  currentUser: UserType;
 }
 
-const NewMessageToast = ({ messageData }: Props) => {
-  const { sender, chat, text, type, fileUrls } = messageData;
-  const notificationLink = `/messages/${chat}`
+const NewMessageToast = ({ messageData, currentUser }: Props) => {
+  const { sender, chat, type } = messageData;
+
+  const [decryptedMsg, setDecryptedMsg] = useState<MessageType | null>(null);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    decryptMessage(messageData, currentUser._id)
+      .then((msg) => {
+        setDecryptedMsg(msg);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [messageData, currentUser]);
+
+  if (!decryptedMsg) return null;
+
+  // Parsear el array de urls de las imagenes del mensaje
+  const parsedFilesUrls = decryptedMsg.fileUrls ? JSON.parse(decryptedMsg.fileUrls) as string[] : [];
+
+  const notificationLink = `/messages/${chat}`;
 
   return (
     <Link
@@ -33,9 +56,9 @@ const NewMessageToast = ({ messageData }: Props) => {
           <span className="font-semibold">{sender.fullName}</span> ha enviado un mensaje.
         </p>
 
-        {text &&
+        {decryptedMsg.text &&
           <span className="w-full mt-1 text-xs text-neutral-700 italic line-clamp-3">
-            {text}
+            {decryptedMsg.text}
           </span>
         }
 
@@ -43,7 +66,7 @@ const NewMessageToast = ({ messageData }: Props) => {
           <div className="w-full h-[80px] mt-1">
             <img
               className="w-full h-full object-cover object-center"
-              src={fileUrls[0]}
+              src={parsedFilesUrls[0]}
             />
           </div>
         }

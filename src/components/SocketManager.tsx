@@ -258,7 +258,10 @@ const SocketManager = () => {
         pathname !== `/messages/${data.chat._id}`
       ) {
         toast(
-          <NewMessageToast messageData={data.message} />,
+          <NewMessageToast
+            messageData={data.message}
+            currentUser={userDocument}
+          />,
           {
             duration: 6000,
             position: "bottom-left",

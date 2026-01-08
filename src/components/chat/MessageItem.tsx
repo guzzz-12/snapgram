@@ -17,7 +17,7 @@ import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { socket } from "@/utils/socket";
 import dayjs from "@/utils/dayJsInstance";
-import { decryptMessageText } from "@/utils/decryptMessageText";
+import { decryptMessage } from "@/utils/decryptMessageText";
 import type { ChatType, MessageType, UserType } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -37,24 +37,24 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [isEditingMessage, setIsEditingMessage] = useState(false);
-  const [message, setMessage] = useState(messageData);
+  const [message, setMessage] = useState<MessageType | null>(null);
   const [messageText, setMessageText] = useState("");
   const [openMsgHistoryModal, setOpenMsgHistoryModal] = useState(false);
 
-  // Descifrar el texto del mensaje cifrado para ambos usuarios
+  // Descifrar el texto del mensaje cifrado
   useEffect(() => {
-    decryptMessageText(messageData, isCurrentUserSender)
-    .then(decryptedMessage => {
-      setMessage(decryptedMessage);
-      setMessageText(decryptedMessage.text || "");
+    decryptMessage(messageData, currentUser._id)
+    .then(msg => {
+      setMessage(msg);
+      setMessageText(msg.text || "");
     });
-  }, [messageData, isCurrentUserSender]);
+  }, [messageData, currentUser]);
   
   const {setImages, setInitialIndex, setOpen: setOpenImgsViewer} = useImagesLighbox();
 
   const {getToken} = useAuth();
 
-  const isSeen = message.seenBy.find(el => el.user && el.user._id !== currentUser._id);
+  const isSeen = message?.seenBy.find(el => el.user && el.user._id !== currentUser._id);
   const seenAt = isSeen?.seenAt;
 
   // Observar si el mensaje es visible en el viewport
@@ -76,6 +76,8 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
   // Marcar el mensaje como visto
   useEffect(() => {
+    if (!message) return;
+
     const isRecipient = message.sender?._id !== currentUser._id;
 
     if (!isSeen && isIntersecting && isRecipient) {
@@ -94,6 +96,8 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
   // Mutation para editar el mensaje
   const {mutate: updateMessage, isPending: isSubmitting} = useMutation({
     mutationFn: async () => {
+      if (!message) return;
+
       const token = await getToken();
 
       if (messageText === message.text) return message;
@@ -115,13 +119,15 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
     },
     onError: (error) => {
       toast.error(errorMessage(error));
-      setMessageText(message.text || "");
+      setMessageText(message?.text || "");
     }
   });
 
   // Mutation para eliminar el mensaje
   const {mutate, isPending} = useMutation({
     mutationFn: async (deleteFor: "me" | "all") => {
+      if (!message) return;
+
       const token = await getToken();
 
       const {data} = await axiosInstance<{data: MessageType}>({
@@ -141,6 +147,10 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
       toast.error(errorMessage(error));
     }
   });
+
+  if (!message) return null;
+
+  const parsedFilesUrls = message.fileUrls ? JSON.parse(message.fileUrls) as string[] : [];
 
   const isMessageDeleted = message.deletedFor.includes(currentUser._id) || message.deletedForAll;
 
@@ -267,13 +277,13 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
               }}
               className="grid gap-2 w-full h-auto mt-1 overflow-hidden"
             >
-              {message.fileUrls.map((fileUrl, i) => (
+              {parsedFilesUrls.map((fileUrl, i) => (
                 <button
                   key={fileUrl}
                   className="relative w-full aspect-square bg-neutral-700 overflow-hidden cursor-pointer"
                   onClick={() => {
                     setInitialIndex(i);
-                    setImages(message.fileUrls);
+                    setImages(parsedFilesUrls);
                     setOpenImgsViewer(true);
                   }}
                 >
@@ -302,7 +312,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
             <audio
               className="block w-full min-w-[200px] h-[40px] rounded-full shadow"
               controls
-              src={message.fileUrls[0]}
+              src={parsedFilesUrls[0]}
             />
           </div>
           }

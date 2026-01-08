@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
@@ -34,6 +34,8 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const {getToken} = useAuth();
+
+  const queryClient = useQueryClient();
 
   const {debouncedValue} = useDebounce(searchTerm);
 
@@ -75,7 +77,8 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["recipientsCryptoKeys", chatData?._id]});
       setIsOpen(false);
       toast.success("Usuario agregado con éxito");
     },

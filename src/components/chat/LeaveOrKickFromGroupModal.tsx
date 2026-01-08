@@ -48,8 +48,9 @@ const LeaveOrKickFromGroupModal = (props: Props) => {
 
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["chats", "all"]});
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["chats", "all"]});
+      await queryClient.invalidateQueries({queryKey: ["recipientsCryptoKeys", chatData?._id]});
       navigate("/messages?type=all", {replace: true});
     },
     onError: (error) => {
@@ -78,6 +79,7 @@ const LeaveOrKickFromGroupModal = (props: Props) => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: ["groupInfo", chatData?._id]});
+      await queryClient.invalidateQueries({queryKey: ["recipientsCryptoKeys", chatData?._id]});
       toast.success(`Has expulsado a ${modalState.kickedUser?.fullName.split(" ")[0]} del grupo`);
       setModalState(prev => ({...prev, isOpen: false}));
     },

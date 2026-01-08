@@ -23,9 +23,10 @@ interface Props {
   headerHeight: number;
   temporaryChatItem: ChatType | null;
   chatTypeParam?: "all" | "group" | null;
+  hasCryptoKeys: boolean;
 }
 
-const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight }: Props) => {
+const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight, hasCryptoKeys }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const {chatId} = useParams<{chatId: string}>();
@@ -81,7 +82,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight }: Props) => 
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,
-    enabled: !!chatTypeParam || !!chatId
+    enabled: !!hasCryptoKeys && (!!chatTypeParam || !!chatId)
   });
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});
@@ -104,17 +105,19 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight }: Props) => 
 
   return (
     <aside className="flex flex-col w-fit min-[950px]:w-[240px] shrink-0 h-full pb-4 min-[600px]:pb-6 border-r overflow-hidden">
-      <Button
-        style={{height: `${headerHeight}px`}}
-        className="p-2 min-[700px]:py-4 rounded-none cursor-pointer"
-        variant="ghost"
-        onClick={() => setOpenPrivateChatsModal(true)}
-      >
-        <HiOutlinePencilAlt className="size-7 shrink-0 text-neutral-700" aria-hidden />
-        <span className="hidden min-[950px]:block text-base text-neutral-900 font-normal">
-          Nuevo mensaje
-        </span>
-      </Button>
+      {hasCryptoKeys &&
+        <Button
+          style={{height: `${headerHeight}px`}}
+          className="p-2 min-[700px]:py-4 rounded-none cursor-pointer"
+          variant="ghost"
+          onClick={() => setOpenPrivateChatsModal(true)}
+        >
+          <HiOutlinePencilAlt className="size-7 shrink-0 text-neutral-700" aria-hidden />
+          <span className="hidden min-[950px]:block text-base text-neutral-900 font-normal">
+            Nuevo mensaje
+          </span>
+        </Button>
+      }
 
       <div
         // style={{ height: `calc(${headerHeight}px + 1px)` }}

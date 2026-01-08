@@ -192,14 +192,7 @@ export type ChatType = {
   groupAdmin: UserType | null;
   groupPicture: string | null;
   groupDescription: string | null;
-  lastMessage: {
-    _id: string;
-    sender: string;
-    text: string | null;
-    fileUrls: string[];
-    type: "text" | "file" | "fileWithText";
-    createdAt: string;
-  } | null;
+  lastMessage: MessageType | null;
   unseenMessages: {
     _id: string;
     user: string;
@@ -214,7 +207,7 @@ export type MessageType = {
   chat: string;
   sender: UserType;
   text: string | null;
-  fileUrls: string[];
+  fileUrls: string | null;
   fileIds: string[];
   seenBy: {
     user: UserType;
@@ -228,6 +221,11 @@ export type MessageType = {
   kickedUser: UserType | null;
   addedBy: UserType | null;
   addedUser: UserType | null;
+  cryptoKeys: {
+    userId: string;
+    encryptedKey: string
+  }[];
+  initVector: string;
   history: {
     _id: string;
     previousContent: string;

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,6 +13,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
 import { axiosInstance } from "@/utils/axiosInstance";
+import { decryptMessage } from "@/utils/decryptMessageText";
 import type { TypingEventData } from "@/types/socketTypes";
 import type { ChatType } from "@/types/global";
 
@@ -52,13 +54,23 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
 
   const otherUserExists = chatData.type === "private" && !!otherUser;
 
-  const lastMessage = chatData.lastMessage;
+  const [lastMessage, setLastMessage] = useState(chatData.lastMessage);
 
   const {getToken} = useAuth();
   
   const queryClient = useQueryClient();
 
   const {removeFromUnreadChats} = useUnreadChats();
+
+  // Desencriptar el último mensaje del chat
+  useEffect(() => {
+    if (chatData.lastMessage?.text && user) {
+      decryptMessage(chatData.lastMessage, user._id)
+      .then((msg) => {
+        setLastMessage(msg);
+      });
+    }
+  }, [chatData.lastMessage, user]);
 
   // Mutation para restablecer el contador de mensajes sin leer del usuario en el chat
   const {mutate: resetUnreadMessagesCounter, isPending} = useMutation({
@@ -96,11 +108,11 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
   if (!user) return null;
 
   // Obtener el contador de mensajes sin leer del usuario en el chat
-  const unReadMessagesCounter = chatData.unseenMessages.find(counter => {
+  const unReadMessagesCounter = chatData.unseenMessages?.find(counter => {
     return counter.user === user._id
   });
 
-  // Verificar si el usuario que está escribiendo
+  // Verificar si el usuario está escribiendo
   const isUserTyping = usersTyping.find((typing) => {
     return (typing.chatId == chatData._id && typing.user._id !== user._id);
   });
@@ -161,7 +173,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
         {lastMessage && !isUserTyping &&
           <div className="flex items-center gap-0.5 w-full text-xs text-neutral-700 font-light overflow-hidden">
             <span className="shrink-0">
-              {lastMessage.sender === user._id && "Tú:"}
+              {lastMessage.sender._id === user._id && "Tú:"}
             </span>
 
             <p className="truncate">

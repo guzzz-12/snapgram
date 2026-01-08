@@ -77,7 +77,7 @@ const GetCryptoKeysModal = () => {
           </DialogTitle>
 
           <DialogDescription>
-            Para usar el chat debes introducir tu pin de cifrado de extremo a extremo.
+            Introduce tu pin de 6 digitos para recuperar el historial de mensajes.
           </DialogDescription>
         </DialogHeader>
 

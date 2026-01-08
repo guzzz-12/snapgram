@@ -1,4 +1,8 @@
-type DecryptHybridPayload = { encryptedKey: string; content: string; iv: string };
+type DecryptHybridPayload = {
+  content: string;
+  encryptedKey: string;
+  iv: string;
+};
 
 /**
  * Generar el par de llaves RSA (publica y privada)
@@ -61,38 +65,59 @@ export const convertJWKToCryptoKey = async (jwk: JsonWebKey, type: "public" | "p
 
 
 /** Función de Cifrado de Extremo a Extremo */
-export const encryptHybrid = async (text: string, receiverPubKey: CryptoKey, senderPubKey: CryptoKey) => {
+export const encryptHybrid = async (text: string, keys: {userId: string, publicKey: CryptoKey}[], fileUrls: string[] = []) => {
   const encoder = new TextEncoder();
   const aesKey = await generateAESKey();
   const initVector = window.crypto.getRandomValues(new Uint8Array(12));
 
-  // Cifrar el mensaje con la llave AES
+  // Cifrar el mensaje con la llave AES aleatoria unica para cada mensaje
   const encryptedContent = await window.crypto.subtle.encrypt(
     { name: "AES-GCM", iv: initVector },
     aesKey,
     encoder.encode(text)
   );
 
+  // Cifrar las urls de los archivos adjuntos con la llave AES aleatoria
+  let encryptedFileUrls: string = "";
+
+  if (fileUrls.length > 0) {
+    const stringifiedFileUrls = JSON.stringify(fileUrls);
+
+    const encrypted = await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: initVector },
+      aesKey,
+      encoder.encode(stringifiedFileUrls)
+    );
+
+    encryptedFileUrls = btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+  }
+
   // Exportar la llave AES para cifrarla con RSA
   const exportedAesKey = await window.crypto.subtle.exportKey("raw", aesKey);
 
-  // Cifrar la llave AES para el remitente y el recipiente
-  const encryptedKeyForReceiver = await window.crypto.subtle.encrypt(
-    { name: "RSA-OAEP" },
-    receiverPubKey,
-    exportedAesKey
-  );
+  // Cifrar la llave AES del mensaje para cada miembro del chat
+  // cifrada con la llave pública RSA de cada miembro
+  const encryptedKeys: { userId: string; encryptedKey: string }[] = [];
 
-  const encryptedKeyForSender = await window.crypto.subtle.encrypt(
-    { name: "RSA-OAEP" },
-    senderPubKey,
-    exportedAesKey
-  );
+  for (const key of keys) {
+    const encryptedKey = await window.crypto.subtle.encrypt(
+      { name: "RSA-OAEP" },
+      key.publicKey,
+      exportedAesKey
+    );
+
+    const encryptedKeyString = btoa(String.fromCharCode(...new Uint8Array(encryptedKey)));
+
+    encryptedKeys.push({
+      userId: key.userId,
+      encryptedKey: encryptedKeyString
+    });
+  }
 
   return {
-    content: btoa(String.fromCharCode(...new Uint8Array(encryptedContent))),
-    keyForSender: btoa(String.fromCharCode(...new Uint8Array(encryptedKeyForSender))),
-    keyForRecipient: btoa(String.fromCharCode(...new Uint8Array(encryptedKeyForReceiver))),
+    encryptedMessage: btoa(String.fromCharCode(...new Uint8Array(encryptedContent))),
+    encryptedFileUrls,
+    encryptedKeys,
     iv: btoa(String.fromCharCode(...initVector))
   };
 };
@@ -122,7 +147,7 @@ export const decryptHybrid = async (payload: DecryptHybridPayload, myPrivateKey:
       ["decrypt"]
     );
   
-    // Descifrar el mensaje
+    // Descifrar el mensaje usando su llave AES desencriptada
     const decryptedContent = await window.crypto.subtle.decrypt(
       { name: "AES-GCM", iv },
       aesKey,

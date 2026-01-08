@@ -24,11 +24,11 @@ interface Props {
   chatData: ChatType | null | undefined;
   wrapperHeight: number;
   chatTypeParam: "all" | "group" | null;
-  recipientPublicKey: JsonWebKey | null;
+  recipientsPublicKeys: {userId: string, publicKey: JsonWebKey}[];
   setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
-const ChatInput = ({ chatData, chatTypeParam, recipientPublicKey, setTemporaryChat }: Props) => {
+const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys, setTemporaryChat }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const navigate = useNavigate();
@@ -81,6 +81,10 @@ const ChatInput = ({ chatData, chatTypeParam, recipientPublicKey, setTemporaryCh
         currentUser
       }) : [];
 
+      const filesUrls = uploadData
+      .filter(data => !!data.fileUrl && !!data.fileId)
+      .map(data => data.fileUrl) as string[];
+
       const token2 = await getToken();
 
       const participants = chatData?.participants.map(user => user._id) || [];
@@ -96,19 +100,30 @@ const ChatInput = ({ chatData, chatTypeParam, recipientPublicKey, setTemporaryCh
         throw new Error("No pudimos obtener tus claves de cifrado o aún no las has creado.");
       }
 
-      if (!recipientPublicKey) {
+      if (!recipientsPublicKeys.length) {
         throw new Error("Este usuario aún no ha creado sus claves de cifrado.");
       }
 
       // Convertir las llaves públicas de cifrado de JsonWebKey a CryptoKey
       const senderKey = await convertJWKToCryptoKey(parsedPublicKey, "public");
-      const recipientKey = await convertJWKToCryptoKey(recipientPublicKey, "public");
+      const allPublicKeys = [
+        {publicKey: senderKey, userId: currentUser?._id || ""}
+      ];
 
-      // Encriptar el mensaje
-      const {content: encryptedMessage, keyForRecipient, keyForSender, iv} = await encryptHybrid(
+      for (const key of recipientsPublicKeys) {
+        const userKey = await convertJWKToCryptoKey(key.publicKey, "public");
+        
+        allPublicKeys.push({
+          publicKey: userKey,
+          userId: key.userId.replace("temp_", "")
+        });
+      }
+
+      // Encriptar el mensaje y las urls de los archivos
+      const {encryptedMessage, encryptedFileUrls, encryptedKeys, iv} = await encryptHybrid(
         messageText,
-        recipientKey,
-        senderKey
+        allPublicKeys,
+        filesUrls,
       );
 
       const {data} = await axiosInstance<{
@@ -123,10 +138,9 @@ const ChatInput = ({ chatData, chatTypeParam, recipientPublicKey, setTemporaryCh
           chatId: chatData?._id,
           recipientIds: participants,
           type: hasText && hasImages ? "imageWithText" : hasImages ? "image" : hasAudio ? "audio" : "text",
-          fileUrls: uploadData.map(uData => uData.fileUrl),
+          fileUrls: encryptedFileUrls,
           fileIds: uploadData.map(uData => uData.fileId),
-          senderCryptoKey: keyForSender,
-          recipientCryptoKey: keyForRecipient,
+          encryptedKeys,
           initVector: iv
         },
         headers: {

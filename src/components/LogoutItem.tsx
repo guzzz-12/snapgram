@@ -15,6 +15,8 @@ const LogoutItem = () => {
       setIsSigningOut(true);
 
       await signOut();
+
+      localStorage.clear();
       
     } catch (error: any) {
       toast.error("Error al cerrar sesión. Inténtalo de nuevo.");

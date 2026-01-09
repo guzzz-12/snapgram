@@ -15,7 +15,7 @@ import { updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { decryptMessage } from "@/utils/decryptMessageText";
 import type { TypingEventData } from "@/types/socketTypes";
-import type { ChatType } from "@/types/global";
+import type { ChatType, MessageType } from "@/types/global";
 
 dayjs.extend(updateLocale);
 
@@ -54,7 +54,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
 
   const otherUserExists = chatData.type === "private" && !!otherUser;
 
-  const [lastMessage, setLastMessage] = useState(chatData.lastMessage);
+  const [lastMessage, setLastMessage] = useState<MessageType | null>(null);
 
   const {getToken} = useAuth();
   
@@ -64,13 +64,20 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
 
   // Desencriptar el último mensaje del chat
   useEffect(() => {
-    if (chatData.lastMessage?.text && user) {
-      decryptMessage(chatData.lastMessage, user._id)
-      .then((msg) => {
-        setLastMessage(msg);
-      });
-    }
-  }, [chatData.lastMessage, user]);
+    if (!chatData.lastMessage || !user) return;
+
+    decryptMessage(chatData.lastMessage, user._id)
+    .then((msg) => {
+      setLastMessage(msg);
+    })
+    .catch((error) => {
+      console.error(error.message);
+    });
+
+    return () => {
+      setLastMessage(null);
+    };
+  }, [chatData, user]);
 
   // Mutation para restablecer el contador de mensajes sin leer del usuario en el chat
   const {mutate: resetUnreadMessagesCounter, isPending} = useMutation({

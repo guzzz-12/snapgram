@@ -8,23 +8,23 @@ import { axiosInstance } from "@/utils/axiosInstance";
 interface State {
   isMounted: boolean;
   hasCryptoKeys: boolean;
+  loadedCryptoKeys: boolean;
   openCryptoKeysModal: boolean;
-  openGetCryptoKeysModal: boolean;
   loadingPrivateKey: boolean;
   setHasCryptoKeys: (hasCryptoKeys: boolean) => void;
+  setLoadedCryptoKeys: (loadedCryptoKeys: boolean) => void;
   setOpenCryptoKeysModal: (open: boolean) => void;
-  setOpenGetCryptoKeysModal: (open: boolean) => void;
 }
 
 const CheckCryptoKeysContext = createContext<State>({
   isMounted: false,
   hasCryptoKeys: false,
   openCryptoKeysModal: false,
-  openGetCryptoKeysModal: false,
   loadingPrivateKey: true,
+  loadedCryptoKeys: false,
   setHasCryptoKeys: () => {},
+  setLoadedCryptoKeys: () => {},
   setOpenCryptoKeysModal: () => {},
-  setOpenGetCryptoKeysModal: () => {}
 });
 
 /** Provider para verificar si el usuario tiene claves de cifrado */
@@ -33,9 +33,8 @@ export const CheckCryptoKeysProvider = ({ children }: { children: ReactNode }) =
 
   const [isMounted, setIsMounted] = useState(false);
   const [hasCryptoKeys, setHasCryptoKeys] = useState(false);
-
+  const [loadedCryptoKeys, setLoadedCryptoKeys] = useState(false);
   const [openCryptoKeysModal, setOpenCryptoKeysModal] = useState(false);
-  const [openGetCryptoKeysModal, setOpenGetCryptoKeysModal] = useState(false);
 
   const { getToken } = useAuth();
 
@@ -74,11 +73,6 @@ export const CheckCryptoKeysProvider = ({ children }: { children: ReactNode }) =
       // Se abre el modal de crear claves de cifrado si el usuario no las ha creado
       setOpenCryptoKeysModal(!data.hasCryptoKeys);
 
-      // Se abre el modal de obtener las claves de cifrado si el usuario ya las ha creado
-      if (data.hasCryptoKeys) {
-        setOpenGetCryptoKeysModal(true);
-      }
-
       return data;
     },
     enabled: !hasCryptoKeys && isMounted,
@@ -102,12 +96,12 @@ export const CheckCryptoKeysProvider = ({ children }: { children: ReactNode }) =
     <CheckCryptoKeysContext.Provider
       value={{ isMounted,
         hasCryptoKeys,
+        loadedCryptoKeys,
         openCryptoKeysModal,
-        openGetCryptoKeysModal,
         loadingPrivateKey,
         setHasCryptoKeys,
-        setOpenCryptoKeysModal,
-        setOpenGetCryptoKeysModal
+        setLoadedCryptoKeys,
+        setOpenCryptoKeysModal
       }}
     >
       {children}

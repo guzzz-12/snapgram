@@ -19,7 +19,7 @@ const GetCryptoKeysModal = () => {
 
   const {getToken} = useAuth();
 
-  const {openGetCryptoKeysModal, setOpenGetCryptoKeysModal} = useCheckCryptoKeys();
+  const {loadedCryptoKeys, setLoadedCryptoKeys} = useCheckCryptoKeys();
 
   // Query para consultar las claves del usuario si las tiene
   const {data, isFetching, error} = useQuery({
@@ -50,7 +50,7 @@ const GetCryptoKeysModal = () => {
       localStorage.setItem("publicKey", JSON.stringify(data.publicKey));
       localStorage.setItem("privateKey", JSON.stringify(decryptedPrivateKey));
 
-      setOpenGetCryptoKeysModal(false);
+      setLoadedCryptoKeys(true);
 
       return data;
     },
@@ -65,7 +65,7 @@ const GetCryptoKeysModal = () => {
 
   return (
     <Dialog
-      open={openGetCryptoKeysModal}
+      open={!loadedCryptoKeys}
       onOpenChange={(open) => {
         return false;
       }}

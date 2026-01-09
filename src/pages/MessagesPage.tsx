@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 import { LuSendHorizontal  } from "react-icons/lu";
 import { Loader2Icon } from "lucide-react";
@@ -22,7 +22,13 @@ const MessagesPage = () => {
 
   const {setIsOpen: setOpenPrivateChatsModal} = usePrivateChatsListModal();
 
-  const {hasCryptoKeys, loadingPrivateKey} = useCheckCryptoKeys();
+  const {hasCryptoKeys, loadingPrivateKey, loadedCryptoKeys, setLoadedCryptoKeys} = useCheckCryptoKeys();
+
+  useEffect(() => {
+    const publicKey = localStorage.getItem("publicKey");
+    const privateKey = localStorage.getItem("privateKey");
+    setLoadedCryptoKeys(!!publicKey && !!privateKey);
+  }, []);
 
   return (
     <main className="relative flex w-full h-full bg-white overflow-hidden">
@@ -40,7 +46,7 @@ const MessagesPage = () => {
         headerHeight={headerHeight}
         temporaryChatItem={temporaryChat}
         chatTypeParam={chatTypeParam}
-        hasCryptoKeys={hasCryptoKeys}
+        loadedCryptoKeys={loadedCryptoKeys}
       />
 
       <section className="flex flex-col justify-start w-full h-screen overflow-x-hidden">

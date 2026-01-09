@@ -23,10 +23,10 @@ interface Props {
   headerHeight: number;
   temporaryChatItem: ChatType | null;
   chatTypeParam?: "all" | "group" | null;
-  hasCryptoKeys: boolean;
+  loadedCryptoKeys: boolean;
 }
 
-const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight, hasCryptoKeys }: Props) => {
+const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight, loadedCryptoKeys }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const {chatId} = useParams<{chatId: string}>();
@@ -82,7 +82,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight, hasCryptoKey
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,
-    enabled: !!hasCryptoKeys && (!!chatTypeParam || !!chatId)
+    enabled: !!loadedCryptoKeys && (!!chatTypeParam || !!chatId)
   });
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});
@@ -105,7 +105,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight, hasCryptoKey
 
   return (
     <aside className="flex flex-col w-fit min-[950px]:w-[240px] shrink-0 h-full pb-4 min-[600px]:pb-6 border-r overflow-hidden">
-      {hasCryptoKeys &&
+      {loadedCryptoKeys &&
         <Button
           style={{height: `${headerHeight}px`}}
           className="p-2 min-[700px]:py-4 rounded-none cursor-pointer"

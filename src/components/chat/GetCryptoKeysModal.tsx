@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { OTPInput } from "input-otp";
@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import OtpInputSlot from "@/components/OtpInputSlot";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -108,8 +109,19 @@ const GetCryptoKeysModal = () => {
                 </div>
               )
             }}
-            />
+          />
         </div>
+
+        <div className="flex justify-center items-center w-full">
+          <Link
+            className="text-sm text-blue-600 underline"
+            to="/update-crypto-keys"
+          >
+            ¿Olvidaste tu pin?
+          </Link>
+        </div>
+
+        <Separator className="w-full my-1 bg-neutral-200" />
 
         <DialogFooter>
           <Button

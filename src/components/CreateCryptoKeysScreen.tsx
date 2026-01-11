@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Navigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { OTPInput } from "input-otp";
@@ -7,6 +7,7 @@ import { IoWarningOutline } from "react-icons/io5";
 import { toast } from "sonner";
 import Logo from "./Logo";
 import OtpInputSlot from "./OtpInputSlot";
+import ConfirmationModal from "./ConfirmationModal";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Toaster } from "./ui/sonner";
@@ -16,13 +17,16 @@ import { generateKeyPair } from "@/utils/hybridCrypto";
 import { decryptPrivateKeyFromPin, protectPrivateKey } from "@/utils/encryptDecryptPrivateKey";
 import { axiosInstance } from "@/utils/axiosInstance";
 
-const CreateCryptoKeysScreen = () => {
+const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) => {
   const pinRef = useRef<string>(null);
+
+  const navigate = useNavigate();
 
   const { user, setUser } = useCurrentUser();
 
   const [createPinStep, setCreatePinStep] = useState(1);
   const [pin, setPin] = useState("");
+  const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
 
   const { getToken, signOut } = useAuth();
 
@@ -60,13 +64,16 @@ const CreateCryptoKeysScreen = () => {
           salt,
           iv
         },
+        params: {
+          operation
+        },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
         }
       });
 
-      const {key} = data.privateKeyLock
+      const {key} = data.privateKeyLock;
       
       // Desencriptar la llave privada usando el pin
       const decryptedPrivateKey = await decryptPrivateKeyFromPin(key, salt, iv, pin);
@@ -91,6 +98,11 @@ const CreateCryptoKeysScreen = () => {
       pinRef.current = null;
 
       setCreatePinStep(1);
+      
+      if (operation === "update") {
+        setOpenConfirmationModal(false);
+        navigate("/messages?type=all", {replace: true});        
+      }
     },
     onError: (error) => {
       console.log(error);
@@ -118,29 +130,48 @@ const CreateCryptoKeysScreen = () => {
     }
   }
 
+  const onCompleteHandler = () => {
+    if (operation === "create") {
+      mutate();
+    } else {
+      setOpenConfirmationModal(true);
+    }
+  }
+
   if (!user) {
     return null;
   }
 
-  if (user.hasCryptoKeys) {
-    return (
-      <Navigate to="/" replace />
-    )
-  }
-
   return (
     <main className="flex justify-center items-center w-full h-screen bg-neutral-200">
+      <ConfirmationModal
+        isOpen={openConfirmationModal}
+        isPending={isPending}
+        title="Actualizar pin de cifrado"
+        description="Estás a punto de actualizar tu pin de cifrado. Perderás permanentemente el acceso a los mensajes anteriores en todos tus chats. Esta acción no se puede deshacer."
+        cb={mutate}
+        setIsOpen={setOpenConfirmationModal}
+      />
+
       <section className="w-full max-w-[600px] mx-auto p-6 rounded-lg bg-white shadow">
-        <Logo className="mb-4" />
+        {operation === "create" && <Logo className="mb-4" />}
 
         <h1 className="mb-1 text-left text-2xl text-neutral-900 font-semibold">
-          Habilita el cifrado de extremo a extremo del chat
+          {operation === "create" ? "Habilita el cifrado de extremo a extremo del chat" : "Actualizar pin de cifrado"}
         </h1>
 
-        <p className="text-left text-sm text-neutral-700 leading-tight">
-          Para continuar debes habilitar el cifrado de extremo a extremo. <br />
-          Crea un pin para habilitar el cifrado de extremo a extremo.
-        </p>
+        {operation === "create" &&
+          <p className="text-left text-sm text-neutral-700 leading-tight">
+            Para continuar debes habilitar el cifrado de extremo a extremo. <br />
+            Crea un pin para habilitar el cifrado de extremo a extremo.
+          </p>
+        }
+
+        {operation === "update" &&
+          <p className="text-left text-sm text-neutral-700 leading-tight">
+            Actualiza tu pin de cifrado de extremo a extremo del chat.
+          </p>
+        }
 
         <Separator className="w-full my-6" />
 
@@ -175,7 +206,7 @@ const CreateCryptoKeysScreen = () => {
               autoFocus
               maxLength={6}
               disabled={isPending}
-              onComplete={() => mutate()}
+              onComplete={onCompleteHandler}
               onChange={onChangeHandler}
               render={({slots}) => {
                 return (
@@ -190,11 +221,19 @@ const CreateCryptoKeysScreen = () => {
           }
         </div>
 
-        <div className="flex justify-center items-center gap-1 w-full mb-6 text-destructive">
-          <IoWarningOutline className="size-6 shrink-0" />
-          <span className="text-sm text-center">
-            Si pierdes este pin no podrás recuperar tu historial de mensajes.
-          </span>
+        <div className="flex justify-center items-center gap-2 w-full mb-6 text-destructive">
+          <IoWarningOutline className="size-7 shrink-0" />
+          {operation === "create" &&
+            <span className="text-sm text-center leading-tight">
+              Si pierdes este pin no podrás recuperar tu historial de mensajes.
+            </span>
+          }
+
+          {operation === "update" &&
+            <span className="text-sm text-left leading-tight">
+              Al actualizar tu pin de cifrado de extremo a extremo, <br /> perderas todos los mensajes anteriores.
+            </span>
+          }
         </div>
 
         <div className="flex justify-end items-center w-full">
@@ -204,7 +243,12 @@ const CreateCryptoKeysScreen = () => {
             disabled={isPending}
             onClick={() => {
               if (isPending) return;
-              signOut();
+
+              if (operation === "create") {
+                signOut();
+              } else {
+                navigate("/", {replace: true});
+              }
             }}
           >
             {!isPending ? "Cancelar": "Guardando..."}

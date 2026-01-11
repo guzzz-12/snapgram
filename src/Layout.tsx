@@ -100,7 +100,7 @@ const Layout = () => {
   // Mostrar esta pantalla si el usuario no ha creado las claves de cifrado
   if (!currentUser.hasCryptoKeys) {
     return (
-      <CreateCryptoKeysScreen />
+      <CreateCryptoKeysScreen operation="create" />
     )
   }
 

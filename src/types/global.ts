@@ -16,6 +16,7 @@ export type UserType = {
   isFollowing: boolean; // true si el usuario actual sigue al usuario consultado
   isDisabled: boolean;
   isVerified: boolean;
+  hasCryptoKeys: boolean;
   createdAt: string;
   updatedAt: string;
 }

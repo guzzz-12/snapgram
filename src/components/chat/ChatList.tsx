@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
@@ -15,6 +15,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
+import { useLocalCryptoKeys } from "@/hooks/useLocalCryptoKeys";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType } from "@/types/global";
@@ -23,10 +24,9 @@ interface Props {
   headerHeight: number;
   temporaryChatItem: ChatType | null;
   chatTypeParam?: "all" | "group" | null;
-  loadedCryptoKeys: boolean;
 }
 
-const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight, loadedCryptoKeys }: Props) => {
+const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const {chatId} = useParams<{chatId: string}>();
@@ -40,6 +40,8 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight, loadedCrypto
   const {user} = useCurrentUser();
 
   const {usersTyping} = useUsersTyping();
+
+  const {hasLocalCryptoKeys} = useLocalCryptoKeys();
 
   useEffect(() => {
     if (!chatId) {
@@ -82,7 +84,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight, loadedCrypto
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,
-    enabled: !!loadedCryptoKeys && (!!chatTypeParam || !!chatId)
+    enabled: hasLocalCryptoKeys && (!!chatTypeParam || !!chatId)
   });
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});
@@ -105,7 +107,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight, loadedCrypto
 
   return (
     <aside className="flex flex-col w-fit min-[950px]:w-[240px] shrink-0 h-full pb-4 min-[600px]:pb-6 border-r overflow-hidden">
-      {loadedCryptoKeys &&
+      {user.hasCryptoKeys &&
         <Button
           style={{height: `${headerHeight}px`}}
           className="p-2 min-[700px]:py-4 rounded-none cursor-pointer"

@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import OtpInputSlot from "@/components/OtpInputSlot";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useCheckCryptoKeys } from "@/providers/CheckCryptoKeysProvider";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useLocalCryptoKeys } from "@/hooks/useLocalCryptoKeys";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { decryptPrivateKeyFromPin } from "@/utils/encryptDecryptPrivateKey";
@@ -19,12 +20,18 @@ const GetCryptoKeysModal = () => {
 
   const {getToken} = useAuth();
 
-  const {loadedCryptoKeys, setLoadedCryptoKeys} = useCheckCryptoKeys();
+  const {user, setUser} = useCurrentUser();
+
+  const {hasLocalCryptoKeys, setHasLocalCryptoKeys} = useLocalCryptoKeys();
 
   // Query para consultar las claves del usuario si las tiene
   const {data, isFetching, error} = useQuery({
     queryKey: ["getMyCryptoKeys"],
     queryFn: async () => {
+      if (!user) {
+        return;
+      }
+
       const token = await getToken();
 
       const {data} = await axiosInstance<{
@@ -50,7 +57,9 @@ const GetCryptoKeysModal = () => {
       localStorage.setItem("publicKey", JSON.stringify(data.publicKey));
       localStorage.setItem("privateKey", JSON.stringify(decryptedPrivateKey));
 
-      setLoadedCryptoKeys(true);
+      setUser({...user, hasCryptoKeys: true});
+
+      setHasLocalCryptoKeys(true);
 
       return data;
     },
@@ -63,9 +72,13 @@ const GetCryptoKeysModal = () => {
     toast.error(errorMessage(error));
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <Dialog
-      open={!loadedCryptoKeys}
+      open={!hasLocalCryptoKeys}
       onOpenChange={(open) => {
         return false;
       }}

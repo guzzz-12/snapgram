@@ -1,38 +1,39 @@
 import { useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Navigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { OTPInput } from "input-otp";
 import { IoWarningOutline } from "react-icons/io5";
 import { toast } from "sonner";
-import OtpInputSlot from "@/components/OtpInputSlot";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
-import { useCheckCryptoKeys } from "@/providers/CheckCryptoKeysProvider";
+import Logo from "./Logo";
+import OtpInputSlot from "./OtpInputSlot";
+import { Button } from "./ui/button";
+import { Separator } from "./ui/separator";
+import { Toaster } from "./ui/sonner";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { generateKeyPair } from "@/utils/hybridCrypto";
 import { decryptPrivateKeyFromPin, protectPrivateKey } from "@/utils/encryptDecryptPrivateKey";
 import { axiosInstance } from "@/utils/axiosInstance";
 
-const CreateCryptoKeysModal = () => {
+const CreateCryptoKeysScreen = () => {
   const pinRef = useRef<string>(null);
+
+  const { user, setUser } = useCurrentUser();
 
   const [createPinStep, setCreatePinStep] = useState(1);
   const [pin, setPin] = useState("");
 
-  const { getToken } = useAuth();
+  const { getToken, signOut } = useAuth();
 
   const queryClient = useQueryClient();
-
-  const {
-    hasCryptoKeys,
-    loadingPrivateKey,
-    openCryptoKeysModal,
-    setHasCryptoKeys,
-    setOpenCryptoKeysModal,
-  } = useCheckCryptoKeys();
 
   // Mutation para crear y almacenar la llave de cifrado privada
   const {mutate, isPending} = useMutation({
     mutationFn: async () => {
+      if (!user) {
+        return;
+      }
+
       const token = await getToken();
 
       const keyPair = await generateKeyPair();
@@ -70,6 +71,8 @@ const CreateCryptoKeysModal = () => {
       localStorage.setItem("publicKey", JSON.stringify(keyPair.publicKey));
       localStorage.setItem("privateKey", JSON.stringify(decryptedPrivateKey));
 
+      setUser({...user, hasCryptoKeys: true});
+
       return data;
     },
     onSuccess: async () => {
@@ -82,9 +85,7 @@ const CreateCryptoKeysModal = () => {
 
       pinRef.current = null;
 
-      setHasCryptoKeys(true);
       setCreatePinStep(1);
-      setOpenCryptoKeysModal(false);
     },
     onError: (error) => {
       console.log(error);
@@ -112,32 +113,33 @@ const CreateCryptoKeysModal = () => {
     }
   }
 
+  if (!user) {
+    return null;
+  }
+
+  if (user.hasCryptoKeys) {
+    return (
+      <Navigate to="/" replace />
+    )
+  }
+
   return (
-    <Dialog
-      open={!loadingPrivateKey && !hasCryptoKeys && openCryptoKeysModal}
-      onOpenChange={(isOpen) => {
-        if (!hasCryptoKeys || isPending) {
-          return;
-        }
+    <main className="flex justify-center items-center w-full h-screen bg-neutral-200">
+      <section className="w-full max-w-[600px] mx-auto p-6 rounded-lg bg-white shadow">
+        <Logo className="mb-4" />
 
-        setOpenCryptoKeysModal(isOpen);
-      }}
-    >
-      <DialogOverlay className="bg-black/70" />
+        <h1 className="mb-1 text-left text-2xl text-neutral-900 font-semibold">
+          Habilita el cifrado de extremo a extremo del chat
+        </h1>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            Habilita el cifrado de extremo a extremo del chat
-          </DialogTitle>
+        <p className="text-left text-sm text-neutral-700 leading-tight">
+          Para continuar debes habilitar el cifrado de extremo a extremo. <br />
+          Crea un pin para habilitar el cifrado de extremo a extremo.
+        </p>
 
-          <DialogDescription>
-            Para usar el chat debes habilitar el cifrado de extremo a extremo. <br />
-            Crea un pin para habilitar el cifrado de extremo a extremo. <br />
-          </DialogDescription>
-        </DialogHeader>
+        <Separator className="w-full my-6" />
 
-        <div className="w-[70%] mx-auto">
+        <div className="w-[70%] mx-auto mb-2">
           {createPinStep === 2 &&
             <p className="w-full mb-3 text-center text-neutral-700 font-semibold">
               Confirma tu pin
@@ -146,6 +148,7 @@ const CreateCryptoKeysModal = () => {
 
           { createPinStep === 1 &&
             <OTPInput
+              autoFocus
               maxLength={6}
               disabled={isPending}
               onComplete={() => setCreatePinStep(2)}
@@ -164,6 +167,7 @@ const CreateCryptoKeysModal = () => {
 
           { createPinStep === 2 &&
             <OTPInput
+              autoFocus
               maxLength={6}
               disabled={isPending}
               onComplete={() => mutate()}
@@ -181,26 +185,31 @@ const CreateCryptoKeysModal = () => {
           }
         </div>
 
-        <div className="flex justify-center items-center gap-2 w-full text-destructive">
+        <div className="flex justify-center items-center gap-1 w-full mb-6 text-destructive">
           <IoWarningOutline className="size-6 shrink-0" />
-          <span className="text-xs text-center">
-            Si pierdes este pin no podrás recuperarlo y perderás tu historial de mensajes.
+          <span className="text-sm text-center">
+            Si pierdes este pin no podrás recuperar tu historial de mensajes.
           </span>
         </div>
 
-        <DialogFooter>
+        <div className="flex justify-end items-center w-full">
           <Button
             className="cursor-pointer"
             variant="outline"
             disabled={isPending}
-            onClick={() => setOpenCryptoKeysModal(false)}
+            onClick={() => {
+              if (isPending) return;
+              signOut();
+            }}
           >
-            {!isPending ? "Crear en otro momento": "Guardando..."}
+            {!isPending ? "Cancelar": "Guardando..."}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </section>
+
+      <Toaster position="bottom-right" />
+    </main>
   )
 }
 
-export default CreateCryptoKeysModal
+export default CreateCryptoKeysScreen

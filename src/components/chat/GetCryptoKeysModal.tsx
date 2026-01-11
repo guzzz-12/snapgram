@@ -8,7 +8,7 @@ import OtpInputSlot from "@/components/OtpInputSlot";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useLocalCryptoKeys } from "@/hooks/useLocalCryptoKeys";
+import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { decryptPrivateKeyFromPin } from "@/utils/encryptDecryptPrivateKey";
@@ -22,7 +22,7 @@ const GetCryptoKeysModal = () => {
 
   const {user, setUser} = useCurrentUser();
 
-  const {hasLocalCryptoKeys, setHasLocalCryptoKeys} = useLocalCryptoKeys();
+  const {hasLocalCryptoKeys, setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 
   // Query para consultar las claves del usuario si las tiene
   const {data, isFetching, error} = useQuery({

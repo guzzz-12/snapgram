@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +19,7 @@ import useSidebarWidth from "./hooks/useSidebarWidth";
 import { errorMessage } from "./utils/errorMessage";
 import { axiosInstance } from "./utils/axiosInstance";
 import { cn } from "./lib/utils";
+import { useCheckLocalCryptoKeys } from "./hooks/useCheckLocalCryptoKeys";
 
 const Layout = () => {
   const {pathname} = useLocation();
@@ -37,6 +38,12 @@ const Layout = () => {
   const {sidebarWidth} = useSidebarWidth();
 
   useTitleNotificationsCounter();
+
+  const {checkLocalCryptoKeys} = useCheckLocalCryptoKeys();
+
+  useEffect(() => {
+    checkLocalCryptoKeys();
+  }, []);
 
   // Mutation para reactivar la cuenta
   const {mutate, isPending} = useMutation({

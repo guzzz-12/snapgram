@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
@@ -15,7 +15,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
-import { useLocalCryptoKeys } from "@/hooks/useLocalCryptoKeys";
+import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType } from "@/types/global";
@@ -41,7 +41,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight }: Props) => 
 
   const {usersTyping} = useUsersTyping();
 
-  const {hasLocalCryptoKeys} = useLocalCryptoKeys();
+  const {hasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 
   useEffect(() => {
     if (!chatId) {

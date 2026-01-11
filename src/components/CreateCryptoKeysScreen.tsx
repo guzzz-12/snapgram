@@ -11,6 +11,7 @@ import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Toaster } from "./ui/sonner";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 import { generateKeyPair } from "@/utils/hybridCrypto";
 import { decryptPrivateKeyFromPin, protectPrivateKey } from "@/utils/encryptDecryptPrivateKey";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -26,6 +27,8 @@ const CreateCryptoKeysScreen = () => {
   const { getToken, signOut } = useAuth();
 
   const queryClient = useQueryClient();
+
+  const {setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 
   // Mutation para crear y almacenar la llave de cifrado privada
   const {mutate, isPending} = useMutation({
@@ -72,6 +75,8 @@ const CreateCryptoKeysScreen = () => {
       localStorage.setItem("privateKey", JSON.stringify(decryptedPrivateKey));
 
       setUser({...user, hasCryptoKeys: true});
+
+      setHasLocalCryptoKeys(true);
 
       return data;
     },

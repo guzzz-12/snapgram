@@ -11,6 +11,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { useUsersRecordingAudio } from "@/hooks/useUsersRecordingAudio";
+import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 import { errorMessage } from "@/utils/errorMessage";
 import { addNewChatToChatsListCache, addNewGroupToChatsListCache, deleteGroupFromChatsListCache, updateChatLastMessageCache, updateGroupChatCache, updateMessagesCache, updateUnreadMessagesCounterCache, updateMsgDataCache } from "@/utils/updateMsgsDataCache";
 import { socket } from "@/utils/socket";
@@ -53,6 +54,8 @@ const SocketManager = () => {
   }, []);
 
   const {connectSocket, setOnlineUsers, setConnected} = useSocketStore();
+
+  const {hasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 
   // Conectar el socket y escuchar los eventos
   useEffect(() => {
@@ -206,7 +209,9 @@ const SocketManager = () => {
 
   // Escuchar el evento de nuevo mensaje
   useEffect(() => {
-    if (!userDocument) return;
+    // No escuchar el evento de nuevo mensaje si no está autenticado
+    // o si no tiene las claves de cifrado guardadas en el localStorage
+    if (!userDocument || !hasLocalCryptoKeys) return;
 
     socket.on("newMessage", (data) => {
       const senderId = data.message.sender._id;
@@ -277,7 +282,7 @@ const SocketManager = () => {
     return () => {
       socket.off("newMessage");
     }
-  }, [socket, userDocument, pathname, params]);
+  }, [socket, userDocument, pathname, params, hasLocalCryptoKeys]);
 
 
   return null;

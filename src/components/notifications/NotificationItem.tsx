@@ -7,7 +7,7 @@ import { Ellipsis, Trash2Icon } from "lucide-react";
 import { GoDotFill } from "react-icons/go";
 import { toast } from "sonner";
 import NotificationIcon from "./NotificationIcon";
-import DeleteConfirmModal from "../DeleteConfirmModal";
+import ConfirmationModal from "../ConfirmationModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { NotificationType } from "@/types/global";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -86,11 +86,11 @@ const NotificationItem = ({ data }: Props) => {
       onMouseEnter={() => setShowDropdownTrigger(true)}
       onMouseLeave={() => setShowDropdownTrigger(false)}
     >
-      <DeleteConfirmModal
+      <ConfirmationModal
         title="Eliminar notificación"
         isOpen={openDeleteModal}
         isPending={isPending}
-        onDeleteHandler={() => mutate()}
+        cb={() => mutate()}
         setIsOpen={() => setOpenDeleteModal(false)}
       />
 

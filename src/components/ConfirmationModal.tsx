@@ -1,15 +1,16 @@
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   title: string;
+  description?: string;
   isOpen: boolean;
   isPending: boolean;
-  onDeleteHandler: () => void;
+  cb: () => void;
   setIsOpen: (isOpen: boolean) => void;
 }
 
-const DeleteConfirmModal = ({isOpen, isPending, title, onDeleteHandler, setIsOpen}: Props) => {
+const ConfirmationModal = ({isOpen, isPending, title, description, cb, setIsOpen}: Props) => {
   return (
     <Dialog
       open={isOpen}
@@ -26,6 +27,12 @@ const DeleteConfirmModal = ({isOpen, isPending, title, onDeleteHandler, setIsOpe
           <DialogTitle>
             {title}
           </DialogTitle>
+
+          {description &&
+            <DialogDescription>
+              {description}
+            </DialogDescription>
+          }
         </DialogHeader>
 
         <DialogFooter>
@@ -44,9 +51,9 @@ const DeleteConfirmModal = ({isOpen, isPending, title, onDeleteHandler, setIsOpe
             size="sm"
             variant="destructive"
             disabled={isPending}
-            onClick={onDeleteHandler}
+            onClick={cb}
           >
-            Eliminar
+            Confirmar
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -54,4 +61,4 @@ const DeleteConfirmModal = ({isOpen, isPending, title, onDeleteHandler, setIsOpe
   )
 }
 
-export default DeleteConfirmModal
+export default ConfirmationModal

@@ -16,6 +16,7 @@ import AuthPage from "@/pages/AuthPage";
 import ErrorPage from "@/pages/ErrorPage";
 import NoAuthRoute from "@/components/NoAuthRoute";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import UpdateCryptoKeysPage from "@/pages/UpdateCryptoKeysPage";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
@@ -185,7 +186,7 @@ const App = () => {
     <Routes>
       <Route path="/" element={!isSignedIn ? <AuthLayout /> : <Layout />}>
         <Route index element={!isSignedIn ? <AuthPage type="login" /> : <HomePage />} />
-        
+
         <Route
           path="login"
           element={
@@ -254,6 +255,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/update-crypto-keys"
+          element={
+            <ProtectedRoute>
+              <UpdateCryptoKeysPage />
             </ProtectedRoute>
           }
         />

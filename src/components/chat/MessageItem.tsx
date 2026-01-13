@@ -273,14 +273,16 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
           {["image", "imageWithText"].includes(message.type) && (
             <div
               style={{
-                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))"
+                // Mostrar maximo 4 columnas, generar una fila por cada 4 imagenes
+                gridTemplateColumns: `repeat(${parsedFilesUrls.length >= 4 ? 4 : parsedFilesUrls.length}, 1fr)`,
+                gridTemplateRows: "repeat(auto-fill, 1fr)"
               }}
               className="grid gap-2 w-full h-auto mt-1 overflow-hidden"
             >
               {parsedFilesUrls.map((fileUrl, i) => (
                 <button
                   key={fileUrl}
-                  className="relative w-full aspect-square bg-neutral-700 overflow-hidden cursor-pointer"
+                  className="relative w-full max-w-[150px] aspect-square bg-neutral-700 overflow-hidden cursor-pointer"
                   onClick={() => {
                     setInitialIndex(i);
                     setImages(parsedFilesUrls);

@@ -74,6 +74,6 @@ export const decryptPrivateKeyFromPin = async (
     return JSON.parse(decodedJWK) as JsonWebKey;
 
   } catch (error) {
-    throw new Error("PIN de seguridad incorrecto. No se pudo recuperar la llave privada.");
+    throw new Error("PIN incorrecto.");
   }
 };

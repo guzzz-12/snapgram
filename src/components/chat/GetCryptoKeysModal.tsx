@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { OTPInput } from "input-otp";
 import { toast } from "sonner";
 import OtpInputSlot from "@/components/OtpInputSlot";
@@ -15,6 +15,8 @@ import { errorMessage } from "@/utils/errorMessage";
 import { decryptPrivateKeyFromPin } from "@/utils/encryptDecryptPrivateKey";
 
 const GetCryptoKeysModal = () => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const navigate = useNavigate();
 
   const [pin, setPin] = useState("");
@@ -23,10 +25,12 @@ const GetCryptoKeysModal = () => {
 
   const {user, setUser} = useCurrentUser();
 
+  const queryClient = useQueryClient();
+
   const {hasLocalCryptoKeys, setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 
   // Query para consultar las claves del usuario si las tiene
-  const {data, isFetching, error} = useQuery({
+  const {error, isFetching} = useQuery({
     queryKey: ["getMyCryptoKeys"],
     queryFn: async () => {
       if (!user) {
@@ -64,13 +68,37 @@ const GetCryptoKeysModal = () => {
 
       return data;
     },
-    retry: 1,
+    retry: false,
     enabled: pin.length === 6,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 
-  if (error) {
-    toast.error(errorMessage(error));
+  // Restablecer el input y resetear la consulta al cerrar el modal
+  useEffect(() => {
+    return () => {
+      setPin("");
+      queryClient.resetQueries({queryKey: ["getMyCryptoKeys"]});
+    }
+  }, []);
+
+  // Mostrar el error si lo hay
+  useEffect(() => {
+    if (error) {
+      if (error.message.toLowerCase().includes("incorrecto")) {
+        setPin("");        
+      }
+
+      toast.dismiss();
+      toast.error(errorMessage(error));
+      
+      inputRef.current?.focus();
+    }
+  }, [error]);
+
+  const onChangeHandler = (val: string) => {
+    if (val.length > 6) return;
+
+    setPin(val);
   }
 
   if (!user) {
@@ -85,26 +113,31 @@ const GetCryptoKeysModal = () => {
       }}
     >
       <DialogContent>
-        <DialogHeader>
+        <DialogHeader className="gap-1">
           <DialogTitle>
             Introduce tu pin de cifrado
           </DialogTitle>
 
           <DialogDescription>
-            Introduce tu pin de 6 digitos para recuperar el historial de mensajes.
+            Introduce tu pin de 6 digitos para cargar tus chats.
           </DialogDescription>
         </DialogHeader>
 
+        <Separator className="w-full bg-neutral-200" />
+
         <div className="w-full max-w-[320px] mx-auto">
           <OTPInput
+            ref={inputRef}
+            autoFocus
             maxLength={6}
             disabled={isFetching}
-            onChange={setPin}
+            value={pin}
+            onChange={onChangeHandler}
             render={({slots}) => {
               return (
                 <div className="flex justify-center w-full">
                   {slots.map((slot, index) => (
-                    <OtpInputSlot key={index} props={slot} />
+                    <OtpInputSlot key={index} props={{...slot, hasFakeCaret: true}} />
                   ))}
                 </div>
               )
@@ -128,7 +161,10 @@ const GetCryptoKeysModal = () => {
             className="cursor-pointer"
             variant="outline"
             disabled={isFetching}
-            onClick={() => navigate("/")}
+            onClick={() => {
+              setPin("");
+              navigate("/")
+            }}
           >
             Cancelar
           </Button>

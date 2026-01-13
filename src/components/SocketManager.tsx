@@ -165,19 +165,23 @@ const SocketManager = () => {
     });
 
     // Escuchar evento de usuario removido del grupo
-    socket.on("userLeftGroup", (data) => {
+    socket.on("userLeftGroup", async (chat) => {
+      await queryClient.invalidateQueries({queryKey: ["recipientsCryptoKeys", chat._id]});
+
       updateGroupChatCache({
         queryClient,
-        updatedGroup: data
-      })
+        updatedGroup: chat
+      });
     });
 
     // Escuchar evento de usuario agregado al grupo
     // y actualizar la lista de chats del nuevo miembro
-    socket.on("userJoinedGroup", (data) => {
+    socket.on("userJoinedGroup", async (chat) => {
+      await queryClient.invalidateQueries({queryKey: ["recipientsCryptoKeys", chat._id]});
+
       addNewGroupToChatsListCache({
         queryClient,
-        newGroup: data
+        newGroup: chat
       })
     });
 

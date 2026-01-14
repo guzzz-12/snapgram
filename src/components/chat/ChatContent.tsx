@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
@@ -10,8 +10,7 @@ import MessageItem from "./MessageItem";
 import UserLeftOrKickedOrAddedMessageItem from "./UserLeftOrKickedOrAddedMessageItem";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { updateMsgDataCache } from "@/utils/updateMsgsDataCache";
-import { socket } from "@/utils/socket";
+import useInboxHooks from "@/hooks/useInboxHooks";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType, MessageType } from "@/types/global";
@@ -29,13 +28,9 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
   const navigate = useNavigate();
   const params = useParams();
 
-  const [scrollFromBottom, setScrollFromBottom] = useState(0);
-
   const {user: currentUser} = useCurrentUser();
 
   const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
 
   // Función para consultar los mensajes
   const getMessages = async (page: number) => {
@@ -81,63 +76,15 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
     threshold: 0.1
   });
 
-  // Cargar la siguiente página de mensajes al llegar al top del chat
-  useEffect(() => {
-    if (isIntersecting && !isLoadingMessages) {
-      wrapperRef.current!.scrollTop = 50;
-      fetchNextPage()
-    }
-  }, [isIntersecting, isLoadingMessages]);
-
-  // Scrollear al bottom de la bandeja de mensajes al entrar al chat
-  useEffect(() => {
-    if (wrapperRef.current && !isLoadingMessages && chatData) {
-      wrapperRef.current.scrollTop = wrapperRef.current.scrollHeight;
-    }
-  }, [chatData, isLoadingMessages, params.chatId]);
-
-  // Calcular la distancia scrolleada desde el fondo de la bandeja de mensajes
-  useEffect(() => {
-    const scrollHandler = (_e: Event) => {
-      if (wrapperRef.current) {
-        // Height total de la bandeja de mensajes incluyendo el scroll
-        const scrollHeight = wrapperRef.current.scrollHeight;
-  
-        // Distancia scrolleada desde el fondo de la bandeja
-        const scrollDistance = scrollHeight - (wrapperRef.current.scrollTop + wrapperRef.current!.clientHeight);
-  
-        setScrollFromBottom(scrollDistance);
-      }
-    }
-
-    if (wrapperRef.current) {
-      wrapperRef.current.addEventListener("scroll", scrollHandler);
-    }
-
-    return () => {
-      if (wrapperRef.current) {
-        wrapperRef.current.removeEventListener("scroll", scrollHandler);
-      }
-    }
-  }, [chatData]);
-
-  // Scrollear al bottom al enviar/recibir un nuevo mensaje
-  // Escucar evento de mensaje editado
-  useEffect(() => {
-    socket.on("newMessage", (newMessage) => {
-      // Si el scroll es menor o igual a 300px, scrollear al bottom
-      if (scrollFromBottom <= 300 && chatData?._id === newMessage.message.chat) {
-        wrapperRef.current!.scrollTop = wrapperRef.current!.scrollHeight;
-      }
-    });
-
-    socket.on("editedMessage", (editedMessage) => {
-      updateMsgDataCache({
-        queryClient,
-        messageData: editedMessage
-      })
-    });
-  }, [socket, chatData, scrollFromBottom]);
+  // Inicializar los hooks de la bandeja de mensajes
+  useInboxHooks({
+    wrapperRef,
+    isIntersecting,
+    isLoadingMessages,
+    chatData,
+    params,
+    fetchNextPage
+  });
 
   if (error) {
     if (error instanceof AxiosError && error.response?.status === 404) {

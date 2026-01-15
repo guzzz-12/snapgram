@@ -1,4 +1,4 @@
-import type { Dispatch, HTMLAttributes, RefObject, SetStateAction } from "react";
+import { useEffect, type Dispatch, type HTMLAttributes, type RefObject, type SetStateAction } from "react";
 import { PlusCircle, X } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -28,13 +28,24 @@ const SelectedImagesPreviews = (props: Props) => {
     className,
   } = props;
 
+  // Limpiar el state de las imagenes cuando se desmonte el componente
+  useEffect(() => {
+    return () => {
+      setSelectedImagePreviews([]);
+      setSelectedImageFiles([]);
+    }
+  }, []);
+
   // El número de imagenes que se estan procesando
   const processingCount = fileInputRef.current?.files?.length ?? 0;
 
   if (!selectedImagePreviews.length && !processingImages) return null;
 
   return (
-    <div className={cn("flex justify-start items-center gap-3 p-1 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200", className)}>
+    <div
+      style={{contain: "layout"}}
+      className={cn("relative flex justify-start items-center gap-3 p-1 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200", processingImages ? "overflow-x-hidden bg-gradient-to-l from-white to-transparent" : "overflow-x-auto", className)}
+    >
       {/* Botón para adjuntar más imágenes */}
       <Tooltip>
         <TooltipTrigger asChild>
@@ -63,11 +74,11 @@ const SelectedImagesPreviews = (props: Props) => {
         </TooltipContent>
       </Tooltip>
 
-      {/* Mostrar un loader por cada imagen que se esté procesando */}
+      {/* Mostrar un loader tipo skeleton por cada imagen que se esté procesando */}
       {processingImages &&
-        <div className="relative flex justify-start items-center gap-3">
-          <div className="absolute top-[50%] left-[50%] w-full translate-x-[-50%] translate-y-[-50%]">
-            <p className="text-center text-sm text-neutral-900 font-semibold">
+        <div className="flex justify-start items-center gap-3 w-full">
+          <div className="fixed top-[50%] left-[50%] flex justify-center items-center w-full h-full translate-x-[-50%] translate-y-[-50%] bg-white/50 z-10">
+            <p className="text-center text-sm text-neutral-700 font-semibold">
               Procesando...
             </p>
           </div>

@@ -206,7 +206,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                     className="w-full h-full object-cover"
                     src={data.groupPicture || ""}
                   />
-                  <AvatarFallback className="w-full h-full object-cover">
+                  <AvatarFallback className="w-full h-full object-cover text-3xl text-white bg-[#4F39F6] font-semibold">
                     {data.groupName!.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>

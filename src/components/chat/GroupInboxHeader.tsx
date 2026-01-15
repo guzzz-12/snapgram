@@ -47,7 +47,7 @@ const GroupInboxHeader = ({ groupData }: Props) => {
               src={groupData.groupPicture || ""}
               alt=""
             />
-            <AvatarFallback className="w-full h-full text-4xl object-cover object-center bg-[#4f39f6]/15">
+            <AvatarFallback className="w-full h-full text-4xl text-white object-cover object-center bg-[#4f39f6]">
               {groupData.groupName?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

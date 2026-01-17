@@ -12,16 +12,17 @@ El enfoque principal fue construir una infraestructura robusta y escalable sin d
 ## 🚀 Características Técnicas Destacadas
 
 ### 🔐 Privacidad y Seguridad Avanzada
-* **Cifrado de Extremo a Extremo (E2EE):** Mensajería privada y grupal protegida mediante la **Web Crypto API**. Para permitir acceso desde múltiples dispositivos, las llaves de cifrado pública y privada del usuario se almacenan de forma segura en la base de datos, cifradas con una llave AES generada a partir de un PIN de 6 dígitos que el usuario debe generar al registrarse y se le solicita al ingresar al chat. El cifrado se realiza en el navegador, garantizando que el servidor nunca tenga acceso al contenido de los mensajes.
+* **Cifrado de Extremo a Extremo (E2EE):** Mensajería privada y grupal protegida mediante la **Web Crypto API**. Para permitir acceso desde múltiples dispositivos, las llaves de cifrado pública y privada del usuario se almacenan de forma segura en la base de datos, cifradas mediante una llave AES generada a partir de un PIN de 6 dígitos que el usuario debe introducir al registrarse y luego se le solicita al ingresar al chat. Sólo al ingresar el PIN correcto cargan sus conversaciones y se desencriptan. El cifrado se realiza en el navegador, garantizando que el servidor nunca tenga acceso al contenido de los mensajes.
 * **Autenticación Segura:** Implementación de autenticación segura basada en Google OAuth y tradicional (email/password) mediante **Clerk**.
 * **Gestión de Privacidad:** Control total sobre la cuenta, incluyendo bloqueos de usuarios, desactivación temporal y eliminación permanente e inmediata de la cuenta.
 
 ### ⚡ Comunicación en Tiempo Real (Nativa)
-* **Arquitectura Socket.io:** A diferencia de depender de servicios de terceros (como Pusher o Stream.io) para la comunicación en tiempo real, implementé Socket.io nativamente para la gestión de chats y notificaciones.
+* **Arquitectura Socket.io:** Se evitó la dependencia de servicios de terceros (como Pusher o Stream.io) para la comunicación en tiempo real, implementé Socket.io nativamente para la gestión de chats y notificaciones.
 * **Mensajería Multimedia:** Soporte completo para notas de voz, imágenes y texto en tiempo real. Tanto el texto como los archivos de imagen y notas de voz se cifran en tiempo real.
 
 ### 📱 Experiencia de Usuario y Engagement
 * **Feed Interactivo:** Sistema dinámico con "Me gusta", comentarios anidados (threaded replies) y funcionalidad de compartir (reposts).
+* **Sistema de seguimiento:** Gestión de seguidores y seguidos, el usuario sólo ve los posts de los usuarios que sigue.
 * **Contenido Efímero (Historias):** Sistema de historias (texto e imagen) con caducidad de 24 horas, automatizado mediante **Cron Jobs** en el servidor.
 * **Búsqueda Avanzada:** Motor de filtrado de los posts por hashtags, títulos y descripciones, así como búsquea de perfiles de usuario por nombre o username.
 * **Diseño Mobile-First:** Interfaz adaptativa construida con **Shadcn UI** y **Tailwind CSS**, garantizando una experiencia fluida en cualquier dispositivo.

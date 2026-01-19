@@ -105,7 +105,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
 
   return (
     <aside className="flex flex-col w-fit min-[950px]:w-[240px] shrink-0 h-full pb-4 min-[600px]:pb-6 border-r overflow-hidden">
-      {user.hasCryptoKeys &&
+      {user.hasCryptoKeys && hasLocalCryptoKeys &&
         <Button
           style={{height: `${headerHeight}px`}}
           className="p-2 min-[700px]:py-4 rounded-none cursor-pointer"

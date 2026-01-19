@@ -102,7 +102,7 @@ const GetCryptoKeys = () => {
   }
 
   return (
-    <section className="flex flex-col justify-center items-center w-fit h-full mx-auto px-4">
+    <section className="flex flex-col justify-center items-center w-full max-w-[420px] h-full mx-auto px-4">
       <div className="flex flex-col justify-center items-center gap-1 mb-6">
         <h2 className="text-xl text-left font-semibold leading-tight">
           Introduce tu pin de cifrado
@@ -113,10 +113,10 @@ const GetCryptoKeys = () => {
         </span>
       </div>
 
-      <div className="relative w-full max-w-[320px] mx-auto mb-2 shrink-0">
+      <div className="relative w-full mx-auto mb-2 shrink-0">
         {isFetching &&
           <div className="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-white opacity-75 rounded-lg z-10">
-            <Loader2Icon className="text-[#4F39F6] animate-spin" />
+            <Loader2Icon className="size-7 text-[#4F39F6] animate-spin" />
           </div>
         }
 

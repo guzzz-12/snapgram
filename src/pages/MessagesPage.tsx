@@ -5,10 +5,11 @@ import ChatList from "@/components/chat/ChatList";
 import ChatInbox from "@/components/chat/ChatInbox";
 import PrivateChatsModalList from "@/components/chat/PrivateChatsModalList";
 import CreateGroupChatModal from "@/components/chat/CreateGroupChatModal";
-import GetCryptoKeysModal from "@/components/chat/GetCryptoKeysModal";
+import GetCryptoKeys from "@/components/chat/GetCryptoKeys";
 import { Button } from "@/components/ui/button";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 import type { ChatType } from "@/types/global";
 
 const MessagesPage = () => {
@@ -21,6 +22,8 @@ const MessagesPage = () => {
 
   const {setIsOpen: setOpenPrivateChatsModal} = usePrivateChatsListModal();
 
+  const {hasLocalCryptoKeys} = useCheckLocalCryptoKeys();
+
   const {user} = useCurrentUser();
 
   if (!user) {
@@ -29,18 +32,17 @@ const MessagesPage = () => {
 
   return (
     <main className="relative flex w-full h-full bg-white overflow-hidden">
-      <GetCryptoKeysModal />
-
       <PrivateChatsModalList setTemporaryChat={setTemporaryChat}/>
       
       <ChatList
         headerHeight={headerHeight}
         temporaryChatItem={temporaryChat}
         chatTypeParam={chatTypeParam}
+        hasLocalCryptoKeys={hasLocalCryptoKeys}
       />
 
       <section className="flex flex-col justify-start w-full h-screen overflow-x-hidden">
-        {chatId &&
+        {chatId && user.hasCryptoKeys && hasLocalCryptoKeys &&
           <ChatInbox
             chatId={chatId}
             temporaryChat={temporaryChat}
@@ -49,7 +51,11 @@ const MessagesPage = () => {
           />
         }
 
-        {!chatId && user.hasCryptoKeys &&
+        {!chatId && !hasLocalCryptoKeys && 
+          <GetCryptoKeys />
+        }
+
+        {!chatId && user.hasCryptoKeys && hasLocalCryptoKeys &&
           <div className="flex flex-col justify-center items-center w-full h-full">
             <div className="flex justify-center items-center w-[120px] h-[120px] mb-2 shrink-0 rounded-full border-2 border-neutral-600">
               <LuSendHorizontal className="size-16 text-neutral-600 stroke-1" />

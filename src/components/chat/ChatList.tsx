@@ -15,7 +15,6 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
-import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType } from "@/types/global";
@@ -23,10 +22,11 @@ import type { ChatType } from "@/types/global";
 interface Props {
   headerHeight: number;
   temporaryChatItem: ChatType | null;
+  hasLocalCryptoKeys: boolean;
   chatTypeParam?: "all" | "group" | null;
 }
 
-const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight }: Props) => {
+const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, headerHeight }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const {chatId} = useParams<{chatId: string}>();
@@ -40,8 +40,6 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight }: Props) => 
   const {user} = useCurrentUser();
 
   const {usersTyping} = useUsersTyping();
-
-  const {hasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 
   useEffect(() => {
     if (!chatId) {
@@ -184,7 +182,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, headerHeight }: Props) => 
         })}
 
         {/* Mostrar mensaje placeholder en la lista de chats/grupos si no hay chats */}
-        {chats.length === 0 && !isLoading &&
+        {chats.length === 0 && !isLoading && hasLocalCryptoKeys &&
           <div className="flex flex-col justify-center items-center w-full px-4 py-5">
             {!temporaryChatItem && chatTypeParam === "all" &&
               <>

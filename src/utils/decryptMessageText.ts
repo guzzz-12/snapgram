@@ -22,9 +22,12 @@ export const decryptMessage = async (message: MessageType, currentUserId: string
     // Buscar la llave AES del usuario en la data del mensaje
     const encriptedAesKey = message.cryptoKeys.find(key => key.userId === currentUserId);
   
-    if (!encriptedAesKey) {
+    // Comprobar si el mensaje ha sido borrado para todos o para el usuario actual
+    const isDeleted = message.deletedForAll || message.deletedFor.includes(currentUserId);
+
+    if (!encriptedAesKey || isDeleted) {
       return message;
-    }
+    } 
   
     // Desencriptar el mensaje
     const decriptedText = await decryptHybrid(
@@ -55,7 +58,7 @@ export const decryptMessage = async (message: MessageType, currentUserId: string
     return decryptedMessage;
 
   } catch (error) {
-    console.log(error);
+    console.log({error, id: message._id});
     return message;
   }
 }

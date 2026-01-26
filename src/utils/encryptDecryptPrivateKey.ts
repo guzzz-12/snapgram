@@ -1,3 +1,5 @@
+import { base64ToUint8 } from "./b64ToUint8";
+
 /** Función para obtener la llave AES-GCM a partir del pin */
 export const getAESKeyFromPassword = async (password: string, salt: Uint8Array) => {
   const enc = new TextEncoder();
@@ -51,9 +53,9 @@ export const decryptPrivateKeyFromPin = async (
   ivB64: string,
   pin: string
 ): Promise<JsonWebKey> => {
-  const encryptedData = new Uint8Array(atob(encryptedKeyB64).split("").map(c => c.charCodeAt(0)));
-  const salt = new Uint8Array(atob(saltB64).split("").map(c => c.charCodeAt(0)));
-  const iv = new Uint8Array(atob(ivB64).split("").map(c => c.charCodeAt(0)));
+  const encryptedData = base64ToUint8(encryptedKeyB64);
+  const salt = base64ToUint8(saltB64);
+  const iv = base64ToUint8(ivB64);
 
   try {
     // Regenerar la llave AES usando el pin y el salt originales

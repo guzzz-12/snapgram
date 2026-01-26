@@ -1,3 +1,5 @@
+import { base64ToUint8 } from "./b64ToUint8";
+
 type DecryptHybridPayload = {
   content: string;
   encryptedKey: string;
@@ -99,6 +101,7 @@ export const encryptHybrid = async (text: string, keys: {userId: string, publicK
   // cifrada con la llave pública RSA de cada miembro
   const encryptedKeys: { userId: string; encryptedKey: string }[] = [];
 
+  // !TODO: Realizar el encriptado de manera paralela para mejorar el rendimiento
   for (const key of keys) {
     const encryptedKey = await window.crypto.subtle.encrypt(
       { name: "RSA-OAEP" },
@@ -127,9 +130,9 @@ export const encryptHybrid = async (text: string, keys: {userId: string, publicK
 export const decryptHybrid = async (payload: DecryptHybridPayload, myPrivateKey: CryptoKey) => {
   try {
     // Recuperar los bytes de los strings Base64
-    const encryptedKeyBytes = new Uint8Array(atob(payload.encryptedKey).split("").map(c => c.charCodeAt(0)));
-    const contentBytes = new Uint8Array(atob(payload.content).split("").map(c => c.charCodeAt(0)));
-    const iv = new Uint8Array(atob(payload.iv).split("").map(c => c.charCodeAt(0)));
+    const encryptedKeyBytes = base64ToUint8(payload.encryptedKey);
+    const contentBytes = base64ToUint8(payload.content);
+    const iv = base64ToUint8(payload.iv);
   
     // Descifrar la llave AES del mensaje usando la llave Privada RSA
     const decryptedAesKeyRaw = await window.crypto.subtle.decrypt(

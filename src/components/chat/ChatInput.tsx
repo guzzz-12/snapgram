@@ -2,12 +2,11 @@ import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 
 import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import { Image, Mic } from "lucide-react";
 import { toast } from "sonner";
-import { FaRegCircleStop } from "react-icons/fa6";
 import MessageInputForm from "./MessageInputForm";
 import UsersTypingIndicator from "./UsersTypingIndicator";
 import UsersRecordingAudioIndicator from "./UsersRecordingAudioIndicator";
+import ChatInputMediaBtns from "./ChatInputMediaBtns";
 import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
 import useImagePicker from "@/hooks/useImagePicker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -222,42 +221,16 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys, setTemporary
         isSending={submitting}
       />
 
-      {messageText.length === 0 && !selectedImageFiles[0] &&
-        <div className="flex justify-between items-center gap-1.5 min-[500px]:gap-3">
-          {(!isRecording && !recordedFile) &&
-            <button
-              className="cursor-pointer"
-              disabled={submitting}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Image className="text-neutral-600" aria-hidden />
-              <span className="sr-only">Adjuntar imágenes</span>
-            </button>
-          }
-
-          {(!isRecording && !recordedFile) &&
-            <button
-              className="cursor-pointer"
-              disabled={submitting}
-              onClick={startRecording}
-            >
-              <Mic className="text-neutral-600" aria-hidden />
-              <span className="sr-only">Grabar audio</span>
-            </button>
-          }
-
-          {isRecording &&
-            <button
-              className="cursor-pointer"
-              disabled={submitting}
-              onClick={stopRecording}
-            >
-              <FaRegCircleStop className="size-6 text-red-700" aria-hidden />
-              <span className="sr-only">Detener audio</span>
-            </button>
-          }
-        </div>
-      }
+      <ChatInputMediaBtns
+        messageText={messageText}
+        selectedImageFiles={selectedImageFiles}
+        isRecording={isRecording}
+        recordedFile={recordedFile}
+        submitting={submitting}
+        fileInputRef={fileInputRef}
+        startRecording={startRecording}
+        stopRecording={stopRecording}
+      />
 
       {(messageText.length > 0 || selectedImageFiles[0] || recordedFile) &&
         <button

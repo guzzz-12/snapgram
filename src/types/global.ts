@@ -80,7 +80,7 @@ export type PostWithLikes = {
 
 export type StoryType = {
   _id: string;
-  user: UserType;
+  user: string;
   content: string;
   textColor: string;
   textBgColor: string;
@@ -88,6 +88,7 @@ export type StoryType = {
   mediaType: "text" | "image" | "video";
   backgroundColor: string;
   imageSize: "cover" | "contain";
+  seenBy: UserType[];
   createdAt: string;
   updatedAt: string;
 };

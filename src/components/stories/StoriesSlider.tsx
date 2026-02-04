@@ -7,6 +7,7 @@ import StoryCardRounded from "./StoryCardRounded";
 import StoryCardSkeletonRounded from "./StoryCardSkeletonRounded";
 import UserStoriesViewer from "./UserStoriesViewer";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { UserWithStories } from "@/types/global";
@@ -21,6 +22,8 @@ const StoriesSlider = () => {
   const [showRightArrow, setShowRightArrow] = useState(true);
 
   const { getToken, userId } = useAuth();
+
+  const {user: currentUser} = useCurrentUser();
 
   const getStories = async (page: number) => {
     const token = await getToken();
@@ -105,7 +108,7 @@ const StoriesSlider = () => {
     toast.error(errorMessage(error));
   }
 
-  if (usersWithStories.length === 0) {
+  if (usersWithStories.length === 0 || !currentUser) {
     return null;
   }
 
@@ -148,6 +151,7 @@ const StoriesSlider = () => {
           isOpen={!!openUserId}
           usersWithStories={usersWithStories}
           storiesUserId={openUserId}
+          currentUserId={currentUser._id}
           setStoriesUserId={(id) => setOpenUserId(id)}
         />
 

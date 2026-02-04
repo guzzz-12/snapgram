@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
+import { useMutation } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { CircleChevronLeft, CircleChevronRight, EllipsisVertical, Pause, Play, Trash2, X } from "lucide-react";
 import StoryProgressBar from "./StoryProgressBar";
 import DeleteStoryModal from "./DeleteStoryModal";
-import { Dialog, DialogClose, DialogContent, DialogOverlay } from "../ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
+import { Dialog, DialogClose, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { axiosInstance } from "@/utils/axiosInstance";
 import type { UserWithStories } from "@/types/global";
 
 interface Props {
@@ -16,10 +18,11 @@ interface Props {
   usersWithStories: UserWithStories[];
   // Se usa como criterio abrir/cerrar el visor
   storiesUserId: string | null;
+  currentUserId: string;
   setStoriesUserId: (userId: string | null) => void;
 }
 
-const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStoriesUserId }: Props) => {
+const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, currentUserId, setStoriesUserId }: Props) => {
   const storiesUser = usersWithStories.find((user) => user._id === storiesUserId);
   const stories = storiesUser?.stories || [];
 
@@ -28,10 +31,28 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
   const [activeStoryId, setActiveStoryId] = useState("");
   const [seenStories, setSeenStories] = useState<string[]>([]);
 
-  const {userId} = useAuth();
+  const {userId, getToken} = useAuth();
 
   const currentStory = stories.find((story) => story._id === activeStoryId);
   const hasMedia = currentStory?.mediaType === "image";
+
+  // Mutation para marcar la historia como vista
+  const {mutate: markStoryAsSeen} = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      return axiosInstance({
+        method: "PUT",
+        url: `/stories/seen/${activeStoryId}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    },
+    onError: (_error) => {
+      console.log("Error actualizando historia")
+    }
+  });
   
   // Abrir el primer story cuando se abre el visor de stories
   useEffect(() => {
@@ -53,6 +74,17 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, setStories
       setIsPaused(false);
     }
   }, [openDeleteModal]);
+
+  // Marcar la historia como vista si no es el creador de la misma
+  useEffect(() => {
+    const story = stories.find((story) => story._id === activeStoryId);
+    const isStoryOwner = story?.user === currentUserId;
+    // const isAlreadySeen = story.
+
+    if (activeStoryId && !isStoryOwner) {
+      markStoryAsSeen();
+    }
+  }, [activeStoryId, currentUserId]);
 
   const nextStoryHandler = () => {
     if (stories.length === 0 || activeStoryId === stories[stories.length - 1]._id) {

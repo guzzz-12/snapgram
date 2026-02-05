@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import dayjs from "@/utils/dayJsInstance";
+import { decryptMsgHistory } from "@/utils/decryptMsgHistory";
 import type { MessageType } from "@/types/global";
 
 interface Props {
@@ -12,7 +14,24 @@ interface Props {
 const MessageHistoryModal = (props: Props) => {
   const { messageData, isOpen, setIsOpen } = props;
 
-  if (!messageData.history) {
+  const [message, setMessage] = useState<MessageType>(messageData);
+
+  const {user: currentUser} = useCurrentUser();
+
+  // Desencriptar el historial de cambios del mensaje
+  useEffect(() => {
+    if (!currentUser) return;
+
+    decryptMsgHistory(messageData, currentUser._id)
+    .then((data) => {
+      setMessage(data);
+    })
+    .catch((_error) =>{
+      console.log("Error desencriptando el historial de cambios del mensaje");
+    });
+  }, [messageData, currentUser]);
+
+  if (!message.history) {
     return null;
   }
 
@@ -29,7 +48,7 @@ const MessageHistoryModal = (props: Props) => {
         </DialogHeader>
 
         <ul className="flex flex-col gap-3 w-full max-h-[360px] overflow-y-auto bg-white scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-          {messageData.history.map(data => (
+          {message.history.map(data => (
             <li
               key={data._id}
               className="flex flex-col w-full p-2 border rounded-md bg-slate-100"
@@ -37,8 +56,8 @@ const MessageHistoryModal = (props: Props) => {
               <p className="text-sm whitespace-pre-wrap">
                 {data.previousContent}
               </p>
-              <Separator className="w-full my-1 bg-neutral-200" />
-              <span className="text-xs text-right text-neutral-600">
+
+              <span className="text-[10px] text-right text-neutral-600">
                 {dayjs(data.editedAt).format("DD/MM/YYYY - hh:mm a")}
               </span>
             </li>

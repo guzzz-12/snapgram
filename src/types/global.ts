@@ -234,7 +234,8 @@ export type MessageType = {
   history: {
     _id: string;
     previousContent: string;
-    editedAt: string
+    editedAt: string;
+    iv: string;
   }[] | null;
   createdAt: string;
   updatedAt: string;

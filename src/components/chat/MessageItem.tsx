@@ -18,6 +18,7 @@ import { errorMessage } from "@/utils/errorMessage";
 import { socket } from "@/utils/socket";
 import dayjs from "@/utils/dayJsInstance";
 import { decryptMessage } from "@/utils/decryptMessageText";
+import { encryptEditedMessage } from "@/utils/encryptEditedMessage";
 import type { ChatType, MessageType, UserType } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -42,12 +43,20 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
   const [openMsgHistoryModal, setOpenMsgHistoryModal] = useState(false);
 
   // Descifrar el texto del mensaje cifrado
+  // al cargar la data del mensaje
   useEffect(() => {
-    decryptMessage(messageData, currentUser._id)
-    .then(msg => {
-      setMessage(msg);
-      setMessageText(msg.text || "");
-    });
+    const decryptMessageContent = async (msg: MessageType, userId: string) => {
+      try {
+        const decryptedMessage = await decryptMessage(msg, userId);
+        setMessage(decryptedMessage);
+        setMessageText(decryptedMessage.text || "");
+      } catch (error) {
+        console.log("Error desencriptando el mensaje");
+      }
+    }
+
+    decryptMessageContent(messageData, currentUser._id);
+    
   }, [messageData, currentUser]);
   
   const {setImages, setInitialIndex, setOpen: setOpenImgsViewer} = useImagesLighbox();
@@ -102,10 +111,20 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
       if (messageText === message.text) return message;
 
+      // Encriptar el texto del mensaje editado
+      const {updatedMsgEncrypted, updatedIv} = await encryptEditedMessage({
+        updatedText: messageText,
+        message,
+        currentUserId: currentUser._id
+      });
+
       const {data} = await axiosInstance<{data: MessageType}>({
         method: "PUT",
         url: `/messages/edit/${message.chat}/${message._id}`,
-        data: {text: messageText},
+        data: {
+          text: updatedMsgEncrypted,
+          iv: updatedIv
+        },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"

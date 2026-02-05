@@ -16,7 +16,7 @@ import { useUsersRecordingAudio } from "@/hooks/useUsersRecordingAudio";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { filesUploader } from "@/utils/filesUploader";
-import { convertJWKToCryptoKey, encryptHybrid } from "@/utils/hybridCrypto";
+import { encryptMsgContent } from "@/utils/encryptMsgContent";
 import type { ChatType, MessageType } from "@/types/global";
 
 interface Props {
@@ -88,42 +88,13 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys, setTemporary
 
       const participants = chatData?.participants.map(user => user._id) || [];
 
-      const senderPublicJWKKey = localStorage.getItem("publicKey");
-      let parsedPublicKey: JsonWebKey | null = null;
-
-      if (senderPublicJWKKey) {
-        parsedPublicKey = JSON.parse(senderPublicJWKKey);
-      }
-
-      if (!parsedPublicKey) {
-        throw new Error("No pudimos obtener tus claves de cifrado o aún no las has creado.");
-      }
-
-      if (!recipientsPublicKeys.length) {
-        throw new Error("Este usuario aún no ha creado sus claves de cifrado.");
-      }
-
-      // Convertir las llaves públicas de cifrado de JsonWebKey a CryptoKey
-      const senderKey = await convertJWKToCryptoKey(parsedPublicKey, "public");
-      const allPublicKeys = [
-        {publicKey: senderKey, userId: currentUser?._id || ""}
-      ];
-
-      for (const key of recipientsPublicKeys) {
-        const userKey = await convertJWKToCryptoKey(key.publicKey, "public");
-        
-        allPublicKeys.push({
-          publicKey: userKey,
-          userId: key.userId.replace("temp_", "")
-        });
-      }
-
-      // Encriptar el mensaje y las urls de los archivos
-      const {encryptedMessage, encryptedFileUrls, encryptedKeys, iv} = await encryptHybrid(
-        messageText,
-        allPublicKeys,
-        filesUrls,
-      );
+      // Encriptar el mensaje, las urls de los archivos y las llaves de cifrado
+      const {encryptedMessage, encryptedFileUrls, encryptedKeys, iv} = await encryptMsgContent({
+        text: messageText,
+        recipientsPublicKeys,
+        currentUser,
+        filesUrls
+      });
 
       const {data} = await axiosInstance<{
         data: MessageType;

@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { CircleChevronLeft, CircleChevronRight, EllipsisVertical, Pause, Play, Trash2, X } from "lucide-react";
 import StoryProgressBar from "./StoryProgressBar";
+import SeenByUsers from "./SeenByUsers";
 import DeleteStoryModal from "./DeleteStoryModal";
 import { Dialog, DialogClose, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -78,15 +79,21 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, currentUse
   // Marcar la historia como vista si no es el creador de la misma
   useEffect(() => {
     const story = stories.find((story) => story._id === activeStoryId);
-    const isStoryOwner = story?.user === currentUserId;
-    // const isAlreadySeen = story.
+
+    if (!story) {
+      return;
+    }
+
+    const isStoryOwner = story.user === currentUserId;
 
     if (activeStoryId && !isStoryOwner) {
       markStoryAsSeen();
     }
   }, [activeStoryId, currentUserId]);
 
+  // Ir al siguiente story
   const nextStoryHandler = () => {
+    // No hacer nada si no hay stories o si el story actual es el último
     if (stories.length === 0 || activeStoryId === stories[stories.length - 1]._id) {
       return false;
     };
@@ -99,7 +106,9 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, currentUse
     setSeenStories([...filteredDuplicates, stories[currentIndex + 1]._id]);
   }
 
+  // Ir al story anterior
   const prevStoryHandler = () => {
+    // No hacer nada si no hay stories o si el story actual es el primero
     if (stories.length === 0 || activeStoryId === stories[0]._id) {
       return false;
     };
@@ -111,6 +120,10 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, currentUse
     // Remover todos los stories posteriores del array de stories vistos
     const sliced = seenStories.slice(0, currentIndex);
     setSeenStories(sliced);
+  }
+
+  if (!currentStory) {
+    return null;
   }
 
   return (
@@ -162,7 +175,11 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, currentUse
 
 
           {/* Header del viewer */}
-          <div className="relative bg-linear-to-b from-black to-transparent p-4 pb-6">
+          <div className="relative p-4 pb-6 h-full">
+            <div className="absolute top-0 left-0 w-full h-[20%] bg-linear-to-b from-black to-transparent rounded-t-lg z-[1]"/>
+
+            <div className="absolute bottom-0 left-0 w-full h-[20%] bg-linear-to-t from-black to-transparent rounded-b-lg z-[1]"/>
+
             <div className="absolute top-4 left-0 flex items-center gap-1 w-full px-3 z-10">
               {stories.map((story) => (
                 <StoryProgressBar
@@ -181,12 +198,12 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, currentUse
               ))}
             </div>
 
-            <div className="flex justify-start items-center gap-3 w-full pt-4">
+            <div className="relative flex justify-start items-center gap-3 w-full pt-4 z-20">
               <Link
                 className="flex justify-start items-center gap-2 w-full overflow-hidden"
                 to={`/profile/${storiesUser?.clerkId}`}
               >
-                <Avatar className="w-8 h-8 shrink-0">
+                <Avatar className="w-9 h-9 shrink-0 border border-white">
                   <AvatarImage
                     className="w-full h-full object-cover"
                     src={storiesUser?.profilePicture}
@@ -268,6 +285,14 @@ const UserStoriesViewer = ({ isOpen, usersWithStories, storiesUserId, currentUse
                 </DialogClose>
               </div>
             </div>
+
+            {/* Usuarios que vieron la historia */}
+            {currentUserId === currentStory.user &&
+              <SeenByUsers
+                className="absolute bottom-4 left-5 z-10"
+                data={currentStory.seenBy}
+              />
+            }
           </div>
 
           {/* Contenido de texto del story (si lo hay) */}

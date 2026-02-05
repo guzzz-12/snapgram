@@ -88,7 +88,10 @@ export type StoryType = {
   mediaType: "text" | "image" | "video";
   backgroundColor: string;
   imageSize: "cover" | "contain";
-  seenBy: UserType[];
+  seenBy: {
+    user: UserType;
+    seenAt: string;
+  }[];
   createdAt: string;
   updatedAt: string;
 };

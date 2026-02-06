@@ -12,7 +12,7 @@ import ConfirmationModal from "../ConfirmationModal";
 import CommentSkeleton from "./CommentSkeleton";
 import CreateCommentInput from "@/components/posts/CreateCommentInput";
 import CommentEditInputBtns from "./CommentEditInputBtns";
-import ChangeLogModal from "@/components/ChangeLogModal";
+import EditHistoryModal from "@/components/posts/EditHistoryModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -179,8 +179,9 @@ const CommentItem = ({ commentData }: Props) => {
           cb={() => deleteComment()}
         />
 
-        <ChangeLogModal
+        <EditHistoryModal
           title="Historial de cambios"
+          author={commentData.user}
           changeLog={commentData.changeLog}
           isOpen={openChangeLogModal}
           setIsOpen={setOpenChangeLogModal}

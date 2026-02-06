@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
 import PostOptionsDropdown from "./PostOptionsDropdown";
 import DeletePostModal from "./DeletePostModal";
-import ChangeLogModal from "@/components/ChangeLogModal";
+import EditHistoryModal from "./EditHistoryModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { PostWithLikes } from "@/types/global";
 import { cn } from "@/lib/utils";
@@ -65,9 +65,10 @@ const PostCardHeader = ({ postData, className, setisEditingPost }: Props) => {
         setIsOpen={setOpenDeleteModal}
       />
 
-      <ChangeLogModal
+      <EditHistoryModal
+        title="Historial de cambios"
+        author={postData.user}
         changeLog={postData.changeLog}
-        title="Historial de cambios del post"
         isOpen={openChangelogModal}
         setIsOpen={(bool) => setOpenChangelogModal(bool)}
       />

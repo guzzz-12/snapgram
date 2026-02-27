@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import Slider from "react-slick";
 import { MdOutlineClose } from "react-icons/md";
 import { toast } from "sonner";
@@ -16,11 +14,10 @@ import PostNotFound from "@/components/posts/PostNotFound";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePostsService } from "@/services/postsService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { SLIDER_SETTINGS } from "@/utils/constants";
-import type { Comment, PostWithLikes } from "@/types/global";
 
 const PostPage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
@@ -31,55 +28,28 @@ const PostPage = () => {
   const [isEditingPost, setIsEditingPost] = useState(false);
   const [textContent, setTextContent] = useState("");
 
-  const {getToken} = useAuth();
-
-  // Query function para consultar los comentarios
-  const getComments = async (page: number) => {
-    const token = await getToken();
-
-    const {data} = await axiosInstance<{
-      data: Comment[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: `/comments/posts/${postId}`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        page,
-        limit: 5
-      }
-    });
-
-    return data;
-  }
+  const {getPostById, getPostComments} = usePostsService();
 
   // Consultar el post
-  const {data: postData, error: postError, isLoading} = useQuery({
-    queryKey: ["posts", postId],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{data: PostWithLikes}>({
-        method: "GET",
-        url: `/posts/${postId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data.data;
-    },
-    enabled: !!postId,
-    refetchOnWindowFocus: false,
-    retry: 1
-  });
+  const {data: postData, error: postError, isLoading} = getPostById({postId});
 
   if (postError) {
     toast.error(errorMessage(postError));
   }
+
+  // Consultar los comentarios del post
+  const {
+    comments,
+    commentsError,
+    loadingComments,
+    hasNextPage,
+    fetchNextPage
+  } = getPostComments({
+    postId,
+    enabled: !!postData
+  });
+
+  const {isIntersecting} = useIntersectionObserver({paginationRef, data: comments});
 
   // Inicializar el contenido de texto del formulario
   // de edición del post al entrar en modo de edición.
@@ -88,18 +58,6 @@ const PostPage = () => {
       setTextContent(postData.content);
     }
   }, [postData, isEditingPost]);
-
-  // Consultar los comentarios del post
-  const {data: commentsData, error: commentsError, isLoading: isLoadingComments, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["postComments", postId],
-    queryFn: async ({ pageParam }) => getComments(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
-    enabled: !!postData
-  });
-
-  const {isIntersecting} = useIntersectionObserver({paginationRef, data: commentsData});
 
   // Consultar la siguiente página de comentarios al scrollear al final de la lista
   useEffect(() => {
@@ -111,9 +69,6 @@ const PostPage = () => {
   if (commentsError) {
     toast.error(errorMessage(commentsError));
   }
-
-  const comments = commentsData?.pages.flatMap(page => page.data) || [];
-  const loadingComments = isLoadingComments || isFetchingNextPage;
 
   if (!postId) {
     return <Navigate to="/" replace />

@@ -1,79 +1,35 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { IoFileTrayStackedOutline } from "react-icons/io5";
 import RightSidebar from "@/components/RightSidebar";
 import NotificationsOptions from "@/components/notifications/NotificationsOptions";
 import NotificationsList from "@/components/notifications/NotificationsList";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNotificationsService } from "@/services/notificationsService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { NotificationType } from "@/types/global";
 
 const ConnectionsPage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
 
-  const {getToken} = useAuth();
+  const {getNotifications, markNotificationsAsRead} = useNotificationsService();
 
-  const queryClient = useQueryClient();
-
-  const {setUnseenNotifications} = useUnseenNotifications();
-
-  const getNotifications = async (page: number, activeTab: "all" | "unread") => {
-    const token = await getToken();
-
-    const {data} = await axiosInstance<{
-      data: NotificationType[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: "/notifications",
-      params: {
-        page,
-        limit: 5,
-        filter: activeTab
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    });
-
-    return data;
-  }
-
-  const {data, error, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["notifications", activeTab],
-    queryFn: async ({pageParam}) => getNotifications(pageParam, activeTab),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false
-  });
+  // Query para consultar las notificaciones
+  const {
+    notifications,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    error,
+    fetchNextPage
+  } = getNotifications({activeTab});
 
   // Mutation para marcar todas las notificaciones como vistas
-  const {mutate: markAllAsSeen} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
+  const markAllAsSeen = markNotificationsAsRead();
 
-      return axiosInstance({
-        method: "PUT",
-        url: "/notifications/unseen",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["notifications"]});
-      setUnseenNotifications(0);
-    }
-  });
+  const {isIntersecting} = useIntersectionObserver({data: notifications, paginationRef});
 
   // Marcar todas las notificaciones como vistas al abrir la página
   useEffect(() => {
@@ -82,8 +38,7 @@ const ConnectionsPage = () => {
     }, 500);
   }, []);
 
-  const {isIntersecting} = useIntersectionObserver({data, paginationRef});
-
+  // Cargar la siguiente página de notificaciones al llegar al final de la lista
   useEffect(() => {
     if (isIntersecting) {
       fetchNextPage();
@@ -93,8 +48,6 @@ const ConnectionsPage = () => {
   if (error) {
     toast.error(errorMessage(error));
   }
-
-  const notifications = data?.pages.flatMap(page => page.data) || [];
   
   return (
     <main className="pageWrapper gap-10 pr-10">

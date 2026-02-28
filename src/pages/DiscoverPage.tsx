@@ -5,17 +5,21 @@ import FiltersBar from "@/components/discover/FiltersBar";
 import UsersSearchResults from "@/components/discover/UsersSearchResults";
 import PostsSearchResults from "@/components/discover/PostsSearchResults";
 import Placeholder from "@/components/discover/Placeholder";
+import { useSearchStatus } from "@/hooks/useSearchStatus";
 
 const DiscoverPage = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
-  const searchType = searchParams.get("type") as "people" | "posts" | null;
+  const searchTypeParam = searchParams.get("type") as "people" | "posts" | null;
 
   const [term, setTerm] = useState("");
-  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
-  const [isSearchingPosts, setIsSearchingPosts] = useState(false);
+
+  const {isSearching, searchType} = useSearchStatus();
+
+  const isSearchingUsers = isSearching && searchType === "people";
+  const isSearchingPosts = isSearching && searchType === "posts";
 
   return (
     <main className="pageWrapper">
@@ -33,14 +37,14 @@ const DiscoverPage = () => {
         <SearchBar
           term={term}
           loading={isSearchingUsers || isSearchingPosts}
-          searchType={searchType}
+          searchType={searchTypeParam}
           setTerm={(term) => setTerm(term)}
           searchInputRef={searchInputRef}
         />
         
         <FiltersBar
           searchTerm={searchTerm}
-          searchType={searchType}
+          searchType={searchTypeParam}
           loading={isSearchingUsers || isSearchingPosts}
         />
 
@@ -50,18 +54,16 @@ const DiscoverPage = () => {
 
         <UsersSearchResults
           searchTerm={searchTerm}
-          searchType={searchType}
+          searchType={searchTypeParam}
           setTerm={setTerm}
           searchInputRef={searchInputRef}
-          setIsSearchingUsers={(isSearching) => setIsSearchingUsers(isSearching)}
         />
         
         <PostsSearchResults
           searchTerm={searchTerm}
-          searchType={searchType}
+          searchType={searchTypeParam}
           setTerm={setTerm}
           searchInputRef={searchInputRef}
-          setIsSearchingUsers={(isSearching) => setIsSearchingPosts(isSearching)}
         />
       </section>
     </main>

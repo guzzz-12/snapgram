@@ -1,14 +1,11 @@
 import { useEffect, useRef } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import FollowedItem from "./FollowedItem";
 import FollowerItemSkeleton from "./FollowerItemSkeleton";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { FollowedType } from "@/types/global";
 import type { UserType } from "@/types/global";
+import { useProfileService } from "@/services/profileService";
 
 interface Props {
   userData: UserType | null;
@@ -17,40 +14,18 @@ interface Props {
 const FollowingTabContent = ({ userData }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
-  const {getToken} = useAuth();
+  const {getFollowing} = useProfileService();
 
-  const getFollowing = async (page: number) => {
-    const token = await getToken();
+  const {
+    data: following,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    error,
+    fetchNextPage
+  } = getFollowing(userData);
 
-    const {data} = await axiosInstance<{
-      data: FollowedType[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: `/follows/get-following/${userData?._id}`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        page,
-        limit: 5
-      }
-    });
-
-    return data
-  }
-
-  const {data, error, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["following", userData?._id],
-    queryFn: async ({pageParam}) => getFollowing(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
-    enabled: !!userData
-  });
-
-  const {isIntersecting} = useIntersectionObserver({data, paginationRef});
+  const {isIntersecting} = useIntersectionObserver({data: following, paginationRef});
 
   useEffect(() => {
     if (isIntersecting && hasNextPage) {
@@ -61,8 +36,6 @@ const FollowingTabContent = ({ userData }: Props) => {
   if (error) {
     toast.error(errorMessage(error));
   }
-
-  const following = data?.pages.flatMap(page => page.data) ?? [];
 
   return (
     <section className="flex flex-col w-full max-w-[600px] mx-auto">

@@ -1,16 +1,14 @@
 import { useEffect, useRef } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import Masonry from "react-responsive-masonry";
 import { RotateCw, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import PostCard from "../posts/PostCard";
-import PostCardSkeleton from "../posts/PostCardSkeleton";
+import PostCard from "@/components/posts/PostCard";
+import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
+import { useProfileService } from "@/services/profileService";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { axiosInstance } from "@/utils/axiosInstance";
-import type { PostWithLikes, UserType } from "@/types/global";
+import type { UserType } from "@/types/global";
 
 interface Props {
   userData: UserType;
@@ -19,61 +17,38 @@ interface Props {
 const LikedPostsTabContent = ({userData}: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
-  const {getToken} = useAuth();
-
   const {windowWidth} = useWindowWidth();
 
-  const getUserLikedPosts = async (page: number) => {
-    const token = await getToken();
+  const {getUserLikedPosts} = useProfileService();
 
-    const {data} = await axiosInstance<{
-      data: PostWithLikes[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: "/likes/liked-posts",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        page,
-        limit: 10
-      }
-    });
-
-    return data;
-  }
-
-  // Query para consultar los posts gustados del usuario
-  const {data, error, isLoading, isRefetching, isFetchingNextPage, hasNextPage, fetchNextPage, refetch} = useInfiniteQuery({
-    queryKey: ["likes", "likedPosts"],
-    queryFn: ({pageParam}) => getUserLikedPosts(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
-    enabled: !!userData,
-    retry: 2,
-  });
+  const {
+    data: postsData, 
+    error, 
+    isLoading, 
+    isRefetching, 
+    isFetchingNextPage, 
+    hasNextPage, 
+    fetchNextPage, 
+    refetch
+  } = getUserLikedPosts(userData);
 
   const {isIntersecting} = useIntersectionObserver({
-    data,
+    data: postsData,
     paginationRef,
   });
 
   // Obtener la siguiente página de posts cuando la referencia de la paginación sea visible
-    useEffect(() => {
-      if (isIntersecting && hasNextPage) {
-        fetchNextPage();
-      }
-    }, [isIntersecting, hasNextPage]);
-  
-    if (error) {
-      toast.error("Error al obtener los posts.");
+  useEffect(() => {
+    if (isIntersecting && hasNextPage) {
+      fetchNextPage();
     }
-  
-    const postsData = data?.pages.flatMap((page) => page.data) ?? [];
-    const loadingPosts = isLoading || isFetchingNextPage;
+  }, [isIntersecting, hasNextPage]);
+
+  if (error) {
+    toast.error("Error al obtener los posts.");
+  }
+
+  const loadingPosts = isLoading || isFetchingNextPage;
 
   return (
     <section className="flex flex-col gap-6 w-full mx-auto p-2 pb-0 bg-slate-100">
@@ -111,10 +86,6 @@ const LikedPostsTabContent = ({userData}: Props) => {
 
       <div className="grid grid-cols-1 min-[1000px]:grid-cols-2 gap-4 w-full">
         {loadingPosts && [...Array(6)].map((_, index) => (
-          <PostCardSkeleton key={index} />
-        ))}
-
-        {isFetchingNextPage && [...Array(6)].map((_, index) => (
           <PostCardSkeleton key={index} />
         ))}
       </div>

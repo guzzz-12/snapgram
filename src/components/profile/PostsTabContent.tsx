@@ -1,16 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
+import { useEffect, useRef } from "react";
 import Masonry from "react-responsive-masonry";
 import { RotateCw, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import PostCard from "@/components/posts/PostCard";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import { Button } from "@/components/ui/button";
+import { useProfileService } from "@/services/profileService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import useWindowWidth from "@/hooks/useWindowWidth";
-import { axiosInstance } from "@/utils/axiosInstance";
-import type { PostWithLikes, UserType } from "@/types/global";
+import type { UserType } from "@/types/global";
 
 interface Props {
   userData: UserType | null;
@@ -19,50 +17,23 @@ interface Props {
 const PostsTabContent = ({userData}: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
-  const [fetchingFirstPostsPage, setFetchingFirstPostsPage] = useState(true);
-
-  const {getToken} = useAuth();
-
   const {windowWidth} = useWindowWidth();
 
-  const getUserPosts = async (page: number) => {
-    const token = await getToken();
-    
-    const {data} = await axiosInstance<{
-      data: PostWithLikes[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: `/posts/user/${userData?._id}`,
-      params: {
-        page,
-        limit: 5
-      },
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+  const {getUserPosts} = useProfileService();
 
-    if (page === 1) {
-      setFetchingFirstPostsPage(false);
-    }
-
-    return data;
-  }
-
-  const {data, error, isLoading, isRefetching, isFetchingNextPage, hasNextPage, fetchNextPage, refetch} = useInfiniteQuery({
-    queryKey: ["posts", userData?.clerkId],
-    queryFn: ({pageParam}) => getUserPosts(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
-    enabled: !!userData,
-    retry: 2,
-  });
+  const {
+    data: postsData,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isRefetching,
+    error,
+    fetchNextPage,
+    refetch
+  } = getUserPosts(userData);
 
   const {isIntersecting} = useIntersectionObserver({
-    data,
+    data: postsData,
     paginationRef,
   });
 
@@ -77,12 +48,9 @@ const PostsTabContent = ({userData}: Props) => {
     toast.error("Error al obtener los posts.");
   }
 
-  const postsData = data?.pages.flatMap((page) => page.data) ?? [];
-  const loadingPosts = fetchingFirstPostsPage || isLoading || isFetchingNextPage;
-
   return (
     <section className="flex flex-col gap-6 w-full mx-auto p-2 pb-0 bg-slate-100">
-      {!loadingPosts && error &&
+      {!isLoading && error &&
         <div className="flex flex-col justify-center items-center gap-4">
           <div className="flex justify-center items-center gap-3">
             <TriangleAlert className="size-9 shrink-0 text-orange-600" />
@@ -102,7 +70,7 @@ const PostsTabContent = ({userData}: Props) => {
         </div>
       }
 
-      {!loadingPosts && postsData.length > 0 &&
+      {!isLoading && postsData.length > 0 &&
         <Masonry
           className="w-full"
           columnsCount={windowWidth >= 750 ? 2 : 1}
@@ -115,16 +83,12 @@ const PostsTabContent = ({userData}: Props) => {
       }
 
       <div className="grid grid-cols-1 min-[1000px]:grid-cols-2 gap-4 w-full">
-        {loadingPosts && [...Array(6)].map((_, index) => (
-          <PostCardSkeleton key={index} />
-        ))}
-
-        {isFetchingNextPage && [...Array(6)].map((_, index) => (
+        {(isLoading || isFetchingNextPage) && [...Array(6)].map((_, index) => (
           <PostCardSkeleton key={index} />
         ))}
       </div>
 
-      {!loadingPosts && userData && postsData.length === 0 &&
+      {!isLoading && userData && postsData.length === 0 &&
         <p className="text-center text-lg text-neutral-700">
           No se encontraron publicaciones.
         </p>

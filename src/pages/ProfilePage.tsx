@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { AxiosError } from "axios";
 import { FaUserTimes } from "react-icons/fa";
@@ -13,9 +12,8 @@ import FollowingTabContent from "@/components/profile/FollowingTabContent";
 import LikedPostsTabContent from "@/components/profile/LikedPostsTabContent";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { useProfileService } from "@/services/profileService";
 import { ACCOUNT_STATUS } from "@/utils/constants";
-import type { UserType } from "@/types/global";
 
 const ProfilePage = () => {
   const {userClerkId} = useParams<{userClerkId: string}>();
@@ -23,35 +21,17 @@ const ProfilePage = () => {
 
   const [activeTab, setActiveTab] = useState("posts");
 
-  const {getToken, userId} = useAuth();
+  const {getUserProfile} = useProfileService();
+
+  const {userId} = useAuth();
 
   // Restablecer el tab default al cambiar de usuario
   useEffect(() => {
     setActiveTab("posts");
   }, [userClerkId]);
 
-  const getUser = async () => {
-    const token = await getToken();
-
-    const {data} = await axiosInstance<{data: UserType}>({
-      method: "GET",
-      url: `/users/${userClerkId}`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    return data.data;
-  }
-
   // Query para consultar los datos del usuario
-  const {data: userData, isLoading: loadingUser, error: userError} = useQuery({
-    queryKey: ["user", userClerkId],
-    queryFn: getUser,
-    enabled: !!userClerkId,
-    refetchOnWindowFocus: false,
-    retry: 1
-  });
+  const {userData, loadingUser, userError} = getUserProfile(userClerkId);
 
   if (userError) {
     const isClientError = userError instanceof AxiosError;

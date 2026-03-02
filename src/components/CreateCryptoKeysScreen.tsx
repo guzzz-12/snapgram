@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { OTPInput } from "input-otp";
 import { IoWarningOutline } from "react-icons/io5";
 import { toast } from "sonner";
@@ -11,109 +10,33 @@ import ConfirmationModal from "./ConfirmationModal";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Toaster } from "./ui/sonner";
+import { useCryptoKeysService } from "@/services/cryptoKeysService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
-import { generateKeyPair } from "@/utils/hybridCrypto";
-import { decryptPrivateKeyFromPin, protectPrivateKey } from "@/utils/encryptDecryptPrivateKey";
-import { axiosInstance } from "@/utils/axiosInstance";
 
 const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) => {
   const pinRef = useRef<string>(null);
 
   const navigate = useNavigate();
 
-  const { user, setUser } = useCurrentUser();
+  const { user } = useCurrentUser();
 
   const [createPinStep, setCreatePinStep] = useState(1);
   const [pin, setPin] = useState("");
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
 
-  const { getToken, signOut } = useAuth();
+  const { signOut } = useAuth();
 
-  const queryClient = useQueryClient();
-
-  const {setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
+  const {createCryptoKeys} = useCryptoKeysService();
 
   // Mutation para crear y almacenar la llave de cifrado privada
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      if (!user) {
-        return;
-      }
-
-      const token = await getToken();
-
-      const keyPair = await generateKeyPair();
-      
-      // Cifrar la llave privada para almacenarla de manera segura en la base de datos
-      const {encryptedKey, salt, iv} = await protectPrivateKey(keyPair.privateKey, pin);
-
-      const {data} = await axiosInstance<{
-        publicKey: CryptoKey;
-        privateKeyLock: {
-          key: string;
-          salt: string;
-          iv: string;
-        };
-      }>({
-        method: "POST",
-        url: "/crypto-keys/store-user-keys",
-        data: {
-          publicKey: keyPair.publicKey,
-          privateKey: encryptedKey,
-          salt,
-          iv
-        },
-        params: {
-          operation
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
-
-      const {key} = data.privateKeyLock;
-      
-      // Desencriptar la llave privada usando el pin
-      const decryptedPrivateKey = await decryptPrivateKeyFromPin(key, salt, iv, pin);
-
-      localStorage.setItem("publicKey", JSON.stringify(keyPair.publicKey));
-      localStorage.setItem("privateKey", JSON.stringify(decryptedPrivateKey));
-
-      setUser({...user, hasCryptoKeys: true});
-
-      setHasLocalCryptoKeys(true);
-
-      return data;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["chats", "all"]});
-      await queryClient.invalidateQueries({queryKey: ["getCryptoKeys"]});
-
-      toast.success("Cifrado habilitado exitosamente.");
-
-      setPin("");
-
-      pinRef.current = null;
-
-      setCreatePinStep(1);
-      
-      if (operation === "update") {
-        setOpenConfirmationModal(false);
-        navigate("/messages?type=all", {replace: true});        
-      }
-    },
-    onError: (error) => {
-      console.log(error);
-
-      toast.error("Error al habilitar el cifrado de extremo a extremo. Inténtalo de nuevo.");
-
-      setPin("");
-      setCreatePinStep(1);
-
-      pinRef.current = null;
-    }
+  const {mutate, isPending} = createCryptoKeys({
+    user,
+    pin,
+    operation,
+    pinRef,
+    setCreatePinStep,
+    setPin,
+    setOpenConfirmationModal
   });
 
   const onChangeHandler = (val: string) => {

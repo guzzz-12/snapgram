@@ -1,15 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { OTPInput } from "input-otp";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import OtpInputSlot from "@/components/OtpInputSlot";
+import { useCryptoKeysService } from "@/services/cryptoKeysService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { decryptPrivateKeyFromPin } from "@/utils/encryptDecryptPrivateKey";
 import { errorMessage } from "@/utils/errorMessage";
 
 const GetCryptoKeys = () => {
@@ -17,57 +14,14 @@ const GetCryptoKeys = () => {
 
   const [pin, setPin] = useState("");
 
-  const {getToken} = useAuth();
-
-  const {user, setUser} = useCurrentUser();
+  const {user} = useCurrentUser();
 
   const queryClient = useQueryClient();
 
-  const {setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
-
-  // Query para consultar las claves del usuario si las tiene
-  const {error, isFetching} = useQuery({
-    queryKey: ["getMyCryptoKeys"],
-    queryFn: async () => {
-      if (!user) {
-        return;
-      }
-
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{
-        publicKey: CryptoKey;
-        privateKeyLock: {
-          key: string;
-          salt: string;
-          iv: string;
-        };
-      }>({
-        method: "GET",
-        url: "/crypto-keys/get-my-keys",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
-
-      const {key, salt, iv} = data.privateKeyLock
-
-      const decryptedPrivateKey = await decryptPrivateKeyFromPin(key, salt, iv, pin);
-
-      localStorage.setItem("publicKey", JSON.stringify(data.publicKey));
-      localStorage.setItem("privateKey", JSON.stringify(decryptedPrivateKey));
-
-      setUser({...user, hasCryptoKeys: true});
-
-      setHasLocalCryptoKeys(true);
-
-      return data;
-    },
-    retry: false,
-    enabled: pin.length === 6,
-    refetchOnWindowFocus: false,
-  });
+  const {getUserCryptoKeys} = useCryptoKeysService();
+  
+  // Query para consultar las claves de cifrado del usuario y almacenarlas en el localStorage
+  const {isFetching, error} = getUserCryptoKeys({user, pin});
 
   // Restablecer el input y resetear la consulta al cerrar el modal
   useEffect(() => {

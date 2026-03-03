@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import { getComments, getPost } from "@/repositories/postsRepository";
+import { fetchPosts, getComments, getPost } from "@/repositories/postsRepository";
 
 type GetPostProps = {
   postId: string | undefined;
@@ -28,6 +28,30 @@ export const usePostsService = () => {
         refetchOnWindowFocus: false,
         retry: 1
       });
+    },
+
+    /** Consultar y paginar los posts del feed del usuario */
+    getFeedPosts: () => {
+      const res = useInfiniteQuery({
+        queryKey: ["posts"],
+        queryFn: ({pageParam}) => fetchPosts(pageParam, getToken),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
+        refetchOnWindowFocus: false
+      });
+
+      const {data, error, isLoading: loadingPosts, isFetchingNextPage, hasNextPage, fetchNextPage} = res;
+
+      const posts = data?.pages.flatMap(page => page.data) || [];
+
+      return {
+        posts,
+        error,
+        loadingPosts,
+        isFetchingNextPage,
+        hasNextPage,
+        fetchNextPage
+      }
     },
 
     /** Consultar y paginar los comentarios de un post */

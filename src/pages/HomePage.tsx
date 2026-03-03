@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { IoFileTrayStackedOutline } from "react-icons/io5";
 import { MdOutlineExplore } from "react-icons/md";
 import { toast } from "sonner";
@@ -11,10 +11,10 @@ import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import RightSidebar from "@/components/RightSidebar";
 import NewUserScreen from "@/components/home/NewUserScreen";
 import { Separator } from "@/components/ui/separator";
+import { usePostsService } from "@/services/postsService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { PostWithLikes } from "@/types/global";
 
 const HomePage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
@@ -23,38 +23,12 @@ const HomePage = () => {
 
   const {getToken} = useAuth();
 
-  const getPosts = async (page: number) => {
-    const token = await getToken();
+  const {getFeedPosts} = usePostsService();
 
-    const {data} = await axiosInstance<{
-      data: PostWithLikes[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: "/posts",
-      params: {
-        page,
-        limit: 5
-      },
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+  // Consultar los posts del feed del usuario
+  const {posts, loadingPosts, isFetchingNextPage, error, hasNextPage, fetchNextPage} = getFeedPosts();
 
-    return data;
-  }
-
-  // Consultar los posts
-  const {data, error, isLoading: loadingPosts, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["posts"],
-    queryFn: ({pageParam}) => getPosts(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false
-  });
-
-  const {isIntersecting} = useIntersectionObserver({ data, paginationRef });
+  const {isIntersecting} = useIntersectionObserver({ data: posts, paginationRef });
 
   // Consultar la siguiente página de posts al scrollear al bottom
   useEffect(() => {
@@ -86,8 +60,6 @@ const HomePage = () => {
       setFollowingCount(followingCountData.data);
     }
   }, [followingCountData]);
-
-  const posts = data?.pages.flatMap(page => page.data) || [];
 
   if (error) {
     toast.error(errorMessage(error));

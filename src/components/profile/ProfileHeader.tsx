@@ -101,7 +101,7 @@ const ProfileHeader = ({ userData }: Props) => {
       />
 
       <button
-        className="relative w-full h-[200px] shadow-sm g-linear-to-r from-[#c8d3ff] to-[#fccee9] cursor-pointer group"
+        className="relative w-full h-[200px] shadow-sm g-linear-to-r from-[#c8d3ff] to-[#fccee9] focus-visible:-outline-offset-4 focus-visible:outline-black cursor-pointer group"
         onClick={() => {
           setImages([userData.coverPicture]);
           setOpen(true);

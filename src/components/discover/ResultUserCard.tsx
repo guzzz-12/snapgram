@@ -1,17 +1,14 @@
 import { useRef } from "react";
 import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MapPin, MessageCircle } from "lucide-react";
-import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { errorMessage } from "@/utils/errorMessage";
+import { useProfileService } from "@/services/profileService";
 import { cn } from "@/lib/utils";
-import type { FollowedType, SearchUsersResult } from "@/types/global";
+import type { SearchUsersResult } from "@/types/global";
 
 interface Props {
   userData: SearchUsersResult;
@@ -20,38 +17,11 @@ interface Props {
 const ResultUserCard = ({ userData }: Props) => {
   const followBtnRef = useRef<HTMLButtonElement>(null);
 
-  const {getToken} = useAuth();
+  const {followOrUnfollowUser} = useProfileService();
 
-  const queryClient = useQueryClient();
+  const {userId} = useAuth();
 
-  const followHandler = async () => {
-    const token = await getToken();
-
-    const {data} = await axiosInstance<{data: FollowedType[]}>({
-      method: "POST",
-      url: "/follows/follow-or-unfollow",
-      data: {
-        userId: userData._id
-      },
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-    });
-
-    return data;
-  }
-
-  const followMutation = useMutation({
-    mutationFn: followHandler,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["following"]});
-      await queryClient.invalidateQueries({queryKey: ["discover"]});
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {mutate, isPending} = followOrUnfollowUser(userData._id, userId);
 
   const onMouseEnterHandler = () => {
     if (userData.isFollowing) {
@@ -119,8 +89,8 @@ const ResultUserCard = ({ userData }: Props) => {
           ref={followBtnRef}
           className="grow text-sm text-center text-white bg-[#4F39F6] hover:bg-[#331fcf] transition-all cursor-pointer"
           size="sm"
-          disabled={followMutation.isPending}
-          onClick={() => followMutation.mutate()}
+          disabled={isPending}
+          onClick={() => mutate()}
           onMouseEnter={onMouseEnterHandler}
           onMouseLeave={onMouseLeaveHandler}
         >

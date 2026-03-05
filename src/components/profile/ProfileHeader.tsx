@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import dayjs from "dayjs";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { Calendar, MapPin, MoreHorizontal, Pencil } from "lucide-react";
 import { RiUserForbidLine } from "react-icons/ri";
 import { MdNoAccounts } from "react-icons/md";
 import { FaRegTrashCan } from "react-icons/fa6";
-import { toast } from "sonner";
 import ProfileEditModal from "./ProfileEditModal";
 import BlockedUsersListModal from "./BlockedUsersListModal";
 import DisableAccountModal from "./DisableAccountModal";
@@ -16,15 +13,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { useProfileService } from "@/services/profileService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useClampedText from "@/hooks/useClampedText";
 import { useBlockUserModal } from "@/hooks/useBlockUserModal";
 import useWindowWidth from "@/hooks/useWindowWidth";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { errorMessage } from "@/utils/errorMessage";
-import { cn } from "@/lib/utils";
-import type { UserType } from "@/types/global";
 import { useImagesLighbox } from "@/hooks/useImagesLightbox";
+import type { UserType } from "@/types/global";
+import { cn } from "@/lib/utils";
 
 interface Props {
   userData: UserType;
@@ -41,9 +37,6 @@ const ProfileHeader = ({ userData }: Props) => {
   const [openDeleteAccountModal, setOpenDeleteAccountModal] = useState(false);
 
   const {user} = useCurrentUser();
-  const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
 
   const {windowWidth} = useWindowWidth();
 
@@ -58,6 +51,8 @@ const ProfileHeader = ({ userData }: Props) => {
 
   const {setOpen: setBlockUserModalOpen, setOperation, setBlockedUser} = useBlockUserModal();
 
+  const {followOrUnfollowUser} = useProfileService();
+
   useEffect(() => {
     if (avatarRef.current) {
       setAvatarHeight(avatarRef.current.clientHeight);
@@ -65,30 +60,7 @@ const ProfileHeader = ({ userData }: Props) => {
   }, []);
 
   // Mutation para seguir o dejar de seguir al usuario
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "POST",
-        url: `/follows/follow-or-unfollow`,
-        data: {
-          userId: userData._id
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["user", userData.clerkId]});
-      await queryClient.invalidateQueries({queryKey: ["followers"]});
-      await queryClient.invalidateQueries({queryKey: ["following"]});
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {mutate, isPending} = followOrUnfollowUser(userData._id, userData.clerkId);
 
   // Si lo está siguiendo, cambia el texto del botón al hacer hover
   const onMouseFollowBtnEnter = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {

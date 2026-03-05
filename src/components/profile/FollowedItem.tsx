@@ -1,12 +1,9 @@
 import { useRef } from "react";
 import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { errorMessage } from "@/utils/errorMessage";
+import { useProfileService } from "@/services/profileService";
 import { cn } from "@/lib/utils";
 import type { FollowedType, UserType } from "@/types/global";
 
@@ -20,33 +17,11 @@ const FollowedItem = ({ data, userData }: Props) => {
   
   const followBtnRef = useRef<HTMLButtonElement>(null);
 
-  const {getToken} = useAuth();
+  const {userId} = useAuth();
 
-  const queryClient = useQueryClient();
+  const {followOrUnfollowUser} = useProfileService();
 
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "POST",
-        url: `/follows/follow-or-unfollow`,
-        data: {
-          userId: followedId
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      queryClient.invalidateQueries({queryKey: ["followers"]});
-      queryClient.invalidateQueries({queryKey: ["following"]});
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {mutate, isPending} = followOrUnfollowUser(followedId, userId);
 
   return (
     <li className="flex justify-start items-center gap-2 w-full border rounded-md p-2 bg-white shadow overflow-x-auto scrollbar-none">

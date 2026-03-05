@@ -42,6 +42,25 @@ export const fetchPosts = async (page: number, getToken: () => Promise<string | 
   });
 
   return data;
+
+  // Mapear las propiedades de formato API a formato Domain.
+  // De esta forma si en el futuro, por ejemplo, la propiedad _id cambia a id en la base de datos,
+  // sólo sería necesario actualizarla en el mapper, en lugar de actualizarla
+  // en los services y en todos los componentes la capa view (capa presentacional).
+  // return {
+  //   data: data.data.map(post => {
+  //     return {
+  //       ...post,
+  //       id: post._id,
+  //       user: {
+  //         ...post.user,
+  //         id: post.user._id
+  //       }
+  //     }
+  //   }),
+  //   hasMore: data.hasMore,
+  //   nextPage: data.nextPage
+  // };
 }
 
 /** Función para obtener los comentarios de un post */

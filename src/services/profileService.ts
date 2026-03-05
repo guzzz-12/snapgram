@@ -1,6 +1,9 @@
 import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchFollowers, fetchFollowing, fetchUserLikedPosts, fetchUserPosts, fetchUserProfile } from "@/repositories/profileRepository";
+import { axiosInstance } from "@/utils/axiosInstance";
+import { toast } from "sonner";
+import { errorMessage } from "@/utils/errorMessage";
 import type { UserType } from "@/types/global";
 
 /**
@@ -9,6 +12,8 @@ import type { UserType } from "@/types/global";
 */
 export const useProfileService = () => {
   const { getToken } = useAuth();
+
+  const queryClient = useQueryClient();
 
   return {
     /** Service para consultar el perfil de un usuario */
@@ -102,6 +107,38 @@ export const useProfileService = () => {
         hasNextPage,
         fetchNextPage
       }
+    },
+
+    /** Service para seguir o dejar de seguir a un usuario */
+    followOrUnfollowUser: (followedUserId: string, currentUserClerkId: string | null | undefined) => {
+      const {mutate, isPending} = useMutation({
+        mutationFn: async () => {
+          const token = await getToken();
+
+          if (!currentUserClerkId) return;
+
+          return axiosInstance({
+            method: "POST",
+            url: `/follows/follow-or-unfollow`,
+            data: {
+              userId: followedUserId
+            },
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+        },
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({queryKey: ["user", currentUserClerkId]});
+          await queryClient.invalidateQueries({queryKey: ["followers"]});
+          await queryClient.invalidateQueries({queryKey: ["following"]});
+        },
+        onError: (error) => {
+          toast.error(errorMessage(error));
+        }
+      });
+
+      return {mutate, isPending};
     },
 
     /** Service para consultar los posts gustados del usuario */

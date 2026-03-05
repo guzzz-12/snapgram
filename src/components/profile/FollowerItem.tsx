@@ -1,12 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { useProfileService } from "@/services/profileService";
 import { cn } from "@/lib/utils";
 import type { FollowerType, UserType } from "@/types/global";
 
@@ -15,37 +12,16 @@ interface Props {
   userData: UserType | null;
 }
 
-const FollowerItem = ({ data, userData }: Props) => {
+const FollowerItem = ({ data }: Props) => {
   const {followerData: {_id: followerId, clerkId: followerClerkId, fullName, username, profilePicture}, isFollowingBack} = data;
   
   const followBtnRef = useRef<HTMLButtonElement>(null);
 
-  const {getToken, userId: currentUserClerkId} = useAuth();
+  const {userId: currentUserClerkId} = useAuth();
 
-  const queryClient = useQueryClient();
+  const {followOrUnfollowUser} = useProfileService();
 
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "POST",
-        url: `/follows/follow-or-unfollow`,
-        data: {
-          userId: followerId
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      queryClient.invalidateQueries({queryKey: ["followers", userData?._id]});
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {mutate, isPending} = followOrUnfollowUser(followerId, currentUserClerkId);
 
   // Cambiar dinámicamente el texto del botón de seguir/dejar de seguir
   useEffect(() => {

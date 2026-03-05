@@ -1,13 +1,10 @@
 import { useRef } from "react";
 import { Link } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { useProfileService } from "@/services/profileService";
 import type { SearchUsersResult } from "@/types/global";
-import { toast } from "sonner";
-import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -17,33 +14,12 @@ interface Props {
 const UserSearchResultItem = ({ userData }: Props) => {
   const followBtnRef = useRef<HTMLButtonElement>(null);
 
-  const {getToken} = useAuth();
+  const {userId} = useAuth();
 
-  const queryClient = useQueryClient();
+  const {followOrUnfollowUser} = useProfileService();
 
   // Mutation para seguir o dejar de seguir al usuario
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "POST",
-        url: `/follows/follow-or-unfollow`,
-        data: {
-          userId: userData._id
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["search-users"]});
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {mutate, isPending} = followOrUnfollowUser(userData._id, userId);
 
   const onMouseEnterHandler = () => {
     if (!followBtnRef.current) return;

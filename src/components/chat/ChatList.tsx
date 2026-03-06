@@ -1,7 +1,5 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { ImUsers } from "react-icons/im";
 import { FaUsers } from "react-icons/fa6";
 import { HiOutlinePencilAlt } from "react-icons/hi";
@@ -11,11 +9,11 @@ import ChatItem from "./ChatItem";
 import MobileNavSidebar from "@/components/MobileNavSidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { useChatsService } from "@/services/chatsService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType } from "@/types/global";
 
@@ -35,11 +33,11 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
 
   const {setIsOpen: setOpenPrivateChatsModal} = usePrivateChatsListModal();
 
-  const {getToken} = useAuth();
-
   const {user} = useCurrentUser();
 
   const {usersTyping} = useUsersTyping();
+
+  const {getChats} = useChatsService();
 
   useEffect(() => {
     if (!chatId) {
@@ -51,49 +49,23 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
     }
   }, [chatTypeParam, chatId]);
 
-  // Función para consultar los chats (tanto privados como grupales)
-  const getChats = async (page: number, type: "all" | "group") => {
-    const token = await getToken();
+  // Consultar los chats del usuario (tanto privados como grupales)
+  const {
+    chats,
+    error,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  } = getChats(chatTypeParam, chatId, hasLocalCryptoKeys);
 
-    const {data} = await axiosInstance<{
-      data: ChatType[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: "/chats",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        page,
-        limit: 10,
-        type
-      }
-    });
-
-    return data;
-  }
-
-  // Consultar los chats
-  const {data, error, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["chats", chatTypeParam || "all"],
-    queryFn: ({pageParam}) => getChats(pageParam, chatTypeParam || "all"),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
-    enabled: hasLocalCryptoKeys && (!!chatTypeParam || !!chatId)
-  });
-
-  const {isIntersecting} = useIntersectionObserver({data, paginationRef});
+  const {isIntersecting} = useIntersectionObserver({data: chats, paginationRef});
 
   useEffect(() => {
     if (isIntersecting && hasNextPage) {
       fetchNextPage();
     }
   }, [isIntersecting]);
-
-  const chats = data?.pages.flatMap((page) => page.data) || [];
 
   if (error) {
     toast.error(errorMessage(error));

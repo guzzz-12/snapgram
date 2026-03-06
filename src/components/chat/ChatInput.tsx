@@ -1,46 +1,46 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
-import { useNavigate } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import { toast } from "sonner";
 import MessageInputForm from "./MessageInputForm";
 import UsersTypingIndicator from "./UsersTypingIndicator";
 import UsersRecordingAudioIndicator from "./UsersRecordingAudioIndicator";
 import ChatInputMediaBtns from "./ChatInputMediaBtns";
 import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
+import { useChatsService } from "@/services/chatsService";
 import useImagePicker from "@/hooks/useImagePicker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { useUsersRecordingAudio } from "@/hooks/useUsersRecordingAudio";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { filesUploader } from "@/utils/filesUploader";
-import { encryptMsgContent } from "@/utils/encryptMsgContent";
-import type { ChatType, MessageType } from "@/types/global";
+import type { PublicKeysType } from "@/repositories/chatsRepository";
+import type { ChatType } from "@/types/global";
 
 interface Props {
   chatData: ChatType | null | undefined;
   wrapperHeight: number;
   chatTypeParam: "all" | "group" | null;
-  recipientsPublicKeys: {userId: string, publicKey: JsonWebKey}[];
+  recipientsPublicKeys: PublicKeysType[];
   setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
-const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys, setTemporaryChat }: Props) => {
+const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat, recipientsPublicKeys }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const navigate = useNavigate();
 
   const [messageText, setMessageText] = useState("");
 
   const {getToken} = useAuth();
 
-  const queryClient = useQueryClient();
+  const {sendMessage} = useChatsService();
 
   const {selectedImageFiles, selectedImagePreviews, isProcessing, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
 
-  const {isRecording, recordingTime, clearRecording, recordedFile, startRecording, stopRecording} = useAudioRecording();
+  const {
+    isRecording,
+    recordingTime,
+    clearRecording,
+    recordedFile,
+    startRecording,
+    stopRecording
+  } = useAudioRecording();
 
   const {user: currentUser} = useCurrentUser();
 
@@ -62,84 +62,21 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys, setTemporary
   }, []);
 
   // Mutation para enviar el mensaje
-  const {mutate, isPending: submitting} = useMutation({
-    mutationKey: ["send-message", chatData?._id],
-    mutationFn: async () => {
-      const token1 = await getToken();
-
-      const hasText = messageText.length > 0;
-      const hasImages = selectedImageFiles.length > 0;
-      const hasAudio = recordedFile;
-      const hasFiles = hasImages || hasAudio;
-      
-      // Subir los archivos a ImageKit si los hay
-      const uploadData = hasFiles ? await filesUploader({
-        files: recordedFile ? [recordedFile] : selectedImageFiles,
-        clerkToken: token1!,
-        folderName: `/chats/${chatData?._id}`,
-        currentUser
-      }) : [];
-
-      const filesUrls = uploadData
-      .filter(data => !!data.fileUrl && !!data.fileId)
-      .map(data => data.fileUrl) as string[];
-
-      const token2 = await getToken();
-
-      const participants = chatData?.participants.map(user => user._id) || [];
-
-      // Encriptar el mensaje, las urls de los archivos y las llaves de cifrado
-      const {encryptedMessage, encryptedFileUrls, encryptedKeys, iv} = await encryptMsgContent({
-        text: messageText,
-        recipientsPublicKeys,
-        currentUser,
-        filesUrls
-      });
-
-      const {data} = await axiosInstance<{
-        data: MessageType;
-        isNewChat: boolean;
-        chat: ChatType | null;
-      }>({
-        method: "POST",
-        url: `/messages/send`,
-        data: {
-          text: encryptedMessage,
-          chatId: chatData?._id,
-          recipientIds: participants,
-          type: hasText && hasImages ? "imageWithText" : hasImages ? "image" : hasAudio ? "audio" : "text",
-          fileUrls: encryptedFileUrls,
-          fileIds: uploadData.map(uData => uData.fileId),
-          encryptedKeys,
-          initVector: iv
-        },
-        headers: {
-          Authorization: `Bearer ${token2}`,
-          "Content-Type": "application/json"
-        }
-      });
-
-      return data;
-    },
-    onSuccess: async (data) => {
-      setMessageText("");
-      setSelectedImageFiles([]);
-      setSelectedImagePreviews([]);
-      clearRecording();
-
-      if(fileInputRef.current) {
-        fileInputRef.current.value = ""
-      };
-
-      if (data.isNewChat) {
-        await queryClient.invalidateQueries({queryKey: ["chats", chatTypeParam || "all"]});
-        setTemporaryChat(null);
-        navigate(`/messages/${data.chat!._id}`, {replace: true});
-      }
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    },
+  const {mutate, submitting} = sendMessage({
+    messageText,
+    chatData,
+    selectedImageFiles,
+    recordedFile,
+    getToken,
+    currentUser,
+    recipientsPublicKeys,
+    chatTypeParam,
+    clearRecording,
+    fileInputRef,
+    setMessageText,
+    setSelectedImageFiles,
+    setSelectedImagePreviews,
+    setTemporaryChat
   });
 
   // Filtrar los usuarios que estan escribiendo en el chat activo

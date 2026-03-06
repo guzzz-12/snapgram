@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import UsersSearchBar from "./UsersSearchBar";
 import UsersModalItem from "./PrivateChatsModalItem";
@@ -10,17 +8,15 @@ import UsersSearchNoResults from "./UsersSearchNoResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup } from "@/components/ui/radio-group";
+import { useChatsService } from "@/services/chatsService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import { getUsersList } from "@/utils/getUsersList";
-import { restoreDeletedChatCache } from "@/utils/updateMsgsDataCache";
 import type { ChatType } from "@/types/global";
 
 interface Props {
-  setTemporaryChat: (chat: ChatType) => void;
+  setTemporaryChat: (chat: ChatType | null) => void;
 }
 
 const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
@@ -33,53 +29,24 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
 
   const {isOpen, setIsOpen} = usePrivateChatsListModal();
 
-  const { getToken } = useAuth();
-
-  const queryClient = useQueryClient();
-
   const {debouncedValue} = useDebounce(searchTerm);
+
+  const {getPrivateChatByRecipient, getUsersToChat} = useChatsService();
 
   // Consultar los usuarios que pueden ser agregados al chat
   const {
-    users,
+    usersData,
+    usersError,
     isLoading,
     isFetchingNextPage,
-    usersError,
     hasNextPage,
     fetchNextPage
-  } = getUsersList({ isOpen, keyword: debouncedValue });
-
-  const usersData = users?.pages.flatMap((page) => page.data) ?? [];
+  } = getUsersToChat({ isOpen, keyword: debouncedValue });
 
   // Consultar el chat con el usuario seleccionado
-  const {refetch, isRefetching: isLoadingChat, error: loadingChatError} = useQuery({
-    queryKey: ["get-private-chat-by-participant", selectedUserId],
-    queryFn: async () => {
-      const token = await getToken();
+  const {isLoadingChat, loadingChatError, refetch} = getPrivateChatByRecipient(selectedUserId);
 
-      const {data} = await axiosInstance<{
-        data: ChatType;
-        isChatRestored: boolean;
-    }>({
-        method: "GET",
-        url: `/chats/participant/${selectedUserId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      // Agregar el nuevo chat a la lista de chats del usuario recipiente
-      // al recibir el primer mensaje de un chat que aun no existe en su lista
-      if (data.isChatRestored) {
-        restoreDeletedChatCache({queryClient, restoredChat: data.data});
-      }
-
-      return data.data;
-    },
-    enabled: false
-  });
-
-  const {isIntersecting} = useIntersectionObserver({ data: users, paginationRef });
+  const {isIntersecting} = useIntersectionObserver({ data: usersData, paginationRef });
 
   // Cargar la siguiente pagina de usuarios
   useEffect(() => {
@@ -92,9 +59,11 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
   // Crear el item del chat temporal si el chat no existe entre los dos usuarios
   const onChatHandler = async () => {
     const {data} = await refetch();
+    
+    if (data?.data) {
+      // setTemporaryChat(null);
 
-    if (data) {
-      navigate(`/messages/${data._id}`);
+      navigate(`/messages/${data.data._id}`);
 
     } else {
       const otherUser = usersData.find((user) => user._id === selectedUserId)!;

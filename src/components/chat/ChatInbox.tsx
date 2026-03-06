@@ -1,7 +1,5 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useQuery } from "@tanstack/react-query";
 import { IoWarningOutline } from "react-icons/io5";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
@@ -9,10 +7,11 @@ import ChatHeader from "./ChatHeader";
 import ChatContent from "./ChatContent";
 import ChatInput from "./ChatInput";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useChatsService } from "@/services/chatsService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { socket } from "@/utils/socket";
+import type { PublicKeysType } from "@/repositories/chatsRepository";
 import type { ChatType } from "@/types/global";
 
 interface Props {
@@ -30,8 +29,7 @@ const ChatInbox = (props: Props) => {
   const [searchParams] = useSearchParams();
   const chatTypeParam = searchParams.get("type") as "all" | "group" | null;
 
-  const [tempChatPublicKey, setTempChatPublicKey] = useState<JsonWebKey | null>(null);
-  const [publicKeys, setPublicKeys] = useState<{userId: string; publicKey: JsonWebKey }[]>([]);
+  const [publicKeys, setPublicKeys] = useState<PublicKeysType[]>([]);
 
   const [isBlocked, setIsBlocked] = useState<{
     blockedBy: string | null;
@@ -41,39 +39,14 @@ const ChatInbox = (props: Props) => {
     blockedUser: null
   });
 
-  const {getToken} = useAuth();
-
-  // Query para consultar la data del chat
-  const {data: existingChat, isFetching: fetchingExistingChat, error: chatError} = useQuery({
-    queryKey: ["chat", chatId],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{
-        data: ChatType;
-        isBlocked: {
-          blockedBy: string | null;
-          blockedUser: string | null;
-        };
-      }>({
-        method: "GET",
-        url: `/chats/${chatId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      setIsBlocked(data.isBlocked);
-
-      return data.data;
-    },
-    enabled: !!chatId && !chatId.startsWith("temp_"),
-    refetchOnWindowFocus: false
-  });
-
   const {user: currentUser} = useCurrentUser();
 
-  const chat = temporaryChat || existingChat;
+  const {getChatById, getRecipientsPublicKeys, getTempChatPublicKey} = useChatsService();
+
+  // Query para consultar la data del chat
+  const {existingChat, chatError, fetchingExistingChat} = getChatById(chatId, setIsBlocked, setTemporaryChat);
+
+  const chat = existingChat || temporaryChat;
   const isPrivateChat = chat?.type === "private";
   const otherUser = isPrivateChat && chat?.participants.find((p) => p._id !== currentUser?._id);
   const otherUserExists = isPrivateChat && !!otherUser;
@@ -81,51 +54,11 @@ const ChatInbox = (props: Props) => {
   const userBlockedMe = isBlocked.blockedUser === currentUser?._id;
 
   // Query para consultar la clave de cifrado del usuario del chat temporal
-  const {data: tempChatPublicKeyData, isLoading: loadingTempChatPublicKey} = useQuery({
-    queryKey: ["tempChatPublicKey", temporaryChat?._id],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{data: JsonWebKey}>({
-        method: "GET",
-        url: `/crypto-keys/get-user-public-key/${chatId.replace("temp_", "")}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      setTempChatPublicKey(data.data);
-
-      return data;
-    },
-    enabled: !!temporaryChat,
-    retry: 1,
-    refetchOnWindowFocus: false
-  });
+  const {loadingTempChatPublicKey} = getTempChatPublicKey(chat, setPublicKeys);
 
   // Query para consultar la clave de cifrado de todos los recipientes del chat
   // Aplica para chats privados y grupales pero no para chats temporales
-  const {data, isLoading: loadingRecipientsCryptoKey} = useQuery({
-    queryKey: ["recipientsCryptoKeys", chatId],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{publicKeys: {userId: string, publicKey: JsonWebKey}[]}>({
-        method: "GET",
-        url: `/crypto-keys/get-recipients-public-keys/${chatId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      setPublicKeys(data.publicKeys);
-
-      return data;
-    },
-    retry: 1,
-    enabled: !!chatId && !chatId.startsWith("temp_"),
-    refetchOnWindowFocus: false
-  });
+  const {loadingRecipientsCryptoKey} = getRecipientsPublicKeys(chat, setPublicKeys);
 
   useEffect(() => {
     // Escuchar evento de usuario bloqueado/desbloqueado
@@ -192,9 +125,7 @@ const ChatInbox = (props: Props) => {
           wrapperHeight={headerHeight}
           setTemporaryChat={setTemporaryChat}
           chatTypeParam={chatTypeParam}
-          recipientsPublicKeys={
-            temporaryChat ? [{userId: temporaryChat._id, publicKey: tempChatPublicKey!}] : publicKeys
-          }
+          recipientsPublicKeys={publicKeys}
         />
       }
 

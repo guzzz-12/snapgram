@@ -12,10 +12,10 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useChatsService } from "@/services/chatsService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useDebounce } from "@/hooks/useDebounce";
-import { getUsersList } from "@/utils/getUsersList";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { ChatType } from "@/types/global";
@@ -38,6 +38,8 @@ const CreateGroupChatModal = () => {
   const {user: currentUser} = useCurrentUser();
 
   const {debouncedValue} = useDebounce(searchTerm);
+
+  const {getUsersToChat} = useChatsService();
 
   // Hacer focus en el input del nombre del grupo cuando se abre el modal
   useEffect(() => {
@@ -82,15 +84,15 @@ const CreateGroupChatModal = () => {
   });
 
   const {
-    users,
+    usersData,
     isLoading,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
     usersError
-  } = getUsersList({ isOpen, keyword: debouncedValue });
+  } = getUsersToChat({ isOpen, keyword: debouncedValue });
 
-  const {isIntersecting} = useIntersectionObserver({ data: users, paginationRef });
+  const {isIntersecting} = useIntersectionObserver({ data: usersData, paginationRef });
 
   // Cargar la siguiente pagina de usuarios
   useEffect(() => {
@@ -102,8 +104,6 @@ const CreateGroupChatModal = () => {
   if (usersError) {
     toast.error(errorMessage(usersError));
   }
-
-  const usersData = users?.pages.flatMap((page) => page.data) ?? [];
 
   const isButtonDisabled = groupName.length === 0 || selectedUsersIds.length === 0 || isCreatingGroup;
 

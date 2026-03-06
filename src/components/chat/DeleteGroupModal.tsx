@@ -1,12 +1,7 @@
-import { useNavigate } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IoWarningOutline } from "react-icons/io5";
-import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { useChatsService } from "@/services/chatsService";
 import type { ChatType } from "@/types/global";
 
 interface Props {
@@ -16,38 +11,10 @@ interface Props {
 }
 
 const DeleteGroupModal = ({ groupData, isOpen, setIsOpen }: Props) => {
-  const navigate = useNavigate();
-
-  const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
+  const {deleteGroup} = useChatsService();
 
   // Mutation para eliminar el grupo
-  const {mutate: deleteGroup, isPending} = useMutation({
-    mutationFn: async () => {
-      if (!groupData) return;
-
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{data: ChatType}>({
-        method: "DELETE",
-        url: `/chats/group/${groupData._id}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data.data;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["chats", "all"]});
-      navigate("/messages?type=all", {replace: true});
-      toast.success("Grupo eliminado con éxito");
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {mutate, isPending} = deleteGroup(groupData);
 
   return (
     <Dialog
@@ -91,7 +58,7 @@ const DeleteGroupModal = ({ groupData, isOpen, setIsOpen }: Props) => {
             size="sm"
             variant="destructive"
             disabled={isPending}
-            onClick={() => deleteGroup()}
+            onClick={() => mutate()}
           >
             Eliminar
           </Button>

@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import { SearchX } from "lucide-react";
@@ -12,11 +10,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { useChatsService } from "@/services/chatsService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useDebounce } from "@/hooks/useDebounce";
-import { getUsersList } from "@/utils/getUsersList";
 import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
 import type { ChatType } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -33,20 +30,18 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
-
   const {debouncedValue} = useDebounce(searchTerm);
 
+  const {getUsersToChat, addMemberToGroup} = useChatsService();
+
   const {
-    users,
+    usersData,
+    usersError,
     isLoading,
     isFetchingNextPage,
-    usersError,
     hasNextPage,
     fetchNextPage
-  } = getUsersList({ isOpen, keyword: debouncedValue });
+  } = getUsersToChat({ isOpen, keyword: debouncedValue });
 
   // Hacer focus en el input cuando se abra el modal
   // Limpiar el state cuando se cierre el modal
@@ -60,34 +55,9 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
   }, [isOpen]);
 
   // Mutation para agregar el usuario al grupo
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
+  const {mutate, isPending} = addMemberToGroup({chatId: chatData?._id, selectedUserId, setIsOpen});
 
-      const {data} = await axiosInstance<{data: ChatType}>({
-        method: "PUT",
-        url: `/chats/group/${chatData?._id}/add-members`,
-        data: {
-          newMember: selectedUserId
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["recipientsCryptoKeys", chatData?._id]});
-      setIsOpen(false);
-      toast.success("Usuario agregado con éxito");
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
-
-  const {isIntersecting} = useIntersectionObserver({ data: users, paginationRef });
+  const {isIntersecting} = useIntersectionObserver({ data: usersData, paginationRef });
 
   // Cargar la siguiente pagina de usuarios
   useEffect(() => {
@@ -100,7 +70,6 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
     toast.error(errorMessage(usersError));
   }
 
-  const usersData = users?.pages.flatMap((page) => page.data) ?? [];
   const isButtonDisabled = !selectedUserId || isPending;
   const groupMembers = chatData?.participants.map((user) => user._id) || [];
 

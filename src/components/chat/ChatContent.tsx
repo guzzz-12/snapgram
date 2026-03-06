@@ -1,19 +1,17 @@
 import { useRef } from "react";
 import { useNavigate, useParams } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import GroupInboxHeader from "./GroupInboxHeader";
 import MessageItem from "./MessageItem";
 import UserLeftOrKickedOrAddedMessageItem from "./UserLeftOrKickedOrAddedMessageItem";
+import { useChatsService } from "@/services/chatsService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import useInboxHooks from "@/hooks/useInboxHooks";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { ChatType, MessageType } from "@/types/global";
+import type { ChatType } from "@/types/global";
 
 interface Props {
   chatData: ChatType | null | undefined;
@@ -30,48 +28,20 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
 
   const {user: currentUser} = useCurrentUser();
 
-  const {getToken} = useAuth();
+  const {getChatMessages} = useChatsService();
 
-  // Función para consultar los mensajes
-  const getMessages = async (page: number) => {
-    const token = await getToken();
-
-    const {data} = await axiosInstance<{
-      data: {
-        messages: MessageType[];
-        chat: ChatType;
-      }
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: `/messages/chat/${chatData?._id}`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        page,
-        limit: 10
-      }
-    });
-
-    return data;
-  };
-
-  // Consultar los mensajes del chat
-  const {data: messagesData, isLoading: isLoadingMessages, isFetchingNextPage, hasNextPage, fetchNextPage, error} = useInfiniteQuery({
-    queryKey: ["messages", chatData?._id],
-    queryFn: ({pageParam}) => getMessages(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    enabled: !isLoadingChatData && !!chatData && !chatData._id.startsWith("temp_"),
-    retry: 2,
-    refetchOnWindowFocus: false,
-  });
+  const {
+    messages,
+    isLoadingMessages,
+    isFetchingNextPage,
+    hasNextPage,
+    error,
+    fetchNextPage
+  } = getChatMessages({chatId: chatData?._id, isLoadingChatData});
 
   // Observar si la referencia de la paginación es visible en el viewport
   const {isIntersecting} = useIntersectionObserver({
-    data: messagesData,
+    data: messages,
     paginationRef,
     threshold: 0.1
   });
@@ -93,10 +63,6 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
 
     toast.error(errorMessage(error));
   }
-
-  // Invertir el orden de los mensajes
-  // para corregir la dirección de la paginación
-  const messages = messagesData?.pages.flatMap((page) => page.data.messages).reverse() || [];
 
   return (
     <div

@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { BsFillPencilFill } from "react-icons/bs";
 import { MdOutlineExitToApp } from "react-icons/md";
 import { FaCrown, FaRegTimesCircle, FaRegTrashAlt } from "react-icons/fa";
@@ -21,11 +19,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useChatsService } from "@/services/chatsService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useClampedText from "@/hooks/useClampedText";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { ChatType, UserType } from "@/types/global";
+import type { UserType } from "@/types/global";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -38,10 +36,6 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
   const editNameInputRef = useRef<HTMLInputElement>(null);
   const editDescriptionInputRef = useRef<HTMLTextAreaElement>(null);
   const textContentRef = useRef<HTMLParagraphElement>(null);
-
-  const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
 
   const [openGroupImgModal, setOpenGroupImgModal] = useState(false);
   const [openAddMemberModal, setOpenAddMemberModal] = useState(false);
@@ -67,55 +61,18 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
 
   const {user: currentUser} = useCurrentUser();
 
-  const getGroupInfo = async () => {
-    const token = await getToken();
-    
-    const {data} = await axiosInstance<{data: ChatType}>({
-      method: "GET",
-      url: `/chats/${groupId}`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    return data.data;
-  }
+  const {getGroupInfo, updateGroupInfo} = useChatsService();
 
   // Query para consultar la data del grupo
-  const {data, isLoading, error} = useQuery({
-    queryKey: ["groupInfo", groupId],
-    queryFn: () => getGroupInfo(),
-    enabled: isOpen && !!groupId
-  });
+  const {data, isLoading, error} = getGroupInfo(groupId, isOpen);
 
   // Mutation para actualizar la información del grupo
-  const {mutate: updateGroupInfo, isPending: isUpdating} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{data: ChatType}>({
-        method: "PUT",
-        url: `/chats/group/${groupId}/update-info`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        data: {
-          groupName,
-          groupDescription: newDescription
-        }
-      });
-
-      return data.data;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["groupInfo", groupId]});
-      setIsEditingGroupName(false);
-      setIsEditingGroupDescription(false);
-      toast.success("Grupo actualizado con éxito");
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
+  const {updateGroupInfoMutation, isUpdating} = updateGroupInfo({
+    groupId, 
+    groupName, 
+    groupDescription: newDescription, 
+    setIsEditingGroupDescription,
+    setIsEditingGroupName
   });
 
   const {
@@ -291,7 +248,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                       variant="ghost"
                       size="icon"
                       disabled={isUpdating}
-                      onClick={() => updateGroupInfo()}
+                      onClick={() => updateGroupInfoMutation()}
                     >
                       <FaCircleCheck className="size-5 text-green-700" aria-hidden />
                       <span className="sr-only">Guardar cambios</span>
@@ -387,7 +344,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                     className="w-fit cursor-pointer"
                     variant="default"
                     disabled={isUpdating || newDescription.length === 0}
-                    onClick={() => updateGroupInfo()}
+                    onClick={() => updateGroupInfoMutation()}
                   >
                     Guardar cambios
                   </Button>

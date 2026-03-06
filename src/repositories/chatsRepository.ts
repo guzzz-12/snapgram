@@ -1,0 +1,253 @@
+import { axiosInstance } from "@/utils/axiosInstance";
+import type { ChatType, MessageType, UserType } from "@/types/global";
+import { filesUploader } from "@/utils/filesUploader";
+import { encryptMsgContent } from "@/utils/encryptMsgContent";
+
+export type PublicKeysType = { userId: string, publicKey: JsonWebKey }
+
+type SendMessageParams = {
+  messageText: string;
+  chatData: ChatType | null | undefined;
+  selectedImageFiles: File[];
+  recordedFile: File | null;
+  currentUser: UserType | null;
+  recipientsPublicKeys: PublicKeysType[];
+  getToken: () => Promise<string | null>;
+}
+
+/** Función para consultar un chat mediante su ID */
+export const fetchChatById = async (
+  chatId: string | undefined,
+  setIsBlocked: (isBlocked: { blockedBy: string | null; blockedUser: string | null }) => void,
+  setTemporaryChat: (chat: ChatType | null) => void,
+  getToken: () => Promise<string | null>
+) => {
+  const token = await getToken();
+
+  const {data} = await axiosInstance<{
+    data: ChatType;
+    isBlocked: {
+      blockedBy: string | null;
+      blockedUser: string | null;
+    };
+  }>({
+    method: "GET",
+    url: `/chats/${chatId}`,
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  // setTemporaryChat(null);
+  setIsBlocked(data.isBlocked);
+
+  return data.data;
+}
+
+/** Función para consultar los chats (tanto privados como grupales) */
+export const fetchChats = async (
+  page: number,
+  type: "all" | "group" | "private" | null | undefined,
+  getToken: () => Promise<string | null>
+) => {
+  const token = await getToken();
+
+  const {data} = await axiosInstance<{
+    data: ChatType[];
+    hasMore: boolean;
+    nextPage: number | null;
+  }>({
+    method: "GET",
+    url: "/chats",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    params: {
+      page,
+      limit: 10,
+      type: type ?? "all"
+    }
+  });
+
+  return data;
+}
+
+
+/** Función para consultar los mensajes de un chat */
+export const fetchChatMessages = async ( chatId: string | undefined, page: number, getToken: () => Promise<string | null>) => {
+  const token = await getToken();
+
+  const {data} = await axiosInstance<{
+    data: {
+      messages: MessageType[];
+      chat: ChatType;
+    }
+    hasMore: boolean;
+    nextPage: number | null;
+  }>({
+    method: "GET",
+    url: `/messages/chat/${chatId}`,
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    params: {
+      page,
+      limit: 10
+    }
+  });
+
+  return data;
+};
+
+
+/** Función para consultar los usuarios que pueden ser agregados al chat */
+export const fetchUsersToChat = async (page: number, keyword: string | undefined, getToken: () => Promise<string | null>) => {
+  const token = await getToken();
+
+  const {data} = await axiosInstance<{
+    data: UserType[];
+    hasMore: boolean;
+    nextPage: number | null;
+  }>({
+    method: "GET",
+    url: "/users/search",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    params: {
+      page,
+      limit: 10,
+      keyword
+    }
+  });
+
+  return data;
+}
+
+
+/** Función para enviar un mensaje */
+export const sendMessageFn = async (params: SendMessageParams) => {
+  const {messageText, chatData, selectedImageFiles, recordedFile, getToken, currentUser, recipientsPublicKeys} = params;
+
+  const token1 = await getToken();
+
+  const hasText = messageText.length > 0;
+  const hasImages = selectedImageFiles.length > 0;
+  const hasAudio = recordedFile;
+  const hasFiles = hasImages || hasAudio;
+  
+  // Subir los archivos a ImageKit si los hay
+  const uploadData = hasFiles ? await filesUploader({
+    files: recordedFile ? [recordedFile] : selectedImageFiles,
+    clerkToken: token1!,
+    folderName: `/chats/${chatData?._id}`,
+    currentUser
+  }) : [];
+
+  const filesUrls = uploadData
+  .filter(data => !!data.fileUrl && !!data.fileId)
+  .map(data => data.fileUrl) as string[];
+
+  const token2 = await getToken();
+
+  const participants = chatData?.participants.map(user => user._id) || [];
+
+  // Encriptar el mensaje, las urls de los archivos y las llaves de cifrado
+  const {encryptedMessage, encryptedFileUrls, encryptedKeys, iv} = await encryptMsgContent({
+    text: messageText,
+    recipientsPublicKeys,
+    currentUser,
+    filesUrls
+  });
+
+  const {data} = await axiosInstance<{
+    data: MessageType;
+    isNewChat: boolean;
+    chat: ChatType | null;
+  }>({
+    method: "POST",
+    url: `/messages/send`,
+    data: {
+      text: encryptedMessage,
+      chatId: chatData?._id,
+      recipientIds: participants,
+      type: hasText && hasImages ? "imageWithText" : hasImages ? "image" : hasAudio ? "audio" : "text",
+      fileUrls: encryptedFileUrls,
+      fileIds: uploadData.map(uData => uData.fileId),
+      encryptedKeys,
+      initVector: iv
+    },
+    headers: {
+      Authorization: `Bearer ${token2}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  return data;
+}
+
+
+/** Funcion para obtener un chat privado mediante el ID del usuario recipiente */
+export const fetchPrivateChatByParticipant = async (
+  params: {
+    selectedUserId: string | null;
+    getToken: () => Promise<string | null>
+  }
+) => {
+  const {selectedUserId, getToken} = params;
+
+  const token = await getToken();
+
+  const {data} = await axiosInstance<{data: ChatType; isChatRestored: boolean}>({
+    method: "GET",
+    url: `/chats/participant/${selectedUserId}`,
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  return data;
+}
+
+
+/** Funcion para agregar un nuevo miembro al grupo */
+export const addMemberToGroupFn = async (params: {chatId: string | undefined; selectedUserId: string | null; getToken: () => Promise<string | null>}) => {
+  const {chatId, selectedUserId, getToken} = params;
+
+  const token = await getToken();
+
+  const {data} = await axiosInstance<{data: ChatType}>({
+    method: "PUT",
+    url: `/chats/group/${chatId}/add-members`,
+    data: {
+      newMember: selectedUserId
+    },
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  return data;
+}
+
+
+/** Funcion para actualizar la informacion de un grupo */
+export const updateGroupInfoFn = async (params: {groupId: string | undefined; groupName: string; groupDescription: string; getToken: () => Promise<string | null>}) => {
+  const {groupId, groupName, groupDescription, getToken} = params;
+
+  const token = await getToken();
+
+  const {data} = await axiosInstance<{data: ChatType}>({
+    method: "PUT",
+    url: `/chats/group/${groupId}/update-info`,
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    data: {
+      groupName,
+      groupDescription
+    }
+  });
+
+  return data.data;
+}

@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState, type HTMLAttributes } from "react";
 import { useSearchParams } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { Twemoji } from "react-emoji-render";
-import { toast } from "sonner";
 import PostHeader from "./PostCardHeader";
 import PostCardSlider from "./PostCardSlider";
 import PostCardFooter from "./PostCardFooter";
@@ -11,20 +8,25 @@ import CreatePostInput from "./CreatePostInput";
 import SharedPostCard from "./SharedPostCard";
 import SeeMoreBtn from "@/components/SeeMoreBtn";
 import { Button } from "../ui/button";
+import type { EditPostProps } from "@/services/postsService";
 import useClampedText from "@/hooks/useClampedText";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { hashtagParser } from "@/utils/hashtagsParser";
-import { cn } from "@/lib/utils";
 import type { PostWithLikes } from "@/types/global";
+import { cn } from "@/lib/utils";
 
 interface Props {
   postData: PostWithLikes;
   isModal?: boolean;
   className?: HTMLAttributes<HTMLElement>["className"];
+  editPost: (params: EditPostProps) => (
+    {
+      mutate: () => void;
+      isPending: boolean;
+    }
+  );
 }
 
-const PostCard = ({ postData, isModal, className }: Props) => {
+const PostCard = ({ postData, isModal, className, editPost }: Props) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
 
   const [searchParams] = useSearchParams();
@@ -40,9 +42,6 @@ const PostCard = ({ postData, isModal, className }: Props) => {
     return () => setTextContent(postData.content);
   }, [isEditingPost]);
 
-  const {getToken} = useAuth();
-  const queryClient = useQueryClient();
-
   const {
     isClamped,
     showFullText,
@@ -50,36 +49,12 @@ const PostCard = ({ postData, isModal, className }: Props) => {
     setIsClamped
   } = useClampedText({ textContentRef, clampedTextData: postData.content });
 
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "PUT",
-        url: `/posts/${postData._id}`,
-        data: {
-          content: textContent
-        },
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["posts"]});
-
-      if (searchTerm) {
-        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
-      }
-
-      setIsEditingPost(false);
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-      setTextContent(postData.content);
-    }
+  const {mutate, isPending} = editPost({
+    postData,
+    updatedTextContent: textContent,
+    setTextContent,
+    setIsEditingPost,
+    searchTerm
   });
 
   return (

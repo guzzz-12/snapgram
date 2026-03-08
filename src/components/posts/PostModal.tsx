@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import type { Comment, PostWithLikes } from "@/types/global";
+import { usePostsService } from "@/services/postsService";
 
 interface Props {
   isOpen: boolean;
@@ -19,6 +20,8 @@ interface Props {
 
 const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
   const {getToken} = useAuth();
+
+  const {editPost} = usePostsService();
 
   const getComments = async (page: number) => {
     const token = await getToken();
@@ -76,6 +79,7 @@ const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
             className="w-full p-0 shadow-none"
             postData={postData}
             isModal={true}
+            editPost={editPost}
           />
 
           <CommentsList comments={comments} isLoading={loading} />

@@ -23,7 +23,7 @@ const HomePage = () => {
 
   const {getToken} = useAuth();
 
-  const {getFeedPosts} = usePostsService();
+  const {getFeedPosts, editPost} = usePostsService();
 
   // Consultar los posts del feed del usuario
   const {posts, loadingPosts, isFetchingNextPage, error, hasNextPage, fetchNextPage} = getFeedPosts();
@@ -112,7 +112,11 @@ const HomePage = () => {
           }
 
           {posts.map((post) => (
-            <PostCard key={post._id} postData={post} />
+            <PostCard
+              key={post._id}
+              postData={post}
+              editPost={editPost}
+            />
           ))}
 
           {isFetchingNextPage &&

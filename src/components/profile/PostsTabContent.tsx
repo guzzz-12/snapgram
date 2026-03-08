@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import PostCard from "@/components/posts/PostCard";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import { Button } from "@/components/ui/button";
+import { usePostsService } from "@/services/postsService";
 import { useProfileService } from "@/services/profileService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import useWindowWidth from "@/hooks/useWindowWidth";
@@ -20,6 +21,8 @@ const PostsTabContent = ({userData}: Props) => {
   const {windowWidth} = useWindowWidth();
 
   const {getUserPosts} = useProfileService();
+
+  const {editPost} = usePostsService();
 
   const {
     data: postsData,
@@ -77,7 +80,11 @@ const PostsTabContent = ({userData}: Props) => {
           gutter="8px"
         >
           {postsData.map((post) => (
-            <PostCard key={post._id} postData={post} />
+            <PostCard
+              key={post._id}
+              postData={post}
+              editPost={editPost}
+            />
           ))}
         </Masonry>
       }

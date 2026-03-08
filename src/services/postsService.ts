@@ -41,7 +41,7 @@ type SharePostProps = {
   }) => void;
 }
 
-type EditPostProps = {
+export type EditPostProps = {
   postData: PostWithLikes;
   updatedTextContent: string;
   searchTerm: string | null;
@@ -275,6 +275,8 @@ export const usePostsService = () => {
         },
         onSuccess: async () => {
           await queryClient.invalidateQueries({queryKey: ["posts"]});
+
+          await queryClient.invalidateQueries({queryKey: ["likes", "likedPosts"]});
 
           if (searchTerm) {
             await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});

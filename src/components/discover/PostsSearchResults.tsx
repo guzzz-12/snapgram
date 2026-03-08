@@ -5,6 +5,7 @@ import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import PostCard from "@/components/posts/PostCard";
 import NoResults from "./NoResults";
 import { useSearchService } from "@/services/searchService";
+import { usePostsService } from "@/services/postsService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { errorMessage } from "@/utils/errorMessage";
 
@@ -41,7 +42,17 @@ const PostsSearchResults = (props: Props) => {
 
   const {searchPosts} = useSearchService();
 
-  const {data, totalResults, error, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage} = searchPosts({searchTerm, searchType});
+  const {editPost} = usePostsService();
+
+  const {
+    data,
+    totalResults,
+    error,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage
+  } = searchPosts({searchTerm, searchType});
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});
 
@@ -76,7 +87,11 @@ const PostsSearchResults = (props: Props) => {
         >
           {!isLoading && data.map((post) => {
             return (
-              <PostCard key={post._id} postData={post} />
+              <PostCard
+                key={post._id}
+                postData={post}
+                editPost={editPost}
+              />
             )
           })}
         </Masonry>

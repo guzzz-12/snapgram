@@ -1,5 +1,13 @@
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { Comment, PostWithLikes } from "@/types/global";
+import type { Comment, PostWithLikes, UserType } from "@/types/global";
+import { filesUploader } from "@/utils/filesUploader";
+
+type CreatePostParams = {
+  user: UserType | null;
+  textContent: string;
+  selectedImageFiles: File[];
+  getToken: () => Promise<string | null>;
+};
 
 /** Función para obtener un post mediante su ID */
 export const getPost = async ({getToken, postId}: {postId: string | undefined; getToken: () => Promise<string | null>}) => {
@@ -80,6 +88,45 @@ export const getComments = async ({postId, page, getToken}: {postId: string | un
     params: {
       page,
       limit: 5
+    }
+  });
+
+  return data;
+}
+
+/** Función para crear un post */
+export const createPostFn = async (params: CreatePostParams) => {
+  const {user, textContent, selectedImageFiles, getToken} = params;
+
+  if ((!textContent && selectedImageFiles.length === 0) || !user) return;
+
+  const token1 = await getToken();
+
+  // Subir las imágenes a ImageKit si las hay
+  const uploadData = selectedImageFiles.length > 0 ? await filesUploader({
+    files: selectedImageFiles,
+    clerkToken: token1!,
+    folderName: `/posts/${user._id}`,
+    currentUser: user
+  }) : [];
+
+  // El primer token de acceso ya está posiblemente expirado en este punto
+  // Generar un nuevo token para la consulta de creación del post
+  // una vez que todas las imágenes ya se hayan subido a ImageKit
+  const token2 = await getToken();
+
+  // Crear el post
+  const {data} = await axiosInstance<{data: PostWithLikes}>({
+    method: "POST",
+    url: "/posts",
+    data: {
+      content: textContent,
+      imageUrls: uploadData.map(uData => uData.fileUrl),
+      imageFileIds: uploadData.map(uData => uData.fileId)
+    },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token2!}`
     }
   });
 

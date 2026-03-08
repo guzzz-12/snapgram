@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import CreatePostInput from "./CreatePostInput";
@@ -10,13 +9,11 @@ import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import { usePostsService } from "@/services/postsService";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import useImagePicker from "@/hooks/useImagePicker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import { filesUploader } from "@/utils/filesUploader";
-import type { PostType, PostWithLikes } from "@/types/global";
 
 const CreatePostModal = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -27,139 +24,60 @@ const CreatePostModal = () => {
   const [textContent, setTextContent] = useState("");
 
   const {user} = useCurrentUser();
-  const {open, publicationType, isRepost, repostedPostId, setOpen} = useCreatePublicationModal();
 
-  const {selectedImageFiles, selectedImagePreviews, isProcessing, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({ fileInputRef });
+  const {
+    open,
+    publicationType,
+    isRepost,
+    repostedPostId,
+    setOpen
+  } = useCreatePublicationModal();
+
+  const {
+    selectedImageFiles,
+    selectedImagePreviews,
+    isProcessing,
+    setSelectedImageFiles,
+    setSelectedImagePreviews,
+    onImagePickHandler
+  } = useImagePicker({ fileInputRef });
 
   const {getToken} = useAuth();
-  const queryClient = useQueryClient();
 
-  const createPost = async () => {
-    if ((!textContent && selectedImageFiles.length === 0) || !user) return;
-
-    const token1 = await getToken();
-
-    // Subir las imágenes a ImageKit si las hay
-    const uploadData = selectedImageFiles.length > 0 ? await filesUploader({
-      files: selectedImageFiles,
-      clerkToken: token1!,
-      folderName: `/posts/${user._id}`,
-      currentUser: user
-    }) : [];
-
-    // El primer token de acceso ya está posiblemente expirado en este punto
-    // Generar un nuevo token para la consulta de creación del post
-    // una vez que todas las imágenes ya se hayan subido a ImageKit
-    const token2 = await getToken();
-
-    // Crear el post
-    const {data} = await axiosInstance<{data: PostWithLikes}>({
-      method: "POST",
-      url: "/posts",
-      data: {
-        content: textContent,
-        imageUrls: uploadData.map(uData => uData.fileUrl),
-        imageFileIds: uploadData.map(uData => uData.fileId)
-      },
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token2!}`
-      }
-    });
-
-    return data;
-  }
+  const {createPost, getSharedPost, sharePost} = usePostsService();
 
   // Mutation para crear el post
-  const {mutate: createPostMutation, isPending: isCreatePostPending} = useMutation({
-    mutationFn: createPost,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["posts"]});
-
-      if (searchTerm) {
-        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
-      }
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-
-      setTextContent("");
-
-      toast.success("Post creado con éxito.");
-
-      setSelectedImageFiles([]);
-      setSelectedImagePreviews([]);
-
-      setOpen({open: false, publicationType: null});
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-    }
+  const {mutate: createPostMutation, isPending: isCreatePostPending} = createPost({
+    fileInputRef,
+    setTextContent,
+    setSelectedImageFiles,
+    setOpen,
+    setSelectedImagePreviews,
+    searchTerm,
+    selectedImageFiles,
+    textContent
   });
 
   // Query para consultar el post compartido
-  const {data: repostedPost, isLoading: isRepostLoading, error: isRepostError} = useQuery({
-    queryKey: ["post", repostedPostId],
-    queryFn: async () => {
-      const token = await getToken();
-      
-      const {data} = await axiosInstance<{data: PostType}>({
-        method: "get",
-        url: `/posts/${repostedPostId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data;
-    },
-    enabled: !!(open && isRepost && repostedPostId),
-    refetchOnWindowFocus: false
-  });
+  const {
+    repostedPost,
+    isRepostLoading,
+    fetchRepostError
+  } = getSharedPost({repostedPostId, open, isRepost});
   
   // Mutation para compartir el post
-  const {mutate: repostMutation, isPending: isRepostPending} = useMutation({
-    mutationFn: async () => {
-      if (!repostedPostId) return;
-
-      const token = await getToken();
-
-      const {data} = await axiosInstance({
-        method: "POST",
-        url: `/posts/share/${repostedPostId}`,
-        data: {
-          content: textContent
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["posts"]});
-
-      setTextContent("");
-      
-      setOpen({
-        open: false,
-        publicationType: null,
-        isRepost: false,
-        repostedPostId: null
-      });
-
-      toast.success("Post compartido.");
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
+  const {repostMutation, isRepostPending, repostError} = sharePost({
+    repostedPostId,
+    textContent,
+    setOpen,
+    setTextContent
   });
 
-  if (isRepostError) {
-    toast.error(`Error al compartir el post: ${errorMessage(isRepostError)}`);
+  if (fetchRepostError || repostError) {
+    const error = (fetchRepostError ?? repostError) as Error;
+
+    toast.error(`Error al compartir el post: ${errorMessage(error)}`);
+
     setOpen({
       open: false,
       publicationType: null,
@@ -226,7 +144,12 @@ const CreatePostModal = () => {
               if (isRepost) {
                 repostMutation();
               } else {
-                createPostMutation();
+                createPostMutation({
+                  user,
+                  textContent,
+                  selectedImageFiles,
+                  getToken
+                });
               }
             }}
           >

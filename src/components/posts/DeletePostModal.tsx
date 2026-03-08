@@ -1,11 +1,7 @@
-import { useLocation, useNavigate, useSearchParams } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
-import { toast } from "sonner";
+import { useLocation, useSearchParams } from "react-router";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { usePostsService } from "@/services/postsService";
 
 interface Props {
   postId: string;
@@ -16,51 +12,17 @@ interface Props {
 
 const DeletePostModal = ({postId, isOpen, setIsDeleting, setIsOpen}: Props) => {
   const {pathname} = useLocation();
-  const navigate = useNavigate();
   const [seachParams] = useSearchParams();
   const searchTerm = seachParams.get("searchTerm");
 
-  const {getToken} = useAuth();
-  const queryClient = useQueryClient();
+  const {deletePost} = usePostsService();
 
-  const deletePost = async () => {
-    const token = await getToken();
-
-    return axiosInstance({
-      method: "DELETE",
-      url: `/posts/${postId}`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-  }
-
-  const {mutate, isPending} = useMutation({
-    mutationFn: deletePost,
-    onSuccess: async () => {
-      // Si se está en la página del post, redirigir a la página principal
-      if (pathname === `/post/${postId}`) {
-        toast.success("Post eliminado con éxito.");
-        return navigate("/", {replace: true});
-      }
-
-      await queryClient.invalidateQueries({queryKey: ["posts"]});
-
-      if (searchTerm) {
-        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
-      }
-
-      toast.success("Post eliminado con éxito.");
-      
-      setIsOpen(false);
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-    },
-    onSettled: () => {
-      setIsDeleting(false);
-    }
+  const {mutate, isPending} = deletePost({
+    postId,
+    pathname,
+    searchTerm,
+    setIsDeleting,
+    setIsOpen
   });
 
   return (

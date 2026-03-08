@@ -1,6 +1,13 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import type { RefObject } from "react";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import { fetchPosts, getComments, getPost } from "@/repositories/postsRepository";
+import { toast } from "sonner";
+import { createPostFn, fetchPosts, getComments, getPost } from "@/repositories/postsRepository";
+import type { PostTypeEnum } from "@/hooks/useCreatePublicationModal";
+import { errorMessage } from "@/utils/errorMessage";
+import { axiosInstance } from "@/utils/axiosInstance";
+import type { PostType } from "@/types/global";
+import { useNavigate } from "react-router";
 
 type GetPostProps = {
   postId: string | undefined;
@@ -11,12 +18,48 @@ type GetPostCommentsProps = {
   enabled: boolean;
 }
 
+type CreatePostProps = {
+  searchTerm: string | null;
+  fileInputRef: RefObject<HTMLInputElement | null>;
+  textContent: string;
+  selectedImageFiles: File[];
+  setTextContent: (value: string) => void;
+  setOpen: (open: {open: boolean, publicationType: PostTypeEnum}) => void;
+  setSelectedImageFiles: (files: File[]) => void;
+  setSelectedImagePreviews: (previews: string[]) => void;
+}
+
+type SharePostProps = {
+  repostedPostId: string | null | undefined;
+  textContent: string;
+  setTextContent: (value: string) => void;
+  setOpen: (open: {
+    open: boolean;
+    publicationType: PostTypeEnum;
+    isRepost: boolean;
+    repostedPostId: string | null;
+  }) => void;
+}
+
+type DeletePostProps = {
+  postId: string;
+  pathname: string | undefined;
+  searchTerm: string | null;
+  setIsDeleting: (isDeleting: boolean) => void;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
 /**
  * Servicios de posts.
  * Debe ser invocado en el top level del componente.
 */
 export const usePostsService = () => {
+  const navigate = useNavigate();
+
+
   const { getToken } = useAuth();
+
+  const queryClient = useQueryClient();
 
   return {
     /** Consultar un post mediante su ID */
@@ -76,5 +119,178 @@ export const usePostsService = () => {
         fetchNextPage
       }
     },
+
+    /** Crear un nuevo post */
+    createPost: (params: CreatePostProps) => {
+      const {searchTerm, fileInputRef, setTextContent, setSelectedImageFiles, setOpen, setSelectedImagePreviews} = params;
+
+      const {mutate, isPending} = useMutation({
+        mutationFn: createPostFn,
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({queryKey: ["posts"]});
+
+          if (searchTerm) {
+            await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+          }
+
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+
+          setTextContent("");
+
+          toast.success("Post creado con éxito.");
+
+          setSelectedImageFiles([]);
+          setSelectedImagePreviews([]);
+
+          setOpen({open: false, publicationType: null});
+        },
+        onError: (error) => {
+          const message = errorMessage(error);
+          toast.error(message);
+        }
+      });
+
+      return {
+        mutate,
+        isPending
+      }
+    },
+
+    /** Compartir un post */
+    sharePost: (params: SharePostProps) => {
+      const {repostedPostId, textContent, setOpen, setTextContent} = params;
+
+      const {mutate, isPending, error} = useMutation({
+        mutationFn: async () => {
+          if (!repostedPostId) return;
+
+          const token = await getToken();
+
+          const {data} = await axiosInstance({
+            method: "POST",
+            url: `/posts/share/${repostedPostId}`,
+            data: {
+              content: textContent
+            },
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          return data;
+        },
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({queryKey: ["posts"]});
+
+          setTextContent("");
+          
+          setOpen({
+            open: false,
+            publicationType: null,
+            isRepost: false,
+            repostedPostId: null
+          });
+
+          toast.success("Post compartido.");
+        },
+        onError: (error) => {
+          toast.error(errorMessage(error));
+        }
+      });
+
+      return {
+        repostMutation: mutate,
+        isRepostPending: isPending,
+        repostError: error
+      }
+    },
+
+    /** Consultar un post compartido */
+    getSharedPost: (
+      params: {
+        repostedPostId: string | null | undefined;
+        open: boolean;
+        isRepost: boolean | undefined;
+      }
+    ) => {
+      const {repostedPostId, open, isRepost} = params;
+
+      const res = useQuery({
+        queryKey: ["post", repostedPostId],
+        queryFn: async () => {
+          const token = await getToken();
+          
+          const {data} = await axiosInstance<{data: PostType}>({
+            method: "get",
+            url: `/posts/${repostedPostId}`,
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          return data;
+        },
+        enabled: !!(open && isRepost && repostedPostId),
+        refetchOnWindowFocus: false
+      });
+
+      return {
+        repostedPost: res.data,
+        isRepostLoading: res.isLoading,
+        fetchRepostError: res.error
+      }
+    },
+
+    /** Eliminar un post */
+    deletePost: (params: DeletePostProps) => {
+      const {postId, pathname, searchTerm, setIsDeleting, setIsOpen} = params;
+
+      const deletePost = async () => {
+        const token = await getToken();
+
+        return axiosInstance({
+          method: "DELETE",
+          url: `/posts/${postId}`,
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+      }
+
+      const {mutate, isPending} = useMutation({
+        mutationFn: deletePost,
+        onSuccess: async () => {
+          // Si se está en la página del post, redirigir a la página principal
+          if (pathname === `/post/${postId}`) {
+            toast.success("Post eliminado con éxito.");
+            return navigate("/", {replace: true});
+          }
+
+          await queryClient.invalidateQueries({queryKey: ["posts"]});
+
+          if (searchTerm) {
+            await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+          }
+
+          toast.success("Post eliminado con éxito.");
+          
+          setIsOpen(false);
+        },
+        onError: (error) => {
+          const message = errorMessage(error);
+          toast.error(message);
+        },
+        onSettled: () => {
+          setIsDeleting(false);
+        }
+      });
+
+      return {
+        mutate,
+        isPending
+      }
+    }
   }
 }

@@ -1,8 +1,8 @@
 import {create} from "zustand";
 
-type PostTypeEnum = "post" | "story" | null;
+export type PostTypeEnum = "post" | "story" | null;
 
-type SetOpenType = {
+export type SetOpenType = {
   open: boolean;
   publicationType: PostTypeEnum;
   isRepost?: boolean;

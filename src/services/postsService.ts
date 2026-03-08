@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { useNavigate } from "react-router";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
@@ -6,8 +7,7 @@ import { createPostFn, fetchPosts, getComments, getPost } from "@/repositories/p
 import type { PostTypeEnum } from "@/hooks/useCreatePublicationModal";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { PostType } from "@/types/global";
-import { useNavigate } from "react-router";
+import type { PostType, PostWithLikes } from "@/types/global";
 
 type GetPostProps = {
   postId: string | undefined;
@@ -39,6 +39,14 @@ type SharePostProps = {
     isRepost: boolean;
     repostedPostId: string | null;
   }) => void;
+}
+
+type EditPostProps = {
+  postData: PostWithLikes;
+  updatedTextContent: string;
+  searchTerm: string | null;
+  setTextContent: (value: string) => void;
+  setIsEditingPost: (value: boolean) => void;
 }
 
 type DeletePostProps = {
@@ -240,6 +248,50 @@ export const usePostsService = () => {
         repostedPost: res.data,
         isRepostLoading: res.isLoading,
         fetchRepostError: res.error
+      }
+    },
+
+    /** Editar un post */
+    editPost: (params: EditPostProps) => {
+      const {postData, updatedTextContent, setTextContent, setIsEditingPost, searchTerm} = params;
+
+      const {mutate, isPending} = useMutation({
+        mutationFn: async () => {
+          if (!postData) return;
+
+          const token = await getToken();
+
+          return axiosInstance({
+            method: "PUT",
+            url: `/posts/${postData._id}`,
+            data: {
+              content: updatedTextContent
+            },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          });
+        },
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({queryKey: ["posts"]});
+
+          if (searchTerm) {
+            await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+          }
+
+          setIsEditingPost(false);
+        },
+        onError: (error) => {
+          const message = errorMessage(error);
+          toast.error(message);
+          setTextContent(postData!.content);
+        }
+      });
+
+      return {
+        mutate,
+        isPending
       }
     },
 

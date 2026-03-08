@@ -1,13 +1,9 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useSearchParams } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
-import { toast } from "sonner";
 import CreatePostInput from "./CreatePostInput";
 import { Button } from "@/components/ui/button";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { usePostsService } from "@/services/postsService";
 import type { PostWithLikes } from "@/types/global";
-import { errorMessage } from "@/utils/errorMessage";
 
 interface Props {
   postData: PostWithLikes;
@@ -22,42 +18,15 @@ const EditPostForm = (props: Props) => {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
 
-  const {getToken} = useAuth();
-  const queryClient = useQueryClient();
+  const {editPost} = usePostsService();
 
   // Mutation para editar el post
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      if (!postData) return;
-
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "PUT",
-        url: `/posts/${postData._id}`,
-        data: {
-          content: textContent
-        },
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["posts"]});
-
-      if (searchTerm) {
-        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
-      }
-
-      setIsEditingPost(false);
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-      setTextContent(postData!.content);
-    }
+  const {mutate, isPending} = editPost({
+    postData,
+    updatedTextContent: textContent,
+    setTextContent,
+    setIsEditingPost,
+    searchTerm
   });
 
   return (

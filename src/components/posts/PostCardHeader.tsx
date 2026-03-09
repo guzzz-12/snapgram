@@ -8,6 +8,7 @@ import EditHistoryModal from "./EditHistoryModal";
 import UserProfileTooltip from "./UserProfileTooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useProfileService } from "@/services/profileService";
 import type { PostWithLikes } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -25,13 +26,15 @@ const PostCardHeader = ({ postData, className, setisEditingPost }: Props) => {
 
   const {userId} = useAuth();
 
+  const {followOrUnfollowUser} = useProfileService();
+
   return (
     <div className={cn("flex justify-start items-center gap-3 w-full", className)}>
       <TooltipProvider>
         <UserProfileTooltip
           userClerkId={postData.user.clerkId}
           isOpen={openUserTooltip}
-          setIsOpen={setOpenUserTooltip}
+          followOrUnfollow={followOrUnfollowUser}
         >
           <div
             className="flex justify-start items-center gap-2 w-fit p-1 overflow-hidden"

@@ -114,7 +114,7 @@ export const useProfileService = () => {
     },
 
     /** Service para seguir o dejar de seguir a un usuario */
-    followOrUnfollowUser: (followedUserId: string, currentUserClerkId: string | null | undefined) => {
+    followOrUnfollowUser: (followedUserId: string | undefined, currentUserClerkId: string | null | undefined) => {
       const {mutate, isPending} = useMutation({
         mutationFn: async () => {
           const token = await getToken();

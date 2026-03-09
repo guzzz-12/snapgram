@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useProfileService } from "@/services/profileService";
+import { useChatsService } from "@/services/chatsService";
+import { useTemporaryChat } from "@/hooks/useTemporaryChat";
 
 interface Props {
   isOpen: boolean;
@@ -29,9 +31,45 @@ const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow}: P
 
   const {userData, loadingUser, userError} = getUserProfile(userClerkId, true, isOpen);
 
-  const isCurrentUser = userClerkId === userId;
+  const {getPrivateChatByRecipient} = useChatsService();
 
+  const {setChat: setTemporaryChat} = useTemporaryChat();
+  
   const {mutate, isPending} = followOrUnfollow(userData?._id, userId);
+  
+  // Consultar el chat con el usuario seleccionado
+  const {refetch} = getPrivateChatByRecipient(userData?._id);
+
+  // Navegar a la página del chat si existe el chat con el usuario seleccionado
+  // Crear el item del chat temporal si el chat no existe entre los dos usuarios
+  const onChatHandler = async () => {
+    const {data} = await refetch();
+    
+    if (data?.data) {
+      navigate(`/messages/${data.data._id}`);
+
+    } else {
+      const tempChatId = `temp_${userData?._id}`;
+
+      setTemporaryChat({
+        _id: tempChatId,
+        participants: [userData!],
+        type: "private",
+        groupAdmin: null,
+        groupName: null,
+        groupPicture: null,
+        groupDescription: null,
+        lastMessage: null,
+        unseenMessages: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      navigate(`/messages/${tempChatId}`);
+    }
+  }
+
+  const isCurrentUser = userClerkId === userId;
 
   return (
     <HoverCard>
@@ -131,7 +169,7 @@ const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow}: P
                     <Button
                       className="w-1/2 rounded-full bg-[#4F39F6] hover:bg-[#4F39F6]/80 cursor-pointer!"
                       size="sm"
-                      onClick={() => navigate(`/messages/`)}
+                      onClick={onChatHandler}
                     >
                       <FiSend className="size-5 text-white shrink-0" aria-hidden />
 

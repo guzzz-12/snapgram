@@ -19,7 +19,6 @@ type SendMessageParams = {
 export const fetchChatById = async (
   chatId: string | undefined,
   setIsBlocked: (isBlocked: { blockedBy: string | null; blockedUser: string | null }) => void,
-  setTemporaryChat: (chat: ChatType | null) => void,
   getToken: () => Promise<string | null>
 ) => {
   const token = await getToken();
@@ -38,7 +37,6 @@ export const fetchChatById = async (
     }
   });
 
-  // setTemporaryChat(null);
   setIsBlocked(data.isBlocked);
 
   return data.data;
@@ -190,7 +188,7 @@ export const sendMessageFn = async (params: SendMessageParams) => {
 /** Funcion para obtener un chat privado mediante el ID del usuario recipiente */
 export const fetchPrivateChatByParticipant = async (
   params: {
-    selectedUserId: string | null;
+    selectedUserId: string | null | undefined;
     getToken: () => Promise<string | null>
   }
 ) => {

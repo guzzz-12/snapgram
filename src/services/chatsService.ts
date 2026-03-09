@@ -47,11 +47,10 @@ export const useChatsService = () => {
     getChatById: (
       chatId: string | undefined,
       setIsBlocked: (data: { blockedBy: string | null; blockedUser: string | null }) => void,
-      setTemporaryChat: (chat: ChatType | null) => void
     ) => {
       const res = useQuery({
         queryKey: ["chat", chatId],
-        queryFn: () => fetchChatById(chatId, setIsBlocked, setTemporaryChat, getToken),
+        queryFn: () => fetchChatById(chatId, setIsBlocked, getToken),
         enabled: !!chatId && !chatId.startsWith("temp_"),
         refetchOnWindowFocus: false
       });
@@ -175,7 +174,7 @@ export const useChatsService = () => {
     },
 
     /** Service para consultar el chat con el usuario seleccionado */
-    getPrivateChatByRecipient: (selectedUserId: string | null) => {
+    getPrivateChatByRecipient: (selectedUserId: string | null | undefined) => {
       const res = useQuery({
         queryKey: ["get-private-chat-by-participant", selectedUserId],
         queryFn: async () => fetchPrivateChatByParticipant({selectedUserId, getToken}),

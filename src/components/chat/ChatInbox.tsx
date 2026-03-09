@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { IoWarningOutline } from "react-icons/io5";
 import { AxiosError } from "axios";
@@ -9,20 +9,19 @@ import ChatInput from "./ChatInput";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChatsService } from "@/services/chatsService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import type { PublicKeysType } from "@/repositories/chatsRepository";
 import { errorMessage } from "@/utils/errorMessage";
 import { socket } from "@/utils/socket";
-import type { PublicKeysType } from "@/repositories/chatsRepository";
 import type { ChatType } from "@/types/global";
 
 interface Props {
   chatId: string;
   temporaryChat: ChatType | null;
   headerHeight: number;
-  setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
 const ChatInbox = (props: Props) => {
-  const {chatId, temporaryChat, headerHeight, setTemporaryChat} = props;
+  const {chatId, temporaryChat, headerHeight} = props;
 
   const navigate = useNavigate();
 
@@ -44,7 +43,7 @@ const ChatInbox = (props: Props) => {
   const {getChatById, getRecipientsPublicKeys, getTempChatPublicKey} = useChatsService();
 
   // Query para consultar la data del chat
-  const {existingChat, chatError, fetchingExistingChat} = getChatById(chatId, setIsBlocked, setTemporaryChat);
+  const {existingChat, chatError, fetchingExistingChat} = getChatById(chatId, setIsBlocked);
 
   const chat = existingChat || temporaryChat;
   const isPrivateChat = chat?.type === "private";
@@ -123,7 +122,6 @@ const ChatInbox = (props: Props) => {
         <ChatInput
           chatData={chat}
           wrapperHeight={headerHeight}
-          setTemporaryChat={setTemporaryChat}
           chatTypeParam={chatTypeParam}
           recipientsPublicKeys={publicKeys}
         />

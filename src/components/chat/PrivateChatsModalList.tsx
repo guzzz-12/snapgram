@@ -12,14 +12,10 @@ import { useChatsService } from "@/services/chatsService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
+import { useTemporaryChat } from "@/hooks/useTemporaryChat";
 import { errorMessage } from "@/utils/errorMessage";
-import type { ChatType } from "@/types/global";
 
-interface Props {
-  setTemporaryChat: (chat: ChatType | null) => void;
-}
-
-const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
+const PrivateChatsModalList = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
@@ -32,6 +28,8 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
   const {debouncedValue} = useDebounce(searchTerm);
 
   const {getPrivateChatByRecipient, getUsersToChat} = useChatsService();
+
+  const {setChat: setTemporaryChat} = useTemporaryChat();
 
   // Consultar los usuarios que pueden ser agregados al chat
   const {
@@ -61,8 +59,6 @@ const PrivateChatsModalList = ({setTemporaryChat}: Props) => {
     const {data} = await refetch();
     
     if (data?.data) {
-      // setTemporaryChat(null);
-
       navigate(`/messages/${data.data._id}`);
 
     } else {

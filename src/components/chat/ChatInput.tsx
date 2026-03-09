@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import MessageInputForm from "./MessageInputForm";
 import UsersTypingIndicator from "./UsersTypingIndicator";
@@ -11,6 +11,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { useUsersRecordingAudio } from "@/hooks/useUsersRecordingAudio";
+import { useTemporaryChat } from "@/hooks/useTemporaryChat";
 import type { PublicKeysType } from "@/repositories/chatsRepository";
 import type { ChatType } from "@/types/global";
 
@@ -19,10 +20,9 @@ interface Props {
   wrapperHeight: number;
   chatTypeParam: "all" | "group" | null;
   recipientsPublicKeys: PublicKeysType[];
-  setTemporaryChat: Dispatch<SetStateAction<ChatType | null>>;
 }
 
-const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat, recipientsPublicKeys }: Props) => {
+const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [messageText, setMessageText] = useState("");
@@ -43,6 +43,8 @@ const ChatInput = ({ chatData, chatTypeParam, setTemporaryChat, recipientsPublic
   } = useAudioRecording();
 
   const {user: currentUser} = useCurrentUser();
+
+  const {setChat: setTemporaryChat} = useTemporaryChat();
 
   const {usersTyping} = useUsersTyping();
 

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
-import type { ChatType } from "@/types/global";
+import { useTemporaryChat } from "@/hooks/useTemporaryChat";
 
 const MessagesPage = () => {
   const {chatId} = useParams<{chatId: string}>();
@@ -18,7 +18,6 @@ const MessagesPage = () => {
   const chatTypeParam = searchParams.get("type") as "all" | "group" | null;
 
   const [headerHeight, _setHeaderHeight] = useState(67);
-  const [temporaryChat, setTemporaryChat] = useState<ChatType | null>(null);
 
   const {setIsOpen: setOpenPrivateChatsModal} = usePrivateChatsListModal();
 
@@ -26,18 +25,20 @@ const MessagesPage = () => {
 
   const {user} = useCurrentUser();
 
+  const {chat: temporaryChat} = useTemporaryChat();
+
   if (!user) {
     return null;
   }
 
   return (
     <main className="relative flex w-full h-full bg-white overflow-hidden">
-      <PrivateChatsModalList setTemporaryChat={setTemporaryChat}/>
+      <PrivateChatsModalList />
       
       <ChatList
         headerHeight={headerHeight}
-        temporaryChatItem={temporaryChat}
         chatTypeParam={chatTypeParam}
+        temporaryChatItem={temporaryChat}
         hasLocalCryptoKeys={hasLocalCryptoKeys}
       />
 
@@ -47,7 +48,6 @@ const MessagesPage = () => {
             chatId={chatId}
             temporaryChat={temporaryChat}
             headerHeight={headerHeight}
-            setTemporaryChat={setTemporaryChat}
           />
         }
 

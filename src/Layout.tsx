@@ -12,14 +12,15 @@ import ImagesLightbox from "@/components/ImagesLightbox";
 import MobileNavSidebar from "./components/MobileNavSidebar";
 import DisabledAccountScreen from "./components/DisabledAccountScreen";
 import CreateCryptoKeysScreen from "./components/CreateCryptoKeysScreen";
+import { TooltipProvider } from "./components/ui/tooltip";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
 import { useCurrentUser } from "./hooks/useCurrentUser";
 import useWindowWidth from "./hooks/useWindowWidth";
 import useSidebarWidth from "./hooks/useSidebarWidth";
+import { useCheckLocalCryptoKeys } from "./hooks/useCheckLocalCryptoKeys";
 import { errorMessage } from "./utils/errorMessage";
 import { axiosInstance } from "./utils/axiosInstance";
 import { cn } from "./lib/utils";
-import { useCheckLocalCryptoKeys } from "./hooks/useCheckLocalCryptoKeys";
 
 const Layout = () => {
   const {pathname} = useLocation();
@@ -110,34 +111,36 @@ const Layout = () => {
       style={{paddingLeft: windowWidth > 700 ? `${sidebarWidth}px` : 0}}
       className="relative flex w-full min-h-screen"
     >
-      <SocketManager />
+      <TooltipProvider>
+        <SocketManager />
 
-      <CreatePostModal />
+        <CreatePostModal />
 
-      <CreateStoryModal />
+        <CreateStoryModal />
 
-      <BlockUserModal />
+        <BlockUserModal />
 
-      <ImagesLightbox />
+        <ImagesLightbox />
 
-      {/* No mostrar el sidebar en la página del post y o si el ancho de la pantalla es menor de 700px */}
-      {!isPostPage &&
-        <div className={cn("hidden min-[700px]:block fixed left-0 top-0 h-full shrink-0 z-10")}>
-          <Sidebar />
-        </div>
-      }
+        {/* No mostrar el sidebar en la página del post y o si el ancho de la pantalla es menor de 700px */}
+        {!isPostPage &&
+          <div className={cn("hidden min-[700px]:block fixed left-0 top-0 h-full shrink-0 z-10")}>
+            <Sidebar />
+          </div>
+        }
 
-      {!isMessagesPage && windowWidth < 700 &&
-        <div className="fixed top-1 right-1 p-0.5 rounded-sm bg-white border z-[100]">
-          <MobileNavSidebar />
-        </div>
-      }
+        {!isMessagesPage && windowWidth < 700 &&
+          <div className="fixed top-1 right-1 p-0.5 rounded-sm bg-white border z-[100]">
+            <MobileNavSidebar />
+          </div>
+        }
 
-      <section className="grow bg-slate-100 overflow-x-hidden">
-        <Outlet />
-      </section>
+        <section className="grow bg-slate-100 overflow-x-hidden">
+          <Outlet />
+        </section>
 
-      <Toaster position="bottom-right" />
+        <Toaster position="bottom-right" />
+      </TooltipProvider>
     </div>
   )
 }

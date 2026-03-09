@@ -17,11 +17,15 @@ export const useProfileService = () => {
 
   return {
     /** Service para consultar el perfil de un usuario */
-    getUserProfile: (userClerkId: string | undefined) => {
+    getUserProfile: (
+      userClerkId: string | undefined,
+      fetchOnHover?: boolean,
+      isHovered?: boolean
+    ) => {
       const userProfileData = useQuery({
         queryKey: ["user", userClerkId],
         queryFn: async () => fetchUserProfile({userClerkId, getToken}),
-        enabled: !!userClerkId,
+        enabled: fetchOnHover ? (isHovered && !!userClerkId) : !!userClerkId,
         refetchOnWindowFocus: false,
         retry: 1
       });

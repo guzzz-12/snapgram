@@ -51,7 +51,7 @@ const MessagesPage = () => {
           />
         }
 
-        {!chatId && !hasLocalCryptoKeys && 
+        {!hasLocalCryptoKeys && 
           <GetCryptoKeys />
         }
 
@@ -67,7 +67,7 @@ const MessagesPage = () => {
             </h1>
 
             <p className="mb-5 text-center text-sm text-neutral-600">
-              Envia mensajes a tus amigos o grupos
+              Envía mensajes a tus amigos o grupos
             </p>
 
             {chatTypeParam === "all" &&

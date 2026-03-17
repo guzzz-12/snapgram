@@ -84,7 +84,6 @@ Este proyecto fue diseñado como una pieza central de mi portafolio para demostr
 
 * **GitHub:** [https://github.com/guzzz-12]
 * **Portafolio:** [https://gzmn.vercel.app]
-* **Email:** [jegq.dev.projects@gmail.com]
 * **Behance:** [https://www.behance.net/guzzz_12]
 
 ---

@@ -1,14 +1,13 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useNavigate } from "react-router";
 import type { StoryType } from "@/types/global";
 
 interface Props {
-  isOpen: boolean;
   isPaused: boolean;
   activeStoryId: string;
   storyId: string;
   stories: StoryType[];
   seenStories: string[];
-  setOpenUserId: (id: string | null) => void;
   setActiveStoryId: (id: string) => void;
   setIsPaused: (isPaused: boolean) => void;
   setSeenStories: Dispatch<SetStateAction<string[]>>
@@ -16,17 +15,17 @@ interface Props {
 
 const StoryProgressBar = (props: Props) => {
   const {
-    isOpen,
     isPaused,
     stories,
     activeStoryId,
     storyId,
     seenStories,
-    setOpenUserId,
     setActiveStoryId,
     setIsPaused,
     setSeenStories
   } = props;
+
+  const navigate = useNavigate();
 
   const TIMER_DURATION = 10000;
   const isCurrentStory = activeStoryId === storyId;
@@ -44,10 +43,10 @@ const StoryProgressBar = (props: Props) => {
     if (seenStories.includes(storyId) && storyId !== activeStoryId) {
       setTimeRemaining(0);
     }
-    
+
     // Restablecer el state paused cuando se cierra el story
     return () => setIsPaused(false);
-    
+
   }, [storyId, seenStories, activeStoryId]);
 
   useEffect(() => {
@@ -55,7 +54,7 @@ const StoryProgressBar = (props: Props) => {
 
     // Actualizar el timer del tiempo restante cada 100ms
     // al story activo si no está pausado
-    if (isOpen && !isPaused && isCurrentStory) {
+    if (!isPaused && isCurrentStory) {
       interval = setInterval(() => {
         setTimeRemaining((prev) => {
           if (prev === 0) {
@@ -72,7 +71,7 @@ const StoryProgressBar = (props: Props) => {
         clearInterval(interval);
       }
     }
-  }, [isOpen, isPaused, stories, activeStoryId, storyId, setTimeRemaining]);
+  }, [isPaused, stories, activeStoryId, storyId, setTimeRemaining]);
 
   // Pasar al siguiente story cuando el timer llega a cero
   // Cerrar el viewer al terminar de ver el ultimo story
@@ -89,7 +88,7 @@ const StoryProgressBar = (props: Props) => {
         setSeenStories([...filteredDuplicates, nextStoryId]);
 
       } else {
-        setOpenUserId(null);
+        navigate("/")
       }
     }
   }, [timeRemaining, isLastStory]);

@@ -13,10 +13,11 @@ import NotificationsPage from "@/pages/NotificationsPage";
 import DiscoverPage from "@/pages/DiscoverPage";
 import ProfilePage from "@/pages/ProfilePage";
 import AuthPage from "@/pages/AuthPage";
+import StoriesPage from "@/pages/StoriesPage";
 import ErrorPage from "@/pages/ErrorPage";
+import UpdateCryptoKeysPage from "@/pages/UpdateCryptoKeysPage";
 import NoAuthRoute from "@/components/NoAuthRoute";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import UpdateCryptoKeysPage from "@/pages/UpdateCryptoKeysPage";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
@@ -28,19 +29,19 @@ import type { UserType } from "@/types/global";
 const PING_RETRY = 6;
 
 const App = () => {
-  const {isSignedIn, isLoaded} = useUser();
-  const {getToken, userId, signOut} = useAuth();
+  const { isSignedIn, isLoaded } = useUser();
+  const { getToken, userId, signOut } = useAuth();
 
   const [serverStarted, setServerStarted] = useState(false);
   const [serverError, setServerError] = useState(false);
 
-  const {user: currentUser, setUser, setLoadingUser} = useCurrentUser();
-  const {setUnseenNotifications} = useUnseenNotifications();
-  const {addToUnreadChats} = useUnreadChats();
+  const { user: currentUser, setUser, setLoadingUser } = useCurrentUser();
+  const { setUnseenNotifications } = useUnseenNotifications();
+  const { addToUnreadChats } = useUnreadChats();
 
   // Realizar ping al servidor para inicializarlo
   // en caso de estar deshabilitado por inactividad.
-  const {data: keepAliveData, status, failureCount} = useQuery({
+  const { data: keepAliveData, status, failureCount } = useQuery({
     queryKey: ["server-ping"],
     queryFn: async () => {
       return await axiosInstance({
@@ -63,12 +64,12 @@ const App = () => {
   }, [status, failureCount]);
 
   // Consultar la data del usuario autenticado
-  const {data: userData, isLoading: loadingUser, error: userError} = useQuery({
+  const { data: userData, isLoading: loadingUser, error: userError } = useQuery({
     queryKey: ["me"],
     queryFn: async () => {
       const token = await getToken();
 
-      const {data} = await axiosInstance<{data: UserType}>({
+      const { data } = await axiosInstance<{ data: UserType }>({
         method: "GET",
         url: "/users/me",
         headers: {
@@ -87,27 +88,27 @@ const App = () => {
   useEffect(() => {
     if (userError) {
       signOut()
-      .then(() => {
-        toast.error("Ocurrió un error al iniciar sesión.");
-      })
-      .catch((_error) => {});
+        .then(() => {
+          toast.error("Ocurrió un error al iniciar sesión.");
+        })
+        .catch((_error) => { });
     }
   }, [userError]);
 
   // Consultar la cantidad de notificaciones no vistas
-  const {data: unseenNotificationsCount, isLoading: loadingNotifications} = useQuery({
+  const { data: unseenNotificationsCount, isLoading: loadingNotifications } = useQuery({
     queryKey: ["unseenNotificationsCount"],
     queryFn: async () => {
       const token = await getToken();
 
-      const {data} = await axiosInstance<{data: number}>({
+      const { data } = await axiosInstance<{ data: number }>({
         method: "GET",
         url: "/notifications/unseen",
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      
+
       return data.data;
     },
     enabled: serverStarted && !!currentUser,
@@ -116,19 +117,19 @@ const App = () => {
   });
 
   // Consultar la cantidad de chats con mesajes sin leer
-  const {data: unreadChatsIds, isLoading: loadingUnreadChats} = useQuery({
+  const { data: unreadChatsIds, isLoading: loadingUnreadChats } = useQuery({
     queryKey: ["unseenMessagesCount"],
     queryFn: async () => {
       const token = await getToken();
 
-      const {data} = await axiosInstance<{data: string[]}>({
+      const { data } = await axiosInstance<{ data: string[] }>({
         method: "GET",
         url: "/chats/get-unread-chats",
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      
+
       return data.data;
     },
     enabled: serverStarted && !!currentUser,
@@ -210,6 +211,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <PostPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="stories/:username"
+          element={
+            <ProtectedRoute>
+              <StoriesPage />
             </ProtectedRoute>
           }
         />

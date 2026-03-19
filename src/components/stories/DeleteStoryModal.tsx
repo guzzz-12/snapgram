@@ -1,53 +1,45 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
-import { toast } from "sonner";
-import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useStoriesService } from "@/services/storiesService";
 
 interface Props {
   storyId: string;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  setOpenUserId: (storyId: string | null) => void;
+  setIsPaused: (isPaused: boolean) => void;
 }
 
-const DeleteStoryModal = ({storyId, isOpen, setIsOpen, setOpenUserId}: Props) => {
-  const {getToken} = useAuth();
+const DeleteStoryModal = ({ storyId, isOpen, setIsOpen, setIsPaused }: Props) => {
+  const { deletStory } = useStoriesService();
 
-  const queryClient = useQueryClient();
+  const { deleteStory, isPending, isSuccess } = deletStory(storyId);
 
-  const {mutate: deleteStory, isPending} = useMutation({
-    mutationKey: ["deleteStory"],
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "DELETE",
-        url: `/stories/${storyId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["stories"]});
+  useEffect(() => {
+    if (isSuccess) {
       setIsOpen(false);
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
+      setIsPaused(false);
     }
-  });
+  }, [isSuccess]);
+
+  // Pausar el timer del story al abrir el modal de eliminación
+  useEffect(() => {
+    if (isOpen) {
+      setIsPaused(true);
+    }
+
+    return () => {
+      setIsPaused(false);
+    }
+
+  }, [isOpen]);
 
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={() => {
+      onOpenChange={(open) => {
         if (isPending) return;
-        setOpenUserId(null);
-        setIsOpen(false);
+        setIsOpen(open);
       }}
     >
       <DialogContent className="!max-w-[270px]">
@@ -63,7 +55,10 @@ const DeleteStoryModal = ({storyId, isOpen, setIsOpen, setOpenUserId}: Props) =>
             size="sm"
             variant="outline"
             disabled={isPending}
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              setIsPaused(false);
+            }}
           >
             Cancelar
           </Button>

@@ -23,9 +23,9 @@ const Sidebar = () => {
   const sidebarRef = useRef<HTMLElement | null>(null);
   const createPostBtnRef = useRef<HTMLButtonElement | null>(null);
 
-  const {pathname} = useLocation();
+  const { pathname } = useLocation();
 
-  const {setSidebarWidth} = useSidebarWidth();
+  const { setSidebarWidth } = useSidebarWidth();
 
   // Calcular el width del sidebar principal
   useEffect(() => {
@@ -44,18 +44,22 @@ const Sidebar = () => {
       }
     }
   }, [pathname]);
-  
-  const {user, loadingUser} = useCurrentUser();
 
-  const {unseenNotifications} = useUnseenNotifications();
+  const { user, loadingUser } = useCurrentUser();
 
-  const {unreadChats} = useUnreadChats();
+  const { unseenNotifications } = useUnseenNotifications();
 
-  const {setOpen: openCreateStoryModal} = useCreatePublicationModal();
+  const { unreadChats } = useUnreadChats();
+
+  const { setOpen: openCreateStoryModal } = useCreatePublicationModal();
 
   const isMessagesPage = pathname.startsWith("/messages");
 
-  if (!loadingUser && !user) return null;
+  const isStoriesPage = pathname.startsWith("/stories");
+
+  if ((!loadingUser && !user) || isStoriesPage) {
+    return null;
+  };
 
   return (
     <aside
@@ -135,7 +139,7 @@ const Sidebar = () => {
         <DropdownMenuContent>
           <DropdownMenuItem
             className="flex justify-start items-center gap-2 w-full h-full cursor-pointer"
-            onClick={() => openCreateStoryModal({open: true, publicationType: "post"})}
+            onClick={() => openCreateStoryModal({ open: true, publicationType: "post" })}
           >
             <ImagePlus className="size-5" aria-hidden />
             <span className="whitespace-nowrap">Crear publicación</span>
@@ -143,7 +147,7 @@ const Sidebar = () => {
 
           <DropdownMenuItem
             className="flex justify-start items-center gap-2 cursor-pointer"
-            onClick={() => openCreateStoryModal({open: true, publicationType: "story"})}
+            onClick={() => openCreateStoryModal({ open: true, publicationType: "story" })}
           >
             <TypeOutline className="size-5" aria-hidden />
 

@@ -122,6 +122,15 @@ export type FollowedType = {
   followingSince: string;
 };
 
+export type UsersHavingStories = {
+  _id: string;
+  clerkId: string;
+  fullName: string;
+  username: string;
+  profilePicture?: string;
+  lastStoryCreatedAt: string;
+}
+
 export type UserWithStories = {
   _id: string;
   clerkId: string;

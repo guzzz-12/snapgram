@@ -3,7 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import { axiosInstance } from "@/utils/axiosInstance";
 import { toast } from "sonner";
 import { errorMessage } from "@/utils/errorMessage";
-import type { UsersHavingStories, UserWithStories } from "@/types/global";
+import type { StoryType, UsersHavingStories, UserWithStories } from "@/types/global";
 
 export const useStoriesService = () => {
   const { getToken } = useAuth();
@@ -51,9 +51,13 @@ export const useStoriesService = () => {
       };
     },
 
-    /** Consultar las stories de un usuario mediante su username */
-    getUserStories: (username: string | null) => {
-      const { data: storiesUserData, isLoading, error } = useQuery({
+    /**
+     * Consultar las stories de un usuario mediante su username.
+     * Si se especifica un storyId, se consulta una sola historia.
+     * Si no se especifica un storyId, se consultan todas las historias.
+     */
+    getUserStories: (username: string | null, storyId?: string) => {
+      const { data: storiesUserData, isLoading, error, isSuccess } = useQuery({
         queryKey: ["stories", username],
         queryFn: async () => {
           const token = await getToken();
@@ -64,6 +68,10 @@ export const useStoriesService = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
+            params: {
+              type: storyId ? "single" : "all",
+              storyId
+            }
           });
 
           return data.data;
@@ -74,6 +82,7 @@ export const useStoriesService = () => {
       return {
         data: storiesUserData,
         isLoading,
+        isSuccess,
         error,
       }
     },
@@ -100,6 +109,66 @@ export const useStoriesService = () => {
       return {
         markStoryAsSeen,
         isMarkingStoryAsSeen
+      }
+    },
+
+    /** Alternar el like en un story */
+    toggleLikeStory: (
+      storyId: string,
+      username: string | null,
+      currentUserId: string | undefined
+    ) => {
+      const { mutate: toggleLikeStory, isPending: isTogglingLikeStory } = useMutation({
+        mutationKey: ["stories", username],
+        mutationFn: async () => {
+          const token = await getToken();
+
+          return axiosInstance<{ data: StoryType }>({
+            method: "PUT",
+            url: `/likes/story/${storyId}`,
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+        },
+        onSuccess: () => {
+          // Actualizar la caché de la data de los stories del usuario
+          // para mostrar el cambio del state del like inmediatamente.
+          queryClient.setQueryData(["stories", username], (oldData: UserWithStories) => {
+            const story = oldData.stories.find((story) => story._id === storyId);
+
+            if (!story) {
+              return oldData;
+            }
+
+            const isLiked = story.likedBy.some((like) => like.user === currentUserId);
+
+            return {
+              ...oldData,
+              stories: oldData.stories.map((story) => {
+                return (
+                  story._id === storyId ? {
+                    ...story,
+                    likedBy: isLiked
+                      ? story.likedBy.filter((like) => like.user !== currentUserId)
+                      : [...story.likedBy, { user: currentUserId, likedAt: new Date() } as any],
+                  } : story
+                )
+              }),
+            };
+          });
+
+          queryClient.invalidateQueries({ queryKey: ["stories", username] });
+        },
+        onError: (error) => {
+          console.log(error)
+          console.log("Error alternando like en historia");
+        }
+      });
+
+      return {
+        toggleLikeStory,
+        isTogglingLikeStory
       }
     },
 

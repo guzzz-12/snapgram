@@ -3,13 +3,15 @@ import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
 import { CircleChevronLeft, CircleChevronRight, EllipsisVertical, Pause, Play, Trash2 } from "lucide-react";
-import StoryProgressBar from "./StoryProgressBar";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "sonner";
+import StoryProgressBar from "./StoryProgressBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SeenByUsers from "./SeenByUsers";
 import DeleteStoryModal from "./DeleteStoryModal";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useStoriesService } from "@/services/storiesService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { errorMessage } from "@/utils/errorMessage";
@@ -30,9 +32,16 @@ const StoriesViewer = (props: Props) => {
 
   const { user: currentUser } = useCurrentUser();
 
-  const { getUserStories, markAsSeen } = useStoriesService();
+  const { getUserStories, markAsSeen, toggleLikeStory } = useStoriesService();
 
-  const { data: storiesData, isLoading, error } = getUserStories(storiesUsername);
+  // Consultar los stories del usuario al abrir la página de stories
+  const { data: storiesData, isLoading, isSuccess, error } = getUserStories(storiesUsername);
+
+  // Dar/quitar like a un story
+  const {
+    toggleLikeStory: toggleStoryLike,
+    isTogglingLikeStory
+  } = toggleLikeStory(activeStoryId, storiesUsername, currentUser?._id);
 
   const { markStoryAsSeen } = markAsSeen(activeStoryId);
 
@@ -50,18 +59,21 @@ const StoriesViewer = (props: Props) => {
 
     const isStoryOwner = story.user === currentUser._id;
 
-    if (activeStoryId && !isStoryOwner) {
+    if (!isStoryOwner) {
       markStoryAsSeen();
     }
   }, [activeStoryId, currentUser]);
 
   // Abrir el primer story cuando se abre el visor de stories
   useEffect(() => {
-    if (stories.length > 0) {
+    // No usar stories como dependencia del useEffect para evitar
+    // que se restablezca el visor de stories al dar like a un story
+    // ya que dar like a un story restablece la caché de los stories.
+    if (!isLoading && isSuccess && stories.length > 0) {
       setActiveStoryId(stories[0]._id);
       setSeenStories([stories[0]._id]);
     }
-  }, [stories]);
+  }, [isLoading, isSuccess]);
 
   if (error) {
     toast.error(errorMessage(error));
@@ -107,7 +119,7 @@ const StoriesViewer = (props: Props) => {
         backgroundPosition: hasMedia ? "center" : "",
         backgroundRepeat: hasMedia ? "no-repeat" : "",
       }}
-      className="w-auto h-[90vh] mx-auto aspect-[1/1.7] rounded-md"
+      className="w-full h-full rounded-md"
     >
       {isLoading &&
         <Skeleton className="w-full h-full bg-neutral-500" />
@@ -260,6 +272,35 @@ const StoriesViewer = (props: Props) => {
               />
             }
           </div>
+
+          {currentUser?._id !== currentStory.user &&
+            <Button
+              className="absolute bottom-4 right-5 group hover:bg-transparent cursor-pointer z-10"
+              variant="ghost"
+              size="icon"
+              onClick={() => toggleStoryLike()}
+              disabled={isTogglingLikeStory}
+            >
+              {currentStory.likedBy.some((like) => like.user === currentUser?._id) ? (
+                <FaHeart
+                  className="size-5.5 text-destructive group-hover:scale-110 transition-all"
+                  aria-hidden
+                />
+              ) : (
+                <FaRegHeart
+                  className="size-5.5 text-destructive group-hover:scale-110 transition-all"
+                  aria-hidden
+                />
+              )}
+
+              <span className="sr-only">
+                {currentStory.likedBy.some((like) => like.user === currentUser?._id) ?
+                  "Eliminar like de la historia" :
+                  "Dar like a la historia"
+                }
+              </span>
+            </Button>
+          }
         </div>
       }
     </div>

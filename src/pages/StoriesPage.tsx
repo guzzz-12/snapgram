@@ -6,7 +6,7 @@ import StoriesViewer from "@/components/stories/StoriesViewer";
 import { Button } from "@/components/ui/button";
 
 const StoriesPage = () => {
-  const params = useParams() as { username: string };
+  const { username } = useParams() as { username: string };
   const navigate = useNavigate();
 
   // Cerrar el visor de stories al presionar Escape
@@ -25,26 +25,28 @@ const StoriesPage = () => {
   }, []);
 
   return (
-    <main className="pageWrapper flex flex-col h-screen py-0 bg-[#1A1A1A] overflow-hidden">
-      <nav className="flex justify-between items-center gap-3 pt-2">
-        <Logo size="sm" mode="dark" />
+    <main className="pageWrapper relative flex flex-col h-screen py-4 bg-[#1A1A1A] overflow-hidden">
+      <Logo
+        className="absolute top-4 left-4 hidden min-[820px]:flex z-10"
+        size="sm"
+        mode="dark"
+      />
 
-        <Button
-          className="text-white hover:text-white hover:bg-transparent cursor-pointer"
-          size="icon"
-          variant="ghost"
-          onClick={() => navigate("/")}
-        >
-          <MdOutlineClose className="size-10" aria-hidden />
+      <Button
+        className="absolute top-4 right-4 text-white hover:text-white hover:bg-transparent cursor-pointer z-10"
+        size="icon"
+        variant="ghost"
+        onClick={() => navigate("/")}
+      >
+        <MdOutlineClose className="size-10" aria-hidden />
 
-          <span className="sr-only">
-            Volver al inicio
-          </span>
-        </Button>
-      </nav>
+        <span className="sr-only">
+          Volver al inicio
+        </span>
+      </Button>
 
-      <section className="grow pb-3">
-        <StoriesViewer storiesUsername={params.username} />
+      <section className="h-[95vh] mx-auto aspect-[1/1.7] grow">
+        <StoriesViewer storiesUsername={username} />
       </section>
     </main>
   )

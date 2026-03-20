@@ -93,6 +93,10 @@ export type StoryType = {
     user: UserType;
     seenAt: string;
   }[];
+  likedBy: {
+    user: string;
+    likedAt: string;
+  }[];
   createdAt: string;
   updatedAt: string;
 };

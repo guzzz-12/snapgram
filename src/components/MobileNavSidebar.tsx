@@ -1,9 +1,17 @@
 import { AiOutlineMenu } from "react-icons/ai";
+import {useLocation} from "react-router";
 import Sidebar from "./Sidebar";
 import { Button } from "./ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "./ui/drawer";
 
 const MobileNavSidebar = () => {
+  const {pathname} = useLocation();
+
+  // No mostrar en la página de los stories
+  if (pathname.startsWith("/stories")) {
+    return null;
+  }
+
   return (
     <Drawer direction="left">
       <DrawerTrigger asChild>

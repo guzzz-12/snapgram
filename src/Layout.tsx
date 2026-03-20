@@ -129,7 +129,7 @@ const Layout = () => {
           </div>
         }
 
-        {!isMessagesPage && windowWidth < 700 &&
+        {!isMessagesPage && windowWidth < 700 && !pathname.startsWith("/stories") &&
           <div className="fixed top-1 right-1 p-0.5 rounded-sm bg-white border z-[100]">
             <MobileNavSidebar />
           </div>

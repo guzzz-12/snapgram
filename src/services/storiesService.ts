@@ -56,7 +56,7 @@ export const useStoriesService = () => {
      * Si se especifica un storyId, se consulta una sola historia.
      * Si no se especifica un storyId, se consultan todas las historias.
      */
-    getUserStories: (username: string | null, storyId?: string) => {
+    getUserStories: (username: string | null, storyId?: string | null) => {
       const { data: storiesUserData, isLoading, error, isSuccess } = useQuery({
         queryKey: ["stories", username],
         queryFn: async () => {

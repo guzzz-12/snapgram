@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
 import { CircleChevronLeft, CircleChevronRight, EllipsisVertical, Pause, Play, Trash2 } from "lucide-react";
@@ -23,6 +23,10 @@ interface Props {
 const StoriesViewer = (props: Props) => {
   const { storiesUsername } = props;
 
+  // Verificar si se espefificó un la ID de un story en la URL
+  const [search] = useSearchParams();
+  const storyId = search.get("storyId");
+
   const [activeStoryId, setActiveStoryId] = useState("");
   const [seenStories, setSeenStories] = useState<string[]>([]);
   const [isPaused, setIsPaused] = useState(false);
@@ -35,7 +39,12 @@ const StoriesViewer = (props: Props) => {
   const { getUserStories, markAsSeen, toggleLikeStory } = useStoriesService();
 
   // Consultar los stories del usuario al abrir la página de stories
-  const { data: storiesData, isLoading, isSuccess, error } = getUserStories(storiesUsername);
+  const {
+    data: userWithStories,
+    isLoading,
+    isSuccess,
+    error
+  } = getUserStories(storiesUsername, storyId);
 
   // Dar/quitar like a un story
   const {
@@ -45,7 +54,7 @@ const StoriesViewer = (props: Props) => {
 
   const { markStoryAsSeen } = markAsSeen(activeStoryId);
 
-  const stories = storiesData?.stories || [];
+  const stories = userWithStories?.stories || [];
   const currentStory = stories.find((story) => story._id === activeStoryId);
   const hasMedia = currentStory?.mediaType === "image";
 
@@ -57,7 +66,7 @@ const StoriesViewer = (props: Props) => {
       return;
     }
 
-    const isStoryOwner = story.user === currentUser._id;
+    const isStoryOwner = story.user._id === currentUser._id;
 
     if (!isStoryOwner) {
       markStoryAsSeen();
@@ -175,21 +184,21 @@ const StoriesViewer = (props: Props) => {
             <div className="relative flex justify-start items-center gap-3 w-full pt-4 z-20">
               <Link
                 className="flex justify-start items-center gap-2 w-full overflow-hidden"
-                to={`/profile/${storiesData?.clerkId}`}
+                to={`/profile/${userWithStories?.clerkId}`}
               >
                 <Avatar className="w-9 h-9 shrink-0 border border-white">
                   <AvatarImage
                     className="w-full h-full object-cover"
-                    src={storiesData?.profilePicture}
+                    src={userWithStories?.profilePicture}
                   />
                   <AvatarFallback className="w-full h-full object-cover">
-                    {storiesData?.fullName.charAt(0)}
+                    {userWithStories?.fullName.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
 
                 <div className="flex flex-col gap-0.5 w-full overflow-hidden">
                   <p className="w-full text-sm text-white font-semibold truncate">
-                    {storiesData?.fullName}
+                    {userWithStories?.fullName}
                   </p>
 
                   <p
@@ -212,7 +221,7 @@ const StoriesViewer = (props: Props) => {
                   }
                 </button>
 
-                {userId === storiesData?.clerkId &&
+                {userId === userWithStories?.clerkId &&
                   <>
                     <DeleteStoryModal
                       storyId={activeStoryId}
@@ -265,7 +274,7 @@ const StoriesViewer = (props: Props) => {
             )}
 
             {/* Usuarios que vieron la historia */}
-            {currentUser?._id === currentStory.user &&
+            {currentUser?._id === userWithStories?._id &&
               <SeenByUsers
                 className="absolute bottom-4 left-5 z-10"
                 data={currentStory.seenBy}
@@ -273,7 +282,7 @@ const StoriesViewer = (props: Props) => {
             }
           </div>
 
-          {currentUser?._id !== currentStory.user &&
+          {currentUser?._id !== userWithStories?._id &&
             <Button
               className="absolute bottom-4 right-5 group hover:bg-transparent cursor-pointer z-10"
               variant="ghost"

@@ -16,7 +16,8 @@ export const NOTIFICATIONS_TEXT_MAP: Record<NotificationType["notificationType"]
   "follow": "te comenzó a seguir.",
   "like": "le gustó tu publicación.",
   "reply": "respondió a tu comentario en una publicación.",
-  "postShared": "compartió tu publicación."
+  "postShared": "compartió tu publicación.",
+  "storyLiked": "le gustó tu historia."
 }
 
 export const ACCOUNT_STATUS = {

@@ -81,7 +81,7 @@ export type PostWithLikes = {
 
 export type StoryType = {
   _id: string;
-  user: string;
+  user: UserType;
   content: string;
   textColor: string;
   textBgColor: string;
@@ -187,15 +187,15 @@ export type HashtagWithPostsCount = {
   createdAt: string;
 }
 
-export type Notifications = "follow" | "like" | "comment" | "reply" | "postShared";
+export type Notifications = "follow" | "like" | "comment" | "reply" | "postShared" | "storyLiked";
 
 export type NotificationType = {
   _id: string;
   sender: UserType;
   recipient: string;
   notificationType: Notifications;
-  onModel: "User" | "Post" | "Comment";
-  onItem: PostType | Comment | UserType;
+  onModel: "User" | "Post" | "Comment" | "Story";
+  onItem: PostType | Comment | UserType | StoryType;
   originalPost: PostType | null;
   isSeen: boolean;
   isRead: boolean;

@@ -24,7 +24,7 @@ interface Props {
 
 /** Item de la lista de la página de notificaciones */
 const NotificationItem = ({ data }: Props) => {
-  const { sender, notificationType, onItem, isSeen, isRead, originalPost } = data;
+  const { sender, notificationType, onItem, isSeen, isRead } = data;
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [showDropdownTrigger, setShowDropdownTrigger] = useState(false);
@@ -77,8 +77,10 @@ const NotificationItem = ({ data }: Props) => {
   // Generar el link de la notificacion
   const notificationLink = generateNotificationLink({
     type: notificationType,
-    onItemId: ("clerkId" in onItem ? onItem.clerkId : notificationType === "reply" ? originalPost?._id : onItem._id) || ""
+    onItem,
   });
+
+  const isLike = ["like", "storyLiked"].includes(notificationType);
 
   return (
     <div
@@ -113,7 +115,7 @@ const NotificationItem = ({ data }: Props) => {
             </Avatar>
 
             <NotificationIcon
-              className={cn("absolute bottom-0 -right-1 z-10", notificationType === "follow" ? "bg-[#4F39F6]" : notificationType === "like" ? "bg-red-600" : "bg-green-600")}
+              className={cn("absolute bottom-0 -right-1 z-10", notificationType === "follow" ? "bg-[#4F39F6]" : isLike ? "bg-red-600" : "bg-green-600")}
               notificationType={notificationType}
               aria-hidden
             />
@@ -122,8 +124,8 @@ const NotificationItem = ({ data }: Props) => {
 
         <div className="flex flex-col justify-center items-start gap-0 w-full overflow-hidden">
           <p className="text-[15px] text-neutral-900 leading-tight">
-            <span>{notificationType === "like" ? "A " : ""}</span>
-            
+            <span>{isLike ? "A " : ""}</span>
+
             <span className="font-semibold">
               {sender.fullName}
             </span> {" "}

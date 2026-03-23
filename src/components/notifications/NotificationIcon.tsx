@@ -12,6 +12,7 @@ interface Props {
 const IconMap = {
   follow: FaUserPlus,
   like: FaHeart,
+  storyLiked: FaHeart,
   comment: FaCommentAlt,
   reply: FaReply,
   postShared: FaShareAlt

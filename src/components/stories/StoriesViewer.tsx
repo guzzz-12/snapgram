@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { Link, Navigate, useSearchParams } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
 import { CircleChevronLeft, CircleChevronRight, EllipsisVertical, Pause, Play, Trash2 } from "lucide-react";
@@ -23,9 +23,24 @@ interface Props {
 const StoriesViewer = (props: Props) => {
   const { storiesUsername } = props;
 
-  // Verificar si se espefificó un la ID de un story en la URL
+  // Verificar si se espefificó la ID de una historia en la URL
   const [search] = useSearchParams();
   const storyId = search.get("storyId");
+
+  const { getUserStories, markAsSeen, toggleLikeStory } = useStoriesService();
+
+  // Consultar las historias del usuario al abrir la página de historias
+  const {
+    data: userWithStories,
+    isLoading,
+    isSuccess,
+    error
+  } = getUserStories(storiesUsername, storyId);
+
+  const stories = userWithStories?.stories || [];
+
+  // Ref de las historias para comparar con las historias actualizadas
+  const prevStoriesRef = useRef(stories);
 
   const [activeStoryId, setActiveStoryId] = useState("");
   const [seenStories, setSeenStories] = useState<string[]>([]);
@@ -36,17 +51,7 @@ const StoriesViewer = (props: Props) => {
 
   const { user: currentUser } = useCurrentUser();
 
-  const { getUserStories, markAsSeen, toggleLikeStory } = useStoriesService();
-
-  // Consultar los stories del usuario al abrir la página de stories
-  const {
-    data: userWithStories,
-    isLoading,
-    isSuccess,
-    error
-  } = getUserStories(storiesUsername, storyId);
-
-  // Dar/quitar like a un story
+  // Dar/quitar like a una historia
   const {
     toggleLikeStory: toggleStoryLike,
     isTogglingLikeStory
@@ -54,7 +59,6 @@ const StoriesViewer = (props: Props) => {
 
   const { markStoryAsSeen } = markAsSeen(activeStoryId);
 
-  const stories = userWithStories?.stories || [];
   const currentStory = stories.find((story) => story._id === activeStoryId);
   const hasMedia = currentStory?.mediaType === "image";
 
@@ -73,24 +77,47 @@ const StoriesViewer = (props: Props) => {
     }
   }, [activeStoryId, currentUser]);
 
-  // Abrir el primer story cuando se abre el visor de stories
+  // Abrir la primera historia o manejar la eliminación de una historia
   useEffect(() => {
-    // No usar stories como dependencia del useEffect para evitar
-    // que se restablezca el visor de stories al dar like a un story
-    // ya que dar like a un story restablece la caché de los stories.
-    if (!isLoading && isSuccess && stories.length > 0) {
+    const isReady = !isLoading && isSuccess && stories.length > 0;
+
+    if (!isReady) return;
+
+    // Mostrar la primera historia al abrir la página de historias
+    if (!activeStoryId) {
       setActiveStoryId(stories[0]._id);
       setSeenStories([stories[0]._id]);
+
+    } else {
+      // Verificar si la historia actualmente activa existe
+      const storyExists = stories.some((story) => story._id === activeStoryId);
+
+      // Si no existe, significa que fue eliminada
+      if (!storyExists) {
+        const deletedIndex = prevStoriesRef.current.findIndex(
+          (story) => story._id === activeStoryId
+        );
+
+        // Si se eliminó una historia posterior, mostrar la anterior
+        // Si se eliminó la primera historia, mostrar la siguiente
+        const updatedActiveStoryId = deletedIndex > 0 ?
+          prevStoriesRef.current[deletedIndex - 1]._id :
+          stories[0]._id;
+
+        setActiveStoryId(updatedActiveStoryId);
+      }
     }
-  }, [isLoading, isSuccess]);
+
+    prevStoriesRef.current = stories;
+  }, [isLoading, isSuccess, stories, activeStoryId]);
 
   if (error) {
     toast.error(errorMessage(error));
   }
 
-  // Ir al siguiente story
+  // Ir a la siguiente historia
   const nextStoryHandler = () => {
-    // No hacer nada si no hay stories o si el story actual es el último
+    // No hacer nada si no hay historias o si la historia actual es la última
     if (stories.length === 0 || activeStoryId === stories[stories.length - 1]._id) {
       return false;
     };
@@ -103,9 +130,9 @@ const StoriesViewer = (props: Props) => {
     setSeenStories([...filteredDuplicates, stories[currentIndex + 1]._id]);
   }
 
-  // Ir al story anterior
+  // Ir a la historia anterior
   const prevStoryHandler = () => {
-    // No hacer nada si no hay stories o si el story actual es el primero
+    // No hacer nada si no hay historias o si la historia actual es la primera
     if (stories.length === 0 || activeStoryId === stories[0]._id) {
       return false;
     };
@@ -114,9 +141,14 @@ const StoriesViewer = (props: Props) => {
 
     setActiveStoryId(stories[currentIndex - 1]._id);
 
-    // Remover todos los stories posteriores del array de stories vistos
+    // Remover todas las historias posteriores del array de historias vistas
     const sliced = seenStories.slice(0, currentIndex);
     setSeenStories(sliced);
+  }
+
+  // Si no hay historias del usuario, redirigir a la página principal
+  if (!isLoading && isSuccess && !userWithStories) {
+    return <Navigate to="/" replace />
   }
 
   return (

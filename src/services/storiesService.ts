@@ -62,7 +62,7 @@ export const useStoriesService = () => {
         queryFn: async () => {
           const token = await getToken();
 
-          const { data } = await axiosInstance<{ data: UserWithStories }>({
+          const { data } = await axiosInstance<{ data: UserWithStories | null }>({
             method: "GET",
             url: `/stories/${username}`,
             headers: {
@@ -174,12 +174,12 @@ export const useStoriesService = () => {
 
     /** Eliminar un story */
     deletStory: (storyId: string) => {
-      const { mutate: deleteStory, isPending, isSuccess, isError } = useMutation({
+      const { data, mutate: deleteStory, isPending, isSuccess, isError } = useMutation({
         mutationKey: ["deleteStory"],
         mutationFn: async () => {
           const token = await getToken();
 
-          return axiosInstance({
+          return axiosInstance<{ data: { message: string } }>({
             method: "DELETE",
             url: `/stories/${storyId}`,
             headers: {

@@ -237,7 +237,7 @@ const PostPage = () => {
           </div>
 
           {/* Columna derecha (autor, información del post, comentarios) */}
-          <div className="flex flex-col gap-3 w-full min-[950px]:w-min h-full shrink-0 pb-0 overflow-hidden bg-neutral-50">
+          <div className="flex flex-col gap-3 w-full min-[950px]:max-w-[350px] h-full shrink-0 pb-0 overflow-hidden bg-neutral-50">
             <div className="w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
               <PostCardHeader
                 className="p-3 pb-0"

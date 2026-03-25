@@ -217,7 +217,7 @@ const CommentItem = ({ commentData }: Props) => {
 
                 {/* Contenido de texto del comentario */}
                 {commentData.content && !isEditing &&
-                  <p className="commentText w-fit text-sm text-neutral-700 whitespace-pre-wrap">
+                  <p className="commentText w-fit text-sm text-neutral-700 whitespace-pre-wrap break-all">
                     <Twemoji className="[&>img]:!inline" text={commentData.content} />
                   </p>
                 }

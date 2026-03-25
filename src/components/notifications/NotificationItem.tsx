@@ -24,7 +24,7 @@ interface Props {
 
 /** Item de la lista de la página de notificaciones */
 const NotificationItem = ({ data }: Props) => {
-  const { sender, notificationType, onItem, isSeen, isRead } = data;
+  const { sender, notificationType, originalPost, onItem, isSeen, isRead } = data;
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [showDropdownTrigger, setShowDropdownTrigger] = useState(false);
@@ -78,6 +78,7 @@ const NotificationItem = ({ data }: Props) => {
   const notificationLink = generateNotificationLink({
     type: notificationType,
     onItem,
+    originalPost
   });
 
   const isLike = ["like", "storyLiked"].includes(notificationType);

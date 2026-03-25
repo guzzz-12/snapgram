@@ -3,19 +3,16 @@ import type { Comment, Notifications, PostType, StoryType, UserType } from "@/ty
 interface Props {
   type: Notifications;
   onItem: UserType | PostType | Comment | StoryType | null;
+  originalPost: PostType | null;
 }
 
 /** Genera el link de la notificación segun el tipo de notificación */
 export const generateNotificationLink = (props: Props) => {
-  const { type, onItem } = props;
+  const { type, onItem, originalPost } = props;
 
-  if (!onItem) {
-    return "";
-  }
+  const itemId = (onItem && "clerkId" in onItem) ? onItem.clerkId : originalPost ? originalPost._id : onItem?._id;
 
-  const itemId = "clerkId" in onItem ? onItem.clerkId : onItem._id;
-
-  const itemOwner = "user" in onItem;
+  const itemOwner = onItem && "user" in onItem;
 
   switch (type) {
     case "like":

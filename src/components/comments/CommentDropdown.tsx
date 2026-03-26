@@ -1,11 +1,12 @@
 import { Ellipsis, Logs, Pencil, Trash2Icon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Separator } from "../ui/separator";
+import type { Comment, UserType } from "@/types/global";
 import { cn } from "@/lib/utils";
-import type { Comment } from "@/types/global";
 
 interface Props {
   commentData: Comment;
+  currentUser: UserType | null;
   isPending: boolean;
   setIsEditing: (isEditing: boolean) => void;
   setOpenDeleteModal: (isOpen: boolean) => void;
@@ -13,7 +14,14 @@ interface Props {
 }
 
 const CommentDropdown = (props: Props) => {
-  const { commentData, isPending, setIsEditing, setOpenDeleteModal, setOpenChangeLogModal } = props;
+  const {
+    commentData,
+    isPending,
+    currentUser,
+    setIsEditing,
+    setOpenDeleteModal,
+    setOpenChangeLogModal
+  } = props;
 
   return (
     <DropdownMenu>
@@ -30,27 +38,36 @@ const CommentDropdown = (props: Props) => {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent>
-        <DropdownMenuItem
-          className={cn("flex justify-start items-center gap-2 cursor-pointer", isPending && "pointer-events-none")}
-          disabled={isPending}
-          onClick={() => setIsEditing(true)}
-        >
-          <Pencil className="size-4.5" aria-hidden />
-          <span className="text-sm text-neutral-900">Editar</span>
-        </DropdownMenuItem>
+        {currentUser?.clerkId === commentData.user.clerkId &&
+          <>
+            <DropdownMenuItem
+              className={cn("flex justify-start items-center gap-2 cursor-pointer", isPending && "pointer-events-none")}
+              disabled={isPending}
+              onClick={() => setIsEditing(true)}
+            >
+              <Pencil className="size-4.5" aria-hidden />
+              <span className="text-sm text-neutral-900">Editar</span>
+            </DropdownMenuItem>
 
-        <Separator />
-        
-        <DropdownMenuItem
-          className={cn("flex justify-start items-center gap-2 cursor-pointer hover:!bg-destructive/5", isPending && "pointer-events-none")}
-          disabled={isPending}
-          onClick={() => setOpenDeleteModal(true)}
-        >
-          <Trash2Icon className="size-5 text-destructive/60" aria-hidden />
-          <span className="text-sm text-destructive">Eliminar</span>
-        </DropdownMenuItem>
+            <Separator />
+          </>
+        }
 
-        <Separator />
+        {/* Mostrar opción de eliminar si el comentario es del usuario o si el comentario es de un post que le pertenece */}
+        {((currentUser?.clerkId === commentData.user.clerkId) || (currentUser?._id === commentData.post.userId)) &&
+          <>
+            <DropdownMenuItem
+              className={cn("flex justify-start items-center gap-2 cursor-pointer hover:!bg-destructive/5", isPending && "pointer-events-none")}
+              disabled={isPending}
+              onClick={() => setOpenDeleteModal(true)}
+            >
+              <Trash2Icon className="size-5 text-destructive/60" aria-hidden />
+              <span className="text-sm text-destructive">Eliminar</span>
+            </DropdownMenuItem>
+
+            <Separator />
+          </>
+        }
 
         <DropdownMenuItem
           className="flex justify-start items-center gap-2 cursor-pointer disabled:pointer-events-none"

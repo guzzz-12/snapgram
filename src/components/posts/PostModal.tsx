@@ -1,16 +1,14 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { CirclePlus, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import PostCard from "./PostCard";
 import PostCommentInput from "./PostCommentInput";
-import CommentsList from "../comments/CommentsList";
-import { Dialog, DialogContent, DialogHeader, DialogOverlay } from "../ui/dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { errorMessage } from "@/utils/errorMessage";
-import type { Comment, PostWithLikes } from "@/types/global";
+import CommentsList from "@/components/comments/CommentsList";
+import { Dialog, DialogContent, DialogHeader, DialogOverlay } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePostsService } from "@/services/postsService";
+import { useCommentsService } from "@/services/commentsService";
+import { errorMessage } from "@/utils/errorMessage";
+import type { PostWithLikes } from "@/types/global";
 
 interface Props {
   isOpen: boolean;
@@ -19,46 +17,24 @@ interface Props {
 }
 
 const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
-  const {getToken} = useAuth();
-
   const {editPost} = usePostsService();
 
-  const getComments = async (page: number) => {
-    const token = await getToken();
+  const {getPostComments} = useCommentsService();
 
-    const {data} = await axiosInstance<{
-      data: Comment[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: `/comments/posts/${postData._id}`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        page,
-        limit: 5
-      }
-    });
+  const {
+    comments,
+    loadingComments,
+    hasNextPage,
+    commentsError,
+    isFetchingNextPage,
+    fetchNextPage
+  } = getPostComments({postId: postData._id, enabled: isOpen});
 
-    return data;
+  if (commentsError) {
+    toast.error(errorMessage(commentsError));
   }
-
-  const {data, error, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["postComments", postData._id],
-    queryFn: async ({ pageParam }) => getComments(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false
-  });
-
-  if (error) {
-    toast.error(errorMessage(error));
-  }
-
-  const comments = data?.pages.flatMap(page => page.data) || [];
-  const loading = isLoading || isFetchingNextPage;
+  
+  const loading = loadingComments || isFetchingNextPage;
 
   return (
     <Dialog

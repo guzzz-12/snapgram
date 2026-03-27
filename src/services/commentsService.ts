@@ -55,6 +55,7 @@ export const useCommentsService = () => {
         commentsError: error,
         loadingComments,
         hasNextPage,
+        isFetchingNextPage,
         fetchNextPage
       }
     },

@@ -1,5 +1,5 @@
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { Comment, PostWithLikes, UserType } from "@/types/global";
+import type { PostWithLikes, UserType } from "@/types/global";
 import { filesUploader } from "@/utils/filesUploader";
 
 type CreatePostParams = {
@@ -69,29 +69,6 @@ export const fetchPosts = async (page: number, getToken: () => Promise<string | 
   //   hasMore: data.hasMore,
   //   nextPage: data.nextPage
   // };
-}
-
-/** Función para obtener los comentarios de un post */
-export const getComments = async ({postId, page, getToken}: {postId: string | undefined; page: number; getToken: () => Promise<string | null>}) => {
-  const token = await getToken();
-  
-  const {data} = await axiosInstance<{
-    data: Comment[];
-    hasMore: boolean;
-    nextPage: number | null;
-  }>({
-    method: "GET",
-    url: `/comments/posts/${postId}`,
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
-    params: {
-      page,
-      limit: 5
-    }
-  });
-
-  return data;
 }
 
 /** Función para crear un post */

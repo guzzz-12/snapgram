@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
-import { createPostFn, fetchPosts, getComments, getPost } from "@/repositories/postsRepository";
+import { createPostFn, fetchPosts, getPost } from "@/repositories/postsRepository";
 import type { PostTypeEnum } from "@/hooks/useCreatePublicationModal";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -11,11 +11,6 @@ import type { PostType, PostWithLikes } from "@/types/global";
 
 type GetPostProps = {
   postId: string | undefined;
-}
-
-type GetPostCommentsProps = {
-  postId: string | undefined;
-  enabled: boolean;
 }
 
 type CreatePostProps = {
@@ -64,7 +59,6 @@ type DeletePostProps = {
 export const usePostsService = () => {
   const navigate = useNavigate();
 
-
   const { getToken } = useAuth();
 
   const queryClient = useQueryClient();
@@ -100,29 +94,6 @@ export const usePostsService = () => {
         error,
         loadingPosts,
         isFetchingNextPage,
-        hasNextPage,
-        fetchNextPage
-      }
-    },
-
-    /** Consultar y paginar los comentarios de un post */
-    getPostComments: ({postId, enabled}: GetPostCommentsProps) => {
-      const {data: commentsData, error: commentsError, isLoading: isLoadingComments, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-        queryKey: ["postComments", postId],
-        queryFn: async ({ pageParam }) => getComments({postId, page: pageParam, getToken}),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-        refetchOnWindowFocus: false,
-        enabled
-      });
-
-      const comments = commentsData?.pages.flatMap(page => page.data) || [];
-      const loadingComments = isLoadingComments || isFetchingNextPage;
-
-      return {
-        comments,
-        commentsError,
-        loadingComments,
         hasNextPage,
         fetchNextPage
       }

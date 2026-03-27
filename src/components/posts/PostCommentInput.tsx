@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { Image, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import CreateCommentInput from "./CreateCommentInput";
+import CreateCommentInput from "../comments/CreateCommentInput";
 import useImagePicker from "@/hooks/useImagePicker";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";

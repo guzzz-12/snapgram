@@ -7,7 +7,7 @@ import CommentFooter from "./CommentFooter";
 import CommentDropdown from "./CommentDropdown";
 import ConfirmationModal from "../ConfirmationModal";
 import CommentSkeleton from "./CommentSkeleton";
-import CreateCommentInput from "@/components/posts/CreateCommentInput";
+import CreateCommentInput from "@/components/comments/CreateCommentInput";
 import CommentEditInputBtns from "./CommentEditInputBtns";
 import EditHistoryModal from "@/components/posts/EditHistoryModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

@@ -65,7 +65,6 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys }: Props) => 
 
   // Mutation para enviar el mensaje
   const {mutate, submitting} = sendMessage({
-    messageText,
     chatData,
     selectedImageFiles,
     recordedFile,
@@ -73,13 +72,24 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys }: Props) => 
     currentUser,
     recipientsPublicKeys,
     chatTypeParam,
-    clearRecording,
-    fileInputRef,
-    setMessageText,
-    setSelectedImageFiles,
-    setSelectedImagePreviews,
-    setTemporaryChat
   });
+
+  const onSendMessageHandler = () => {
+    mutate({
+      messageText,
+      onSuccess: () => {
+        setMessageText("");
+        setSelectedImageFiles([]);
+        setSelectedImagePreviews([]);
+        setTemporaryChat(null);
+        clearRecording();
+  
+        if(fileInputRef.current) {
+          fileInputRef.current.value = ""
+        };
+      }
+    })
+  }
 
   // Filtrar los usuarios que estan escribiendo en el chat activo
   const usersCurrentlyTyping = usersTyping.slice(0, 5).filter(el => {
@@ -146,7 +156,7 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys }: Props) => 
         <button
           className="p-1 text-sm text-blue-700 font-semibold cursor-pointer hover:underline disabled:cursor-not-allowed disabled:text-neutral-400"
           disabled={submitting}
-          onClick={() => mutate()}
+          onClick={onSendMessageHandler}
         >
           { submitting ? "Enviando..." : "Enviar" }
         </button>

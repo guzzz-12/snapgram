@@ -43,7 +43,7 @@ const ChatInbox = (props: Props) => {
   const {getChatById, getRecipientsPublicKeys, getTempChatPublicKey} = useChatsService();
 
   // Query para consultar la data del chat
-  const {existingChat, chatError, fetchingExistingChat} = getChatById(chatId, setIsBlocked);
+  const {existingChat, blockData, chatError, fetchingExistingChat} = getChatById(chatId);
 
   const chat = existingChat || temporaryChat;
   const isPrivateChat = chat?.type === "private";
@@ -53,14 +53,32 @@ const ChatInbox = (props: Props) => {
   const userBlockedMe = isBlocked.blockedUser === currentUser?._id;
 
   // Query para consultar la clave de cifrado del usuario del chat temporal
-  const {loadingTempChatPublicKey} = getTempChatPublicKey(chat, setPublicKeys);
+  const {tempChatPublicKey, loadingTempChatPublicKey} = getTempChatPublicKey(chat);
 
   // Query para consultar la clave de cifrado de todos los recipientes del chat
   // Aplica para chats privados y grupales pero no para chats temporales
-  const {loadingRecipientsCryptoKey} = getRecipientsPublicKeys(chat, setPublicKeys);
+  const {publicKeys: recipientsPublicKeys, loadingRecipientsCryptoKey} = getRecipientsPublicKeys(chat);
 
+  // Actualizar el state de las claves de cifrado cuando estén disponibles
   useEffect(() => {
-    // Escuchar evento de usuario bloqueado/desbloqueado
+    if (recipientsPublicKeys) {
+      setPublicKeys(recipientsPublicKeys);
+    }
+
+    if (tempChatPublicKey) {
+      setPublicKeys(tempChatPublicKey);
+    }
+  }, [recipientsPublicKeys, tempChatPublicKey]);
+
+  // Verificar si existe un bloqueo entre los miembros del chat
+  useEffect(() => {
+    if (blockData) {
+      setIsBlocked(blockData);
+    }
+  }, [blockData]);
+
+  // Escuchar evento de usuario bloqueado/desbloqueado
+  useEffect(() => {
     socket.on("userBlocked", (data) => {
       const {user, blockedUser, operation, chatId: blockedChatId} = data;
 

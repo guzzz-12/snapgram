@@ -18,7 +18,6 @@ type SendMessageParams = {
 /** Función para consultar un chat mediante su ID */
 export const fetchChatById = async (
   chatId: string | undefined,
-  setIsBlocked: (isBlocked: { blockedBy: string | null; blockedUser: string | null }) => void,
   getToken: () => Promise<string | null>
 ) => {
   const token = await getToken();
@@ -37,9 +36,10 @@ export const fetchChatById = async (
     }
   });
 
-  setIsBlocked(data.isBlocked);
+  const chatData = data.data;
+  const isBlocked = data.isBlocked;
 
-  return data.data;
+  return {chatData, isBlocked};
 }
 
 /** Función para consultar los chats (tanto privados como grupales) */

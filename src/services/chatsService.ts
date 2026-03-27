@@ -1,4 +1,3 @@
-import { type RefObject } from "react";
 import { useNavigate } from "react-router";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
@@ -10,28 +9,19 @@ import { axiosInstance } from "@/utils/axiosInstance";
 import type { ChatType, UserType } from "@/types/global";
 
 type SendMessageParams = {
-  messageText: string;
   chatData: ChatType | null | undefined;
   selectedImageFiles: File[];
   recordedFile: File | null;
   currentUser: UserType | null;
   chatTypeParam: "all" | "group" | null | undefined;
   recipientsPublicKeys: PublicKeysType[];
-  fileInputRef: RefObject<HTMLInputElement | null>;
   getToken: () => Promise<string | null>;
-  setTemporaryChat: (chat: ChatType | null) => void;
-  setMessageText: (text: string) => void;
-  setSelectedImageFiles: (files: File[]) => void;
-  setSelectedImagePreviews: (previews: string[]) => void;
-  clearRecording: () => void;
 }
 
 type UpdateGroupParams = {
   groupId: string | undefined;
   groupName: string;
   groupDescription: string;
-  setIsEditingGroupName: (value: boolean) => void;
-  setIsEditingGroupDescription: (value: boolean) => void;
 }
 
 /** Services de los chats y grupos */
@@ -44,13 +34,10 @@ export const useChatsService = () => {
 
   return {
     /** Service para consultar un chat especifico por su ID */
-    getChatById: (
-      chatId: string | undefined,
-      setIsBlocked: (data: { blockedBy: string | null; blockedUser: string | null }) => void,
-    ) => {
+    getChatById: (chatId: string | undefined) => {
       const res = useQuery({
         queryKey: ["chat", chatId],
-        queryFn: () => fetchChatById(chatId, setIsBlocked, getToken),
+        queryFn: () => fetchChatById(chatId, getToken),
         enabled: !!chatId && !chatId.startsWith("temp_"),
         refetchOnWindowFocus: false
       });
@@ -58,7 +45,8 @@ export const useChatsService = () => {
       const {data, isFetching, error} = res;
 
       return {
-        existingChat: data,
+        existingChat: data?.chatData,
+        blockData: data?.isBlocked,
         fetchingExistingChat: isFetching,
         chatError: error
       };
@@ -106,7 +94,14 @@ export const useChatsService = () => {
       // para corregir la dirección de la paginación
       const messages = messagesData?.pages.flatMap((page) => page.data.messages).reverse() || [];
 
-      return {messages, isLoadingMessages, isFetchingNextPage, hasNextPage, fetchNextPage, error};
+      return {
+        messages,
+        isLoadingMessages,
+        isFetchingNextPage,
+        hasNextPage,
+        fetchNextPage,
+        error
+      };
     },
 
     /** Service para consultar los usuarios que pueden ser agregados al chat */
@@ -134,11 +129,18 @@ export const useChatsService = () => {
 
     /** Enviar un mensaje en un chat (privado o grupal) */
     sendMessage: (params: SendMessageParams) => {
-      const {messageText, chatData, selectedImageFiles, recordedFile, currentUser, chatTypeParam, recipientsPublicKeys, setTemporaryChat, setMessageText, setSelectedImageFiles, setSelectedImagePreviews, clearRecording, fileInputRef} = params;
+      const {
+        chatData,
+        selectedImageFiles,
+        recordedFile,
+        currentUser,
+        chatTypeParam,
+        recipientsPublicKeys
+      } = params;
 
       const {mutate, isPending: submitting} = useMutation({
         mutationKey: ["send-message", chatData?._id],
-        mutationFn: async () => sendMessageFn({
+        mutationFn: async ({messageText}: {messageText: string; onSuccess?: () => void}) => sendMessageFn({
           messageText,
           chatData,
           selectedImageFiles,
@@ -147,20 +149,11 @@ export const useChatsService = () => {
           currentUser,
           recipientsPublicKeys
         }),
-        onSuccess: async (data) => {
-          setMessageText("");
-          setSelectedImageFiles([]);
-          setSelectedImagePreviews([]);
-          clearRecording();
-    
-          if(fileInputRef.current) {
-            fileInputRef.current.value = ""
-          };
+        onSuccess: async (data, {onSuccess}) => {
+          onSuccess?.();
     
           if (data.isNewChat) {
             await queryClient.invalidateQueries({queryKey: ["chats", chatTypeParam || "all"]});
-
-            setTemporaryChat(null);
 
             navigate(`/messages/${data.chat!._id}`, {replace: true});
           }
@@ -193,17 +186,15 @@ export const useChatsService = () => {
     },
 
     /** Service para agregar un nuevo miembro al grupo */
-    addMemberToGroup: (params: {chatId: string | undefined; selectedUserId: string | null; setIsOpen: (isOpen: boolean) => void}) => {
-      const {chatId, selectedUserId, setIsOpen} = params;
+    addMemberToGroup: (params: {chatId: string | undefined; selectedUserId: string | null}) => {
+      const {chatId, selectedUserId} = params;
 
       const {mutate, isPending} = useMutation({
-        mutationFn: async () => addMemberToGroupFn({chatId, selectedUserId, getToken}),
-        onSuccess: async () => {
+        mutationFn: async (_props: {onSuccess?: () => void}) => addMemberToGroupFn({chatId, selectedUserId, getToken}),
+        onSuccess: async (_data, {onSuccess}) => {
           await queryClient.invalidateQueries({queryKey: ["recipientsCryptoKeys", chatId]});
 
-          setIsOpen(false);
-          
-          toast.success("Usuario agregado con éxito");
+          onSuccess?.();
         },
         onError: (error) => {
           toast.error(errorMessage(error));
@@ -214,10 +205,7 @@ export const useChatsService = () => {
     },
 
     /** Service para consultar las claves publicas de los miembros del chat */
-    getRecipientsPublicKeys: (
-      chat: ChatType | null | undefined,
-      setPublicKeys: (publicKeys: PublicKeysType[]) => void
-    ) => {
+    getRecipientsPublicKeys: (chat: ChatType | null | undefined) => {
       const isNotTempChat = Boolean(chat && !chat._id.startsWith("temp_"));
 
       const res = useQuery({
@@ -233,8 +221,6 @@ export const useChatsService = () => {
             }
           });
 
-          setPublicKeys(data.publicKeys);
-
           return data;
         },
         retry: 1,
@@ -243,18 +229,16 @@ export const useChatsService = () => {
       });
 
       return {
+        publicKeys: res.data?.publicKeys,
         loadingRecipientsCryptoKey: res.isLoading
       };
     },
 
     /** Service para consultar la clave publica del chat temporal */
-    getTempChatPublicKey: (
-      chat: ChatType | null | undefined,
-      setPublicKeys: (publicKeys: PublicKeysType[]) => void
-    ) => {
+    getTempChatPublicKey: (chat: ChatType | null | undefined) => {
       const isTempChat = Boolean(chat && chat._id.startsWith("temp_"));
 
-      const res = useQuery({
+      const {data, isLoading} = useQuery({
         queryKey: ["tempChatPublicKey", chat?._id],
         queryFn: async () => {
           const token = await getToken();
@@ -267,8 +251,6 @@ export const useChatsService = () => {
             }
           });
 
-          setPublicKeys([{publicKey: data.data, userId: chat!._id}]);
-
           return data;
         },
         enabled: isTempChat,
@@ -276,8 +258,11 @@ export const useChatsService = () => {
         refetchOnWindowFocus: false
       });
 
+      const publicKey = data ? [{publicKey: data.data, userId: chat!._id}] : undefined;
+
       return {
-        loadingTempChatPublicKey: res.isLoading
+        tempChatPublicKey: publicKey,
+        loadingTempChatPublicKey: isLoading
       };
     },
 
@@ -310,18 +295,14 @@ export const useChatsService = () => {
 
     /** Service para actualizar la informacion de un grupo */
     updateGroupInfo: (params: UpdateGroupParams) => {
-      const {groupId, groupName, groupDescription, setIsEditingGroupName, setIsEditingGroupDescription} = params;
+      const {groupId, groupName, groupDescription} = params;
 
       const {mutate: updateGroupInfoMutation, isPending: isUpdating} = useMutation({
-        mutationFn: () => updateGroupInfoFn({groupId, groupName, groupDescription, getToken}),
-        onSuccess: async () => {
+        mutationFn: (_props: {onSuccess?: () => void}) => updateGroupInfoFn({groupId, groupName, groupDescription, getToken}),
+        onSuccess: async (_data, {onSuccess}) => {
           await queryClient.invalidateQueries({queryKey: ["groupInfo", groupId]});
 
-          setIsEditingGroupName(false);
-
-          setIsEditingGroupDescription(false);
-
-          toast.success("Grupo actualizado con éxito");
+          onSuccess?.();
         },
         onError: (error) => {
           toast.error(errorMessage(error));

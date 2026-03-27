@@ -70,9 +70,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
   const {updateGroupInfoMutation, isUpdating} = updateGroupInfo({
     groupId, 
     groupName, 
-    groupDescription: newDescription, 
-    setIsEditingGroupDescription,
-    setIsEditingGroupName
+    groupDescription: newDescription
   });
 
   const {
@@ -97,6 +95,17 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
   if (error) {
     toast.error(errorMessage(error));
     setIsOpen(false);
+  }
+
+  // Confirmar los cambios en la información del grupo
+  const onSaveHandler = () => {
+    updateGroupInfoMutation({
+      onSuccess: () => {
+        setIsEditingGroupName(false);
+        setIsEditingGroupDescription(false);
+        toast.success("Grupo actualizado con éxito");
+      }
+    });
   }
 
   const members = data?.participants || [];
@@ -248,7 +257,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                       variant="ghost"
                       size="icon"
                       disabled={isUpdating}
-                      onClick={() => updateGroupInfoMutation()}
+                      onClick={onSaveHandler}
                     >
                       <FaCircleCheck className="size-5 text-green-700" aria-hidden />
                       <span className="sr-only">Guardar cambios</span>
@@ -344,7 +353,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                     className="w-fit cursor-pointer"
                     variant="default"
                     disabled={isUpdating || newDescription.length === 0}
-                    onClick={() => updateGroupInfoMutation()}
+                    onClick={onSaveHandler}
                   >
                     Guardar cambios
                   </Button>

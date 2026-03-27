@@ -43,6 +43,9 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
     fetchNextPage
   } = getUsersToChat({ isOpen, keyword: debouncedValue });
 
+  // Mutation para agregar el usuario al grupo
+  const {mutate, isPending} = addMemberToGroup({chatId: chatData?._id, selectedUserId});
+
   // Hacer focus en el input cuando se abra el modal
   // Limpiar el state cuando se cierre el modal
   useEffect(() => {
@@ -53,9 +56,6 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
       setSearchTerm("");
     }
   }, [isOpen]);
-
-  // Mutation para agregar el usuario al grupo
-  const {mutate, isPending} = addMemberToGroup({chatId: chatData?._id, selectedUserId, setIsOpen});
 
   const {isIntersecting} = useIntersectionObserver({ data: usersData, paginationRef });
 
@@ -68,6 +68,16 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
 
   if (usersError) {
     toast.error(errorMessage(usersError));
+  }
+
+  // Agregar el nuevo miembro al grupo
+  const onClickHandler = () => {
+    mutate({
+      onSuccess: () => {
+        setIsOpen(false);
+        toast.success("Usuario agregado con éxito");
+      }
+    });
   }
 
   const isButtonDisabled = !selectedUserId || isPending;
@@ -212,7 +222,7 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
               className="wtext-sm text-white bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
               variant="default"
               disabled={isButtonDisabled}
-              onClick={() => mutate()}
+              onClick={onClickHandler}
             >
               Agregar
             </Button>

@@ -147,7 +147,10 @@ export type UserWithStories = {
 export type Comment = {
   _id: string;
   user: UserType;
-  post: PostType;
+  post: {
+    _id: string;
+    userId: string;
+  };
   parent: Comment | null;
   content: string;
   commentType: "text" | "image" | "video";

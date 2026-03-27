@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Twemoji } from "react-emoji-render";
 import { CornerLeftDown, SendHorizontal } from "lucide-react";
-import { toast } from "sonner";
 import CommentsList from "./CommentsList";
 import CommentFooter from "./CommentFooter";
 import CommentDropdown from "./CommentDropdown";
@@ -15,16 +12,9 @@ import CommentEditInputBtns from "./CommentEditInputBtns";
 import EditHistoryModal from "@/components/posts/EditHistoryModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useCommentsService } from "@/services/commentsService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { errorMessage } from "@/utils/errorMessage";
 import type { Comment } from "@/types/global";
-
-type PaginatedReplies = {
-  data: Comment[];
-  hasMore: boolean;
-  nextPage: number | null;
-}
 
 interface Props {
   commentData: Comment;
@@ -38,135 +28,53 @@ const CommentItem = ({ commentData }: Props) => {
   const [openReplies, setOpenReplies] = useState(false);
   const [replyText, setReplyText] = useState("");
 
-  const {getToken} = useAuth();
-  const queryClient = useQueryClient();
+  const {user: currentUser} = useCurrentUser();
 
-  const {user} = useCurrentUser();
+  const {updateCommentFn, deleteCommentFn, createCommentFn, getCommentRepliesFn} = useCommentsService();
 
-  // Actualizar comentario
-  const {mutate: updateComment, isPending: isUpdating} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
+  // Mutation para actualizar comentario
+  const {updateCommentMutation, isUpdating} = updateCommentFn();
 
-      return axiosInstance({
-        method: "PUT",
-        url: `/comments/${commentData._id}`,
-        data: {
-          content: commentText
-        },
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["postComments", commentData.post._id]
-      });
+  // Mutation para eliminar comentario
+  const {deleteCommentMutation, isDeleting} = deleteCommentFn();
 
-      setIsEditing(false);
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-    }
-  });
+  // Mutation para responder al comentario
+  const {createCommentMutation, isCreatingComment} = createCommentFn();
 
-  // Eliminar comentario
-  const {mutate: deleteComment, isPending: isDeleting} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
+  // Query para consultar las respuestas del comentario
+  const {
+    commentReplies,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  } = getCommentRepliesFn(commentData._id, openReplies);
 
-      return axiosInstance({
-        method: "DELETE",
-        url: `/comments/${commentData._id}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["postComments", commentData.post._id]
-      });
+  const onUpdateCommentHandler = () => {
+    updateCommentMutation({
+      commentData,
+      commentText,
+      onSuccess: () => setIsEditing(false)
+    });
+  }
 
-      await queryClient.invalidateQueries({
-        queryKey: ["commentReplies", commentData._id]
-      });
+  const onCreateCommentHandler = () => {
+    createCommentMutation({
+      postId: commentData.post._id,
+      parentId: commentData._id,
+      replyText,
+      onSuccess: () => setReplyText("")
+    });
+  }
 
-      setOpenDeleteModal(false);
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-    }
-  });
+  const onDeleteCommentHandler = () => {
+    deleteCommentMutation({
+      commentData,
+      onSuccess: () => setOpenDeleteModal(false)
+    });
+  }
 
-  // Responder al comentario
-  const {mutate: replyComment, isPending: isReplying} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "POST",
-        url: `/comments/posts/${commentData.post._id}`,
-        data: {
-          content: replyText,
-          parentId: commentData._id
-        },
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["postComments", commentData.post._id]
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["commentReplies", commentData._id]
-      });
-
-      setReplyText("");
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-    }
-  });
-
-  // Consultar las respuestas del comentario
-  const {data: repliesData, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["commentReplies", commentData._id],
-    queryFn: async ({ pageParam }) => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<PaginatedReplies>({
-        method: "GET",
-        url: `/comments/replies/comment/${commentData._id}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        params: {
-          page: pageParam,
-          limit: 5
-        }
-      });
-
-      return data;
-    },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    enabled: openReplies,
-    refetchOnWindowFocus: false,
-    staleTime: 0
-  });
-
-  const commentReplies = repliesData?.pages.flatMap((page) => page.data) ?? [];
-  const isPending = isUpdating || isDeleting || isReplying;
+  const isPending = isUpdating || isDeleting || isCreatingComment;
 
   return (
     <div className="flex flex-col gap-3">
@@ -176,7 +84,7 @@ const CommentItem = ({ commentData }: Props) => {
           isOpen={openDeleteModal}
           setIsOpen={(bool) => setOpenDeleteModal(bool)}
           isPending={isDeleting}
-          cb={() => deleteComment()}
+          cb={onDeleteCommentHandler}
         />
 
         <EditHistoryModal
@@ -236,16 +144,17 @@ const CommentItem = ({ commentData }: Props) => {
                       isPending={isPending}
                       commentText={commentText}
                       setIsEditing={setIsEditing}
-                      updateComment={() => updateComment()}
+                      updateComment={onUpdateCommentHandler}
                     />
                   </div>
                 }
               </div>
               
               {/* Dropdown de las opciones del comentario */}
-              {user?.clerkId === commentData.user.clerkId && !isEditing &&
+              {!isEditing &&
                 <CommentDropdown
                   commentData={commentData}
+                  currentUser={currentUser}
                   isPending={isPending}
                   setIsEditing={setIsEditing}
                   setOpenDeleteModal={setOpenDeleteModal}
@@ -327,7 +236,7 @@ const CommentItem = ({ commentData }: Props) => {
               <Button
                 className="h-full shrink-0 bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer disabled:pointer-events-none"
                 disabled={isPending || !replyText}
-                onClick={() => replyComment()}
+                onClick={onCreateCommentHandler}
               >
                 <SendHorizontal className="size-5" aria-hidden />
                 <span className="sr-only">

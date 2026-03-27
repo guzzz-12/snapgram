@@ -1,15 +1,9 @@
 import { useEffect, useRef, useState, type HTMLAttributes } from "react";
-import { useSearchParams } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { Image, X } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import CreateCommentInput from "../comments/CreateCommentInput";
+import CreateCommentInput from "@/components/comments/CreateCommentInput";
+import { useCommentsService } from "@/services/commentsService";
 import useImagePicker from "@/hooks/useImagePicker";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { cn } from "@/lib/utils";
-import type { Comment } from "@/types/global";
 
 interface Props {
   postId: string;
@@ -19,58 +13,35 @@ interface Props {
 const PostCommentInput = ({postId, className}: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [searchParams] = useSearchParams();
-  const searchTerm = searchParams.get("searchTerm");
-
   const [commentText, setCommentText] = useState("");
 
-  const {getToken} = useAuth();
-  const queryClient = useQueryClient();
+  const {createCommentFn} = useCommentsService();
 
   const {selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
 
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
+  const {createCommentMutation, isCreatingComment: isPending} = createCommentFn();
 
-      const formData = new FormData();
+  const onCreateCommentHandler = () => {
+    const formData = new FormData();
 
-      if (commentText) {
-        formData.append("content", commentText);
+    if (commentText) {
+      formData.append("content", commentText);
+    }
+
+    selectedImageFiles.forEach(file => formData.append("media", file));
+
+    if (!commentText && selectedImageFiles.length === 0) return;
+
+    createCommentMutation({
+      postId,
+      formData,
+      onSuccess: () => {
+        setCommentText("");
+        setSelectedImageFiles([]);
+        setSelectedImagePreviews([]);
       }
-
-      selectedImageFiles.forEach(file => formData.append("media", file));
-
-      if (!commentText && selectedImageFiles.length === 0) return;
-
-      return await axiosInstance<{data: Comment}>({
-        method: "POST",
-        url: `/comments/posts/${postId}`,
-        data: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-    },
-    onSuccess: async () => {
-      setCommentText("");
-      setSelectedImageFiles([]);
-      setSelectedImagePreviews([]);
-
-      await queryClient.invalidateQueries({queryKey: ["posts"]});
-      await queryClient.invalidateQueries({queryKey: ["postComments", postId]});
-
-      if (searchTerm) {
-        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
-      }
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-    },
-  });
+    });
+  }
 
   useEffect(() => {
     return () => {
@@ -130,7 +101,7 @@ const PostCommentInput = ({postId, className}: Props) => {
         <button
           className="p-1 text-sm text-blue-700 font-semibold cursor-pointer hover:underline disabled:cursor-not-allowed disabled:text-neutral-400 disabled:pointer-events-none"
           disabled={isPending}
-          onClick={() => mutate()}
+          onClick={onCreateCommentHandler}
         >
           Enviar
         </button>

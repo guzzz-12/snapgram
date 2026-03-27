@@ -140,32 +140,33 @@ export const useCommentsService = () => {
     /** Crear comementario o responder a un comentario */
     createCommentFn: () => {
       const {mutate, isPending: isCreatingComment} = useMutation({
-        mutationFn: async (props: {postId: string; parentId: string; replyText: string, onSuccess?: () => void}) => {
-          const {postId, parentId, replyText} = props;
+        mutationFn: async (props: {postId: string; formData: FormData; onSuccess?: () => void}) => {
+          const {postId, formData} = props;
 
           const token = await getToken();
 
           return axiosInstance({
             method: "POST",
             url: `/comments/posts/${postId}`,
-            data: {
-              content: replyText,
-              parentId
-            },
+            data: formData,
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type": "multipart/form-data",
               Authorization: `Bearer ${token}`
             }
           });
         },
         onSuccess: async (_, variables) => {
+          await queryClient.invalidateQueries({queryKey: ["posts"]});
+
           await queryClient.invalidateQueries({
             queryKey: ["postComments", variables.postId]
           });
 
-          if (variables.parentId) {
+          const parentId = variables.formData.get("parentId");
+
+          if (parentId) {
             await queryClient.invalidateQueries({
-              queryKey: ["commentReplies", variables.parentId]
+              queryKey: ["commentReplies", parentId.toString()]
             });
           }
 

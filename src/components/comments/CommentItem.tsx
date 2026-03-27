@@ -59,10 +59,14 @@ const CommentItem = ({ commentData }: Props) => {
   }
 
   const onCreateCommentHandler = () => {
+    const formData = new FormData();
+
+    formData.append("content", replyText);
+    formData.append("parentId", commentData._id);
+
     createCommentMutation({
       postId: commentData.post._id,
-      parentId: commentData._id,
-      replyText,
+      formData,
       onSuccess: () => setReplyText("")
     });
   }
@@ -114,7 +118,7 @@ const CommentItem = ({ commentData }: Props) => {
           <div className="flex flex-col justify-start items-start gap-1">
             <div className="flex justify-start items-start gap-2 w-full">
               {/* Contenedor de información del comentario */}
-              <div className="max-w-full py-2 px-3 rounded-lg bg-neutral-100 overflow-hidden">
+              <div className="max-w-full min-w-0 py-2 px-3 rounded-lg bg-neutral-100 overflow-hidden">
                 {/* Nombre del autor del comentario */}
                 <Link
                   className="block text-sm font-semibold text-neutral-900 truncate"
@@ -125,7 +129,7 @@ const CommentItem = ({ commentData }: Props) => {
 
                 {/* Contenido de texto del comentario */}
                 {commentData.content && !isEditing &&
-                  <p className="commentText w-fit text-sm text-neutral-700 whitespace-pre-wrap break-all">
+                  <p className="commentText w-fit text-sm text-neutral-700 whitespace-pre-wrap [overflow-wrap:anywhere]">
                     <Twemoji className="[&>img]:!inline" text={commentData.content} />
                   </p>
                 }

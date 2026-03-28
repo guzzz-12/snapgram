@@ -12,13 +12,14 @@ import { Separator } from "./ui/separator";
 import { Toaster } from "./ui/sonner";
 import { useCryptoKeysService } from "@/services/cryptoKeysService";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 
 const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) => {
   const pinRef = useRef<string>(null);
 
   const navigate = useNavigate();
 
-  const { user } = useCurrentUser();
+  const { user, setUser } = useCurrentUser();
 
   const [createPinStep, setCreatePinStep] = useState(1);
   const [pin, setPin] = useState("");
@@ -27,16 +28,14 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
   const { signOut } = useAuth();
 
   const {createCryptoKeys} = useCryptoKeysService();
+  
+  const {setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 
   // Mutation para crear y almacenar la llave de cifrado privada
   const {mutate, isPending} = createCryptoKeys({
     user,
     pin,
     operation,
-    pinRef,
-    setCreatePinStep,
-    setPin,
-    setOpenConfirmationModal
   });
 
   const onChangeHandler = (val: string) => {
@@ -53,9 +52,37 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
     }
   }
 
+  // Guardar el pin de cifrado
+  const onSaveHandler = () => {
+    mutate({
+      onSuccess: () => {
+        if (!user) {
+          return;
+        }
+
+        toast.success("Cifrado habilitado exitosamente.");
+
+        setPin("");
+
+        pinRef.current = null;
+
+        setCreatePinStep(1);
+        
+        if (operation === "update") {
+          setOpenConfirmationModal(false);
+          navigate("/messages?type=all", {replace: true});        
+        }
+
+        setUser({...user, hasCryptoKeys: true});
+
+        setHasLocalCryptoKeys(true);
+      }
+    })
+  }
+
   const onCompleteHandler = () => {
     if (operation === "create") {
-      mutate();
+      onSaveHandler();
     } else {
       setOpenConfirmationModal(true);
     }
@@ -72,7 +99,7 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
         isPending={isPending}
         title="Actualizar pin de cifrado"
         description="Estás a punto de actualizar tu pin de cifrado. Perderás permanentemente el acceso a los mensajes anteriores en todos tus chats. Esta acción no se puede deshacer."
-        cb={mutate}
+        cb={onSaveHandler}
         setIsOpen={setOpenConfirmationModal}
       />
 

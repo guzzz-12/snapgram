@@ -1,6 +1,6 @@
 import { useLocation, useSearchParams } from "react-router";
-import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
 import { usePostsService } from "@/services/postsService";
 
 interface Props {
@@ -17,19 +17,25 @@ const DeletePostModal = ({postId, isOpen, setIsDeleting, setIsOpen}: Props) => {
 
   const {deletePost} = usePostsService();
 
-  const {mutate, isPending} = deletePost({
-    postId,
-    pathname,
-    searchTerm,
-    setIsDeleting,
-    setIsOpen
-  });
+  const {mutate, isPending} = deletePost();
+
+  const onDeleteHandler = () => {
+    mutate({
+      postId,
+      pathname,
+      searchTerm,
+      onSuccess: () => {
+        setIsDeleting(false);
+        setIsOpen(false);
+      }
+    });
+  }
 
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={(isOpen) => {
-        if (!isOpen && !isPending) {
+      onOpenChange={(open) => {
+        if (!open && !isPending) {
           setIsOpen(false);
         };
       }}
@@ -60,7 +66,7 @@ const DeletePostModal = ({postId, isOpen, setIsDeleting, setIsOpen}: Props) => {
             disabled={isPending}
             onClick={() =>{
               setIsDeleting(true);
-              mutate();
+              onDeleteHandler();
             }}
           >
             Eliminar

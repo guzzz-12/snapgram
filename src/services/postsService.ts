@@ -4,52 +4,41 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { createPostFn, fetchPosts, getPost } from "@/repositories/postsRepository";
-import type { PostTypeEnum } from "@/hooks/useCreatePublicationModal";
 import { errorMessage } from "@/utils/errorMessage";
 import { axiosInstance } from "@/utils/axiosInstance";
-import type { PostType, PostWithLikes } from "@/types/global";
+import type { PostType, PostWithLikes, UserType } from "@/types/global";
 
 type GetPostProps = {
   postId: string | undefined;
 }
 
 type CreatePostProps = {
+  user: UserType | null;
   searchTerm: string | null;
   fileInputRef: RefObject<HTMLInputElement | null>;
   textContent: string;
   selectedImageFiles: File[];
-  setTextContent: (value: string) => void;
-  setOpen: (open: {open: boolean, publicationType: PostTypeEnum}) => void;
-  setSelectedImageFiles: (files: File[]) => void;
-  setSelectedImagePreviews: (previews: string[]) => void;
+  onSuccess?: () => void;
 }
 
 type SharePostProps = {
-  repostedPostId: string | null | undefined;
+  repostedPostId: string;
   textContent: string;
-  setTextContent: (value: string) => void;
-  setOpen: (open: {
-    open: boolean;
-    publicationType: PostTypeEnum;
-    isRepost: boolean;
-    repostedPostId: string | null;
-  }) => void;
+  onSuccess?: () => void;
 }
 
 export type EditPostProps = {
   postData: PostWithLikes;
   updatedTextContent: string;
   searchTerm: string | null;
-  setTextContent: (value: string) => void;
-  setIsEditingPost: (value: boolean) => void;
+  onSuccess?: () => void;
 }
 
 type DeletePostProps = {
   postId: string;
   pathname: string | undefined;
   searchTerm: string | null;
-  setIsDeleting: (isDeleting: boolean) => void;
-  setIsOpen: (isOpen: boolean) => void;
+  onSuccess?: () => void;
 }
 
 /**
@@ -100,30 +89,22 @@ export const usePostsService = () => {
     },
 
     /** Crear un nuevo post */
-    createPost: (params: CreatePostProps) => {
-      const {searchTerm, fileInputRef, setTextContent, setSelectedImageFiles, setOpen, setSelectedImagePreviews} = params;
-
+    createPost: () => {
       const {mutate, isPending} = useMutation({
-        mutationFn: createPostFn,
-        onSuccess: async () => {
+        mutationFn: async (props: CreatePostProps) => createPostFn({
+          user: props.user,
+          textContent: props.textContent,
+          selectedImageFiles: props.selectedImageFiles,
+          getToken
+        }),
+        onSuccess: async (_data, vars) => {
           await queryClient.invalidateQueries({queryKey: ["posts"]});
 
-          if (searchTerm) {
-            await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+          if (vars.searchTerm) {
+            await queryClient.invalidateQueries({queryKey: ["search", vars.searchTerm, "posts"]});
           }
 
-          if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-          }
-
-          setTextContent("");
-
-          toast.success("Post creado con éxito.");
-
-          setSelectedImageFiles([]);
-          setSelectedImagePreviews([]);
-
-          setOpen({open: false, publicationType: null});
+          vars.onSuccess?.();
         },
         onError: (error) => {
           const message = errorMessage(error);
@@ -138,20 +119,18 @@ export const usePostsService = () => {
     },
 
     /** Compartir un post */
-    sharePost: (params: SharePostProps) => {
-      const {repostedPostId, textContent, setOpen, setTextContent} = params;
-
+    sharePost: () => {
       const {mutate, isPending, error} = useMutation({
-        mutationFn: async () => {
-          if (!repostedPostId) return;
+        mutationFn: async (params: SharePostProps) => {
+          if (!params.repostedPostId) return;
 
           const token = await getToken();
 
           const {data} = await axiosInstance({
             method: "POST",
-            url: `/posts/share/${repostedPostId}`,
+            url: `/posts/share/${params.repostedPostId}`,
             data: {
-              content: textContent
+              content: params.textContent
             },
             headers: {
               Authorization: `Bearer ${token}`
@@ -160,19 +139,10 @@ export const usePostsService = () => {
 
           return data;
         },
-        onSuccess: async () => {
+        onSuccess: async (_data, vars) => {
           await queryClient.invalidateQueries({queryKey: ["posts"]});
 
-          setTextContent("");
-          
-          setOpen({
-            open: false,
-            publicationType: null,
-            isRepost: false,
-            repostedPostId: null
-          });
-
-          toast.success("Post compartido.");
+          vars.onSuccess?.();
         },
         onError: (error) => {
           toast.error(errorMessage(error));
@@ -223,11 +193,11 @@ export const usePostsService = () => {
     },
 
     /** Editar un post */
-    editPost: (params: EditPostProps) => {
-      const {postData, updatedTextContent, setTextContent, setIsEditingPost, searchTerm} = params;
-
+    editPost: () => {
       const {mutate, isPending} = useMutation({
-        mutationFn: async () => {
+        mutationFn: async (params: EditPostProps) => {
+          const {postData, updatedTextContent} = params;
+
           if (!postData) return;
 
           const token = await getToken();
@@ -244,21 +214,20 @@ export const usePostsService = () => {
             }
           });
         },
-        onSuccess: async () => {
+        onSuccess: async (_data, vars) => {
           await queryClient.invalidateQueries({queryKey: ["posts"]});
 
           await queryClient.invalidateQueries({queryKey: ["likes", "likedPosts"]});
 
-          if (searchTerm) {
-            await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
+          if (vars.searchTerm) {
+            await queryClient.invalidateQueries({queryKey: ["search", vars.searchTerm, "posts"]});
           }
 
-          setIsEditingPost(false);
+          vars.onSuccess?.();
         },
         onError: (error) => {
           const message = errorMessage(error);
           toast.error(message);
-          setTextContent(postData!.content);
         }
       });
 
@@ -269,46 +238,38 @@ export const usePostsService = () => {
     },
 
     /** Eliminar un post */
-    deletePost: (params: DeletePostProps) => {
-      const {postId, pathname, searchTerm, setIsDeleting, setIsOpen} = params;
-
-      const deletePost = async () => {
-        const token = await getToken();
-
-        return axiosInstance({
-          method: "DELETE",
-          url: `/posts/${postId}`,
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-      }
-
+    deletePost: () => {
       const {mutate, isPending} = useMutation({
-        mutationFn: deletePost,
-        onSuccess: async () => {
+        mutationFn: async (params: DeletePostProps) => {
+          const token = await getToken();
+
+          return axiosInstance({
+            method: "DELETE",
+            url: `/posts/${params.postId}`,
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+        },
+        onSuccess: async (_data, vars) => {
+          vars.onSuccess?.();
+
           // Si se está en la página del post, redirigir a la página principal
-          if (pathname === `/post/${postId}`) {
-            toast.success("Post eliminado con éxito.");
-            return navigate("/", {replace: true});
+          if (vars.pathname === `/post/${vars.postId}`) {
+            navigate("/", {replace: true});
+
+          } else {
+            // Invalidar los queries de los posts
+            await queryClient.invalidateQueries({queryKey: ["posts"]});
+  
+            if (vars.searchTerm) {
+              await queryClient.invalidateQueries({queryKey: ["search", vars.searchTerm, "posts"]});
+            }
           }
-
-          await queryClient.invalidateQueries({queryKey: ["posts"]});
-
-          if (searchTerm) {
-            await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
-          }
-
-          toast.success("Post eliminado con éxito.");
-          
-          setIsOpen(false);
         },
         onError: (error) => {
           const message = errorMessage(error);
           toast.error(message);
-        },
-        onSettled: () => {
-          setIsDeleting(false);
         }
       });
 

@@ -21,13 +21,18 @@ const EditPostForm = (props: Props) => {
   const {editPost} = usePostsService();
 
   // Mutation para editar el post
-  const {mutate, isPending} = editPost({
-    postData,
-    updatedTextContent: textContent,
-    setTextContent,
-    setIsEditingPost,
-    searchTerm
-  });
+  const {mutate, isPending} = editPost();
+
+  const onSaveChangesHandler = () => {
+    mutate({
+      postData,
+      updatedTextContent: textContent,
+      searchTerm,
+      onSuccess: () => {
+        setIsEditingPost(false);
+      }
+    });
+  }
 
   return (
     <div className="w-full p-3 pt-0">
@@ -52,7 +57,7 @@ const EditPostForm = (props: Props) => {
           disabled={
             isPending || (textContent === postData.content)
           }
-          onClick={() => mutate()}
+          onClick={onSaveChangesHandler}
         >
           Guardar cambios
         </Button>

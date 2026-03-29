@@ -18,12 +18,10 @@ interface Props {
   postData: PostWithLikes;
   isModal?: boolean;
   className?: HTMLAttributes<HTMLElement>["className"];
-  editPost: (params: EditPostProps) => (
-    {
-      mutate: () => void;
-      isPending: boolean;
-    }
-  );
+  editPost: () => {
+    mutate: (params: EditPostProps) => void;
+    isPending: boolean;
+  }
 }
 
 const PostCard = ({ postData, isModal, className, editPost }: Props) => {
@@ -49,13 +47,18 @@ const PostCard = ({ postData, isModal, className, editPost }: Props) => {
     setIsClamped
   } = useClampedText({ textContentRef, clampedTextData: postData.content });
 
-  const {mutate, isPending} = editPost({
-    postData,
-    updatedTextContent: textContent,
-    setTextContent,
-    setIsEditingPost,
-    searchTerm
-  });
+  const {mutate, isPending} = editPost();
+
+  const onSaveChangesHandler = () => {
+    mutate({
+      postData,
+      updatedTextContent: textContent,
+      searchTerm,
+      onSuccess: () => {
+        setIsEditingPost(false);
+      }
+    });
+  }
 
   return (
     <article className={cn("flex flex-col gap-3 w-full p-4 rounded-lg bg-white shadow", className)}>
@@ -91,7 +94,7 @@ const PostCard = ({ postData, isModal, className, editPost }: Props) => {
                 ||
                 (!textContent && postData.postType === "text")
               }
-              onClick={() => mutate()}
+              onClick={onSaveChangesHandler}
             >
               Guardar cambios
             </Button>

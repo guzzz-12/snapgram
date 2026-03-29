@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { useSearchParams } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { ImagePlus, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import CreatePostInput from "./CreatePostInput";
@@ -42,21 +41,10 @@ const CreatePostModal = () => {
     onImagePickHandler
   } = useImagePicker({ fileInputRef });
 
-  const {getToken} = useAuth();
-
   const {createPost, getSharedPost, sharePost} = usePostsService();
 
   // Mutation para crear el post
-  const {mutate: createPostMutation, isPending: isCreatePostPending} = createPost({
-    fileInputRef,
-    setTextContent,
-    setSelectedImageFiles,
-    setOpen,
-    setSelectedImagePreviews,
-    searchTerm,
-    selectedImageFiles,
-    textContent
-  });
+  const {mutate: createPostMutation, isPending: isCreatePostPending} = createPost();
 
   // Query para consultar el post compartido
   const {
@@ -66,12 +54,50 @@ const CreatePostModal = () => {
   } = getSharedPost({repostedPostId, open, isRepost});
   
   // Mutation para compartir el post
-  const {repostMutation, isRepostPending, repostError} = sharePost({
-    repostedPostId,
-    textContent,
-    setOpen,
-    setTextContent
-  });
+  const {repostMutation, isRepostPending, repostError} = sharePost();
+
+  const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isRepost && repostedPostId) {
+      repostMutation({
+        repostedPostId,
+        textContent,
+        onSuccess: () => {
+          setTextContent("");
+
+          setOpen({
+            open: false,
+            publicationType: null,
+            isRepost: false,
+            repostedPostId: null
+          });
+
+          toast.success("Post compartido.");
+        }
+      });
+    } else {
+      createPostMutation({
+        user,
+        fileInputRef,
+        searchTerm,
+        selectedImageFiles,
+        textContent,
+        onSuccess: () => {
+          setTextContent("");
+          setSelectedImageFiles([]);
+          setSelectedImagePreviews([]);
+          setOpen({open: false, publicationType: null});
+
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+
+          toast.success("Post creado.");
+        }
+      });
+    }
+  }
 
   if (fetchRepostError || repostError) {
     const error = (fetchRepostError ?? repostError) as Error;
@@ -138,20 +164,7 @@ const CreatePostModal = () => {
 
           <form
             className="flex flex-col gap-2 w-full"
-            onSubmit={(e) => {
-              e.preventDefault();
-
-              if (isRepost) {
-                repostMutation();
-              } else {
-                createPostMutation({
-                  user,
-                  textContent,
-                  selectedImageFiles,
-                  getToken
-                });
-              }
-            }}
+            onSubmit={onSubmitHandler}
           >
             <CreatePostInput
               isPending={isPending}

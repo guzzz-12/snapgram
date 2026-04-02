@@ -11,7 +11,7 @@ interface Props {
 const NotificationToast = ({ notificationData }: Props) => {
   const {notificationType: type, sender, onItem} = notificationData;
 
-  const notificationLink = generateNotificationLink({type, onItem});
+  const notificationLink = generateNotificationLink({type, onItem, originalPost: null});
 
   return (
     <Link

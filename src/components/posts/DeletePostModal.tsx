@@ -1,7 +1,7 @@
 import { useLocation, useSearchParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
-import { usePostsService } from "@/services/postsService";
+import { useDeletePost } from "@/services/posts";
 
 interface Props {
   postId: string;
@@ -15,9 +15,7 @@ const DeletePostModal = ({postId, isOpen, setIsDeleting, setIsOpen}: Props) => {
   const [seachParams] = useSearchParams();
   const searchTerm = seachParams.get("searchTerm");
 
-  const {deletePost} = usePostsService();
-
-  const {mutate, isPending} = deletePost();
+  const {mutate, isPending} = useDeletePost();
 
   const onDeleteHandler = () => {
     mutate({

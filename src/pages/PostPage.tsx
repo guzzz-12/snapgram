@@ -14,7 +14,7 @@ import PostNotFound from "@/components/posts/PostNotFound";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { usePostsService } from "@/services/postsService";
+import { useGetPostById } from "@/services/posts";
 import { useCommentsService } from "@/services/commentsService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { errorMessage } from "@/utils/errorMessage";
@@ -29,12 +29,10 @@ const PostPage = () => {
   const [isEditingPost, setIsEditingPost] = useState(false);
   const [textContent, setTextContent] = useState("");
 
-  const {getPostById} = usePostsService();
-
   const {getPostComments} = useCommentsService();
 
   // Consultar el post
-  const {data: postData, error: postError, isLoading} = getPostById({postId});
+  const {data: postData, error: postError, isLoading} = useGetPostById({postId});
 
   if (postError) {
     toast.error(errorMessage(postError));

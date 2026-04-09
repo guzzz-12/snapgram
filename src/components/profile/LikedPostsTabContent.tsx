@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import PostCard from "@/components/posts/PostCard";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
-import { usePostsService } from "@/services/postsService";
+import { useEditPost } from "@/services/posts";
 import { useProfileService } from "@/services/profileService";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
@@ -22,7 +22,7 @@ const LikedPostsTabContent = ({userData}: Props) => {
 
   const {getUserLikedPosts} = useProfileService();
 
-  const {editPost} = usePostsService();
+  const {mutate: editPost, isPending} = useEditPost();
 
   const {
     data: postsData, 
@@ -86,6 +86,7 @@ const LikedPostsTabContent = ({userData}: Props) => {
               key={post._id}
               postData={post}
               editPost={editPost}
+              isPending={isPending}
             />
           ))}
         </Masonry>

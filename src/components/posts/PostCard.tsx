@@ -18,13 +18,11 @@ interface Props {
   postData: PostWithLikes;
   isModal?: boolean;
   className?: HTMLAttributes<HTMLElement>["className"];
-  editPost: () => {
-    mutate: (params: EditPostProps) => void;
-    isPending: boolean;
-  }
+  editPost: (params: EditPostProps) => void;
+  isPending: boolean;
 }
 
-const PostCard = ({ postData, isModal, className, editPost }: Props) => {
+const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
 
   const [searchParams] = useSearchParams();
@@ -47,10 +45,10 @@ const PostCard = ({ postData, isModal, className, editPost }: Props) => {
     setIsClamped
   } = useClampedText({ textContentRef, clampedTextData: postData.content });
 
-  const {mutate, isPending} = editPost();
+  // const {mutate, isPending} = editPost();
 
   const onSaveChangesHandler = () => {
-    mutate({
+    editPost({
       postData,
       updatedTextContent: textContent,
       searchTerm,

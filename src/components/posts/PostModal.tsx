@@ -5,7 +5,7 @@ import PostCommentInput from "./PostCommentInput";
 import CommentsList from "@/components/comments/CommentsList";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { usePostsService } from "@/services/postsService";
+import { useEditPost } from "@/services/posts";
 import { useCommentsService } from "@/services/commentsService";
 import { errorMessage } from "@/utils/errorMessage";
 import type { PostWithLikes } from "@/types/global";
@@ -17,7 +17,7 @@ interface Props {
 }
 
 const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
-  const {editPost} = usePostsService();
+  const {mutate: editPost, isPending} = useEditPost();
 
   const {getPostComments} = useCommentsService();
 
@@ -56,6 +56,7 @@ const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
             postData={postData}
             isModal={true}
             editPost={editPost}
+            isPending={isPending}
           />
 
           <CommentsList comments={comments} isLoading={loading} />

@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { useSearchParams } from "react-router";
 import CreatePostInput from "./CreatePostInput";
 import { Button } from "@/components/ui/button";
-import { usePostsService } from "@/services/postsService";
+import { useEditPost } from "@/services/posts";
 import type { PostWithLikes } from "@/types/global";
 
 interface Props {
@@ -18,10 +18,8 @@ const EditPostForm = (props: Props) => {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
 
-  const {editPost} = usePostsService();
-
   // Mutation para editar el post
-  const {mutate, isPending} = editPost();
+  const {mutate, isPending} = useEditPost();
 
   const onSaveChangesHandler = () => {
     mutate({

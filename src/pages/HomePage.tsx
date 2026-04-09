@@ -11,7 +11,7 @@ import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import RightSidebar from "@/components/RightSidebar";
 import NewUserScreen from "@/components/home/NewUserScreen";
 import { Separator } from "@/components/ui/separator";
-import { usePostsService } from "@/services/postsService";
+import { useEditPost, useGetFeedPosts } from "@/services/posts";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -23,10 +23,10 @@ const HomePage = () => {
 
   const {getToken} = useAuth();
 
-  const {getFeedPosts, editPost} = usePostsService();
+  const {mutate: editPost, isPending} = useEditPost();
 
   // Consultar los posts del feed del usuario
-  const {posts, loadingPosts, isFetchingNextPage, error, hasNextPage, fetchNextPage} = getFeedPosts();
+  const {posts, loadingPosts, isFetchingNextPage, error, hasNextPage, fetchNextPage} = useGetFeedPosts();
 
   const {isIntersecting} = useIntersectionObserver({ data: posts, paginationRef });
 
@@ -116,6 +116,7 @@ const HomePage = () => {
               key={post._id}
               postData={post}
               editPost={editPost}
+              isPending={isPending}
             />
           ))}
 

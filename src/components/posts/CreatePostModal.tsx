@@ -8,7 +8,7 @@ import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { usePostsService } from "@/services/postsService";
+import { useCreatePost, useGetSharedPost, useSharePost } from "@/services/posts";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import useImagePicker from "@/hooks/useImagePicker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -41,20 +41,18 @@ const CreatePostModal = () => {
     onImagePickHandler
   } = useImagePicker({ fileInputRef });
 
-  const {createPost, getSharedPost, sharePost} = usePostsService();
-
   // Mutation para crear el post
-  const {mutate: createPostMutation, isPending: isCreatePostPending} = createPost();
+  const {mutate: createPostMutation, isPending: isCreatePostPending} = useCreatePost();
 
   // Query para consultar el post compartido
   const {
     repostedPost,
     isRepostLoading,
     fetchRepostError
-  } = getSharedPost({repostedPostId, open, isRepost});
+  } = useGetSharedPost({repostedPostId, open, isRepost});
   
   // Mutation para compartir el post
-  const {repostMutation, isRepostPending, repostError} = sharePost();
+  const {repostMutation, isRepostPending, repostError} = useSharePost();
 
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

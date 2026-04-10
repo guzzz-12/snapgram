@@ -55,7 +55,7 @@ const SearchBar = ({loading, term, searchType, setTerm, searchInputRef}: Props) 
           className="pl-10 bg-slate-100"
           type="search"
           placeholder="Introduce un término para buscar personas o publicaciones..."
-          disabled={loading}
+          disabled={false}
           value={term}
           onChange={(e) => setTerm(e.target.value)}
         />

@@ -12,7 +12,7 @@ import CommentEditInputBtns from "./CommentEditInputBtns";
 import EditHistoryModal from "@/components/posts/EditHistoryModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useCommentsService } from "@/services/commentsService";
+import { useCreateComment, useDeleteComment, useGetCommentReplies, useUpdateComment } from "@/services/comments";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import type { Comment } from "@/types/global";
 
@@ -30,16 +30,14 @@ const CommentItem = ({ commentData }: Props) => {
 
   const {user: currentUser} = useCurrentUser();
 
-  const {updateCommentFn, deleteCommentFn, createCommentFn, getCommentRepliesFn} = useCommentsService();
-
   // Mutation para actualizar comentario
-  const {updateCommentMutation, isUpdating} = updateCommentFn();
+  const {updateCommentMutation, isUpdating} = useUpdateComment();
 
   // Mutation para eliminar comentario
-  const {deleteCommentMutation, isDeleting} = deleteCommentFn();
+  const {deleteCommentMutation, isDeleting} = useDeleteComment();
 
   // Mutation para responder al comentario
-  const {createCommentMutation, isCreatingComment} = createCommentFn();
+  const {createCommentMutation, isCreatingComment} = useCreateComment();
 
   // Query para consultar las respuestas del comentario
   const {
@@ -48,7 +46,7 @@ const CommentItem = ({ commentData }: Props) => {
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage
-  } = getCommentRepliesFn(commentData._id, openReplies);
+  } = useGetCommentReplies(commentData._id, openReplies);
 
   const onUpdateCommentHandler = () => {
     updateCommentMutation({

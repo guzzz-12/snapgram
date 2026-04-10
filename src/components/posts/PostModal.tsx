@@ -6,7 +6,7 @@ import CommentsList from "@/components/comments/CommentsList";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useEditPost } from "@/services/posts";
-import { useCommentsService } from "@/services/commentsService";
+import { useGetPostComments } from "@/services/comments";
 import { errorMessage } from "@/utils/errorMessage";
 import type { PostWithLikes } from "@/types/global";
 
@@ -19,8 +19,6 @@ interface Props {
 const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
   const {mutate: editPost, isPending} = useEditPost();
 
-  const {getPostComments} = useCommentsService();
-
   const {
     comments,
     loadingComments,
@@ -28,7 +26,7 @@ const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
     commentsError,
     isFetchingNextPage,
     fetchNextPage
-  } = getPostComments({postId: postData._id, enabled: isOpen});
+  } = useGetPostComments({postId: postData._id, enabled: isOpen});
 
   if (commentsError) {
     toast.error(errorMessage(commentsError));

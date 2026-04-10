@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type HTMLAttributes } from "react";
 import { Image, X } from "lucide-react";
 import CreateCommentInput from "@/components/comments/CreateCommentInput";
-import { useCommentsService } from "@/services/commentsService";
+import { useCreateComment } from "@/services/comments";
 import useImagePicker from "@/hooks/useImagePicker";
 import { cn } from "@/lib/utils";
 
@@ -15,11 +15,9 @@ const PostCommentInput = ({postId, className}: Props) => {
 
   const [commentText, setCommentText] = useState("");
 
-  const {createCommentFn} = useCommentsService();
-
   const {selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
 
-  const {createCommentMutation, isCreatingComment: isPending} = createCommentFn();
+  const {createCommentMutation, isCreatingComment: isPending} = useCreateComment();
 
   const onCreateCommentHandler = () => {
     const formData = new FormData();

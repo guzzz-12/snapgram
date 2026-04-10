@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetPostById } from "@/services/posts";
-import { useCommentsService } from "@/services/commentsService";
+import { useGetPostComments } from "@/services/comments";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { errorMessage } from "@/utils/errorMessage";
 import { SLIDER_SETTINGS } from "@/utils/constants";
@@ -28,8 +28,6 @@ const PostPage = () => {
 
   const [isEditingPost, setIsEditingPost] = useState(false);
   const [textContent, setTextContent] = useState("");
-
-  const {getPostComments} = useCommentsService();
 
   // Consultar el post
   const {data: postData, error: postError, isLoading} = useGetPostById({postId});
@@ -45,7 +43,7 @@ const PostPage = () => {
     loadingComments,
     hasNextPage,
     fetchNextPage
-  } = getPostComments({
+  } = useGetPostComments({
     postId,
     enabled: !!postData
   });

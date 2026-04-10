@@ -8,7 +8,7 @@ import CreatePostInput from "./CreatePostInput";
 import SharedPostCard from "./SharedPostCard";
 import SeeMoreBtn from "@/components/SeeMoreBtn";
 import { Button } from "../ui/button";
-import type { EditPostProps } from "@/services/postsService";
+import type { EditPostProps } from "@/services/posts/useEditPost";
 import useClampedText from "@/hooks/useClampedText";
 import { hashtagParser } from "@/utils/hashtagsParser";
 import type { PostWithLikes } from "@/types/global";
@@ -44,8 +44,6 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
     setShowFullText,
     setIsClamped
   } = useClampedText({ textContentRef, clampedTextData: postData.content });
-
-  // const {mutate, isPending} = editPost();
 
   const onSaveChangesHandler = () => {
     editPost({

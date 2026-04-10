@@ -7,7 +7,7 @@ import ChatHeader from "./ChatHeader";
 import ChatContent from "./ChatContent";
 import ChatInput from "./ChatInput";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useChatsService } from "@/services/chatsService";
+import { useGetChatById, useGetRecipientsPublicKeys, useGetTempChatPublicKey } from "@/services/chats";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import type { PublicKeysType } from "@/repositories/chatsRepository";
 import { errorMessage } from "@/utils/errorMessage";
@@ -40,10 +40,8 @@ const ChatInbox = (props: Props) => {
 
   const {user: currentUser} = useCurrentUser();
 
-  const {getChatById, getRecipientsPublicKeys, getTempChatPublicKey} = useChatsService();
-
   // Query para consultar la data del chat
-  const {existingChat, blockData, chatError, fetchingExistingChat} = getChatById(chatId);
+  const {existingChat, blockData, chatError, fetchingExistingChat} = useGetChatById(chatId);
 
   const chat = existingChat || temporaryChat;
   const isPrivateChat = chat?.type === "private";
@@ -53,11 +51,11 @@ const ChatInbox = (props: Props) => {
   const userBlockedMe = isBlocked.blockedUser === currentUser?._id;
 
   // Query para consultar la clave de cifrado del usuario del chat temporal
-  const {tempChatPublicKey, loadingTempChatPublicKey} = getTempChatPublicKey(chat);
+  const {tempChatPublicKey, loadingTempChatPublicKey} = useGetTempChatPublicKey(chat);
 
   // Query para consultar la clave de cifrado de todos los recipientes del chat
   // Aplica para chats privados y grupales pero no para chats temporales
-  const {publicKeys: recipientsPublicKeys, loadingRecipientsCryptoKey} = getRecipientsPublicKeys(chat);
+  const {publicKeys: recipientsPublicKeys, loadingRecipientsCryptoKey} = useGetRecipientsPublicKeys(chat);
 
   // Actualizar el state de las claves de cifrado cuando estén disponibles
   useEffect(() => {

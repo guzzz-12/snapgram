@@ -8,7 +8,7 @@ import UsersSearchNoResults from "./UsersSearchNoResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup } from "@/components/ui/radio-group";
-import { useChatsService } from "@/services/chatsService";
+import { useGetPrivateChatByRecipient, useGetUsersToChat } from "@/services/chats";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePrivateChatsListModal } from "@/hooks/usePrivateChatsListModal";
@@ -27,8 +27,6 @@ const PrivateChatsModalList = () => {
 
   const {debouncedValue} = useDebounce(searchTerm);
 
-  const {getPrivateChatByRecipient, getUsersToChat} = useChatsService();
-
   const {setChat: setTemporaryChat} = useTemporaryChat();
 
   // Consultar los usuarios que pueden ser agregados al chat
@@ -39,10 +37,10 @@ const PrivateChatsModalList = () => {
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage
-  } = getUsersToChat({ isOpen, keyword: debouncedValue });
+  } = useGetUsersToChat({ isOpen, keyword: debouncedValue });
 
   // Consultar el chat con el usuario seleccionado
-  const {isLoadingChat, loadingChatError, refetch} = getPrivateChatByRecipient(selectedUserId);
+  const {isLoadingChat, loadingChatError, refetch} = useGetPrivateChatByRecipient(selectedUserId);
 
   const {isIntersecting} = useIntersectionObserver({ data: usersData, paginationRef });
 

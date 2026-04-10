@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { useChatsService } from "@/services/chatsService";
+import { useAddMemberToGroup, useGetUsersToChat } from "@/services/chats";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useDebounce } from "@/hooks/useDebounce";
 import { errorMessage } from "@/utils/errorMessage";
@@ -32,8 +32,6 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
 
   const {debouncedValue} = useDebounce(searchTerm);
 
-  const {getUsersToChat, addMemberToGroup} = useChatsService();
-
   const {
     usersData,
     usersError,
@@ -41,10 +39,10 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage
-  } = getUsersToChat({ isOpen, keyword: debouncedValue });
+  } = useGetUsersToChat({ isOpen, keyword: debouncedValue });
 
   // Mutation para agregar el usuario al grupo
-  const {mutate, isPending} = addMemberToGroup({chatId: chatData?._id, selectedUserId});
+  const {mutate, isPending} = useAddMemberToGroup({chatId: chatData?._id, selectedUserId});
 
   // Hacer focus en el input cuando se abra el modal
   // Limpiar el state cuando se cierre el modal

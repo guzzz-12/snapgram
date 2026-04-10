@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useChatsService } from "@/services/chatsService";
+import { useGetGroupInfo, useUpdateGroupInfo } from "@/services/chats";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useClampedText from "@/hooks/useClampedText";
 import { errorMessage } from "@/utils/errorMessage";
@@ -61,13 +61,11 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
 
   const {user: currentUser} = useCurrentUser();
 
-  const {getGroupInfo, updateGroupInfo} = useChatsService();
-
   // Query para consultar la data del grupo
-  const {data, isLoading, error} = getGroupInfo(groupId, isOpen);
+  const {data, isLoading, error} = useGetGroupInfo(groupId, isOpen);
 
   // Mutation para actualizar la información del grupo
-  const {updateGroupInfoMutation, isUpdating} = updateGroupInfo({
+  const {updateGroupInfoMutation, isUpdating} = useUpdateGroupInfo({
     groupId, 
     groupName, 
     groupDescription: newDescription

@@ -9,7 +9,7 @@ import ChatItem from "./ChatItem";
 import MobileNavSidebar from "@/components/MobileNavSidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useChatsService } from "@/services/chatsService";
+import { useGetChats } from "@/services/chats";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
@@ -37,7 +37,15 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
 
   const {usersTyping} = useUsersTyping();
 
-  const {getChats} = useChatsService();
+  // Consultar los chats del usuario (tanto privados como grupales)
+  const {
+    chats,
+    error,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  } = useGetChats(chatTypeParam, chatId, hasLocalCryptoKeys);
 
   useEffect(() => {
     if (!chatId) {
@@ -48,16 +56,6 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
       }
     }
   }, [chatTypeParam, chatId]);
-
-  // Consultar los chats del usuario (tanto privados como grupales)
-  const {
-    chats,
-    error,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage
-  } = getChats(chatTypeParam, chatId, hasLocalCryptoKeys);
 
   const {isIntersecting} = useIntersectionObserver({data: chats, paginationRef});
 

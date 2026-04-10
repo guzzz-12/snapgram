@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useProfileService } from "@/services/profileService";
-import { useChatsService } from "@/services/chatsService";
+import { useGetPrivateChatByRecipient } from "@/services/chats";
 import { useTemporaryChat } from "@/hooks/useTemporaryChat";
 
 interface Props {
@@ -29,16 +29,14 @@ const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow}: P
 
   const {getUserProfile} = useProfileService();
 
-  const {userData, loadingUser, userError} = getUserProfile(userClerkId, true, isOpen);
-
-  const {getPrivateChatByRecipient} = useChatsService();
+  const {userData, loadingUser} = getUserProfile(userClerkId, true, isOpen);
 
   const {setChat: setTemporaryChat} = useTemporaryChat();
   
   const {mutate, isPending} = followOrUnfollow(userData?._id, userId);
   
   // Consultar el chat con el usuario seleccionado
-  const {refetch} = getPrivateChatByRecipient(userData?._id);
+  const {refetch} = useGetPrivateChatByRecipient(userData?._id);
 
   // Navegar a la página del chat si existe el chat con el usuario seleccionado
   // Crear el item del chat temporal si el chat no existe entre los dos usuarios

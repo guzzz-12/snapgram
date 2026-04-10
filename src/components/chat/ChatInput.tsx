@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
 import MessageInputForm from "./MessageInputForm";
 import UsersTypingIndicator from "./UsersTypingIndicator";
 import UsersRecordingAudioIndicator from "./UsersRecordingAudioIndicator";
 import ChatInputMediaBtns from "./ChatInputMediaBtns";
 import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
-import { useChatsService } from "@/services/chatsService";
+import { useSendMessage } from "@/services/chats";
 import useImagePicker from "@/hooks/useImagePicker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUsersTyping } from "@/hooks/useUsersTyping";
@@ -26,10 +25,6 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys }: Props) => 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [messageText, setMessageText] = useState("");
-
-  const {getToken} = useAuth();
-
-  const {sendMessage} = useChatsService();
 
   const {selectedImageFiles, selectedImagePreviews, isProcessing, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
 
@@ -64,11 +59,10 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys }: Props) => 
   }, []);
 
   // Mutation para enviar el mensaje
-  const {mutate, submitting} = sendMessage({
+  const {mutate, submitting} = useSendMessage({
     chatData,
     selectedImageFiles,
     recordedFile,
-    getToken,
     currentUser,
     recipientsPublicKeys,
     chatTypeParam,

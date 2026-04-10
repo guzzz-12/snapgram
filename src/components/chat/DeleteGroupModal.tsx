@@ -1,7 +1,7 @@
 import { IoWarningOutline } from "react-icons/io5";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useChatsService } from "@/services/chatsService";
+import { useDeleteGroup } from "@/services/chats";
 import type { ChatType } from "@/types/global";
 
 interface Props {
@@ -11,10 +11,7 @@ interface Props {
 }
 
 const DeleteGroupModal = ({ groupData, isOpen, setIsOpen }: Props) => {
-  const {deleteGroup} = useChatsService();
-
-  // Mutation para eliminar el grupo
-  const {mutate, isPending} = deleteGroup(groupData);
+  const {mutate, isPending} = useDeleteGroup(groupData);
 
   return (
     <Dialog

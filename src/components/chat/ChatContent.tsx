@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import GroupInboxHeader from "./GroupInboxHeader";
 import MessageItem from "./MessageItem";
 import UserLeftOrKickedOrAddedMessageItem from "./UserLeftOrKickedOrAddedMessageItem";
-import { useChatsService } from "@/services/chatsService";
+import { useGetChatsMessages } from "@/services/chats";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import useInboxHooks from "@/hooks/useInboxHooks";
@@ -28,8 +28,6 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
 
   const {user: currentUser} = useCurrentUser();
 
-  const {getChatMessages} = useChatsService();
-
   const {
     messages,
     isLoadingMessages,
@@ -37,7 +35,7 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
     hasNextPage,
     error,
     fetchNextPage
-  } = getChatMessages({chatId: chatData?._id, isLoadingChatData});
+  } = useGetChatsMessages({chatId: chatData?._id, isLoadingChatData});
 
   // Observar si la referencia de la paginación es visible en el viewport
   const {isIntersecting} = useIntersectionObserver({

@@ -5,7 +5,7 @@ import { OTPInput } from "input-otp";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import OtpInputSlot from "@/components/OtpInputSlot";
-import { useCryptoKeysService } from "@/services/cryptoKeysService";
+import { useGetUserCryptoKeys } from "@/services/cryptoKeys";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 import { errorMessage } from "@/utils/errorMessage";
@@ -20,11 +20,9 @@ const GetCryptoKeys = () => {
   const queryClient = useQueryClient();
 
   const {hasLocalCryptoKeys, setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
-
-  const {getUserCryptoKeys} = useCryptoKeysService();
   
   // Query para consultar las claves de cifrado del usuario y almacenarlas en el localStorage
-  const {status, isFetching, error} = getUserCryptoKeys({user, pin});
+  const {status, isFetching, error} = useGetUserCryptoKeys({user, pin});
 
   useEffect(() => {
     if (status === "success" && user && !hasLocalCryptoKeys) {

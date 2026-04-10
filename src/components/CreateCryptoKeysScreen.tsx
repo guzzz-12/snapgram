@@ -10,7 +10,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Toaster } from "./ui/sonner";
-import { useCryptoKeysService } from "@/services/cryptoKeysService";
+import { useCreateCryptoKeys } from "@/services/cryptoKeys";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 
@@ -26,13 +26,11 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
 
   const { signOut } = useAuth();
-
-  const {createCryptoKeys} = useCryptoKeysService();
   
   const {setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 
   // Mutation para crear y almacenar la llave de cifrado privada
-  const {mutate, isPending} = createCryptoKeys({
+  const {mutate, isPending} = useCreateCryptoKeys({
     user,
     pin,
     operation,

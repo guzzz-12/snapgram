@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import PostCard from "@/components/posts/PostCard";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import { Button } from "@/components/ui/button";
+import { useGetUserPosts } from "@/services/profile";
 import { useEditPost } from "@/services/posts";
-import { useProfileService } from "@/services/profileService";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import type { UserType } from "@/types/global";
@@ -20,8 +20,6 @@ const PostsTabContent = ({userData}: Props) => {
 
   const {windowWidth} = useWindowWidth();
 
-  const {getUserPosts} = useProfileService();
-
   const {mutate: editPost, isPending} = useEditPost();
 
   const {
@@ -33,7 +31,7 @@ const PostsTabContent = ({userData}: Props) => {
     error,
     fetchNextPage,
     refetch
-  } = getUserPosts(userData);
+  } = useGetUserPosts(userData);
 
   const {isIntersecting} = useIntersectionObserver({
     data: postsData,

@@ -6,7 +6,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { useProfileService } from "@/services/profileService";
+import { useGetUserProfile } from "@/services/profile";
 import { useGetPrivateChatByRecipient } from "@/services/chats";
 import { useTemporaryChat } from "@/hooks/useTemporaryChat";
 
@@ -14,26 +14,18 @@ interface Props {
   isOpen: boolean;
   userClerkId: string;
   children: JSX.Element;
-  followOrUnfollow: (followedUserId: string | undefined, currentUserClerkId: string | null | undefined) => (
-    {
-      mutate: () => void;
-      isPending: boolean;
-    }
-  )
+  followOrUnfollow: () => void;
+  isPending: boolean;
 }
 
-const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow}: Props) => {
+const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow, isPending}: Props) => {
   const navigate = useNavigate();
 
   const {userId} = useAuth();
 
-  const {getUserProfile} = useProfileService();
-
-  const {userData, loadingUser} = getUserProfile(userClerkId, true, isOpen);
+  const {userData, loadingUser} = useGetUserProfile(userClerkId, true, isOpen);
 
   const {setChat: setTemporaryChat} = useTemporaryChat();
-  
-  const {mutate, isPending} = followOrUnfollow(userData?._id, userId);
   
   // Consultar el chat con el usuario seleccionado
   const {refetch} = useGetPrivateChatByRecipient(userData?._id);
@@ -181,7 +173,7 @@ const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow}: P
                       size="sm"
                       variant="outline"
                       disabled={isPending}
-                      onClick={() => mutate()}
+                      onClick={followOrUnfollow}
                     >
                       <span className="">
                         {userData.isFollowing ? "Dejar de seguir" : "Seguir"}

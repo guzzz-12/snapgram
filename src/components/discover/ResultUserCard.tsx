@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useProfileService } from "@/services/profileService";
+import { useFollowOrUnfollowUser } from "@/services/profile";
 import { cn } from "@/lib/utils";
 import type { SearchUsersResult } from "@/types/global";
 
@@ -17,11 +17,9 @@ interface Props {
 const ResultUserCard = ({ userData }: Props) => {
   const followBtnRef = useRef<HTMLButtonElement>(null);
 
-  const {followOrUnfollowUser} = useProfileService();
-
   const {userId} = useAuth();
 
-  const {mutate, isPending} = followOrUnfollowUser(userData._id, userId);
+  const {mutate, isPending} = useFollowOrUnfollowUser(userData._id, userId);
 
   const onMouseEnterHandler = () => {
     if (userData.isFollowing) {

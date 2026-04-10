@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { useProfileService } from "@/services/profileService";
+import { useFollowOrUnfollowUser } from "@/services/profile";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useClampedText from "@/hooks/useClampedText";
 import { useBlockUserModal } from "@/hooks/useBlockUserModal";
@@ -51,8 +51,6 @@ const ProfileHeader = ({ userData }: Props) => {
 
   const {setOpen: setBlockUserModalOpen, setOperation, setBlockedUser} = useBlockUserModal();
 
-  const {followOrUnfollowUser} = useProfileService();
-
   useEffect(() => {
     if (avatarRef.current) {
       setAvatarHeight(avatarRef.current.clientHeight);
@@ -60,7 +58,7 @@ const ProfileHeader = ({ userData }: Props) => {
   }, []);
 
   // Mutation para seguir o dejar de seguir al usuario
-  const {mutate, isPending} = followOrUnfollowUser(userData._id, userData.clerkId);
+  const {mutate, isPending} = useFollowOrUnfollowUser(userData._id, userData.clerkId);
 
   // Si lo está siguiendo, cambia el texto del botón al hacer hover
   const onMouseFollowBtnEnter = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {

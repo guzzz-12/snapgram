@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useProfileService } from "@/services/profileService";
+import { useFollowOrUnfollowUser } from "@/services/profile";
 import type { SearchUsersResult } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -16,10 +16,7 @@ const UserSearchResultItem = ({ userData }: Props) => {
 
   const {userId} = useAuth();
 
-  const {followOrUnfollowUser} = useProfileService();
-
-  // Mutation para seguir o dejar de seguir al usuario
-  const {mutate, isPending} = followOrUnfollowUser(userData._id, userId);
+  const {mutate, isPending} = useFollowOrUnfollowUser(userData._id, userId);
 
   const onMouseEnterHandler = () => {
     if (!followBtnRef.current) return;

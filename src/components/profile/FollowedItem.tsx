@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useProfileService } from "@/services/profileService";
+import { useFollowOrUnfollowUser } from "@/services/profile";
 import { cn } from "@/lib/utils";
 import type { FollowedType, UserType } from "@/types/global";
 
@@ -19,9 +19,7 @@ const FollowedItem = ({ data, userData }: Props) => {
 
   const {userId} = useAuth();
 
-  const {followOrUnfollowUser} = useProfileService();
-
-  const {mutate, isPending} = followOrUnfollowUser(followedId, userId);
+  const {mutate, isPending} = useFollowOrUnfollowUser(followedId, userId);
 
   return (
     <li className="flex justify-start items-center gap-2 w-full border rounded-md p-2 bg-white shadow overflow-x-auto scrollbar-none">

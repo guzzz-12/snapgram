@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import FollowerItem from "./FollowerItem";
 import FollowerItemSkeleton from "./FollowerItemSkeleton";
-import { useProfileService } from "@/services/profileService";
+import { useGetFollowers } from "@/services/profile";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { errorMessage } from "@/utils/errorMessage";
 import type { UserType } from "@/types/global";
@@ -14,9 +14,14 @@ interface Props {
 const FollowersTabContent = ({ userData }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
-  const {getFollowers} = useProfileService();
-
-  const {data: followers, isLoading, hasNextPage, isFetchingNextPage, error, fetchNextPage} = getFollowers(userData);
+  const {
+    data: followers,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    error,
+    fetchNextPage
+  } = useGetFollowers(userData);
 
   const {isIntersecting} = useIntersectionObserver({data: followers, paginationRef});
 

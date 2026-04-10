@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import PostCard from "@/components/posts/PostCard";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import { useEditPost } from "@/services/posts";
-import { useProfileService } from "@/services/profileService";
+import { useGetUserLikedPosts } from "@/services/profile";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import type { UserType } from "@/types/global";
@@ -20,8 +20,6 @@ const LikedPostsTabContent = ({userData}: Props) => {
 
   const {windowWidth} = useWindowWidth();
 
-  const {getUserLikedPosts} = useProfileService();
-
   const {mutate: editPost, isPending} = useEditPost();
 
   const {
@@ -33,7 +31,7 @@ const LikedPostsTabContent = ({userData}: Props) => {
     hasNextPage, 
     fetchNextPage, 
     refetch
-  } = getUserLikedPosts(userData);
+  } = useGetUserLikedPosts(userData);
 
   const {isIntersecting} = useIntersectionObserver({
     data: postsData,

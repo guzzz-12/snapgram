@@ -12,7 +12,7 @@ import FollowingTabContent from "@/components/profile/FollowingTabContent";
 import LikedPostsTabContent from "@/components/profile/LikedPostsTabContent";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProfileService } from "@/services/profileService";
+import { useGetUserProfile } from "@/services/profile";
 import { ACCOUNT_STATUS } from "@/utils/constants";
 
 const ProfilePage = () => {
@@ -20,8 +20,6 @@ const ProfilePage = () => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("posts");
-
-  const {getUserProfile} = useProfileService();
 
   const {userId} = useAuth();
 
@@ -31,7 +29,7 @@ const ProfilePage = () => {
   }, [userClerkId]);
 
   // Query para consultar los datos del usuario
-  const {userData, loadingUser, userError} = getUserProfile(userClerkId);
+  const {userData, loadingUser, userError} = useGetUserProfile(userClerkId);
 
   if (userError) {
     const isClientError = userError instanceof AxiosError;

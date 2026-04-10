@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useProfileService } from "@/services/profileService";
+import { useFollowOrUnfollowUser } from "@/services/profile";
 import { cn } from "@/lib/utils";
 import type { FollowerType, UserType } from "@/types/global";
 
@@ -19,9 +19,7 @@ const FollowerItem = ({ data }: Props) => {
 
   const {userId: currentUserClerkId} = useAuth();
 
-  const {followOrUnfollowUser} = useProfileService();
-
-  const {mutate, isPending} = followOrUnfollowUser(followerId, currentUserClerkId);
+  const {mutate, isPending} = useFollowOrUnfollowUser(followerId, currentUserClerkId);
 
   // Cambiar dinámicamente el texto del botón de seguir/dejar de seguir
   useEffect(() => {

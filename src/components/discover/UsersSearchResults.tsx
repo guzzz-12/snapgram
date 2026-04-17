@@ -4,7 +4,7 @@ import SearchUserCardSkeleton from "./SearchUserCardSkeleton";
 import ResultUserCard from "./ResultUserCard";
 import NoResults from "./NoResults";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { useSearchService } from "@/services/searchService";
+import { useSearchUsers } from "@/services/search";
 import { errorMessage } from "@/utils/errorMessage";
 
 interface Props {
@@ -24,8 +24,6 @@ const UsersSearchResults = (props: Props) => {
 
   const paginationRef = useRef<HTMLDivElement | null>(null);
 
-  const {searchUsers} = useSearchService();
-
   const {
     data,
     isLoading,
@@ -33,7 +31,7 @@ const UsersSearchResults = (props: Props) => {
     isFetchingNextPage,
     error,
     fetchNextPage
-  } = searchUsers({searchTerm, searchType});
+  } = useSearchUsers({searchTerm, searchType});
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});
 

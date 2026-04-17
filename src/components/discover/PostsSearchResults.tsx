@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import PostCard from "@/components/posts/PostCard";
 import NoResults from "./NoResults";
-import { useSearchService } from "@/services/searchService";
+import { useSearchPosts } from "@/services/search";
 import { useEditPost } from "@/services/posts";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { errorMessage } from "@/utils/errorMessage";
@@ -40,8 +40,6 @@ const PostsSearchResults = (props: Props) => {
     }
   }, []);
 
-  const {searchPosts} = useSearchService();
-
   const {mutate: editPost, isPending} = useEditPost();
 
   const {
@@ -52,7 +50,7 @@ const PostsSearchResults = (props: Props) => {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage
-  } = searchPosts({searchTerm, searchType});
+  } = useSearchPosts({searchTerm, searchType});
 
   const {isIntersecting} = useIntersectionObserver({data, paginationRef});
 

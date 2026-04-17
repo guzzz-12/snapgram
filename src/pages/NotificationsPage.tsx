@@ -5,7 +5,7 @@ import RightSidebar from "@/components/RightSidebar";
 import NotificationsOptions from "@/components/notifications/NotificationsOptions";
 import NotificationsList from "@/components/notifications/NotificationsList";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNotificationsService } from "@/services/notificationsService";
+import { useGetNotifications, useMarkNotificationsAsRead } from "@/services/notifications";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { errorMessage } from "@/utils/errorMessage";
 
@@ -13,8 +13,6 @@ const ConnectionsPage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
-
-  const {getNotifications, markNotificationsAsRead} = useNotificationsService();
 
   // Query para consultar las notificaciones
   const {
@@ -24,10 +22,10 @@ const ConnectionsPage = () => {
     isFetchingNextPage,
     error,
     fetchNextPage
-  } = getNotifications({activeTab});
+  } = useGetNotifications({activeTab});
 
   // Mutation para marcar todas las notificaciones como vistas
-  const markAllAsSeen = markNotificationsAsRead();
+  const markAllAsSeen = useMarkNotificationsAsRead();
 
   const {isIntersecting} = useIntersectionObserver({data: notifications, paginationRef});
 

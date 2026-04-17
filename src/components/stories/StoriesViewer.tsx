@@ -12,7 +12,7 @@ import DeleteStoryModal from "./DeleteStoryModal";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { useStoriesService } from "@/services/storiesService";
+import { useGetUserStories, useMarkStoryAsSeen, useToggleLikeStory } from "@/services/stories";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { errorMessage } from "@/utils/errorMessage";
 
@@ -27,15 +27,13 @@ const StoriesViewer = (props: Props) => {
   const [search] = useSearchParams();
   const storyId = search.get("storyId");
 
-  const { getUserStories, markAsSeen, toggleLikeStory } = useStoriesService();
-
   // Consultar las historias del usuario al abrir la página de historias
   const {
     data: userWithStories,
     isLoading,
     isSuccess,
     error
-  } = getUserStories(storiesUsername, storyId);
+  } = useGetUserStories(storiesUsername, storyId);
 
   const stories = userWithStories?.stories || [];
 
@@ -55,9 +53,9 @@ const StoriesViewer = (props: Props) => {
   const {
     toggleLikeStory: toggleStoryLike,
     isTogglingLikeStory
-  } = toggleLikeStory(activeStoryId, storiesUsername, currentUser?._id);
+  } = useToggleLikeStory(activeStoryId, storiesUsername, currentUser?._id);
 
-  const { markStoryAsSeen } = markAsSeen(activeStoryId);
+  const { markStoryAsSeen } = useMarkStoryAsSeen(activeStoryId);
 
   const currentStory = stories.find((story) => story._id === activeStoryId);
   const hasMedia = currentStory?.mediaType === "image";

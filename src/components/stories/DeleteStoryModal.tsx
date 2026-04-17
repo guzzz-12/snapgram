@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useStoriesService } from "@/services/storiesService";
+import { useDeleteStory } from "@/services/stories";
 
 interface Props {
   storyId: string;
@@ -11,9 +11,7 @@ interface Props {
 }
 
 const DeleteStoryModal = ({ storyId, isOpen, setIsOpen, setIsPaused }: Props) => {
-  const { deletStory } = useStoriesService();
-
-  const { deleteStory, isPending, isSuccess } = deletStory(storyId);
+  const { deleteStory, isPending, isSuccess } = useDeleteStory(storyId);
 
   useEffect(() => {
     if (isSuccess) {

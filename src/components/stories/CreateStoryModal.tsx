@@ -1,18 +1,13 @@
 import { useEffect, useRef, useState, type ChangeEvent, type ClipboardEvent } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { ArrowLeft, Expand, Image, Minimize, Palette, Plus, TypeOutline } from "lucide-react";
 import StoryColorPicker, { COLORS } from "./StoryColorPicker";
 import { Button } from "../ui/button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
 import { Textarea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { useCreateStory } from "@/services/stories";
 import useImagePicker from "@/hooks/useImagePicker";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
-import type { StoryType } from "@/types/global";
 
 const TEXT_BG_COLORS: ("transparent" | "#fff" | "#000")[] = ["transparent", "#fff", "#000"];
 
@@ -31,10 +26,6 @@ const CreateStoryModal = () => {
   const [imageSize, setImageSize] = useState<"cover" | "contain">("cover");
 
   const { selectedImageFiles, selectedImagePreviews, setSelectedImageFiles, setSelectedImagePreviews, onImagePickHandler} = useImagePicker({fileInputRef});
-
-  const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
 
   const {open: isOpen, publicationType, setOpen} = useCreatePublicationModal();
 
@@ -124,47 +115,14 @@ const CreateStoryModal = () => {
     setStoryTextBgColor(TEXT_BG_COLORS[nextIndex]);
   }
 
-  const onSubmitHandler = async () => {
-    if (!storyTextContent && !selectedImageFiles[0]) return;
-
-    const token = await getToken();
-
-    const formData = new FormData();
-
-    if (selectedImageFiles[0]) {
-      formData.append("media", selectedImageFiles[0]);
-    }
-
-    formData.append("backgroundColor", selectdBgColor.value);
-    formData.append("content", storyTextContent);
-    formData.append("textColor", storyTextColor);
-    formData.append("textBgColor", storyTextBgColor);
-    formData.append("mediaType", selectedImageFiles[0] ? "image" : "text");
-    imageSize && formData.append("imageSize", imageSize);
-    
-    const {data} = await axiosInstance<{data: StoryType}>({
-      method: "POST",
-      url: "/stories/create",
-      data: formData,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data"
-      }
-    });
-
-    return data.data;
-  }
-
-  const {mutate: createStory, isPending: isLoading} = useMutation({
-    mutationFn: onSubmitHandler,
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["stories"]});
-      setOpen({open: false, publicationType: null});
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-    }
+  // Crear la historia
+  const {createStory, isLoading} = useCreateStory({
+    storyTextContent,
+    selectedImageFiles,
+    selectdBgColor,
+    storyTextColor,
+    storyTextBgColor,
+    imageSize
   });
 
   return (

@@ -4,7 +4,7 @@ import { CircleArrowLeft, CircleArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import StoryCardRounded from "./StoryCardRounded";
 import StoryCardSkeletonRounded from "./StoryCardSkeletonRounded";
-import { useStoriesService } from "@/services/storiesService";
+import { useGetUsersHavingStories } from "@/services/stories";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { errorMessage } from "@/utils/errorMessage";
@@ -21,8 +21,6 @@ const StoriesSlider = () => {
 
   const { user: currentUser } = useCurrentUser();
 
-  const { getUsersHavingStories } = useStoriesService();
-
   const {
     data: usersWithStories,
     loading,
@@ -30,7 +28,7 @@ const StoriesSlider = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage
-  } = getUsersHavingStories();
+  } = useGetUsersHavingStories();
 
   // Verificar si la referencia del paginador está en el viewport
   const { isIntersecting } = useIntersectionObserver({ data: usersWithStories, paginationRef });

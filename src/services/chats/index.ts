@@ -10,6 +10,7 @@ import useGetTempChatPublicKey from "./useGetTempChatPublicKey";
 import useGetGroupInfo from "./useGetGroupInfo";
 import useUpdateGroupInfo from "./useUpdateGroupInfo";
 import useDeleteGroup from "./useDeleteGroup";
+import useGetUnreadChats from "./useGetUnreadChats";
 
 export {
   useGetChatById,
@@ -23,5 +24,6 @@ export {
   useGetTempChatPublicKey,
   useGetGroupInfo,
   useUpdateGroupInfo,
-  useDeleteGroup
+  useDeleteGroup,
+  useGetUnreadChats,
 };

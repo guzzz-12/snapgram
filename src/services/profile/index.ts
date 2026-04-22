@@ -4,6 +4,7 @@ import useGetFollowers from "./useGetFollowers";
 import useGetFollowing from "./useGetFollowing";
 import useFollowOrUnfollowUser from "./useFollowOrUnfollowUser";
 import useGetUserLikedPosts from "./useGetUserLikedPosts";
+import useGetFollowingCount from "./useGetFollowingCount";
 
 export {
   useGetUserProfile,
@@ -11,5 +12,6 @@ export {
   useGetFollowers,
   useGetFollowing,
   useFollowOrUnfollowUser,
-  useGetUserLikedPosts
+  useGetUserLikedPosts,
+  useGetFollowingCount
 }

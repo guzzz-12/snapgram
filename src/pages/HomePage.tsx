@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useQuery } from "@tanstack/react-query";
 import { IoFileTrayStackedOutline } from "react-icons/io5";
 import { MdOutlineExplore } from "react-icons/md";
 import { toast } from "sonner";
@@ -11,17 +9,13 @@ import PostCardSkeleton from "@/components/posts/PostCardSkeleton";
 import RightSidebar from "@/components/RightSidebar";
 import NewUserScreen from "@/components/home/NewUserScreen";
 import { Separator } from "@/components/ui/separator";
+import { useGetFollowingCount } from "@/services/profile";
 import { useEditPost, useGetFeedPosts } from "@/services/posts";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 
 const HomePage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
-
-  const [followingCount, setFollowingCount] = useState(0);
-
-  const {getToken} = useAuth();
 
   const {mutate: editPost, isPending} = useEditPost();
 
@@ -38,28 +32,7 @@ const HomePage = () => {
   }, [isIntersecting, hasNextPage]);
 
   // Consultar el número de seguidos del usuario
-  const {data: followingCountData, isLoading: loadingFollowingCount} = useQuery({
-    queryKey: ["following-count"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{data: number}>({
-        method: "GET",
-        url: "/follows/get-following-count",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data;
-    }
-  });
-
-  useEffect(() => {
-    if (followingCountData) {
-      setFollowingCount(followingCountData.data);
-    }
-  }, [followingCountData]);
+  const {followingCount, loadingFollowingCount} = useGetFollowingCount();
 
   if (error) {
     toast.error(errorMessage(error));

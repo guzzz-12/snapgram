@@ -4,7 +4,6 @@ import type { PostWithLikes, SearchUsersResult } from "@/types/global";
 type SearchUsersProps = {
   page: number;
   keyword: string | null | undefined;
-  getToken: () => Promise<string | null>;
   setIsSearching: (status: boolean) => void;
   setSearchType: (type: "people" | "posts" | null) => void;
 }
@@ -12,17 +11,14 @@ type SearchUsersProps = {
 type SearchPostsProps = {
   page: number;
   keyword: string | null | undefined;
-  getToken: () => Promise<string | null>;
   setIsSearching: (status: boolean) => void;
   setSearchType: (type: "people" | "posts" | null) => void;
 }
 
 /** Función para buscar usuarios por término de búsqueda */
-export const searchUsers = async ({page, keyword, getToken, setIsSearching, setSearchType}: SearchUsersProps) => {
+export const searchUsers = async ({page, keyword, setIsSearching, setSearchType}: SearchUsersProps) => {
   setIsSearching(true);
   setSearchType("people");
-
-  const token = await getToken();
 
   const {data} = await axiosInstance<{
     data: SearchUsersResult[];
@@ -31,9 +27,6 @@ export const searchUsers = async ({page, keyword, getToken, setIsSearching, setS
   }>({
     method: "GET",
     url: "/search/search-users",
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
     params: {
       keyword,
       page,
@@ -49,11 +42,9 @@ export const searchUsers = async ({page, keyword, getToken, setIsSearching, setS
 
 
 /** Función para buscar posts por término de búsqueda */
-export const searchPosts = async ({keyword, page, getToken, setIsSearching, setSearchType}: SearchPostsProps) => {
+export const searchPosts = async ({keyword, page, setIsSearching, setSearchType}: SearchPostsProps) => {
   setIsSearching(true);
   setSearchType("posts");
-
-  const token = await getToken();
 
   const {data} = await axiosInstance<{
     data: PostWithLikes[];
@@ -63,9 +54,6 @@ export const searchPosts = async ({keyword, page, getToken, setIsSearching, setS
   }>({
     method: "GET",
     url: "/search/search-posts",
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
     params: {
       page,
       keyword,

@@ -1,5 +1,4 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { useSearchStatus } from "@/hooks/useSearchStatus";
 import { searchUsers } from "@/repositories/searchRepository";
 
@@ -10,13 +9,11 @@ type SearchProps = {
 
 /** Hook para buscar usuarios especificando el término de búsqueda */
 const useSearchUsers = ({searchTerm, searchType}: SearchProps) => {
-  const {getToken} = useAuth();
-
   const {setIsSearching, setSearchType} = useSearchStatus();
 
   const res = useInfiniteQuery({
     queryKey: ["search", searchTerm, "users"],
-    queryFn: ({pageParam}) => searchUsers({page: pageParam, keyword: searchTerm, getToken, setIsSearching, setSearchType}),
+    queryFn: ({pageParam}) => searchUsers({page: pageParam, keyword: searchTerm, setIsSearching, setSearchType}),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,

@@ -8,16 +8,13 @@ type CreateStoryProps = {
   storyTextColor: "#fff" | "#000";
   storyTextBgColor: "transparent" | "#fff" | "#000";
   imageSize: "cover" | "contain";
-  getToken: () => Promise<string | null>
 }
 
 /** Función para crear una historia */
 export const createStoryFn = async (props: CreateStoryProps) => {
-  const {storyTextContent, selectedImageFiles, selectdBgColor, storyTextColor, storyTextBgColor, imageSize, getToken} = props;
+  const {storyTextContent, selectedImageFiles, selectdBgColor, storyTextColor, storyTextBgColor, imageSize} = props;
 
   if (!storyTextContent && !selectedImageFiles[0]) return;
-
-  const token = await getToken();
 
   const formData = new FormData();
 
@@ -37,7 +34,6 @@ export const createStoryFn = async (props: CreateStoryProps) => {
     url: "/stories/create",
     data: formData,
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "multipart/form-data"
     }
   });

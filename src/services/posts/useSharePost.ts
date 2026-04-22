@@ -1,6 +1,5 @@
 import { axiosInstance } from "@/utils/axiosInstance";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { errorMessage } from "@/utils/errorMessage";
 
@@ -12,24 +11,17 @@ type SharePostProps = {
 
 /** Hook para compartir un post */
 const useSharePost = () => {
-  const { getToken } = useAuth();
-
   const queryClient = useQueryClient();
 
   const {mutate, isPending, error} = useMutation({
     mutationFn: async (params: SharePostProps) => {
       if (!params.repostedPostId) return;
 
-      const token = await getToken();
-
-      const {data} = await axiosInstance({
+        const {data} = await axiosInstance({
         method: "POST",
         url: `/posts/share/${params.repostedPostId}`,
         data: {
           content: params.textContent
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
         }
       });
 

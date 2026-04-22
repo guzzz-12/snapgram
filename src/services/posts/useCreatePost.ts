@@ -1,6 +1,5 @@
 import type { RefObject } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { createPostFn } from "@/repositories/postsRepository";
 import { errorMessage } from "@/utils/errorMessage";
@@ -17,8 +16,6 @@ type CreatePostProps = {
 
 /** Hook para crear un post */
 const useCreatePost = () => {
-  const { getToken } = useAuth();
-
   const queryClient = useQueryClient();
 
   const {mutate, isPending} = useMutation({
@@ -26,7 +23,6 @@ const useCreatePost = () => {
       user: props.user,
       textContent: props.textContent,
       selectedImageFiles: props.selectedImageFiles,
-      getToken
     }),
     onSuccess: async (_data, vars) => {
       await queryClient.invalidateQueries({queryKey: ["posts"]});

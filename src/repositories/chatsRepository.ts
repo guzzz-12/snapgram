@@ -12,15 +12,10 @@ type SendMessageParams = {
   recordedFile: File | null;
   currentUser: UserType | null;
   recipientsPublicKeys: PublicKeysType[];
-  getToken: () => Promise<string | null>;
 }
 
 /** Función para consultar un chat mediante su ID */
-export const fetchChatById = async (
-  chatId: string | undefined,
-  getToken: () => Promise<string | null>
-) => {
-  const token = await getToken();
+export const fetchChatById = async (chatId: string | undefined) => {
 
   const {data} = await axiosInstance<{
     data: ChatType;
@@ -30,10 +25,7 @@ export const fetchChatById = async (
     };
   }>({
     method: "GET",
-    url: `/chats/${chatId}`,
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    url: `/chats/${chatId}`
   });
 
   const chatData = data.data;
@@ -45,10 +37,8 @@ export const fetchChatById = async (
 /** Función para consultar los chats (tanto privados como grupales) */
 export const fetchChats = async (
   page: number,
-  type: "all" | "group" | "private" | null | undefined,
-  getToken: () => Promise<string | null>
+  type: "all" | "group" | "private" | null | undefined
 ) => {
-  const token = await getToken();
 
   const {data} = await axiosInstance<{
     data: ChatType[];
@@ -57,9 +47,6 @@ export const fetchChats = async (
   }>({
     method: "GET",
     url: "/chats",
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
     params: {
       page,
       limit: 10,
@@ -72,8 +59,7 @@ export const fetchChats = async (
 
 
 /** Función para consultar los mensajes de un chat */
-export const fetchChatMessages = async ( chatId: string | undefined, page: number, getToken: () => Promise<string | null>) => {
-  const token = await getToken();
+export const fetchChatMessages = async (chatId: string | undefined, page: number) => {
 
   const {data} = await axiosInstance<{
     data: {
@@ -85,9 +71,6 @@ export const fetchChatMessages = async ( chatId: string | undefined, page: numbe
   }>({
     method: "GET",
     url: `/messages/chat/${chatId}`,
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
     params: {
       page,
       limit: 10
@@ -99,8 +82,7 @@ export const fetchChatMessages = async ( chatId: string | undefined, page: numbe
 
 
 /** Función para consultar los usuarios que pueden ser agregados al chat */
-export const fetchUsersToChat = async (page: number, keyword: string | undefined, getToken: () => Promise<string | null>) => {
-  const token = await getToken();
+export const fetchUsersToChat = async (page: number, keyword: string | undefined) => {
 
   const {data} = await axiosInstance<{
     data: UserType[];
@@ -109,9 +91,6 @@ export const fetchUsersToChat = async (page: number, keyword: string | undefined
   }>({
     method: "GET",
     url: "/users/search",
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
     params: {
       page,
       limit: 10,
@@ -125,9 +104,7 @@ export const fetchUsersToChat = async (page: number, keyword: string | undefined
 
 /** Función para enviar un mensaje */
 export const sendMessageFn = async (params: SendMessageParams) => {
-  const {messageText, chatData, selectedImageFiles, recordedFile, getToken, currentUser, recipientsPublicKeys} = params;
-
-  const token1 = await getToken();
+  const {messageText, chatData, selectedImageFiles, recordedFile, currentUser, recipientsPublicKeys} = params;
 
   const hasText = messageText.length > 0;
   const hasImages = selectedImageFiles.length > 0;
@@ -137,7 +114,6 @@ export const sendMessageFn = async (params: SendMessageParams) => {
   // Subir los archivos a ImageKit si los hay
   const uploadData = hasFiles ? await filesUploader({
     files: recordedFile ? [recordedFile] : selectedImageFiles,
-    clerkToken: token1!,
     folderName: `/chats/${chatData?._id}`,
     currentUser
   }) : [];
@@ -145,8 +121,6 @@ export const sendMessageFn = async (params: SendMessageParams) => {
   const filesUrls = uploadData
   .filter(data => !!data.fileUrl && !!data.fileId)
   .map(data => data.fileUrl) as string[];
-
-  const token2 = await getToken();
 
   const participants = chatData?.participants.map(user => user._id) || [];
 
@@ -176,7 +150,6 @@ export const sendMessageFn = async (params: SendMessageParams) => {
       initVector: iv
     },
     headers: {
-      Authorization: `Bearer ${token2}`,
       "Content-Type": "application/json"
     }
   });
@@ -189,19 +162,13 @@ export const sendMessageFn = async (params: SendMessageParams) => {
 export const fetchPrivateChatByParticipant = async (
   params: {
     selectedUserId: string | null | undefined;
-    getToken: () => Promise<string | null>
   }
 ) => {
-  const {selectedUserId, getToken} = params;
-
-  const token = await getToken();
+  const {selectedUserId} = params;
 
   const {data} = await axiosInstance<{data: ChatType; isChatRestored: boolean}>({
     method: "GET",
-    url: `/chats/participant/${selectedUserId}`,
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    url: `/chats/participant/${selectedUserId}`
   });
 
   return data;
@@ -209,19 +176,14 @@ export const fetchPrivateChatByParticipant = async (
 
 
 /** Funcion para agregar un nuevo miembro al grupo */
-export const addMemberToGroupFn = async (params: {chatId: string | undefined; selectedUserId: string | null; getToken: () => Promise<string | null>}) => {
-  const {chatId, selectedUserId, getToken} = params;
-
-  const token = await getToken();
+export const addMemberToGroupFn = async (params: {chatId: string | undefined; selectedUserId: string | null}) => {
+  const {chatId, selectedUserId} = params;
 
   const {data} = await axiosInstance<{data: ChatType}>({
     method: "PUT",
     url: `/chats/group/${chatId}/add-members`,
     data: {
       newMember: selectedUserId
-    },
-    headers: {
-      Authorization: `Bearer ${token}`
     }
   });
 
@@ -230,17 +192,12 @@ export const addMemberToGroupFn = async (params: {chatId: string | undefined; se
 
 
 /** Funcion para actualizar la informacion de un grupo */
-export const updateGroupInfoFn = async (params: {groupId: string | undefined; groupName: string; groupDescription: string; getToken: () => Promise<string | null>}) => {
-  const {groupId, groupName, groupDescription, getToken} = params;
-
-  const token = await getToken();
+export const updateGroupInfoFn = async (params: {groupId: string | undefined; groupName: string; groupDescription: string}) => {
+  const {groupId, groupName, groupDescription} = params;
 
   const {data} = await axiosInstance<{data: ChatType}>({
     method: "PUT",
     url: `/chats/group/${groupId}/update-info`,
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
     data: {
       groupName,
       groupDescription

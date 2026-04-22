@@ -28,8 +28,6 @@ const useSendMessage = (params: SendMessageParams) => {
 
   const navigate = useNavigate();
 
-  const {getToken} = useAuth();
-
   const queryClient = useQueryClient();
 
   const {mutate, isPending: submitting} = useMutation({
@@ -39,7 +37,6 @@ const useSendMessage = (params: SendMessageParams) => {
       chatData,
       selectedImageFiles,
       recordedFile,
-      getToken,
       currentUser,
       recipientsPublicKeys
     }),

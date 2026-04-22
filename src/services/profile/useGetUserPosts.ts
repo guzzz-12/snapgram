@@ -1,14 +1,11 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { fetchUserPosts } from "@/repositories/profileRepository";
 import type { UserType } from "@/types/global";
 
 const useGetUserPosts = (userData: UserType | null) => {
-  const {getToken} = useAuth();
-
   const postsData = useInfiniteQuery({
     queryKey: ["posts", userData?.clerkId],
-    queryFn: ({pageParam}) => fetchUserPosts({page: pageParam, userId: userData?._id, getToken}),
+    queryFn: ({pageParam}) => fetchUserPosts({page: pageParam, userId: userData?._id}),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,

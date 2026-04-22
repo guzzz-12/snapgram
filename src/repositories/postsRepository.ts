@@ -6,21 +6,15 @@ type CreatePostParams = {
   user: UserType | null;
   textContent: string;
   selectedImageFiles: File[];
-  getToken: () => Promise<string | null>;
 };
 
 /** Función para obtener un post mediante su ID */
-export const getPost = async ({getToken, postId}: {postId: string | undefined; getToken: () => Promise<string | null>}) => {
-  const token = await getToken();
-
-  if (!token || !postId) return false;
+export const getPost = async ({postId}: {postId: string | undefined}) => {
+  if (!postId) return false;
 
   const {data} = await axiosInstance<{data: PostWithLikes}>({
     method: "GET",
-    url: `/posts/${postId}`,
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    url: `/posts/${postId}`
   });
 
   return data.data;
@@ -30,9 +24,7 @@ export const getPost = async ({getToken, postId}: {postId: string | undefined; g
  * Función para consultar los posts paginados.
  * Devuelve los posts de los usuarios seguidos por el usuario que consulta.
  */
-export const fetchPosts = async (page: number, getToken: () => Promise<string | null>) => {
-  const token = await getToken();
-
+export const fetchPosts = async (page: number) => {
   const {data} = await axiosInstance<{
     data: PostWithLikes[];
     hasMore: boolean;
@@ -43,9 +35,6 @@ export const fetchPosts = async (page: number, getToken: () => Promise<string | 
     params: {
       page,
       limit: 5
-    },
-    headers: {
-      Authorization: `Bearer ${token}`
     }
   });
 
@@ -73,24 +62,16 @@ export const fetchPosts = async (page: number, getToken: () => Promise<string | 
 
 /** Función para crear un post */
 export const createPostFn = async (params: CreatePostParams) => {
-  const {user, textContent, selectedImageFiles, getToken} = params;
+  const {user, textContent, selectedImageFiles} = params;
 
   if ((!textContent && selectedImageFiles.length === 0) || !user) return;
-
-  const token1 = await getToken();
 
   // Subir las imágenes a ImageKit si las hay
   const uploadData = selectedImageFiles.length > 0 ? await filesUploader({
     files: selectedImageFiles,
-    clerkToken: token1!,
     folderName: `/posts/${user._id}`,
     currentUser: user
   }) : [];
-
-  // El primer token de acceso ya está posiblemente expirado en este punto
-  // Generar un nuevo token para la consulta de creación del post
-  // una vez que todas las imágenes ya se hayan subido a ImageKit
-  const token2 = await getToken();
 
   // Crear el post
   const {data} = await axiosInstance<{data: PostWithLikes}>({
@@ -102,8 +83,7 @@ export const createPostFn = async (params: CreatePostParams) => {
       imageFileIds: uploadData.map(uData => uData.fileId)
     },
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token2!}`
+      "Content-Type": "application/json"
     }
   });
 

@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { fetchUserCryptoKeys } from "@/repositories/cryptoKeysRepository";
 import type { UserType } from "@/types/global";
 
@@ -12,11 +11,9 @@ type GetUserKeysParams = {
 const useGetUserCryptoKeys = (params: GetUserKeysParams) => {
   const {user, pin} = params;
 
-  const {getToken} = useAuth();
-
-  const {error, isFetching, status, } = useQuery({
+  const {error, isFetching, status} = useQuery({
     queryKey: ["getMyCryptoKeys"],
-    queryFn: async () => fetchUserCryptoKeys({user, pin, getToken}),
+    queryFn: async () => fetchUserCryptoKeys({user, pin}),
     retry: false,
     enabled: !!user && pin.length === 6,
     refetchOnWindowFocus: false,

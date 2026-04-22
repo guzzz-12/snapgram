@@ -1,5 +1,4 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { Comment } from "@/types/global";
 
@@ -7,13 +6,9 @@ import type { Comment } from "@/types/global";
 const useGetPostComments = (props: {postId: string | undefined; enabled: boolean}) => {
   const {postId, enabled} = props;
 
-  const {getToken} = useAuth();
-
   const res = useInfiniteQuery({
     queryKey: ["postComments", postId],
     queryFn: async ({ pageParam }) => {
-      const token = await getToken();
-
       const {data} = await axiosInstance<{
         data: Comment[];
         hasMore: boolean;
@@ -21,9 +16,6 @@ const useGetPostComments = (props: {postId: string | undefined; enabled: boolean
       }>({
         method: "GET",
         url: `/comments/posts/${postId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
         params: {
           page: pageParam,
           limit: 5

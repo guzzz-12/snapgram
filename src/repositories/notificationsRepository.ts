@@ -4,13 +4,10 @@ import type { NotificationType } from "@/types/global";
 type FetchNotificationsProps = {
   page: number;
   activeTab: "all" | "unread";
-  getToken: () => Promise<string | null>;
 }
 
 /** Función para consultar las notificaciones */
-export const fetchNotifications = async ({page, activeTab, getToken}: FetchNotificationsProps) => {
-  const token = await getToken();
-
+export const fetchNotifications = async ({page, activeTab}: FetchNotificationsProps) => {
   const {data} = await axiosInstance<{
     data: NotificationType[];
     hasMore: boolean;
@@ -24,7 +21,6 @@ export const fetchNotifications = async ({page, activeTab, getToken}: FetchNotif
       filter: activeTab
     },
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json"
     }
   });

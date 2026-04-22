@@ -1,17 +1,14 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { fetchPrivateChatByParticipant } from "@/repositories/chatsRepository";
 import { restoreDeletedChatCache } from "@/utils/updateMsgsDataCache";
 
 /** Hook para consultar el chat con el usuario seleccionado */
 const getPrivateChatByRecipient = (selectedUserId: string | null | undefined) => {
-  const { getToken } = useAuth();
-
   const queryClient = useQueryClient();
 
   const res = useQuery({
     queryKey: ["get-private-chat-by-participant", selectedUserId],
-    queryFn: async () => fetchPrivateChatByParticipant({selectedUserId, getToken}),
+    queryFn: async () => fetchPrivateChatByParticipant({selectedUserId}),
     enabled: !!selectedUserId
   });
 

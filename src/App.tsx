@@ -24,7 +24,7 @@ import { useGetUnreadChats } from "./services/chats";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { axiosInstance, setupAxiosInterceptors } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 
 /** Cantidad de intentos de ping al servidor */
@@ -32,7 +32,7 @@ const PING_RETRY = 6;
 
 const App = () => {
   const { isSignedIn, isLoaded } = useUser();
-  const { userId, signOut } = useAuth();
+  const { userId, signOut, getToken } = useAuth();
 
   const [serverStarted, setServerStarted] = useState(false);
   const [serverError, setServerError] = useState(false);
@@ -43,7 +43,7 @@ const App = () => {
 
   // Realizar ping al servidor para inicializarlo
   // en caso de estar deshabilitado por inactividad.
-  const { data: keepAliveData, status, failureCount } = useQuery({
+  const { data: keepAliveData, status: serverStatus, failureCount } = useQuery({
     queryKey: ["server-ping"],
     queryFn: async () => {
       return await axiosInstance({
@@ -57,13 +57,20 @@ const App = () => {
 
   // Actualizar el state activo del servidor
   useEffect(() => {
-    setServerStarted(status === "success");
+    setServerStarted(serverStatus === "success");
 
     // failureCount = primer intento + el número de retries
     if (failureCount === PING_RETRY + 1) {
       setServerError(true);
     }
-  }, [status, failureCount]);
+  }, [serverStatus, failureCount]);
+
+  // Inicializar el interceptor de axios para incluir el token en cada consulta
+  useEffect(() => {
+    if (serverStarted) {
+      setupAxiosInterceptors(getToken);
+    }
+  }, [serverStarted, getToken]);
 
   // Consultar la data del usuario autenticado
   const { userData, loadingUser, userError } = useGetCurrentUser({

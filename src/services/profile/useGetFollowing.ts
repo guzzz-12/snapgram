@@ -5,11 +5,9 @@ import { fetchFollowing } from "@/repositories/profileRepository";
 
 /** Hook para consultar los seguidos del usuario */
 const useGetFollowing = (userData: UserType | null) => {
-  const {getToken} = useAuth();
-
   const res = useInfiniteQuery({
     queryKey: ["following", userData?._id],
-    queryFn: async ({pageParam}) => fetchFollowing({userId: userData?._id, page: pageParam, getToken}),
+    queryFn: async ({pageParam}) => fetchFollowing({userId: userData?._id, page: pageParam}),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,

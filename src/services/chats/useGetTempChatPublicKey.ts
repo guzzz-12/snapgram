@@ -1,4 +1,3 @@
-import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import type { ChatType } from "@/types/global";
 import { axiosInstance } from "@/utils/axiosInstance";
@@ -7,19 +6,13 @@ import { axiosInstance } from "@/utils/axiosInstance";
 const useGetTempChatPublicKey = (chat: ChatType | null | undefined) => {
   const isTempChat = Boolean(chat && chat._id.startsWith("temp_"));
 
-  const {getToken} = useAuth();
-
   const {data, isLoading} = useQuery({
     queryKey: ["tempChatPublicKey", chat?._id],
     queryFn: async () => {
-      const token = await getToken();
 
       const {data} = await axiosInstance<{data: JsonWebKey}>({
         method: "GET",
-        url: `/crypto-keys/get-user-public-key/${chat?._id.replace("temp_", "")}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        url: `/crypto-keys/get-user-public-key/${chat?._id.replace("temp_", "")}`
       });
 
       return data;

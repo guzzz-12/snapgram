@@ -1,4 +1,3 @@
-import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchChats } from "@/repositories/chatsRepository";
 
@@ -8,11 +7,9 @@ const useGetChats = (
   chatId: string | undefined,
   hasLocalCryptoKeys: boolean
 ) => {
-  const { getToken } = useAuth();
-
   const res = useInfiniteQuery({
     queryKey: ["chats", chatTypeParam || "all"],
-    queryFn: ({pageParam}) => fetchChats(pageParam, chatTypeParam, getToken),
+    queryFn: ({pageParam}) => fetchChats(pageParam, chatTypeParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,

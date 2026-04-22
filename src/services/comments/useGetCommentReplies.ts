@@ -1,5 +1,4 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { axiosInstance } from "@/utils/axiosInstance";
 import type { Comment } from "@/types/global";
 
@@ -11,19 +10,13 @@ type PaginatedReplies = {
 
 /** Consultar y paginar las respuestas de un comentario */
 const useGetCommentReplies = (commentId: string, openReplies: boolean) => {
-  const {getToken} = useAuth();
-
   const res = useInfiniteQuery({
     queryKey: ["commentReplies", commentId],
     queryFn: async ({ pageParam }) => {
-      const token = await getToken();
 
       const {data} = await axiosInstance<PaginatedReplies>({
         method: "GET",
         url: `/comments/replies/comment/${commentId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
         params: {
           page: pageParam,
           limit: 5

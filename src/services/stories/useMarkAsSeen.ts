@@ -1,21 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { axiosInstance } from "@/utils/axiosInstance";
 
 /** Hook para marcar una historia como vista */
 const useMarkStoryAsSeen = (storyId: string) => {
-  const { getToken } = useAuth();
-
   const { mutate: markStoryAsSeen, isPending: isMarkingStoryAsSeen } = useMutation({
     mutationFn: async () => {
-      const token = await getToken();
-
       return axiosInstance({
         method: "PUT",
-        url: `/stories/seen/${storyId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        url: `/stories/seen/${storyId}`
       });
     },
     onError: (_error) => {

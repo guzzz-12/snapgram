@@ -6,11 +6,9 @@ import { fetchChatMessages } from "@/repositories/chatsRepository";
 const useGetChatsMessages = (params: { chatId: string | undefined; isLoadingChatData: boolean}) => {
   const {chatId, isLoadingChatData} = params;
 
-  const { getToken } = useAuth();
-
   const res = useInfiniteQuery({
     queryKey: ["messages", chatId],
-    queryFn: ({pageParam}) => fetchChatMessages(chatId, pageParam, getToken),
+    queryFn: ({pageParam}) => fetchChatMessages(chatId, pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     enabled: !isLoadingChatData && !!chatId && !chatId.startsWith("temp_"),

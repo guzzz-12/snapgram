@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -14,8 +13,6 @@ export type EditPostProps = {
 
 /** Hook para editar un post */
 const useEditPost = () => {
-  const {getToken} = useAuth();
-
   const queryClient = useQueryClient();
 
   const {mutate, isPending} = useMutation({
@@ -24,8 +21,6 @@ const useEditPost = () => {
 
       if (!postData) return;
 
-      const token = await getToken();
-
       return axiosInstance({
         method: "PUT",
         url: `/posts/${postData._id}`,
@@ -33,8 +28,7 @@ const useEditPost = () => {
           content: updatedTextContent
         },
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          "Content-Type": "application/json"
         }
       });
     },

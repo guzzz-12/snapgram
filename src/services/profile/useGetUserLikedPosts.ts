@@ -1,15 +1,12 @@
-import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchUserLikedPosts } from "@/repositories/profileRepository";
 import type { UserType } from "@/types/global";
 
 /** Hook para consultar los posts gustados del usuario */
 const useGetUserLikedPosts = (userData: UserType | null) => {
-  const { getToken } = useAuth();
-
   const res = useInfiniteQuery({
     queryKey: ["likes", "likedPosts"],
-    queryFn: ({pageParam}) => fetchUserLikedPosts(pageParam, getToken),
+    queryFn: ({pageParam}) => fetchUserLikedPosts(pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,

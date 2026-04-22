@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import type { StoryType, UserWithStories } from "@/types/global";
 import { axiosInstance } from "@/utils/axiosInstance";
 
@@ -10,21 +9,14 @@ const useToggleLikeStory = (
   username: string | null,
   currentUserId: string | undefined
 ) => {
-  const { getToken } = useAuth();
-
   const queryClient = useQueryClient();
 
   const { mutate: toggleLikeStory, isPending: isTogglingLikeStory } = useMutation({
     mutationKey: ["stories", username],
     mutationFn: async () => {
-      const token = await getToken();
-
       return axiosInstance<{ data: StoryType }>({
         method: "PUT",
-        url: `/likes/story/${storyId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        url: `/likes/story/${storyId}`
       });
     },
     onSuccess: () => {

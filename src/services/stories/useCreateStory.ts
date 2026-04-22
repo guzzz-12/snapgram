@@ -16,14 +16,12 @@ type Props = {
 
 /** Hook para crear una historia */
 const useCreateStory = (props: Props) => {
-  const {getToken} = useAuth();
-
   const queryClient = useQueryClient();
 
   const {setOpen} = useCreatePublicationModal();
 
   const {mutate, isPending} = useMutation({
-    mutationFn: () => createStoryFn({...props, getToken}),
+    mutationFn: () => createStoryFn(props),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ["stories"]});
       setOpen({open: false, publicationType: null});

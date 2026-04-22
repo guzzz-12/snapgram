@@ -1,5 +1,4 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { fetchNotifications } from "@/repositories/notificationsRepository";
 
 type GetNotificationsProps = {
@@ -8,11 +7,9 @@ type GetNotificationsProps = {
 
 /** Hook para consultar y paginar las notificaciones */
 const useGetNotifications = ({activeTab}: GetNotificationsProps) => {
-  const { getToken } = useAuth();
-
   const notificationsData = useInfiniteQuery({
     queryKey: ["notifications", activeTab],
-    queryFn: async ({pageParam}) => fetchNotifications({page: pageParam, activeTab, getToken}),
+    queryFn: async ({pageParam}) => fetchNotifications({page: pageParam, activeTab}),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false

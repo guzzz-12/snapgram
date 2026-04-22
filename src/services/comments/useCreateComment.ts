@@ -1,20 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 
 /** Crear comementario o responder a un comentario */
 const useCreateComment = () => {
-  const {getToken} = useAuth();
-
   const queryClient = useQueryClient();
 
   const {mutate, isPending: isCreatingComment} = useMutation({
     mutationFn: async (props: {postId: string; formData: FormData; onSuccess?: () => void}) => {
       const {postId, formData} = props;
-
-      const token = await getToken();
 
       return axiosInstance({
         method: "POST",
@@ -22,7 +17,6 @@ const useCreateComment = () => {
         data: formData,
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
         }
       });
     },

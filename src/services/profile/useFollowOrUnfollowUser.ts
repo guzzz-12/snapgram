@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -9,14 +8,11 @@ const useFollowOrUnfollowUser = (
   followedUserId: string | undefined,
   currentUserClerkId: string | null | undefined
 ) => {
-  const {getToken} = useAuth();
 
   const queryClient = useQueryClient();
 
   const {mutate, isPending} = useMutation({
     mutationFn: async () => {
-      const token = await getToken();
-
       if (!currentUserClerkId) return;
 
       return axiosInstance({
@@ -24,9 +20,6 @@ const useFollowOrUnfollowUser = (
         url: `/follows/follow-or-unfollow`,
         data: {
           userId: followedUserId
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
         }
       });
     },

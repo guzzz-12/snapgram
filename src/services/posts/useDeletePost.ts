@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
@@ -16,20 +15,14 @@ type DeletePostProps = {
 const useDeletePost = () => {
   const navigate = useNavigate();
 
-  const {getToken} = useAuth();
-
   const queryClient = useQueryClient();
 
   const {mutate, isPending} = useMutation({
     mutationFn: async (params: DeletePostProps) => {
-      const token = await getToken();
 
       return axiosInstance({
         method: "DELETE",
-        url: `/posts/${params.postId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        url: `/posts/${params.postId}`
       });
     },
     onSuccess: async (_data, vars) => {

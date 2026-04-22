@@ -1,14 +1,11 @@
-import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchChatById } from "@/repositories/chatsRepository";
 
 /** Hook para consultar un chat especifico por su ID */
 const useGetChatById = (chatId: string | undefined) => {
-  const { getToken } = useAuth();
-
   const res = useQuery({
     queryKey: ["chat", chatId],
-    queryFn: () => fetchChatById(chatId, getToken),
+    queryFn: () => fetchChatById(chatId),
     enabled: !!chatId && !chatId.startsWith("temp_"),
     refetchOnWindowFocus: false
   });

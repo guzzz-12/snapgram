@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import type { PostType } from "@/types/global";
 import { axiosInstance } from "@/utils/axiosInstance";
 
@@ -13,19 +12,12 @@ const useGetSharedPost = (
 ) => {
   const {repostedPostId, open, isRepost} = params;
 
-  const {getToken} = useAuth();
-
   const res = useQuery({
     queryKey: ["post", repostedPostId],
     queryFn: async () => {
-      const token = await getToken();
-      
       const {data} = await axiosInstance<{data: PostType}>({
         method: "get",
-        url: `/posts/${repostedPostId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        url: `/posts/${repostedPostId}`
       });
 
       return data;

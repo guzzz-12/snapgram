@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { createCryptoKeys } from "@/repositories/cryptoKeysRepository";
 import type { UserType } from "@/types/global";
@@ -14,12 +13,10 @@ type CreateKeysParams = {
 const useCreateCryptoKeys = (params: CreateKeysParams) => {
   const {user, pin, operation} = params;
 
-  const {getToken} = useAuth();
-
   const queryClient = useQueryClient();
 
   const {mutate, isPending, error} = useMutation({
-    mutationFn: async (_props: {onSuccess?: () => void}) => createCryptoKeys({user, pin, operation, getToken}),
+    mutationFn: async (_props: {onSuccess?: () => void}) => createCryptoKeys({user, pin, operation}),
     onSuccess: async (_data, {onSuccess}) => {
       if (!user) {
         return;

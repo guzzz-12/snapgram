@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserProfile } from "@/repositories/profileRepository";
-import { useAuth } from "@clerk/clerk-react";
 
 /** Hook para consultar el perfil de un usuario */
 const useGetUserProfile = (
@@ -8,11 +7,9 @@ const useGetUserProfile = (
   fetchOnHover?: boolean,
   isHovered?: boolean
 ) => {
-  const {getToken} = useAuth();
-
   const userProfileData = useQuery({
     queryKey: ["user", userClerkId],
-    queryFn: async () => fetchUserProfile({userClerkId, getToken}),
+    queryFn: async () => fetchUserProfile({userClerkId}),
     enabled: fetchOnHover ? (isHovered && !!userClerkId) : !!userClerkId,
     refetchOnWindowFocus: false,
     retry: 1

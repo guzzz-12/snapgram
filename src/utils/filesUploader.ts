@@ -4,7 +4,6 @@ import type { UserType } from "@/types/global";
 
 interface Props {
   files: File[];
-  clerkToken: string;
   currentUser: UserType | null;
   folderName: string;
 }
@@ -21,7 +20,7 @@ export const filesUploader = async (props: Props) => {
     return [];
   }
 
-  const { files, clerkToken, currentUser, folderName } = props;
+  const { files, currentUser, folderName } = props;
 
   if (!files || files.length === 0) {
     throw new Error("No se ha proporcionado un archivo válido");
@@ -34,9 +33,6 @@ export const filesUploader = async (props: Props) => {
     data: {
       // Solicitar un signature para cada imagen a subir
       amount: files.length
-    },
-    headers: {
-      Authorization: `Bearer ${clerkToken}`
     }
   });
 

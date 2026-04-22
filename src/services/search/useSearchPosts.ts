@@ -1,5 +1,4 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { useSearchStatus } from "@/hooks/useSearchStatus";
 import { searchPosts } from "@/repositories/searchRepository";
 
@@ -10,13 +9,11 @@ type SearchProps = {
 
 /** Hook para buscar posts a traves del término de búsqueda */
 const useSearchPosts = ({searchTerm, searchType}: SearchProps) => {
-  const {getToken} = useAuth();
-
   const {setIsSearching, setSearchType} = useSearchStatus();
 
   const res = useInfiniteQuery({
     queryKey: ["search", searchTerm, "posts"],
-    queryFn: ({pageParam}) => searchPosts({page: pageParam, keyword: searchTerm, getToken, setIsSearching, setSearchType}),
+    queryFn: ({pageParam}) => searchPosts({page: pageParam, keyword: searchTerm, setIsSearching, setSearchType}),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
     refetchOnWindowFocus: false,

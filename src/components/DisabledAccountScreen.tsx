@@ -1,6 +1,7 @@
 import { GoInfo } from "react-icons/go";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
+import Logo from "./Logo";
 
 interface Props {
   isPending: boolean;
@@ -11,7 +12,9 @@ interface Props {
 
 const DisabledAccountScreen = ({ isPending, isSigningOut, mutate, signOutHandler }: Props) => {
   return (
-    <main className="flex justify-center items-center w-full min-h-[100dvh] bg-slate-100">
+    <main className="flex flex-col justify-start pt-20 items-center gap-8 w-full min-h-[100dvh] bg-slate-100">
+      <Logo size="md" />
+
       <section className="flex flex-col justify-center items-center px-10 py-4 border rounded-lg bg-white shadow">
         <h1 className="mb-2 text-center text-2xl text-neutral-900 font-semibold">
           ¿Reactivar tu cuenta?

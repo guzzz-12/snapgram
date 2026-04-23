@@ -14,6 +14,7 @@ import DeletePrivateChatModal from "./DeletePrivateChatModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLeaveOrKickUser } from "@/hooks/useLeaveOrKickUser";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useBlockUserModal } from "@/hooks/useBlockUserModal";
 import type { ChatType } from "@/types/global";
@@ -32,10 +33,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
   const [openAddMemberModal, setOpenAddMemberModal] = useState(false);
 
   // State del modal de eliminar miembro del grupo
-  const [modalState, setModalState] = useState<{isOpen: boolean, operation: "Abandonar" | "Eliminar" | null}>({
-    isOpen: false,
-    operation: null
-  });
+  const {setModalState} = useLeaveOrKickUser();
 
   const [openGroupInfoModal, setOpenGroupInfoModal] = useState(false);
 
@@ -80,11 +78,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
         setIsOpen={setOpenAddMemberModal}
       />
 
-      <LeaveOrKickFromGroupModal
-        chatData={chatData}
-        modalState={modalState}
-        setModalState={setModalState}
-      />
+      <LeaveOrKickFromGroupModal chatData={chatData}/>
 
       <DeleteGroupModal
         isOpen={openDeleteGroupModal}

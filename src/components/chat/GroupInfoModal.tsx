@@ -21,9 +21,9 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useGetGroupInfo, useUpdateGroupInfo } from "@/services/chats";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useLeaveOrKickUser } from "@/hooks/useLeaveOrKickUser";
 import useClampedText from "@/hooks/useClampedText";
 import { errorMessage } from "@/utils/errorMessage";
-import type { UserType } from "@/types/global";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -48,16 +48,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
 
   const [openDeleteGroupModal, setOpenDeleteGroupModal] = useState(false);
 
-  // State del modal de abandonar grupo o eliminar miembro del grupo
-  const [leaveOrKickModalState, setLeaveOrKickModalState] = useState<{
-    isOpen: boolean;
-    operation: "Abandonar" | "Eliminar" | null;
-    kickedUser?: UserType;
-  }>({
-    isOpen: false,
-    operation: null,
-    kickedUser: undefined
-  });
+  const {setModalState: setLeaveOrKickModalState} = useLeaveOrKickUser();
 
   const {user: currentUser} = useCurrentUser();
 
@@ -134,11 +125,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
         setIsOpen={setOpenAddMemberModal}
       />
 
-      <LeaveOrKickFromGroupModal
-        chatData={data}
-        modalState={leaveOrKickModalState}
-        setModalState={setLeaveOrKickModalState}
-      />
+      <LeaveOrKickFromGroupModal chatData={data}/>
 
       <DeleteGroupModal
         isOpen={openDeleteGroupModal}

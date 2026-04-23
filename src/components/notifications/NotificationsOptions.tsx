@@ -1,34 +1,11 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { FaCheck } from "react-icons/fa6";
 import { Ellipsis } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { useMarkAllAsRead } from "@/services/notifications";
 
 const NotificationsOptions = () => {
-  const { getToken } = useAuth();
-
-  const queryClient = useQueryClient();
-
-  // Marcar todas las notificaciones como leídas
-  const {mutate: markAllAsRead, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "PUT",
-        url: "/notifications/mark-all-as-read",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["notifications"]});
-    }
-  });
-
+  const { mutate: markAllAsRead, isPending } = useMarkAllAsRead();
 
   return (
     <DropdownMenu>

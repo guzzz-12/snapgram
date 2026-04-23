@@ -1,10 +1,8 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import { toast } from "sonner";
 import ProfileAvatarEdit from "./ProfileAvatarEdit";
 import ProfileCoverEdit from "./ProfileCoverEdit";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
@@ -13,8 +11,7 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay } from "../ui/dialog";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { errorMessage } from "@/utils/errorMessage";
+import { useUserProfileUpdate } from "@/services/user";
 import useImagePicker from "@/hooks/useImagePicker";
 import type { UserType } from "@/types/global";
 
@@ -24,7 +21,7 @@ const FormSchema = z.object({
   bio: z.string().max(4200, "La biografía no puede tener más de 4200 caracteres").optional(),
 });
 
-type FormType = z.infer<typeof FormSchema>;
+export type FormType = z.infer<typeof FormSchema>;
 
 interface Props {
   userData: UserType;
@@ -36,17 +33,14 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
   const profilePicInputRef = useRef<HTMLInputElement | null>(null);
   const coverPicInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [mutableUserData, setMutableUserData] = useState<UserType>(userData);
-
-  const {getToken, userId} = useAuth();
-  const queryClient = useQueryClient();
+  const {userId} = useAuth();
 
   const formProps = useForm<FormType>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      fullName: mutableUserData.fullName,
-      username: mutableUserData.username,
-      bio: mutableUserData.bio,
+      fullName: userData.fullName,
+      username: userData.username,
+      bio: userData.bio,
     },
   });
   
@@ -58,33 +52,10 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
     fileInputRef: coverPicInputRef
   });
 
-  const updateUserMutation = useMutation({
-    mutationFn: async (values: FormType) => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance({
-        method: "PUT",
-        url: `/users/update-user`,
-        data: values,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
-
-      return data;
-    },
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({queryKey: ["user", userId]}),
-        queryClient.invalidateQueries({queryKey: ["posts", userId]}),      
-      ]);
-
+  const updateUserMutation = useUserProfileUpdate({
+    userId,
+    onSuccess: () => {
       onClose(false);
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
     }
   });
 
@@ -114,7 +85,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
         <div className="flex flex-col gap-6 w-full h-full">
           <ProfileAvatarEdit
             title="Foto de perfil"
-            userData={mutableUserData}
+            userData={userData}
             selectedImageFile={selectedProfilePicFile}
             selectedImagePreview={selectedProfilePicPreview}
             setSelectedImageFile={setSelectedProfilePicFile}
@@ -124,7 +95,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
 
           <ProfileCoverEdit
             title="Foto de portada"
-            userData={mutableUserData}
+            userData={userData}
             selectedImageFile={selectedCoverPicFile}
             selectedImagePreview={selectedCoverPicPreview}
             setSelectedImageFile={setSelectedCoverPicFile}

@@ -1,19 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
 import { Ellipsis, Trash2Icon } from "lucide-react";
 import { GoDotFill } from "react-icons/go";
-import { toast } from "sonner";
 import NotificationIcon from "./NotificationIcon";
 import ConfirmationModal from "../ConfirmationModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { NotificationType } from "@/types/global";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { useDeleteNotification, useMarkNotificationAsRead } from "@/services/notifications";
 import { NOTIFICATIONS_TEXT_MAP } from "@/utils/constants";
 import { generateNotificationLink } from "@/utils/generateNotificationLink";
 import { cn } from "@/lib/utils";
@@ -29,50 +25,11 @@ const NotificationItem = ({ data }: Props) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [showDropdownTrigger, setShowDropdownTrigger] = useState(false);
 
-  const queryClient = useQueryClient();
-
-  const { getToken } = useAuth();
-  
-  const markAsRead = async (notificationId: string) => {
-    const token = await getToken();
-
-    await axiosInstance({
-      method: "PUT",
-      url: `/notifications/mark-as-read/${notificationId}`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-  }
-
   // Marcar notificacion como leída
-  const {mutate: markAsReadMutation} = useMutation({
-    mutationFn: markAsRead,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["notifications"]});
-    }
-  });
+  const { markAsReadMutation } = useMarkNotificationAsRead();
 
   // Eliminar notificacion
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "DELETE",
-        url: `/notifications/${data._id}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["notifications"]});
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const { mutate, isPending } = useDeleteNotification({ notificationId: data._id });
 
   // Generar el link de la notificacion
   const notificationLink = generateNotificationLink({

@@ -1,14 +1,11 @@
 import { useEffect, useRef } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import BlockedUserListItem from "./BlockedUserListItem";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGetBlockedUsers } from "@/services/user";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { UserType } from "@/types/global";
 
 interface Props {
   isOpen: boolean;
@@ -18,43 +15,18 @@ interface Props {
 const BlockedUsersListModal = ({ isOpen, setIsOpen }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
-  const {getToken} = useAuth();
-
-  const {data, error, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["blocked-users"],
-    queryFn: async ({pageParam}) => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{
-        data: {
-          blockedBy: string;
-          blockedUser: UserType;
-          createdAt: string;
-        }[];
-        hasMore: boolean;
-        nextPage: number | null;
-      }>({
-        method: "GET",
-        url: "/block",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        params: {
-          page: pageParam,
-          limit: 10
-        }
-      });
-
-      return data;
-    },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    enabled: isOpen
-  });
+  const {
+    blockedUsers,
+    error,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  } = useGetBlockedUsers({enabled: isOpen});
 
   // Observar cuando el usuario llega al final del viewport
   const {isIntersecting} = useIntersectionObserver({
-    data,
+    data: blockedUsers,
     paginationRef
   });
 
@@ -68,8 +40,6 @@ const BlockedUsersListModal = ({ isOpen, setIsOpen }: Props) => {
   if (error) {
     toast.error(errorMessage(error));
   }
-
-  const blockedUsers = data?.pages.flatMap(page => page.data) || [];
   
   return (
     <Dialog

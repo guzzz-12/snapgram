@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2Icon, Search } from "lucide-react";
 import { toast } from "sonner";
 import UserSearchResultItem from "./UserSearchResultItem";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useDebounce } from "@/hooks/useDebounce";
+import { useSearchUsers } from "@/services/search";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { SearchUsersResult } from "@/types/global";
 
 const NewUserScreen = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
@@ -18,51 +14,15 @@ const NewUserScreen = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const {getToken} = useAuth();
-
-  const {debouncedValue} = useDebounce(searchTerm);
-
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  });
+  }, []);
 
-  // Función para buscar los usuarios
-  const searchUsers = async (page: number, term: string) => {
-    const token = await getToken();
+  const {data: users, error, isLoading, isFetchingNextPage, status, hasNextPage, fetchNextPage} = useSearchUsers({searchTerm, searchType: "people"});
 
-    const {data} = await axiosInstance<{
-      data: SearchUsersResult[];
-      hasMore: boolean;
-      nextPage: number | null;
-    }>({
-      method: "GET",
-      url: "/search/search-users",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        page,
-        limit: 5,
-        keyword: term
-      }
-    });
-
-    return data;
-  }
-
-  const {data: usersData, error, isLoading, isFetchingNextPage, status, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["search-users", debouncedValue],
-    queryFn: ({pageParam}) => searchUsers(pageParam, debouncedValue),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    refetchOnWindowFocus: false,
-    enabled: debouncedValue.trim().length > 0,
-    retry: 1
-  });
-
-  const {isIntersecting} = useIntersectionObserver({data: usersData, paginationRef});
+  const {isIntersecting} = useIntersectionObserver({data: users, paginationRef});
 
   // Consultar las siguientes paginas de usuarios cuando la referencia de la paginación sea visible
   useEffect(() => {
@@ -78,8 +38,6 @@ const NewUserScreen = () => {
   if (error) {
     toast.error(errorMessage(error));
   }
-
-  const users = usersData?.pages.flatMap((page) => page.data) ?? [];
 
   return (
     <section className="flex flex-col justify-start items-center w-full max-w-[600px] h-full mx-auto">
@@ -98,7 +56,6 @@ const NewUserScreen = () => {
             type="search"
             className="w-full h-full px-4 pl-10 py-3 rounded-full border-none"
             placeholder="Busca amigos o creadores de contenido..."
-            disabled={isLoading || isFetchingNextPage}
             value={searchTerm}
             onChange={onChangeHandler}
           />

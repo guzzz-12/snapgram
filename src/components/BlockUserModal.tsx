@@ -1,76 +1,29 @@
 import { useLocation, useNavigate } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { useBlockUserModal } from "@/hooks/useBlockUserModal"
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
-import type { UserType } from "@/types/global";
+import { useBlockUser } from "@/services/user";
+import { useBlockUserModal } from "@/hooks/useBlockUserModal";
 
 const BlockUserModal = () => {
   const {pathname} = useLocation();
   const navigate = useNavigate();
 
-  const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
-
   const {open, blockedUser, operation, setOpen, setBlockedUser} = useBlockUserModal();
 
-  // Mutation para bloquear o desbloquear al usuario
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      if (!blockedUser) return;
+  const onSuccessHandler = () => {
+    setBlockedUser(null);
 
-      const token = await getToken();
+    setOpen(false);
 
-      const {data} = await axiosInstance<{
-        data: {
-          user: UserType;
-          operation: "block" | "unblock";
-          chatId: string | null;
-        }
-      }>({
-        method: "PUT",
-        url: "/block",
-        data: {
-          blockedUserId: blockedUser._id
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
-
-      const message = data.data.operation === "block" ? `Bloqueaste a ${blockedUser.fullName.split(" ")[0]}` : `Desbloqueaste a ${blockedUser.fullName.split(" ")[0]}`;
-
-      toast.success(message);
-
-      return data;
-    },
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({queryKey: ["blocked-users"]});
-
-      await queryClient.invalidateQueries({queryKey: ["user", data?.data.user.clerkId]});
-
-      // Invalidar la cache del chat con el usuario bloqueado/desbloqueado
-      if (data && data.data.chatId) {
-        await queryClient.invalidateQueries({queryKey: ["chat", data.data.chatId]});
-      }
-
-      setBlockedUser(null);
-      setOpen(false);
-
-      if (pathname === `/profile/${blockedUser?.clerkId}`) {
-        navigate("/", {replace: true});
-      }
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
+    if (pathname === `/profile/${blockedUser?.clerkId}`) {
+      navigate("/", {replace: true});
     }
+  }
+
+  // Mutation para bloquear o desbloquear al usuario
+  const {mutate, isPending} = useBlockUser({
+    blockedUser,
+    onSuccess: onSuccessHandler
   });
 
   return (

@@ -1,13 +1,10 @@
 import { useNavigate } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { IoWarningOutline } from "react-icons/io5";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useDeletePrivateChat } from "@/services/chats";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
 import type { ChatType } from "@/types/global";
 
 interface Props {
@@ -19,40 +16,20 @@ interface Props {
 const DeletePrivateChatModal = ({chatData, isOpen, setIsOpen}: Props) => {
   const navigate = useNavigate();
 
-  const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
-
   const {user: currentUser} = useCurrentUser();
 
   const otherUser = chatData?.participants.find((p) => p._id !== currentUser?._id)!;
 
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      if (!chatData || !currentUser) return;
+  const onSuccessHandler = () => {
+    toast.success("Chat eliminado con éxito");
+    navigate("/messages?type=all", {replace: true});
+    setIsOpen(false);
+  }
 
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{data: {chat: string}}>({
-        method: "DELETE",
-        url: `/chats/private/${chatData._id}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["chats", "all"]});
-      toast.success("Chat eliminado con éxito");
-      navigate("/messages?type=all", {replace: true});
-      setIsOpen(false);
-    },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
-    }
+  const {mutate, isPending} = useDeletePrivateChat({
+    currentUser,
+    chatData,
+    onSuccess: onSuccessHandler
   });
 
   if (!chatData || !otherUser) return null;

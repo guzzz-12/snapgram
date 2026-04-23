@@ -11,6 +11,14 @@ import useGetGroupInfo from "./useGetGroupInfo";
 import useUpdateGroupInfo from "./useUpdateGroupInfo";
 import useDeleteGroup from "./useDeleteGroup";
 import useGetUnreadChats from "./useGetUnreadChats";
+import useResetUnreadCount from "./useResetUnreadCount";
+import useCreateGroupChat from "./useCreateGroupChat";
+import useDeletePrivateChat from "./useDeletePrivateChat";
+import useLeaveGroup from "./useLeaveGroup";
+import useKickFromGroup from "./useKickFromGroup";
+import useEditMessage from "./useEditMessage";
+import useDeleteMessage from "./useDeleteMessage";
+import useUpdateGroupImage from "./useUpdateGroupImage";
 
 export {
   useGetChatById,
@@ -26,4 +34,12 @@ export {
   useUpdateGroupInfo,
   useDeleteGroup,
   useGetUnreadChats,
+  useResetUnreadCount,
+  useCreateGroupChat,
+  useDeletePrivateChat,
+  useLeaveGroup,
+  useKickFromGroup,
+  useEditMessage,
+  useDeleteMessage,
+  useUpdateGroupImage
 };

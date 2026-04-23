@@ -1,14 +1,10 @@
 import { useRef } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useUpdateGroupImage } from "@/services/chats";
 import useImagePicker from "@/hooks/useImagePicker";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { errorMessage } from "@/utils/errorMessage";
-import type { ChatType } from "@/types/global";
 
 interface Props {
   groupId: string;
@@ -26,39 +22,14 @@ const UpdateGroupImgModal = (props: Props) => {
     maxSize: 1000
   });
 
-  const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
-
-  const updateGroupImg = async () => {
-    const token = await getToken();
-
-    const formData = new FormData();
-    formData.append("groupImage", selectedImageFiles[0]!);
-
-    const {data} = await axiosInstance<{data: ChatType}>({
-      method: "PUT",
-      url: `/chats/group/${groupId}/update-image`,
-      data: formData,
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    return data;
-  }
-
-  const {mutate, isPending} = useMutation({
-    mutationFn: updateGroupImg,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["groupInfo", groupId]});
+  const {mutate, isPending} = useUpdateGroupImage({
+    groupId,
+    selectedImageFiles,
+    onSuccess: () => {
+      toast.success("Imagen del grupo actualizada con éxito");
       setSelectedImageFiles([]);
       setSelectedImagePreviews([]);
       setIsOpen(false);
-      toast.success("Imagen del grupo actualizada con éxito");
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
     }
   });
 

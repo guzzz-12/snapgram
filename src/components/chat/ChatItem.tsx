@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import updateLocale from "dayjs/plugin/updateLocale";
 import { MdOutlineAttachment } from "react-icons/md";
@@ -9,10 +8,10 @@ import { LuDot } from "react-icons/lu";
 import { BeatLoader } from "react-spinners";
 import UnreadMsgsCounterBadge from "./UnreadMsgsCounterBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useResetUnreadCount } from "@/services/chats";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 import { updateUnreadMessagesCounterCache } from "@/utils/updateMsgsDataCache";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { decryptMessage } from "@/utils/decryptMessageText";
 import type { TypingEventData } from "@/types/socketTypes";
 import type { ChatType, MessageType } from "@/types/global";
@@ -55,8 +54,6 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
   const otherUserExists = chatData.type === "private" && !!otherUser;
 
   const [lastMessage, setLastMessage] = useState<MessageType | null>(null);
-
-  const {getToken} = useAuth();
   
   const queryClient = useQueryClient();
 
@@ -80,22 +77,10 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
   }, [chatData, user]);
 
   // Mutation para restablecer el contador de mensajes sin leer del usuario en el chat
-  const {mutate: resetUnreadMessagesCounter, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{data: ChatType}>({
-        method: "PUT",
-        url: `/chats/reset-unread-count/${chatData._id}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data;
-    },
-    onSuccess: (data) => {
-      updateUnreadMessagesCounterCache({chat: data.data, queryClient});
+  const {resetUnreadMessagesCounter, isPending} = useResetUnreadCount({
+    chatData,
+    onSuccess: (chat) => {
+      updateUnreadMessagesCounterCache({chat, queryClient});
     }
   });
 

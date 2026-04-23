@@ -1,12 +1,8 @@
-import { useAuth } from "@clerk/clerk-react";
-import { useMutation } from "@tanstack/react-query";
 import { IoWarningOutline } from "react-icons/io5";
-import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { axiosInstance } from "@/utils/axiosInstance";
-import { errorMessage } from "@/utils/errorMessage";
+import { useDisableAccount } from "@/services/user";
 
 interface Props {
   isOpen: boolean;
@@ -14,33 +10,7 @@ interface Props {
 }
 
 const DisableAccountModal = ({isOpen, setIsOpen}: Props) => {
-  const {getToken, signOut} = useAuth();
-
-  const {mutate: disableAccount, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance({
-        method: "PUT",
-        url: "/users/disable-account",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data;
-    },
-    onSuccess: () => {
-      toast.success("Tu cuenta ha sido deshabilitada correctamente");
-
-      setTimeout(() => {
-        signOut({redirectUrl: "/"});
-      }, 1000);
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {disableAccount, isPending} = useDisableAccount();
 
   return (
     <Dialog

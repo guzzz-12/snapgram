@@ -1,11 +1,9 @@
 import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { Pencil, Save, Trash2Icon, X } from "lucide-react";
 import { toast } from "sonner";
 import DeleteModal from "./DeleteModal";
 import { Button } from "../ui/button";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { useDeleteCoverPicture, useUpdateCoverPicture } from "@/services/user";
 import type { UserType } from "@/types/global";
 
 interface Props {
@@ -21,73 +19,35 @@ interface Props {
 const ProfileCoverEdit = ({title, userData, selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, coverPicInputRef }: Props) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
-  const {getToken} = useAuth();
-  const queryClient = useQueryClient();
-
-  const onUploadCoverPicHandler = async () => {
-    const token = await getToken();
-
-    const formData = new FormData();
-    formData.append("coverPicture", selectedImageFile[0]);
-
-    const {data} = await axiosInstance<{data: UserType}>({
-      method: "POST",
-      url: "/users/cover-picture",
-      data: formData,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data"
-      }
-    });
-
-    return data.data;
+  const onSuccess = () => {
+    toast.success("Imagen de portada actualizada correctamente");
+    setSelectedImageFile([]);
+    setSelectedImagePreview([]); 
   }
 
-  const updateCoverMutation = useMutation({
-    mutationFn: onUploadCoverPicHandler,
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({queryKey: ["user", userData.clerkId]});
-      toast.success("Imagen de portada actualizada correctamente");
+  const { updateCoverMutation, isPendingUpdateCover } = useUpdateCoverPicture({
+    selectedImage: selectedImageFile[0],
+    onSuccess
+  });
+
+  const {deleteCoverMutation, isPendingDeleteCover} = useDeleteCoverPicture({
+    onSuccess: () => {
+      toast.success("Foto de portada eliminada");
       setSelectedImageFile([]);
       setSelectedImagePreview([]);
-    },
-    onError: (error: any) => {
-      toast.error(error.message);
     }
   });
 
-  const onDeleteCoverPicHandler = async () => {
-    const {data} = await axiosInstance<{data: UserType}>({
-      method: "DELETE",
-      url: "/users/cover-picture"
-    });
-
-    return data.data;
-  }
-
-  const deleteCoverMutation = useMutation({
-    mutationFn: onDeleteCoverPicHandler,
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({queryKey: ["user", data.clerkId]})
-      toast.success("Foto de portada eliminada con éxito");
-      setSelectedImageFile([]);
-      setSelectedImagePreview([]);
-    },
-    onError: (error: any) => {
-      toast.error(error.message);
-    }
-  });
-
-  const isSubmitting = updateCoverMutation.isPending || deleteCoverMutation.isPending;
+  const isSubmitting = isPendingUpdateCover || isPendingDeleteCover;
 
   return (
     <div className="flex flex-col items-center gap-2 w-full">
       <DeleteModal
         isOpen={openDeleteModal}
-        isLoading={deleteCoverMutation.isPending}
+        isLoading={isPendingDeleteCover}
         title="¿Eliminar foto de portada?"
         setIsOpen={setOpenDeleteModal}
-        onDelete={() => deleteCoverMutation.mutate()}
+        onDelete={() => deleteCoverMutation()}
       />
 
       <p className="w-full text-left text-neutral-900 font-medium">
@@ -114,7 +74,7 @@ const ProfileCoverEdit = ({title, userData, selectedImageFile, selectedImagePrev
                 className="text-white hover:text-white border-none bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
                 variant="outline"
                 disabled={isSubmitting}
-                onClick={() => updateCoverMutation.mutate()}
+                onClick={() => updateCoverMutation()}
               >
                 <Save className="size-4" aria-hidden />
                 <span>Guardar</span>
@@ -126,7 +86,7 @@ const ProfileCoverEdit = ({title, userData, selectedImageFile, selectedImagePrev
                 className="border-none cursor-pointer"
                 variant="outline"
                 disabled={!userData.coverPicture || isSubmitting}
-                onClick={() => deleteCoverMutation.mutate()}
+                onClick={() => deleteCoverMutation()}
               >
                 <Trash2Icon className="size-4 text-destructive" aria-hidden />
                 <span>Eliminar</span>

@@ -1,7 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import UsersSearchBar from "./UsersSearchBar";
 import GroupChatModalItem from "./GroupChatModalItem";
@@ -12,32 +9,24 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useGetUsersToChat } from "@/services/chats";
+import { useCreateGroupChat, useGetUsersToChat } from "@/services/chats";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useDebounce } from "@/hooks/useDebounce";
-import { axiosInstance } from "@/utils/axiosInstance";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { errorMessage } from "@/utils/errorMessage";
-import type { ChatType } from "@/types/global";
 
 const CreateGroupChatModal = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const paginationRef = useRef<HTMLDivElement>(null);
-
-  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [selectedUsersIds, setSelectedUsersIds] = useState<string[]>([]);
 
-  const { getToken } = useAuth();
-
-  const queryClient = useQueryClient();
+  const {debouncedValue} = useDebounce(searchTerm);
 
   const {user: currentUser} = useCurrentUser();
-
-  const {debouncedValue} = useDebounce(searchTerm);
 
   // Hacer focus en el input del nombre del grupo cuando se abre el modal
   useEffect(() => {
@@ -46,40 +35,11 @@ const CreateGroupChatModal = () => {
     }
   }, [isOpen]);
 
-  // Función para crear el grupo
-  const createGroupChat = async () => {
-    if (!currentUser) return;
 
-    const token = await getToken();
-
-    const {data} = await axiosInstance<{data: ChatType}>({
-      method: "POST",
-      url: "/chats/create",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      data: {
-        type: "group",
-        participants: selectedUsersIds,
-        groupName,
-        groupAdmin: currentUser._id
-      }
-    });
-
-    return data;
-  }
-
-  // Mutation para crear el grupo
-  const {mutate: createGroupChatMutation, isPending: isCreatingGroup} = useMutation({
-    mutationFn: createGroupChat,
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({queryKey: ["chats", "all"]});
-      navigate(`/messages/${data?.data._id}`);
-    },
-    onError: (error: any) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {
+    createGroupChatMutation,
+    isCreatingGroup
+  } = useCreateGroupChat();
 
   const {
     usersData,
@@ -200,7 +160,11 @@ const CreateGroupChatModal = () => {
             className="w-full py-5 text-sm text-white bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
             variant="default"
             disabled={isButtonDisabled}
-            onClick={() => createGroupChatMutation()}
+            onClick={() => createGroupChatMutation({
+              currentUser,
+              groupName,
+              selectedUsersIds
+            })}
           >
             Crear grupo
           </Button>

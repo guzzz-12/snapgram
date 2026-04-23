@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
-import { useAuth, useReverification } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { IoWarningOutline } from "react-icons/io5";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { useDeleteUserAccount } from "@/services/user";
 import { errorMessage } from "@/utils/errorMessage";
 
 interface Props {
@@ -15,30 +15,17 @@ interface Props {
 }
 
 const DeleteAccountModal = ({ isOpen, setIsOpen, setOpenDisableAccountModal }: Props) => {
-  const navigate = useNavigate();
-
-  const {getToken, signOut} = useAuth();
+  const {signOut} = useAuth();
 
   const [isPending, setIsPending] = useState(false);
 
-  const deleteAccount = useReverification(async () => {
-    const token = await getToken();
-
-    const serverUrl = import.meta.env.VITE_SERVER_URL;
-
-    return fetch(`${serverUrl}/api/users/delete-account`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-  });
+  const {deleteUserAccount} = useDeleteUserAccount();
 
   const deleteAccountHandler = async () => {
     try {
       setIsPending(true);
 
-      await deleteAccount();
+      await deleteUserAccount();
 
       setIsPending(false);
 

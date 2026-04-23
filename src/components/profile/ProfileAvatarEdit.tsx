@@ -1,14 +1,11 @@
 import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
-import { useParams } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { Pencil, Save, Trash2Icon, X } from "lucide-react";
 import { toast } from "sonner";
 import DeleteAvatarModal from "./DeleteModal";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useDeleteAvatar, useUpdateAvatar } from "@/services/user";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { axiosInstance } from "@/utils/axiosInstance";
 import type { UserType } from "@/types/global";
 
 interface Props {
@@ -21,91 +18,46 @@ interface Props {
   profilePicInputRef: RefObject<HTMLInputElement | null>;
 }
 
-const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, profilePicInputRef }: Props) => {
-  const {userClerkId} = useParams<{userClerkId: string}>();
+const ProfileAvatarEdit = (props: Props) => {
+  const {title, userData, selectedImageFile, selectedImagePreview, setSelectedImageFile, setSelectedImagePreview, profilePicInputRef } = props;
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
-  const {getToken} = useAuth();
-  const queryClient = useQueryClient();
-
   const {setUser} = useCurrentUser();
 
-  const onSubmitHandler = async () => {
-    if (!selectedImageFile[0]) return;
-
-    const token = await getToken();
-
-    const formData = new FormData();
-
-    formData.append("avatar", selectedImageFile[0]);
-
-    const {data} = await axiosInstance<{data: UserType}>({
-      method: "POST",
-      url: "/users/user-avatar",
-      data: formData,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data"
-      }
-    });
-
-    return data.data;
+  const onUpdateSuccessHandler = (data: UserType) => {
+    toast.success("Avatar actualizado con éxito");
+    setUser(data);
+    setSelectedImageFile([]);
+    setSelectedImagePreview([]);
   }
 
-  const updateAvatarMutation = useMutation({
-    mutationFn: onSubmitHandler,
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({queryKey: ["user", userData.clerkId]});
-      setUser(data!);
-      toast.success("Avatar actualizado con éxito");
-      setSelectedImageFile([]);
-      setSelectedImagePreview([]);
-    },
-    onError: (error: any) => {
-      toast.error(error.message);
-    }
+  const {updateAvatarMutation, isUpdateAvatarPending} = useUpdateAvatar({
+    userData,
+    selectedImages: selectedImageFile,
+    onSuccess: onUpdateSuccessHandler
   });
 
-  const onDeleteAvatarHandler = async () => {
-    const token = await getToken();
-
-    const {data} = await axiosInstance<{data: UserType}>({
-      method: "DELETE",
-      url: "/users/user-avatar",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    return data.data;
-  }
-
-  const deleteAvatarMutation = useMutation({
-    mutationFn: onDeleteAvatarHandler,
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({queryKey: ["user", userClerkId]});
-      setUser(data);
+  const {deleteAvatarMutation, isDeleteAvatarPending} = useDeleteAvatar({
+    onSuccess: (data: UserType) => {
       toast.success("Avatar eliminado con éxito");
+      setUser(data);
       setOpenDeleteModal(false);
       setSelectedImageFile([]);
       setSelectedImagePreview([]);
-    },
-    onError: (error: any) => {
-      toast.error(error.message);
     }
   });
 
-  const isSubmitting = updateAvatarMutation.isPending || deleteAvatarMutation.isPending;
+  const isSubmitting = isUpdateAvatarPending || isDeleteAvatarPending;
 
   return (
     <div className="flex flex-col items-start gap-2 w-full">
       <DeleteAvatarModal
         isOpen={openDeleteModal}
-        isLoading={deleteAvatarMutation.isPending}
+        isLoading={isDeleteAvatarPending}
         title="¿Eliminar foto de perfil?"
         setIsOpen={setOpenDeleteModal}
-        onDelete={() => deleteAvatarMutation.mutate()}
+        onDelete={() => deleteAvatarMutation()}
       />
       
       <p className="text-left text-neutral-900 font-medium">
@@ -146,7 +98,7 @@ const ProfileAvatarEdit = ({title, userData, selectedImageFile, selectedImagePre
               className="text-white hover:text-white border-none bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer"
               variant="outline"
               disabled={isSubmitting}
-              onClick={() => updateAvatarMutation.mutate()}
+              onClick={() => updateAvatarMutation()}
             >
               <Save className="size-4" aria-hidden />
               <span>Guardar</span>

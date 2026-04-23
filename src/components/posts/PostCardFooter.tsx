@@ -1,16 +1,12 @@
 import type { HTMLAttributes } from "react";
 import { useSearchParams } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
-import { toast } from "sonner";
 import PostModal from "./PostModal";
 import PostCardFooterBtn from "./PostCardFooterBtn";
 import LikesPopover from "@/components/likes/LikesPopover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTogglePostLike } from "@/services/likes";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
-import { errorMessage } from "@/utils/errorMessage";
-import { axiosInstance } from "@/utils/axiosInstance";
 import type { PostWithLikes } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -26,37 +22,12 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
 
-  const {getToken} = useAuth();
-
-  const queryClient = useQueryClient();
-
   const {setOpen} = useCreatePublicationModal();
 
-  // Mutation para dar/quitar like al post
-  const likeMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "POST",
-        url: `/likes/post/${postData._id}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["posts"]});
-      await queryClient.invalidateQueries({queryKey: ["posts", postData._id]});
-      await queryClient.invalidateQueries({queryKey: ["likes", "likedPosts"]});
-      
-      if (searchTerm) {
-        await queryClient.invalidateQueries({queryKey: ["search", searchTerm, "posts"]});
-      }
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
+  // Dar/quitar like al post
+  const {togglePostLikeMutation, isPending} = useTogglePostLike({
+    postId: postData._id,
+    searchTerm: searchTerm || ""
   });
 
   return (
@@ -119,8 +90,8 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
       
       <div className="flex justify-between items-center gap-1 w-full pt-2 text-neutral-700 text-sm font-semibold border-t overflow-hidden">
         <PostCardFooterBtn
-          disabled={likeMutation.isPending}
-          callback={() => likeMutation.mutate()}
+          disabled={isPending}
+          callback={() => togglePostLikeMutation()}
         >
           <Heart
             className="size-4.5 shrink-0"

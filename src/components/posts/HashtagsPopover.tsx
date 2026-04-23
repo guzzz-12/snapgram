@@ -1,14 +1,12 @@
 import { createPortal } from "react-dom";
 import { useEffect, useRef, type RefObject } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
+import { useCreateHashtag, useGetHashtags } from "@/services/hashtags";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
-import type { HashtagWithPostsCount } from "@/types/global";
 
 interface Props {
   openPopover: boolean;
@@ -28,68 +26,31 @@ const HashtagsPopover = (props: Props) => {
 
   const paginationRef = useRef<HTMLDivElement>(null);
 
-  const {getToken} = useAuth();
-
   const queryClient = useQueryClient();
 
   // Consultar los hashtags
-  const {data, isLoading, error: hashtagsError, isEnabled, isRefetching, isFetchingNextPage, hasNextPage, fetchNextPage, refetch} = useInfiniteQuery({
-    queryKey: ["hashtags", currentlyTypingHashtag],
-    queryFn: async ({pageParam = 1}) => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{
-        data: HashtagWithPostsCount[];
-        hasMore: boolean;
-        nextPage: number | null;
-      }>({
-        method: "GET",
-        url: "/hashtags",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        params: {
-          title: currentlyTypingHashtag,
-          page: pageParam,
-          limit: 10
-        }
-      });
-
-      return data;
-    },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
-    enabled: openPopover && !!currentlyTypingHashtag,
-    retry: 2
+  const {
+    data,
+    isLoading,
+    error: hashtagsError,
+    isEnabled,
+    isRefetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch
+  } = useGetHashtags({
+    value: currentlyTypingHashtag,
+    enabled: openPopover && !!currentlyTypingHashtag
   });
 
   // Crear el hashtag
-  const {mutate: createHashtag, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance( {
-        method: "POST",
-        url: "/hashtags",
-        data: {
-          title: selectedHashtag || currentlyTypingHashtag
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["hashtags"]});
+  const {createHashtag, isPending} = useCreateHashtag({
+    selectedHashtag,
+    currentlyTypingHashtag,
+    onSuccess: () => {
       setOpenPopover(false);
-    },
-    onError: (err) => {
-      toast.error(errorMessage(err));
-    },
-    retry: 2
+    }
   });
 
   const {isIntersecting} = useIntersectionObserver({paginationRef, data});

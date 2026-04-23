@@ -190,6 +190,26 @@ export const addMemberToGroupFn = async (params: {chatId: string | undefined; se
   return data;
 }
 
+/** Funcion para crear un chat grupal */
+export const createGroupChatFn = async (props: {currentUser: UserType | null | undefined; selectedUsersIds: string[]; groupName: string}) => {
+  const {currentUser, selectedUsersIds, groupName} = props;
+
+  if (!currentUser) return;
+
+  const {data} = await axiosInstance<{data: ChatType}>({
+    method: "POST",
+    url: "/chats/create",
+    data: {
+      type: "group",
+      participants: selectedUsersIds,
+      groupName,
+      groupAdmin: currentUser._id
+    }
+  });
+
+  return data;
+}
+
 
 /** Funcion para actualizar la informacion de un grupo */
 export const updateGroupInfoFn = async (params: {groupId: string | undefined; groupName: string; groupDescription: string}) => {

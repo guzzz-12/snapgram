@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
 import Sidebar from "./components/Sidebar";
 import CreateStoryModal from "@/components/stories/CreateStoryModal";
@@ -13,13 +12,12 @@ import MobileNavSidebar from "./components/MobileNavSidebar";
 import DisabledAccountScreen from "./components/DisabledAccountScreen";
 import CreateCryptoKeysScreen from "./components/CreateCryptoKeysScreen";
 import { TooltipProvider } from "./components/ui/tooltip";
+import { useReactivateAccount } from "./services/user";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
 import { useCurrentUser } from "./hooks/useCurrentUser";
 import useWindowWidth from "./hooks/useWindowWidth";
 import useSidebarWidth from "./hooks/useSidebarWidth";
 import { useCheckLocalCryptoKeys } from "./hooks/useCheckLocalCryptoKeys";
-import { errorMessage } from "./utils/errorMessage";
-import { axiosInstance } from "./utils/axiosInstance";
 import { cn } from "./lib/utils";
 
 const Layout = () => {
@@ -28,9 +26,7 @@ const Layout = () => {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const {isLoaded} = useUser();
-  const {signOut, getToken} = useAuth();
-
-  const queryClient = useQueryClient();
+  const {signOut} = useAuth();
 
   const {user: currentUser} = useCurrentUser();
 
@@ -47,33 +43,17 @@ const Layout = () => {
   }, []);
 
   // Mutation para reactivar la cuenta
-  const {mutate, isPending} = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      return axiosInstance({
-        method: "PUT",
-        url: "/users/reactivate-account",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["me"]});
-      toast.success("Tu cuenta ha sido reactivada correctamente.");
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {mutate, isPending} = useReactivateAccount();
 
   const signOutHandler = async () => {
     try {
       setIsSigningOut(true);
+
       await signOut();
+
     } catch (error: any) {
       toast.error("Error al cerrar sesión. Inténtalo de nuevo.");
+      
     } finally {
       setIsSigningOut(false);
     }

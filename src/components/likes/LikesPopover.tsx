@@ -1,17 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import LikeItem from "./LikeItem";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Skeleton } from "../ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useGetPostLikes } from "@/services/likes";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { cn } from "@/lib/utils";
-import type { LikeType, PostWithLikes } from "@/types/global";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import type { PostWithLikes } from "@/types/global";
 
 interface Props {
   postData: PostWithLikes;
@@ -20,44 +18,25 @@ interface Props {
 }
 
 const LikesPopover = (props: Props) => {
-  const { postData, itemId, itemType } = props;
+  const { postData, itemId } = props;
 
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const {getToken} = useAuth();
-
-  const {data, error, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useInfiniteQuery({
-    queryKey: ["likes", "post", itemId],
-    queryFn: async ({pageParam = 1}) => {
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{
-        data: LikeType[];
-        hasMore: boolean;
-        nextPage: number | null;
-      }>({
-        method: "GET",
-        url: `/likes/post/${itemId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        params: {
-          limit: 5,
-          page: pageParam
-        }
-      });
-
-      return data;
-    },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
-    refetchOnWindowFocus: false,
+  const {
+    likes,
+    error,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  } = useGetPostLikes({
+    itemId,
     enabled: isOpen,
   });
 
-  const {isIntersecting} = useIntersectionObserver({ data, paginationRef });
+  const {isIntersecting} = useIntersectionObserver({ data: likes, paginationRef });
 
   useEffect(() => {
     if (isIntersecting && hasNextPage) {
@@ -68,8 +47,6 @@ const LikesPopover = (props: Props) => {
   if (error) {
     toast.error(errorMessage(error));
   }
-
-  const likes = data?.pages.flatMap((page) => page.data) ?? [];
 
   return (
     <Popover

@@ -21,7 +21,7 @@ const useSearchUsers = ({searchTerm, searchType}: SearchProps) => {
     enabled: !!searchTerm && searchType === "people"
   });
 
-  const {data, error, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage} = res;
+  const {data, error, isLoading, hasNextPage, status, isFetchingNextPage, fetchNextPage} = res;
 
   const searchUsersResults = data?.pages.flatMap(page => page.data) || [];
 
@@ -30,6 +30,7 @@ const useSearchUsers = ({searchTerm, searchType}: SearchProps) => {
     error,
     isLoading,
     hasNextPage,
+    status,
     isFetchingNextPage,
     fetchNextPage
   }

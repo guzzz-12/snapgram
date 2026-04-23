@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
-import { useMutation } from "@tanstack/react-query";
 import { Twemoji } from "react-emoji-render";
 import { FiMoreVertical } from "react-icons/fi";
 import { CheckCheck } from "lucide-react";
@@ -11,14 +9,13 @@ import MessageInputForm from "./MessageInputForm";
 import MessageHistoryModal from "./MessageHistoryModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useDeleteMessage, useEditMessage } from "@/services/chats";
 import { useImagesLighbox } from "@/hooks/useImagesLightbox";
 import dayJsInstance from "@/utils/dayJsInstance";
-import { axiosInstance } from "@/utils/axiosInstance";
 import { errorMessage } from "@/utils/errorMessage";
 import { socket } from "@/utils/socket";
 import dayjs from "@/utils/dayJsInstance";
 import { decryptMessage } from "@/utils/decryptMessageText";
-import { encryptEditedMessage } from "@/utils/encryptEditedMessage";
 import type { ChatType, MessageType, UserType } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -61,8 +58,6 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
   
   const {setImages, setInitialIndex, setOpen: setOpenImgsViewer} = useImagesLighbox();
 
-  const {getToken} = useAuth();
-
   const isSeen = message?.seenBy.find(el => el.user && el.user._id !== currentUser._id);
   const seenAt = isSeen?.seenAt;
 
@@ -103,36 +98,10 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
   }, [isIntersecting, socket, currentUser._id, message, isSeen]);
 
   // Mutation para editar el mensaje
-  const {mutate: updateMessage, isPending: isSubmitting} = useMutation({
-    mutationFn: async () => {
-      if (!message) return;
-
-      const token = await getToken();
-
-      if (messageText === message.text) return message;
-
-      // Encriptar el texto del mensaje editado
-      const {updatedMsgEncrypted, updatedIv} = await encryptEditedMessage({
-        updatedText: messageText,
-        message,
-        currentUserId: currentUser._id
-      });
-
-      const {data} = await axiosInstance<{data: MessageType}>({
-        method: "PUT",
-        url: `/messages/edit/${message.chat}/${message._id}`,
-        data: {
-          text: updatedMsgEncrypted,
-          iv: updatedIv
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
-
-      return data;
-    },
+  const { updateMessage, isSubmitting } = useEditMessage({
+    message,
+    messageText,
+    currentUser,
     onSuccess: () => {
       setIsEditingMessage(false);
     },
@@ -142,30 +111,9 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
     }
   });
 
+
   // Mutation para eliminar el mensaje
-  const {mutate, isPending} = useMutation({
-    mutationFn: async (deleteFor: "me" | "all") => {
-      if (!message) return;
-
-      const token = await getToken();
-
-      const {data} = await axiosInstance<{data: MessageType}>({
-        method: "DELETE",
-        url: `/messages/delete/${message.chat}/${message._id}`,
-        params: {
-          deleteFor
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      return data;
-    },
-    onError: (error) => {
-      toast.error(errorMessage(error));
-    }
-  });
+  const {mutate, isPending} = useDeleteMessage({message});
 
   if (!message) return null;
 

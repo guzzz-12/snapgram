@@ -9,7 +9,7 @@ import { useGetNotifications, useMarkNotificationsAsRead } from "@/services/noti
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { errorMessage } from "@/utils/errorMessage";
 
-const ConnectionsPage = () => {
+const NotificationsPage = () => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
@@ -122,4 +122,4 @@ const ConnectionsPage = () => {
   )
 }
 
-export default ConnectionsPage
+export default NotificationsPage;

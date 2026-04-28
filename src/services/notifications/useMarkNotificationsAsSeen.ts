@@ -2,8 +2,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { axiosInstance } from "@/utils/axiosInstance";
 
-/** Hook para marcar las notificaciones como leídas */
-const useMarkNotificationsAsRead = () => {
+/**
+ * Hook para marcar las notificaciones como vistas
+ * Las notificaciones no vistas se muestran con un color de background diferente al resto por unos instantes mientras el servidor procesa la consulta.
+ * El estado isSeen de todas las notificaciones cambia a true automáticamente al cargarlas.
+ */
+const useMarkNotificationsAsSeen = () => {
   const queryClient = useQueryClient();
 
   const { setUnseenNotifications } = useUnseenNotifications();
@@ -24,4 +28,4 @@ const useMarkNotificationsAsRead = () => {
   return markAllAsSeen;
 }
 
-export default useMarkNotificationsAsRead;
+export default useMarkNotificationsAsSeen;

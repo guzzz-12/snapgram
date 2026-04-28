@@ -22,7 +22,7 @@ const NotificationsList = ({ notifications, loading, isFetchingNextPage }: Props
         </>
       }
 
-      {notifications.map((notification) => {
+      {!loading && notifications.map((notification) => {
         return (
           <li key={notification._id} className="w-full">
             <NotificationItem data={notification} />
@@ -30,7 +30,7 @@ const NotificationsList = ({ notifications, loading, isFetchingNextPage }: Props
         )
       })}
 
-      {isFetchingNextPage && 
+      {!loading && isFetchingNextPage && 
         <>
           <NotificationSkeleton />
           <NotificationSkeleton />

@@ -1,5 +1,5 @@
 import useGetNotifications from "./useGetNotifications";
-import useMarkNotificationsAsRead from "./useMarkNotificationsAsRead";
+import useMarkNotificationsAsSeen from "./useMarkNotificationsAsSeen";
 import useGetUnseenNotificationsCount from "./useGetUnseenNotificationsCount";
 import useMarkNotificationAsRead from "./useMarkNotificationAsRead";
 import useDeleteNotification from "./useDeleteNotification";
@@ -7,7 +7,7 @@ import useMarkAllAsRead from "./useMarkAllAsRead";
 
 export {
   useGetNotifications,
-  useMarkNotificationsAsRead,
+  useMarkNotificationsAsSeen,
   useGetUnseenNotificationsCount,
   useMarkNotificationAsRead,
   useDeleteNotification,

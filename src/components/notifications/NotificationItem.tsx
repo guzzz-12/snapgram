@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import dayjs from "dayjs";
 import { Ellipsis, Trash2Icon } from "lucide-react";
 import { GoDotFill } from "react-icons/go";
 import NotificationIcon from "./NotificationIcon";
@@ -10,6 +9,7 @@ import type { NotificationType } from "@/types/global";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useDeleteNotification, useMarkNotificationAsRead } from "@/services/notifications";
+import dayjs from "@/utils/dayJsInstance";
 import { NOTIFICATIONS_TEXT_MAP } from "@/utils/constants";
 import { generateNotificationLink } from "@/utils/generateNotificationLink";
 import { cn } from "@/lib/utils";
@@ -43,6 +43,7 @@ const NotificationItem = ({ data }: Props) => {
   return (
     <div
       className={cn("flex justify-start items-center gap-0 w-full p-3 bg-white border rounded-md shadow-md hover:bg-neutral-100 cursor-pointer transition-colors", !isSeen && "bg-[#4F39F6]/20")}
+      data-testid="notification-item"
       onMouseEnter={() => setShowDropdownTrigger(true)}
       onMouseLeave={() => setShowDropdownTrigger(false)}
     >

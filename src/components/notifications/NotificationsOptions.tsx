@@ -14,6 +14,7 @@ const NotificationsOptions = () => {
           className="shrink-0 rounded-full hover:bg-slate-100 cursor-pointer"
           variant="ghost"
           size="icon"
+          data-testid="notifications-options-btn"
         >
           <Ellipsis className="size-6 shrink-0 text-neutral-700" aria-hidden />
           <span className="sr-only">Opciones de las notificaciones</span>
@@ -24,6 +25,7 @@ const NotificationsOptions = () => {
         <DropdownMenuItem
           className="cursor-pointer"
           disabled={isPending}
+          data-testid="mark-all-as-read-option"
           onClick={() => markAllAsRead()}
         >
           <FaCheck className="text-neutral-700" aria-hidden />

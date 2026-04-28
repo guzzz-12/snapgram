@@ -5,7 +5,7 @@ import RightSidebar from "@/components/RightSidebar";
 import NotificationsOptions from "@/components/notifications/NotificationsOptions";
 import NotificationsList from "@/components/notifications/NotificationsList";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useGetNotifications, useMarkNotificationsAsRead } from "@/services/notifications";
+import { useGetNotifications, useMarkNotificationsAsSeen } from "@/services/notifications";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { errorMessage } from "@/utils/errorMessage";
 
@@ -25,7 +25,7 @@ const NotificationsPage = () => {
   } = useGetNotifications({activeTab});
 
   // Mutation para marcar todas las notificaciones como vistas
-  const markAllAsSeen = useMarkNotificationsAsRead();
+  const markAllAsSeen = useMarkNotificationsAsSeen();
 
   const {isIntersecting} = useIntersectionObserver({data: notifications, paginationRef});
 

@@ -17,7 +17,7 @@ export const fetchNotifications = async ({page, activeTab}: FetchNotificationsPr
     url: "/notifications",
     params: {
       page,
-      limit: 5,
+      limit: 10,
       filter: activeTab
     },
     headers: {

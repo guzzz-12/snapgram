@@ -6,7 +6,7 @@ import { http, HttpResponse } from "msw";
 import userEvent from "@testing-library/user-event";
 import NotificationsPage from "@/pages/NotificationsPage";
 import { server } from "../mocks/server";
-import { mockDb } from "../mocks/notificationsRepository";
+import { mockDb } from "../mocks/notifications/notificationsRepository";
 
 describe("NotificationsPage", () => {
   const user = userEvent.setup();

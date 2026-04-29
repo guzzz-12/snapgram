@@ -1,19 +1,9 @@
 import type { ReactNode } from "react"
-import { ErrorBoundary } from "react-error-boundary";
+import { MemoryRouter } from "react-router";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { esMX } from "@clerk/localizations";
 import { ImageKitProvider } from "@imagekit/react";
-import ErrorPage from "@/pages/ErrorPage";
-
-const Fallback = () => {
-  return (
-    <ErrorPage
-      title="¡Oops! Algo salió mal."
-      message="Actualiza la página e inténtalo de nuevo."
-    />
-  )
-}
 
 interface Props {
   children: ReactNode;
@@ -40,9 +30,11 @@ const Providers = ({ children }: Props) => {
         publishableKey={PUBLISHABLE_KEY}
         localization={esMX}
       >
-        <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
-          {children}
-        </ImageKitProvider>
+        <MemoryRouter>
+          <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
+            {children}
+          </ImageKitProvider>
+        </MemoryRouter>
       </ClerkProvider>
     </QueryClientProvider>
   )

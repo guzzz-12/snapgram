@@ -2,11 +2,13 @@ import type { ReactNode } from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent, { PointerEventsCheckLevel } from "@testing-library/user-event";
 import { mockIntersectionObserver } from "jsdom-testing-mocks";
+import { http, HttpResponse } from "msw";
 import Layout from "@/Layout";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { imageProcessor } from "@/utils/imageCompressor";
 import Providers from "../Providers";
 import { buildMockUser } from "../mocks/users/factories";
+import { server } from "../mocks/server";
 
 /** Renderizar el layout y abrir el modal de creación de post */
 const setupCreatePost = async () => {
@@ -238,6 +240,35 @@ describe("CreatePostModal", async () => {
     expect(screen.queryByTestId("toast-post-created-success")).toBeInTheDocument();
 
     // Verificar que el modal se haya cerrado luego de crear el post
+    expect(screen.queryByTestId("create-post-modal")).not.toBeInTheDocument();
+  });
+
+
+  it("debe mostrar toast de error y cerrar el modal si falla la creación del post", async () => {
+    server.use(http.post("/api/posts", () => {
+      return HttpResponse.json(
+        { message: "Error interno del servidor" }, 
+        { status: 500 }
+      );
+    }));
+
+    const {user} = await setupCreatePost();
+
+    // Esperar a que el formulario aparezca
+    const createPostForm = await screen.findByTestId("create-post-form");
+    expect(createPostForm).toBeInTheDocument();
+
+    // Tipear en el input
+    const createPostInput = within(createPostForm).getByTestId("create-post-input");
+    await user.type(createPostInput, "Post de prueba...");
+
+    // Hacer click en el botón de submit
+    const submitPostBtn = within(createPostForm).getByTestId("create-post-submit-btn");
+    await user.click(submitPostBtn);
+
+    const errorToast = await screen.findByTestId("toast-post-error");
+    expect(errorToast).toBeInTheDocument();
+
     expect(screen.queryByTestId("create-post-modal")).not.toBeInTheDocument();
   });
 });

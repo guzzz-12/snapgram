@@ -71,7 +71,9 @@ const CreatePostModal = () => {
             repostedPostId: null
           });
 
-          toast.success("Post compartido.");
+          toast.success("Post compartido.", {
+            testId: "toast-post-shared-success"
+          });
         }
       });
     } else {
@@ -91,7 +93,9 @@ const CreatePostModal = () => {
             fileInputRef.current.value = "";
           }
 
-          toast.success("Post creado.");
+          toast.success("Post creado.", {
+            testId: "toast-post-created-success"
+          });
         }
       });
     }
@@ -100,7 +104,9 @@ const CreatePostModal = () => {
   if (fetchRepostError || repostError) {
     const error = (fetchRepostError ?? repostError) as Error;
 
-    toast.error(`Error al compartir el post: ${errorMessage(error)}`);
+    toast.error(`Error al compartir el post: ${errorMessage(error)}`, {
+      testId: "toast-post-error"
+    });
 
     setOpen({
       open: false,

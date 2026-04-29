@@ -214,4 +214,30 @@ describe("CreatePostModal", async () => {
       expect(message).not.toBeInTheDocument();
     }, { timeout: 2000 });
   });
+
+  
+  it("debe mostrar toast y cerrar el modal al crear el post exitosamente", async () => {
+    const {user} = await setupCreatePost();
+
+    // Esperar a que el formulario aparezca
+    const createPostForm = await screen.findByTestId("create-post-form");
+    expect(createPostForm).toBeInTheDocument();
+
+    // Tipear en el input
+    const createPostInput = within(createPostForm).getByTestId("create-post-input");
+    await user.type(createPostInput, "Post de prueba...");
+
+    // Hacer click en el botón de submit
+    const submitPostBtn = within(createPostForm).getByTestId("create-post-submit-btn");
+    await user.click(submitPostBtn);
+
+    expect(createPostInput).toBeDisabled();
+    expect(submitPostBtn).toBeDisabled();
+
+    // Verificar que aparezca el toast con mensaje de éxito
+    expect(screen.queryByTestId("toast-post-created-success")).toBeInTheDocument();
+
+    // Verificar que el modal se haya cerrado luego de crear el post
+    expect(screen.queryByTestId("create-post-modal")).not.toBeInTheDocument();
+  });
 });

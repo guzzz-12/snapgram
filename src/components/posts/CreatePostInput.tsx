@@ -32,7 +32,9 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
   // Hacer autoFocus en el textarea
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const textarea = inputRef.current!;
+      const textarea = inputRef.current;
+
+      if (!textarea) return;
 
       textarea.focus();
 
@@ -157,6 +159,7 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
           ref={inputRef}
           className="w-full px-0 py-4 !text-base border-t-0 border-b-0 border-l-0 border-r-0 rounded-none shadow-none resize-none placeholder:text-neutral-400 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:ring-offset-transparent focus-visible:border-b"
           placeholder="¿Qué estás pensando?"
+          data-testid="create-post-input"
           disabled={isPending}
           value={textContent}
           onChange={onChangeHandler}

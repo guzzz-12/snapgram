@@ -127,6 +127,7 @@ const Sidebar = () => {
           <button
             ref={createPostBtnRef}
             className="flex justify-center items-center gap-2 w-full px-4 py-2 text-base text-white rounded-md bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
+            data-testid="create-publication-btn"
           >
             <CirclePlus className="!size-6" aria-hidden />
 
@@ -136,10 +137,11 @@ const Sidebar = () => {
           </button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent>
+        <DropdownMenuContent data-testid="create-dropdown-menu">
           <DropdownMenuItem
             className="flex justify-start items-center gap-2 w-full h-full cursor-pointer"
             onClick={() => openCreateStoryModal({ open: true, publicationType: "post" })}
+            data-testid="create-post-option"
           >
             <ImagePlus className="size-5" aria-hidden />
             <span className="whitespace-nowrap">Crear publicación</span>
@@ -148,6 +150,7 @@ const Sidebar = () => {
           <DropdownMenuItem
             className="flex justify-start items-center gap-2 cursor-pointer"
             onClick={() => openCreateStoryModal({ open: true, publicationType: "story" })}
+            data-testid="create-story-option"
           >
             <TypeOutline className="size-5" aria-hidden />
 

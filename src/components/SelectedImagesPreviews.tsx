@@ -76,7 +76,10 @@ const SelectedImagesPreviews = (props: Props) => {
 
       {/* Mostrar un loader tipo skeleton por cada imagen que se esté procesando */}
       {processingImages &&
-        <div className="flex justify-start items-center gap-3 w-full">
+        <div
+          className="flex justify-start items-center gap-3 w-full"
+          data-testid="processing-image-skeleton"
+        >
           <div className="fixed top-[50%] left-[50%] flex justify-center items-center w-full h-full translate-x-[-50%] translate-y-[-50%] bg-white/50 z-10">
             <p className="text-center text-sm text-neutral-700 font-semibold">
               Procesando...
@@ -99,6 +102,7 @@ const SelectedImagesPreviews = (props: Props) => {
           <div
             key={i}
             className="relative w-[120px] h-[120px] shrink-0 bg-slate-200 rounded-sm"
+            data-testid={`image-preview-${i}`}
           >
             <button
               className="absolute top-0.5 right-0.5 flex justify-center items-center p-0.5 rounded-full cursor-pointer text-red-700 bg-red-50"

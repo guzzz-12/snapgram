@@ -135,7 +135,10 @@ const CreatePostModal = () => {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="w-full max-w-[600px] h-auto overflow-hidden">
+        <div
+          className="w-full max-w-[600px] h-auto overflow-hidden"
+          data-testid="create-post-modal"
+        >
           <div className="flex justify-start items-center gap-2 mb-4">
             <Avatar className="w-[40px] h-[40px] shrink-0">
               <AvatarImage
@@ -163,6 +166,7 @@ const CreatePostModal = () => {
           <form
             className="flex flex-col gap-2 w-full"
             onSubmit={onSubmitHandler}
+            data-testid="create-post-form"
           >
             <CreatePostInput
               isPending={isPending}
@@ -178,6 +182,7 @@ const CreatePostModal = () => {
                     className="cursor-pointer"
                     type="button"
                     disabled={isPending}
+                    data-testid="attach-image-btn"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <ImagePlus className="size-10 text-neutral-600 stroke-1" aria-hidden />
@@ -212,6 +217,7 @@ const CreatePostModal = () => {
               className="gap-1 w-full mt-3 text-sm font-normal shrink-0 bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
               type="submit"
               disabled={isPending || (!isRepost && !textContent && !selectedImageFiles.length)}
+              data-testid="create-post-submit-btn"
             >
               {isPending ? 
                 <>
@@ -232,6 +238,7 @@ const CreatePostModal = () => {
             multiple
             disabled={isPending || isRepost}
             accept="image/png, image/jpg, image/jpeg, image/webp"
+            data-testid="file-input"
             onChange={onImagePickHandler}
           />
         </div>

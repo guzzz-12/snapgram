@@ -24,6 +24,22 @@ const CreatePostModal = () => {
 
   const {user} = useCurrentUser();
 
+  /** Manejar los errores de crear y compartir post */
+  const onErrorHandler = (error: Error, type: "create" | "share") => {
+    const message = `Error al ${type === "share" ? "compartir" : "crear"} el post: ${errorMessage(error)}`;
+
+    toast.error(message, {
+      testId: "toast-post-error"
+    });
+
+    setOpen({
+      open: false,
+      publicationType: null,
+      isRepost: false,
+      repostedPostId: null
+    });
+  }
+
   const {
     open,
     publicationType,
@@ -52,7 +68,7 @@ const CreatePostModal = () => {
   } = useGetSharedPost({repostedPostId, open, isRepost});
   
   // Mutation para compartir el post
-  const {repostMutation, isRepostPending, repostError} = useSharePost();
+  const {repostMutation, isRepostPending} = useSharePost();
 
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -74,6 +90,9 @@ const CreatePostModal = () => {
           toast.success("Post compartido.", {
             testId: "toast-post-shared-success"
           });
+        },
+        onError: (error, type) => {
+          onErrorHandler(error, type);
         }
       });
     } else {
@@ -96,24 +115,12 @@ const CreatePostModal = () => {
           toast.success("Post creado.", {
             testId: "toast-post-created-success"
           });
+        },
+        onError: (error, type) => {
+          onErrorHandler(error, type);
         }
       });
     }
-  }
-
-  if (fetchRepostError || repostError) {
-    const error = (fetchRepostError ?? repostError) as Error;
-
-    toast.error(`Error al compartir el post: ${errorMessage(error)}`, {
-      testId: "toast-post-error"
-    });
-
-    setOpen({
-      open: false,
-      publicationType: null,
-      isRepost: false,
-      repostedPostId: null
-    });
   }
 
   const isPending = isCreatePostPending || isRepostPending;

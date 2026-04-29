@@ -1,12 +1,11 @@
 import { axiosInstance } from "@/utils/axiosInstance";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { errorMessage } from "@/utils/errorMessage";
 
 type SharePostProps = {
   repostedPostId: string;
   textContent: string;
   onSuccess?: () => void;
+  onError: (error: Error, type: "share" | "create") => void;
 }
 
 /** Hook para compartir un post */
@@ -32,8 +31,8 @@ const useSharePost = () => {
 
       vars.onSuccess?.();
     },
-    onError: (error) => {
-      toast.error(errorMessage(error));
+    onError: (error, vars) => {
+      vars.onError(error, "share");
     }
   });
 

@@ -1,8 +1,6 @@
 import type { RefObject } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { createPostFn } from "@/repositories/postsRepository";
-import { errorMessage } from "@/utils/errorMessage";
 import type { UserType } from "@/types/global";
 
 type CreatePostProps = {
@@ -12,6 +10,7 @@ type CreatePostProps = {
   textContent: string;
   selectedImageFiles: File[];
   onSuccess?: () => void;
+  onError: (error: Error, type: "create" | "share") => void;
 }
 
 /** Hook para crear un post */
@@ -33,9 +32,8 @@ const useCreatePost = () => {
 
       vars.onSuccess?.();
     },
-    onError: (error) => {
-      const message = errorMessage(error);
-      toast.error(message);
+    onError: (error, vars) => {
+      vars.onError(error, "create")
     }
   });
 

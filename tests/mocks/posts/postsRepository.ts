@@ -21,10 +21,22 @@ class MockPostsStore {
     };
   }
 
-  seed() {
-    for(let i = 0; i < 30; i++) {
-      this.posts.push(this.buildMockPost());
+  seed(count?: number) {
+    const newPosts: PostType[] = [];
+
+    for(let i = 0; i < (count || 30); i++) {
+      const post = this.buildMockPost({
+        content: `Post ${i+1}`
+      });
+      
+      newPosts.push(post);
     }
+
+    this.posts = newPosts;
+  }
+
+  clear() {
+    this.posts = [];
   }
 
   getAllPosts(): PostType[] {

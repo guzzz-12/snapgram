@@ -48,7 +48,7 @@ vi.mock("@clerk/clerk-react", async (importOriginal) => {
   };
 });
 
-describe.only("HomePage", () => {
+describe("HomePage", () => {
   const user = userEvent.setup();
   const io = mockIntersectionObserver();
 

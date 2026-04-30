@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, type InitialEntry } from "react-router";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { esMX } from "@clerk/localizations";
@@ -19,10 +19,11 @@ const Fallback = ({ error }: { error: Error }) => {
 }
 
 interface Props {
+  initialEntries?: InitialEntry[];
   children: ReactNode;
 }
 
-const Providers = ({ children }: Props) => {
+const Providers = ({initialEntries, children }: Props) => {
   const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
   if (!PUBLISHABLE_KEY) {
@@ -44,7 +45,7 @@ const Providers = ({ children }: Props) => {
           publishableKey={PUBLISHABLE_KEY}
           localization={esMX}
         >
-          <MemoryRouter>
+          <MemoryRouter initialEntries={initialEntries}>
             <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
               {children}
             </ImageKitProvider>

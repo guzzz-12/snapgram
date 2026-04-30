@@ -104,7 +104,10 @@ const Layout = () => {
 
         {/* No mostrar el sidebar en la página del post y o si el ancho de la pantalla es menor de 700px */}
         {!isPostPage &&
-          <div className={cn("hidden min-[700px]:block fixed left-0 top-0 h-full shrink-0 z-10")}>
+          <div
+            className={cn("hidden min-[700px]:block fixed left-0 top-0 h-full shrink-0 z-10")} 
+            data-testid="sidebar-wrapper"
+          >
             <Sidebar />
           </div>
         }

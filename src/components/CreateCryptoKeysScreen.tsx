@@ -91,7 +91,10 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
   }
 
   return (
-    <main className="flex justify-center items-center w-full h-screen bg-neutral-200">
+    <main
+      className="flex justify-center items-center w-full h-screen bg-neutral-200"
+      data-testid="create-crypto-keys-screen"
+    >
       <ConfirmationModal
         isOpen={openConfirmationModal}
         isPending={isPending}

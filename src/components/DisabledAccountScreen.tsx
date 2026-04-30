@@ -12,7 +12,10 @@ interface Props {
 
 const DisabledAccountScreen = ({ isPending, isSigningOut, mutate, signOutHandler }: Props) => {
   return (
-    <main className="flex flex-col justify-start pt-20 items-center gap-8 w-full min-h-[100dvh] bg-slate-100">
+    <main
+      className="flex flex-col justify-start pt-20 items-center gap-8 w-full min-h-[100dvh] bg-slate-100"
+      data-testid="disabled-account-screen"
+    >
       <Logo size="md" />
 
       <section className="flex flex-col justify-center items-center px-10 py-4 border rounded-lg bg-white shadow">

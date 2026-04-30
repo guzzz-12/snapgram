@@ -2,7 +2,10 @@ import { Skeleton } from "../ui/skeleton";
 
 const PostCardSkeleton = () => {
   return (
-    <div className="w-full mx-auto">
+    <div
+      className="w-full mx-auto"
+      data-testid="post-skeleton"
+    >
       <div className="flex flex-col space-y-3 rounded-lg border bg-white p-6 shadow-md">
         {/* Header del post */}
         <div className="flex items-center space-x-4">

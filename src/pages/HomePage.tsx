@@ -100,7 +100,11 @@ const HomePage = () => {
           }
 
           {hasNextPage && (
-            <div ref={paginationRef} className="w-full h-4 shrink-0"/>
+            <div
+              ref={paginationRef}
+              className="w-full h-4 shrink-0"
+              data-testid="pagination-trigger"
+            />
           )}
         </section>
       </div>

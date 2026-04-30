@@ -57,7 +57,10 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
   }
 
   return (
-    <article className={cn("flex flex-col gap-3 w-full p-4 rounded-lg bg-white shadow", className)}>
+    <article
+      className={cn("flex flex-col gap-3 w-full p-4 rounded-lg bg-white shadow", className)}
+      data-testid={`post-card`}
+    >
       <PostHeader
         postData={postData}
         setisEditingPost={(bool) => setIsEditingPost(bool)}

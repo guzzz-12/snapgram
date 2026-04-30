@@ -1,7 +1,6 @@
 import { useState, type HTMLAttributes } from "react";
 import { Link } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
-import dayjs from "dayjs";
 import PostOptionsDropdown from "./PostOptionsDropdown";
 import DeletePostModal from "./DeletePostModal";
 import EditHistoryModal from "./EditHistoryModal";
@@ -9,6 +8,7 @@ import UserProfileTooltip from "./UserProfileTooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useFollowOrUnfollowUser } from "@/services/profile";
+import dayJs from "@/utils/dayJsInstance";
 import type { PostWithLikes } from "@/types/global";
 import { cn } from "@/lib/utils";
 
@@ -68,9 +68,9 @@ const PostCardHeader = ({ postData, className, setisEditingPost }: Props) => {
               <Link
                 className="text-sm text-neutral-700"
                 to={`/post/${postData._id}`}
-                title={dayjs(postData.createdAt).format("dddd, DD [de] MMMM [de] YYYY [a las] hh:mm a")}
+                title={dayJs(postData.createdAt).format("dddd, DD [de] MMMM [de] YYYY [a las] hh:mm a")}
               >
-                {dayjs(postData.createdAt).fromNow().replace("hace", "Hace")}
+                {dayJs(postData.createdAt).fromNow().replace("hace", "Hace")}
               </Link>
             </div>
           </div>

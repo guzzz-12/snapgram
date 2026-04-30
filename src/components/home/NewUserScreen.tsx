@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useSearchUsers } from "@/services/search";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import { useDebounce } from "@/hooks/useDebounce";
 import { errorMessage } from "@/utils/errorMessage";
 
 const NewUserScreen = () => {
@@ -14,13 +15,23 @@ const NewUserScreen = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
 
+  const { debouncedValue } = useDebounce(searchTerm, 500);
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
 
-  const {data: users, error, isLoading, isFetchingNextPage, status, hasNextPage, fetchNextPage} = useSearchUsers({searchTerm, searchType: "people"});
+  const {
+    data: users,
+    error,
+    isLoading,
+    isFetchingNextPage,
+    status,
+    hasNextPage,
+    fetchNextPage
+  } = useSearchUsers({searchTerm: debouncedValue, searchType: "people"});
 
   const {isIntersecting} = useIntersectionObserver({data: users, paginationRef});
 
@@ -40,9 +51,10 @@ const NewUserScreen = () => {
   }
 
   return (
-    <section className="flex flex-col justify-start items-center w-full max-w-[600px] h-full mx-auto">
-      {/* <UserRoundPlus className="size-[100px] text-[#4F39F6] stroke-[0.5px]"/> */}
-
+    <section
+      className="flex flex-col justify-start items-center w-full max-w-[600px] h-full mx-auto"
+      data-testid="new-user-screen"
+    >
       <h1 className="mt-1 text-3xl text-center text-neutral-700 font-light leading-[1.1]">
         Comienza a seguir cuentas <br /> para ver más contenido
       </h1>
@@ -56,6 +68,7 @@ const NewUserScreen = () => {
             type="search"
             className="w-full h-full px-4 pl-10 py-3 rounded-full border-none"
             placeholder="Busca amigos o creadores de contenido..."
+            data-testid="search-users-input"
             value={searchTerm}
             onChange={onChangeHandler}
           />

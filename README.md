@@ -2,34 +2,37 @@
 
 ![Landing Page](https://mir-s3-cdn-cf.behance.net/project_modules/fs_webp/1e3f06242284039.6969a806a08e0.png)
 
-## 📌 Descripción del Proyecto
+## Descripción del Proyecto
 Este proyecto es una plataforma de red social que prioriza la **seguridad del usuario** y la **interactividad en tiempo real**. Desarrollada como un ecosistema completo, la aplicación permite la creación de contenido, interacción social y mensajería privada protegida bajo estándares de cifrado modernos.
 
 El enfoque principal fue construir una infraestructura robusta y escalable sin depender de soluciones externas para las funcionalidades críticas, demostrando así un dominio avanzado en arquitectura de software y manejo de datos sensibles.
 
 ---
 
-## 🚀 Características Técnicas Destacadas
+## Características Técnicas Destacadas
 
-### 🔐 Privacidad y Seguridad Avanzada
+### Privacidad y Seguridad Avanzada
 * **Cifrado de Extremo a Extremo (E2EE):** Mensajería privada y grupal protegida mediante la **Web Crypto API**. Para permitir acceso desde múltiples dispositivos, las llaves de cifrado pública y privada del usuario se almacenan de forma segura en la base de datos, cifradas mediante una llave AES generada a partir de un PIN de 6 dígitos que el usuario debe introducir al registrarse y luego se le solicita al ingresar al chat. Sólo al ingresar el PIN correcto cargan sus conversaciones y se desencriptan. El cifrado se realiza en el navegador, garantizando que el servidor nunca tenga acceso al contenido de los mensajes.
 * **Autenticación Segura:** Implementación de autenticación segura basada en Google OAuth y tradicional (email/password) mediante **Clerk**.
 * **Gestión de Privacidad:** Control total sobre la cuenta, incluyendo bloqueos de usuarios, desactivación temporal y eliminación permanente e inmediata de la cuenta.
 
-### ⚡ Comunicación en Tiempo Real (Nativa)
+### Comunicación en Tiempo Real (Nativa)
 * **Arquitectura Socket.io:** Se evitó la dependencia de servicios de terceros (como Pusher o Stream.io) para la comunicación en tiempo real, implementé Socket.io nativamente para la gestión de chats y notificaciones.
 * **Mensajería Multimedia:** Soporte completo para notas de voz, imágenes y texto en tiempo real. Tanto el texto como los archivos de imagen y notas de voz se cifran en tiempo real.
 
-### 📱 Experiencia de Usuario y Engagement
+### Experiencia de Usuario y Engagement
 * **Feed Interactivo:** Sistema dinámico con "Me gusta", comentarios anidados (threaded replies) y funcionalidad de compartir (reposts).
 * **Sistema de seguimiento:** Gestión de seguidores y seguidos, el usuario sólo ve los posts de los usuarios que sigue.
 * **Contenido Efímero (Historias):** Sistema de historias (texto e imagen) con caducidad de 24 horas, automatizado mediante **Cron Jobs** en el servidor.
 * **Búsqueda Avanzada:** Motor de filtrado de los posts por hashtags, títulos y descripciones, así como búsquea de perfiles de usuario por nombre o username.
 * **Diseño Mobile-First:** Interfaz adaptativa construida con **Shadcn UI** y **Tailwind CSS**, garantizando una experiencia fluida en cualquier dispositivo.
 
+### Arquitectura Limpia y Escalable
+* Refactorización del código base implementando el patrón **Repository-Entity-Service-View**, desacoplando totalmente la lógica business y la capa view mediante custom hooks, facilitando la mantenibilidad y la escalabilidad, así como la testeabilidad del código.
+
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 | Capa | Tecnologías |
 | :--- | :--- |
@@ -38,11 +41,12 @@ El enfoque principal fue construir una infraestructura robusta y escalable sin d
 | **Backend** | Node.js, Express.js, Socket.io |
 | **Base de Datos** | MongoDB & Mongoose (NoSQL) |
 | **Seguridad** | Clerk Auth, Web Crypto API |
+| **Testing** | Vitest, JSDOM, React Testing Library, Mock Service Worker (MSW) |
 | **Infraestructura** | ImageKit (Almacenamiento de archivos), Vercel (Frontend), Render (Backend) |
 
 ---
 
-## 📸 Demo Visual
+## Demo Visual
 
 ### Interfaz de Usuario
 ![Feed principal](https://mir-s3-cdn-cf.behance.net/project_modules/fs_webp/1ad92b242284039.6969a806a4980.jpg)
@@ -62,28 +66,22 @@ El enfoque principal fue construir una infraestructura robusta y escalable sin d
 
 ---
 
-## ⚙️ Desafíos Técnicos y Soluciones
+## Desafíos Técnicos y Soluciones
 
 1.  **Criptografía en el Cliente:** Implementar el cifrado E2EE requirió asegurar que el intercambio de llaves fuera seguro y transparente para el usuario, manteniendo el rendimiento de la aplicación.
 2.  **Infraestructura Real-Time Nativa:** Al optar por **Socket.io** sobre soluciones pagas, diseñé una lógica de "rooms" y estados de conexión que maneja eficientemente múltiples chats simultáneos.
 3.  **Automatización de Datos:** La eliminación automática de historias a las 24 horas se realiza mediante **Cron Jobs** que interactúan con la base de datos y la API de **ImageKit** para liberar almacenamiento.
-4.  **Gestión de Estado Ligera:** Se eligió **Zustand** sobre Redux por su simplicidad y bajo boilerplate.
+4.  **Refactorización Arquitectónica:** Migrar una base de código fuertemente acoplada hacia una arquitectura limpia representó un reto. La solución fue extraer la lógica de estado y consultas a la API hacia servicios dedicados y custom hooks, mejorando drásticamente la legibilidad y la estructura, además de la escalabilidad y mantenibilidad a largo plazo.
+5.  **Estrategia de Testing Integral:** Implementar pruebas de integración en un entorno simulado requirió configuraciones avanzadas con Vitest y JSDOM, además de implementación de mocks para APIs del navegador, asegurando la fiabilidad de los componentes complejos sin impactar significativamente el rendimiento de los tests.
 
 ---
 
-## 🎯 Objetivo de este Proyecto
+## Objetivo de este Proyecto
 Este proyecto fue diseñado como una pieza central de mi portafolio para demostrar habilidades en:
 * Arquitectura de aplicaciones **Full-Stack** modernas.
 * Manejo de protocolos de seguridad y privacidad de datos.
 * Desarrollo de funcionalidades en tiempo real sin dependencias externas.
 * Creación de interfaces de usuario profesionales, accesibles y altamente responsivas.
-
----
-
-## 📧 Contacto
-
-* **GitHub:** [https://github.com/guzzz-12]
-* **Portafolio:** [https://gzmn.vercel.app]
-* **Behance:** [https://www.behance.net/guzzz_12]
+* Escribir código testeable, escalable, mantenible y preparado para entornos de producción.
 
 ---

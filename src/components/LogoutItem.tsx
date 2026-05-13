@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/clerk-react"
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
 import { cn } from "@/lib/utils";
 
 const LogoutItem = () => {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
-  const {signOut} = useAuth();
+  const {signOut} = useAuthContext();
 
   const {setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 

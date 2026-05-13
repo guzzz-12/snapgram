@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import { Link } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useFollowOrUnfollowUser } from "@/services/profile";
 import { cn } from "@/lib/utils";
 import type { FollowedType, UserType } from "@/types/global";
@@ -17,7 +17,7 @@ const FollowedItem = ({ data, userData }: Props) => {
   
   const followBtnRef = useRef<HTMLButtonElement>(null);
 
-  const {userId} = useAuth();
+  const {userId} = useAuthContext();
 
   const {mutate, isPending} = useFollowOrUnfollowUser(followedId, userId);
 

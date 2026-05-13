@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { useCreatePublicationModal } from "@/hooks/useCreatePublicationModal";
 import { createStoryFn } from "@/repositories/storiesRepository";

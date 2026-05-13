@@ -2,7 +2,6 @@ import { useRef } from "react";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@clerk/clerk-react";
 import ProfileAvatarEdit from "./ProfileAvatarEdit";
 import ProfileCoverEdit from "./ProfileCoverEdit";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
@@ -11,6 +10,7 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay } from "../ui/dialog";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useUserProfileUpdate } from "@/services/user";
 import useImagePicker from "@/hooks/useImagePicker";
 import type { UserType } from "@/types/global";
@@ -33,7 +33,7 @@ const ProfileEditModal = ({ userData, isOpen, onClose }: Props) => {
   const profilePicInputRef = useRef<HTMLInputElement | null>(null);
   const coverPicInputRef = useRef<HTMLInputElement | null>(null);
 
-  const {userId} = useAuth();
+  const {userId} = useAuthContext();
 
   const formProps = useForm<FormType>({
     resolver: zodResolver(FormSchema),

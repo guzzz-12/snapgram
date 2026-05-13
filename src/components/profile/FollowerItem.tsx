@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useFollowOrUnfollowUser } from "@/services/profile";
 import { cn } from "@/lib/utils";
 import type { FollowerType, UserType } from "@/types/global";
@@ -17,9 +17,9 @@ const FollowerItem = ({ data }: Props) => {
   
   const followBtnRef = useRef<HTMLButtonElement>(null);
 
-  const {userId: currentUserClerkId} = useAuth();
+  const {userId} = useAuthContext();
 
-  const {mutate, isPending} = useFollowOrUnfollowUser(followerId, currentUserClerkId);
+  const {mutate, isPending} = useFollowOrUnfollowUser(followerId, userId);
 
   // Cambiar dinámicamente el texto del botón de seguir/dejar de seguir
   useEffect(() => {
@@ -72,7 +72,7 @@ const FollowerItem = ({ data }: Props) => {
         </div>
       </Link>
 
-      {followerClerkId !== currentUserClerkId &&
+      {followerClerkId !== userId &&
         <Button
           ref={followBtnRef}
           className={cn("bg-[#4F39F6] hover:bg-[#331fcf] text-white rounded-full cursor-pointer", isFollowingBack && "hover:text-white hover:bg-red-700")}

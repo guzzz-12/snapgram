@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import { Link } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useFollowOrUnfollowUser } from "@/services/profile";
 import type { SearchUsersResult } from "@/types/global";
 import { cn } from "@/lib/utils";
@@ -11,10 +11,11 @@ interface Props {
   userData: SearchUsersResult;
 }
 
+// Item del resultado de búsqueda de usuarios (pantalla de nuevo usuario en HomePage)
 const UserSearchResultItem = ({ userData }: Props) => {
   const followBtnRef = useRef<HTMLButtonElement>(null);
 
-  const {userId} = useAuth();
+  const {userId} = useAuthContext();
 
   const {mutate, isPending} = useFollowOrUnfollowUser(userData._id, userId);
 

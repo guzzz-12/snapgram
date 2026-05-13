@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router";
-import { useAuth, useUser } from "@clerk/clerk-react";
 import { toast, Toaster } from "sonner";
 import Sidebar from "./components/Sidebar";
 import CreateStoryModal from "@/components/stories/CreateStoryModal";
@@ -13,6 +12,7 @@ import DisabledAccountScreen from "./components/DisabledAccountScreen";
 import CreateCryptoKeysScreen from "./components/CreateCryptoKeysScreen";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { useReactivateAccount } from "./services/user";
+import { useAuthContext } from "./providers/AuthProvider";
 import { useTitleNotificationsCounter } from "./hooks/useTitleNotificationsCounter";
 import { useCurrentUser } from "./hooks/useCurrentUser";
 import useWindowWidth from "./hooks/useWindowWidth";
@@ -24,9 +24,8 @@ const Layout = () => {
   const {pathname} = useLocation();
 
   const [isSigningOut, setIsSigningOut] = useState(false);
-
-  const {isLoaded} = useUser();
-  const {signOut} = useAuth();
+  
+  const {isLoaded, signOut} = useAuthContext();
 
   const {user: currentUser} = useCurrentUser();
 

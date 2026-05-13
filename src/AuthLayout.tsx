@@ -1,9 +1,9 @@
 import { Link, Outlet } from "react-router";
-import { useUser } from "@clerk/clerk-react";
+import { useAuthContext } from "./providers/AuthProvider";
 import logo from "@/assets/logo-simple.webp";
 
-const AuthLayout = () => {  
-  const {isLoaded} = useUser();
+const AuthLayout = () => {
+  const { isLoaded } = useAuthContext();
 
   if (!isLoaded) {
     return null;

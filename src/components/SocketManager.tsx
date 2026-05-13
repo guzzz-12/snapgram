@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import NotificationToast from "./NotificationToast";
 import NewMessageToast from "./NewMessageToast";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useSocketStore } from "@/hooks/useSocket";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -23,7 +23,7 @@ const SocketManager = () => {
 
   const [token, setToken] = useState<string | null>(null);
 
-  const { getToken } = useAuth();
+  const { getToken } = useAuthContext();
 
   const {user: userDocument} = useCurrentUser();
 

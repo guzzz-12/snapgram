@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { sendMessageFn, type PublicKeysType } from "@/repositories/chatsRepository";

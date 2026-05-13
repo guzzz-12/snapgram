@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type UIEvent } from "react";
-import { useAuth } from "@clerk/clerk-react";
 import { CircleArrowLeft, CircleArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import StoryCardRounded from "./StoryCardRounded";
 import StoryCardSkeletonRounded from "./StoryCardSkeletonRounded";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useGetUsersHavingStories } from "@/services/stories";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -17,7 +17,7 @@ const StoriesSlider = () => {
   const [showLeftArrow, setShowLeftArrow] = useState(true);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
-  const { userId } = useAuth();
+  const { userId } = useAuthContext();
 
   const { user: currentUser } = useCurrentUser();
 

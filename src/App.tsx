@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router";
-import { useAuth, useUser } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
@@ -21,6 +20,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useGetCurrentUser } from "./services/user";
 import { useGetUnseenNotificationsCount } from "./services/notifications";
 import { useGetUnreadChats } from "./services/chats";
+import { useAuthContext } from "./providers/AuthProvider";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUnseenNotifications } from "@/hooks/useUnseenNotifications";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
@@ -31,8 +31,7 @@ import { errorMessage } from "@/utils/errorMessage";
 const PING_RETRY = 6;
 
 const App = () => {
-  const { isSignedIn, isLoaded } = useUser();
-  const { userId, signOut, getToken } = useAuth();
+  const { isSignedIn, isLoaded, userId, signOut, getToken } = useAuthContext();
 
   const [serverStarted, setServerStarted] = useState(false);
   const [serverError, setServerError] = useState(false);

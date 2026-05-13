@@ -1,12 +1,12 @@
 import { useState, type HTMLAttributes } from "react";
 import { Link } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import PostOptionsDropdown from "./PostOptionsDropdown";
 import DeletePostModal from "./DeletePostModal";
 import EditHistoryModal from "./EditHistoryModal";
 import UserProfileTooltip from "./UserProfileTooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useFollowOrUnfollowUser } from "@/services/profile";
 import dayJs from "@/utils/dayJsInstance";
 import type { PostWithLikes } from "@/types/global";
@@ -24,7 +24,7 @@ const PostCardHeader = ({ postData, className, setisEditingPost }: Props) => {
   const [openChangelogModal, setOpenChangelogModal] = useState(false);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
 
-  const {userId} = useAuth();
+  const {userId} = useAuthContext();
 
   const {mutate, isPending} = useFollowOrUnfollowUser(postData.user._id, userId);
 

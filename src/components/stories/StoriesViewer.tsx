@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import dayjs from "dayjs";
 import { CircleChevronLeft, CircleChevronRight, EllipsisVertical, Pause, Play, Trash2 } from "lucide-react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
@@ -12,6 +11,7 @@ import DeleteStoryModal from "./DeleteStoryModal";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useGetUserStories, useMarkStoryAsSeen, useToggleLikeStory } from "@/services/stories";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { errorMessage } from "@/utils/errorMessage";
@@ -45,7 +45,7 @@ const StoriesViewer = (props: Props) => {
   const [isPaused, setIsPaused] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
-  const { userId } = useAuth();
+  const { userId } = useAuthContext();
 
   const { user: currentUser } = useCurrentUser();
 

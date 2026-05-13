@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { AxiosError } from "axios";
 import { FaUserTimes } from "react-icons/fa";
 import { toast } from "sonner";
@@ -12,6 +11,7 @@ import FollowingTabContent from "@/components/profile/FollowingTabContent";
 import LikedPostsTabContent from "@/components/profile/LikedPostsTabContent";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useGetUserProfile } from "@/services/profile";
 import { ACCOUNT_STATUS } from "@/utils/constants";
 
@@ -21,7 +21,7 @@ const ProfilePage = () => {
 
   const [activeTab, setActiveTab] = useState("posts");
 
-  const {userId} = useAuth();
+  const {userId} = useAuthContext();
 
   // Restablecer el tab default al cambiar de usuario
   useEffect(() => {

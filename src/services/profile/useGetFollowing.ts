@@ -1,4 +1,3 @@
-import { useAuth } from "@clerk/clerk-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { UserType } from "@/types/global";
 import { fetchFollowing } from "@/repositories/profileRepository";

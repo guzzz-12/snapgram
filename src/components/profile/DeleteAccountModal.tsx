@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import { IoWarningOutline } from "react-icons/io5";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useDeleteUserAccount } from "@/services/user";
 import { errorMessage } from "@/utils/errorMessage";
 
@@ -15,7 +15,7 @@ interface Props {
 }
 
 const DeleteAccountModal = ({ isOpen, setIsOpen, setOpenDisableAccountModal }: Props) => {
-  const {signOut} = useAuth();
+  const {signOut} = useAuthContext();
 
   const [isPending, setIsPending] = useState(false);
 

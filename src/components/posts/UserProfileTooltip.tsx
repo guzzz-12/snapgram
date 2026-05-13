@@ -1,11 +1,11 @@
 import type { JSX } from "react";
 import { Link, useNavigate } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { FiSend } from "react-icons/fi";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useGetUserProfile } from "@/services/profile";
 import { useGetPrivateChatByRecipient } from "@/services/chats";
 import { useTemporaryChat } from "@/hooks/useTemporaryChat";
@@ -21,7 +21,7 @@ interface Props {
 const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow, isPending}: Props) => {
   const navigate = useNavigate();
 
-  const {userId} = useAuth();
+  const {userId} = useAuthContext();
 
   const {userData, loadingUser} = useGetUserProfile(userClerkId, true, isOpen);
 

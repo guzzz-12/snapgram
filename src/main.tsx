@@ -2,22 +2,15 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ClerkProvider } from "@clerk/clerk-react";
-import { esMX } from "@clerk/localizations";
 import { ImageKitProvider } from "@imagekit/react";
 import { ErrorBoundary } from "react-error-boundary";
 import App from "./App.tsx";
-import ErrorPage from "./pages/ErrorPage.tsx";
+import ErrorPage from "./pages/ErrorPage";
+import AllProviders from "./providers/AllProviders";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "yet-another-react-lightbox/styles.css";
 import "./index.css";
-
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Publishable key de Clerk no encontrado");
-}
 
 const queryClient = new QueryClient();
 
@@ -35,10 +28,7 @@ const Fallback = ({ error }: { error: Error }) => {
 const MyApp = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ClerkProvider
-        publishableKey={PUBLISHABLE_KEY}
-        localization={esMX}
-      >
+      <AllProviders>
         <BrowserRouter>
           <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
             <ErrorBoundary FallbackComponent={Fallback}>
@@ -48,7 +38,7 @@ const MyApp = () => {
         </BrowserRouter>
 
         <ReactQueryDevtools initialIsOpen={false} />
-      </ClerkProvider>
+      </AllProviders>
     </QueryClientProvider>
   )
 }

@@ -1,5 +1,4 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
 import { fetchChatMessages } from "@/repositories/chatsRepository";
 
 /** Service para consultar los mensajes de un chat */

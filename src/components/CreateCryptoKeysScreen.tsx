@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
 import { OTPInput } from "input-otp";
 import { IoWarningOutline } from "react-icons/io5";
 import { toast } from "sonner";
@@ -10,6 +9,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Toaster } from "./ui/sonner";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useCreateCryptoKeys } from "@/services/cryptoKeys";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCheckLocalCryptoKeys } from "@/hooks/useCheckLocalCryptoKeys";
@@ -25,7 +25,7 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
   const [pin, setPin] = useState("");
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
 
-  const { signOut } = useAuth();
+  const { signOut } = useAuthContext();
   
   const {setHasLocalCryptoKeys} = useCheckLocalCryptoKeys();
 

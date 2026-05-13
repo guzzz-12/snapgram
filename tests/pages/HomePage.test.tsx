@@ -1,4 +1,3 @@
-import { type ReactNode } from "react";
 import { act, fireEvent, render, screen, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { mockIntersectionObserver } from "jsdom-testing-mocks";
@@ -16,36 +15,6 @@ vi.mock("@/services/profile", async (importOriginal) => {
     ...actual,
     useGetFollowingCount: vi.fn(),
   }
-});
-
-vi.mock("@clerk/clerk-react", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@clerk/clerk-react")>();
-  
-  return {
-    ...actual,
-    ClerkProvider: ({ children }: { children: ReactNode }) => {
-      return (
-        <>
-          {children}
-        </>
-      )
-    },
-    useUser: vi.fn().mockReturnValue({
-      isLoaded: true,
-      isSignedIn: true,
-      user: {
-        id: "user_2026_test",
-        fullName: "John Doe",
-      },
-    }),
-    useAuth: vi.fn().mockReturnValue({
-      isLoaded: true,
-      userId: "user_2026_test",
-      sessionId: "sess_123",
-      getToken: vi.fn().mockResolvedValue("fake-token"),
-      signOut: vi.fn(),
-    }),
-  };
 });
 
 describe("HomePage", () => {

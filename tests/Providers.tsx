@@ -1,11 +1,10 @@
-import type { ReactNode } from "react"
+import type { ReactNode } from "react";
 import { MemoryRouter, type InitialEntry } from "react-router";
-import { ClerkProvider } from "@clerk/clerk-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { esMX } from "@clerk/localizations";
 import { ImageKitProvider } from "@imagekit/react";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "@/pages/ErrorPage";
+import AllProviders from "@/providers/AllProviders";
 
 const Fallback = ({ error }: { error: Error }) => {
   console.log(error);
@@ -41,16 +40,13 @@ const Providers = ({initialEntries, children }: Props) => {
   return (
     <ErrorBoundary FallbackComponent={Fallback}>
       <QueryClientProvider client={client}>
-        <ClerkProvider
-          publishableKey={PUBLISHABLE_KEY}
-          localization={esMX}
-        >
+        <AllProviders>
           <MemoryRouter initialEntries={initialEntries}>
             <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
               {children}
             </ImageKitProvider>
           </MemoryRouter>
-        </ClerkProvider>
+        </AllProviders>
       </QueryClientProvider>
     </ErrorBoundary>
   )

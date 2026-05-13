@@ -2,40 +2,20 @@ import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { mockIntersectionObserver } from "jsdom-testing-mocks";
 import Layout from "@/Layout";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { buildMockUser } from "../mocks/users/factories";
 import Providers from "../Providers";
 
-// Mockear los hooks de Clerk
-vi.mock("@clerk/clerk-react", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@clerk/clerk-react")>();
-  
-  return {
-    ...actual,
-    ClerkProvider: ({ children }: { children: ReactNode }) => {
-      return (
-        <>
-          {children}
-        </>
-      )
-    },
-    useUser: vi.fn().mockReturnValue({
-      isLoaded: true,
-      isSignedIn: true,
-      user: {
-        id: "user_2026_test",
-        fullName: "John Doe",
-      },
-    }),
-    useAuth: () => ({
-      isLoaded: true,
-      userId: "user_2026_test",
-      sessionId: "sess_123",
-      getToken: vi.fn().mockResolvedValue("fake-token"),
-      signOut: vi.fn(),
-    }),
-  };
-});
+// Mockear el provider global de autenticación
+vi.mock("@/providers/AuthProvider", () => ({
+  useAuthContext: vi.fn(),
+  default: ({ children }: { children: ReactNode }) => (
+    <>
+      {children}
+    </>
+  )
+}));
 
 // Mock del state global del usuario autenticado
 vi.mock("@/hooks/useCurrentUser", () => ({
@@ -45,6 +25,15 @@ vi.mock("@/hooks/useCurrentUser", () => ({
 describe("Layout Principal", () => {
   beforeEach(() => {
     mockIntersectionObserver();
+
+    // Simular un usuario autenticado
+    (useAuthContext as any).mockReturnValue({
+      userId: "user_2026_test",
+      isLoaded: true,
+      isSignedIn: true,
+      signOut: vi.fn(),
+      getToken: vi.fn().mockResolvedValue("fake-token"),
+    });
   });
 
 

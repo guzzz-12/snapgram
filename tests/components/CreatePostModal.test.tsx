@@ -4,6 +4,7 @@ import userEvent, { PointerEventsCheckLevel } from "@testing-library/user-event"
 import { mockIntersectionObserver } from "jsdom-testing-mocks";
 import { http, HttpResponse } from "msw";
 import Layout from "@/Layout";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { imageProcessor } from "@/utils/imageCompressor";
 import Providers from "../Providers";
@@ -32,36 +33,15 @@ vi.mock("@/utils/imageCompressor", () => ({
   imageProcessor: vi.fn(),
 }));
 
-// Mockear los hooks de Clerk
-vi.mock("@clerk/clerk-react", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@clerk/clerk-react")>();
-  
-  return {
-    ...actual,
-    ClerkProvider: ({ children }: { children: ReactNode }) => {
-      return (
-        <>
-          {children}
-        </>
-      )
-    },
-    useUser: vi.fn().mockReturnValue({
-      isLoaded: true,
-      isSignedIn: true,
-      user: {
-        id: "user_2026_test",
-        fullName: "John Doe",
-      },
-    }),
-    useAuth: () => ({
-      isLoaded: true,
-      userId: "user_2026_test",
-      sessionId: "sess_123",
-      getToken: vi.fn().mockResolvedValue("fake-token"),
-      signOut: vi.fn(),
-    }),
-  };
-});
+// Mockear el provider global de autenticación
+vi.mock("@/providers/AuthProvider", () => ({
+  useAuthContext: vi.fn(),
+  default: ({ children }: { children: ReactNode }) => (
+    <>
+      {children}
+    </>
+  )
+}));
 
 // Mock del state global del usuario autenticado
 vi.mock("@/hooks/useCurrentUser", () => ({
@@ -81,6 +61,15 @@ describe("CreatePostModal", async () => {
 
   beforeEach(() => {
     mockIntersectionObserver();
+
+    // Simular un usuario autenticado
+    (useAuthContext as any).mockReturnValue({
+      userId: "user_2026_test",
+      isLoaded: true,
+      isSignedIn: true,
+      signOut: vi.fn(),
+      getToken: vi.fn().mockResolvedValue("fake-token"),
+    });
   });
 
   it("debe mostrar el formulario de crear post al clickear la opción del dropdown y debe hacer autofocus al input del post", async () => {

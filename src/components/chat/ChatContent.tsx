@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import { AxiosError } from "axios";
 import { Loader2Icon } from "lucide-react";
@@ -54,13 +54,15 @@ const ChatContent = ({ chatData, isLoadingChatData }: Props) => {
     fetchNextPage
   });
 
-  if (error) {
+  useEffect(() => {
+    if (!error) return;
+
     if (error instanceof AxiosError && error.response?.status === 404) {
-      navigate("/messages", {replace: true});
+      navigate("/messages", { replace: true });
     }
 
     toast.error(errorMessage(error));
-  }
+  }, [error, navigate]);
 
   return (
     <div

@@ -34,9 +34,11 @@ const HomePage = () => {
   // Consultar el número de seguidos del usuario
   const {followingCount, loadingFollowingCount} = useGetFollowingCount();
 
-  if (error) {
-    toast.error(errorMessage(error));
-  }
+  useEffect(() => {
+    if (error) {
+      toast.error(errorMessage(error));
+    }
+  }, [error]);
 
   return (
     <main className="pageWrapper ">

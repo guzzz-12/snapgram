@@ -1,21 +1,33 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryErrorResetBoundary
+} from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ImageKitProvider } from "@imagekit/react";
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { Toaster } from "sonner";
 import App from "./App.tsx";
 import ErrorPage from "./pages/ErrorPage";
 import AllProviders from "./providers/AllProviders";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import "yet-another-react-lightbox/styles.css";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60,
+      refetchOnWindowFocus: false,
+      retry: 1
+    }
+  }
+});
 
-const Fallback = ({ error }: { error: Error }) => {
-  console.log(error);
+const Fallback = ({ error }: FallbackProps) => {
+  console.error(error);
 
   return (
     <ErrorPage
@@ -31,12 +43,17 @@ const MyApp = () => {
       <AllProviders>
         <BrowserRouter>
           <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
-            <ErrorBoundary FallbackComponent={Fallback}>
-              <App />
-            </ErrorBoundary>
+            <QueryErrorResetBoundary>
+              {({ reset }) => (
+                <ErrorBoundary onReset={reset} FallbackComponent={Fallback}>
+                  <App />
+                </ErrorBoundary>
+              )}
+            </QueryErrorResetBoundary>
           </ImageKitProvider>
         </BrowserRouter>
 
+        <Toaster position="bottom-right" />
         <ReactQueryDevtools initialIsOpen={false} />
       </AllProviders>
     </QueryClientProvider>

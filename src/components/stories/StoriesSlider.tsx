@@ -76,9 +76,11 @@ const StoriesSlider = () => {
   const otherStories = usersWithStories.filter((user) => user.clerkId !== userId);
   const sortedStories = [myStories, ...otherStories];
 
-  if (error) {
-    toast.error(errorMessage(error));
-  }
+  useEffect(() => {
+    if (error) {
+      toast.error(errorMessage(error));
+    }
+  }, [error]);
 
   if ((!loading && usersWithStories.length === 0) || !currentUser) {
     return null;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import Sidebar from "./components/Sidebar";
 import CreateStoryModal from "@/components/stories/CreateStoryModal";
 import CreatePostModal from "@/components/posts/CreatePostModal";
@@ -120,8 +120,6 @@ const Layout = () => {
         <section className="grow bg-slate-100 overflow-x-hidden">
           <Outlet />
         </section>
-
-        <Toaster position="bottom-right" />
       </TooltipProvider>
     </div>
   )

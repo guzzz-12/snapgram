@@ -121,25 +121,27 @@ describe("HomePage", () => {
 
     vi.useFakeTimers();
 
-    const searchSpy = vi.spyOn(searchModule, "useSearchUsers");
+    try {
+      const searchSpy = vi.spyOn(searchModule, "useSearchUsers");
 
-    // Input de búsqueda de usuarios
-    const searchInput = screen.queryByTestId("search-users-input");
-    expect(searchInput).toBeInTheDocument();
+      // Input de búsqueda de usuarios
+      const searchInput = screen.queryByTestId("search-users-input");
+      expect(searchInput).toBeInTheDocument();
 
-    // Simular que el usuario escribe en el input
-    fireEvent.change(searchInput!, { target: { value: "john" } });
+      // Simular que el usuario escribe en el input
+      fireEvent.change(searchInput!, { target: { value: "john" } });
 
-    // Esperar a que termine el debounce
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
+      // Esperar a que termine el debounce
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
 
-    // Verificar que la función de búsqueda se haya ejecutado una sola vez
-    expect(searchSpy).toHaveBeenLastCalledWith(
-      expect.objectContaining({searchTerm: "john", searchType: "people"}),
-    );
-
-    vi.useRealTimers();
+      // Verificar que la función de búsqueda se haya ejecutado una sola vez
+      expect(searchSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({searchTerm: "john", searchType: "people"}),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

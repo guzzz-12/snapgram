@@ -1,12 +1,42 @@
-import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type KeyboardEvent, type SetStateAction, type WheelEvent } from "react";
-import Picker from "@emoji-mart/react";
-import emojiData from "@emoji-mart/data/sets/15/twitter.json";
-import { Smile } from "lucide-react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type Dispatch,
+  type KeyboardEvent,
+  type SetStateAction,
+  type WheelEvent
+} from "react";
+import { Loader2Icon, Smile } from "lucide-react";
 import HashtagsPopover from "./HashtagsPopover";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getCaretCoordinates } from "@/utils/getCaretCoordinates";
+
+const LazyEmojiPicker = lazy(async () => {
+  const [{ default: Picker }, { default: emojiData }] = await Promise.all([
+    import("@emoji-mart/react"),
+    import("@emoji-mart/data/sets/15/twitter.json")
+  ]);
+
+  return {
+    default: (props: { onEmojiSelect: (e: any) => void }) => (
+      <Picker
+        locale="es"
+        emojiVersion="15"
+        set="twitter"
+        previewPosition="none"
+        navPosition="bottom"
+        data={emojiData}
+        onEmojiSelect={props.onEmojiSelect}
+      />
+    )
+  };
+});
 
 // const HASHTAG_REGEX = /#[A-Za-z_][A-Za-z0-9_]*$/; // No soporta diacríticas
 const HASHTAG_REGEX = /#[\p{L}\p{N}_]+$/u; // Soporta diacríticas (multilenguaje)
@@ -188,15 +218,15 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
               side="left"
               onWheel={handleScrollInterception}
             >
-              <Picker
-                locale="es"
-                emojiVersion="15"
-                set="twitter"
-                previewPosition="none"
-                navPosition="bottom"
-                data={emojiData}
-                onEmojiSelect={onEmojiPickHandler}
-              />
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center w-[352px] h-[435px] bg-white rounded-lg shadow">
+                    <Loader2Icon className="size-6 text-[#4F39F6] animate-spin" />
+                  </div>
+                }
+              >
+                <LazyEmojiPicker onEmojiSelect={onEmojiPickHandler} />
+              </Suspense>
             </PopoverContent>
           </Popover>
         </div>

@@ -1,4 +1,5 @@
 import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 import { useImagesLighbox } from "@/hooks/useImagesLightbox";
 
 const ImagesLightbox = () => {
@@ -11,6 +12,8 @@ const ImagesLightbox = () => {
     setImages([]);
     setInitialIndex(0);
   }
+
+  if (!open) return null;
 
   return (
     <Lightbox

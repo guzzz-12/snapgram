@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type HTMLAttributes } from "react";
+import { memo, useEffect, useRef, useState, type HTMLAttributes } from "react";
 import { useSearchParams } from "react-router";
 import { Twemoji } from "react-emoji-render";
 import PostHeader from "./PostCardHeader";
@@ -32,11 +32,12 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
   const [textContent, setTextContent] = useState(() => postData.content);
   const [openPostModal, setOpenPostModal] = useState(false);
 
-  // Restablecer el texto inicial del post al salir
-  // del modo de edición sin guardar los cambios
+  // Sincronizar el texto cuando cambia el contenido del post en el servidor y no se está editando
   useEffect(() => {
-    return () => setTextContent(postData.content);
-  }, [isEditingPost]);
+    if (!isEditingPost) {
+      setTextContent(postData.content);
+    }
+  }, [postData.content, isEditingPost]);
 
   const {
     isClamped,
@@ -44,6 +45,11 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
     setShowFullText,
     setIsClamped
   } = useClampedText({ textContentRef, clampedTextData: postData.content });
+
+  const onCancelEditHandler = () => {
+    setTextContent(postData.content);
+    setIsEditingPost(false);
+  };
 
   const onSaveChangesHandler = () => {
     editPost({
@@ -54,16 +60,16 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
         setIsEditingPost(false);
       }
     });
-  }
+  };
 
   return (
     <article
       className={cn("flex flex-col gap-3 w-full p-4 rounded-lg bg-white shadow", className)}
-      data-testid={`post-card`}
+      data-testid="post-card"
     >
       <PostHeader
         postData={postData}
-        setisEditingPost={(bool) => setIsEditingPost(bool)}
+        setisEditingPost={setIsEditingPost}
       />
 
       {isEditingPost && (
@@ -79,7 +85,7 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
               className="cursor-pointer"
               variant="outline"
               disabled={isPending}
-              onClick={() => setIsEditingPost(false)}
+              onClick={onCancelEditHandler}
             >
               Cancelar
             </Button>
@@ -87,10 +93,8 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
             <Button
               className="bg-[#4F39F6] hover:bg-[#331fcf] cursor-pointer disabled:pointer-events-none"
               disabled={
-                isPending
-                ||
-                (textContent === postData.content)
-                ||
+                isPending ||
+                textContent === postData.content ||
                 (!textContent && postData.postType === "text")
               }
               onClick={onSaveChangesHandler}
@@ -105,41 +109,40 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
         <div>
           <p
             ref={textContentRef}
-            className={cn("inline-block text-base text-left text-neutral-700 whitespace-pre-wrap bg-transparent", showFullText ? "line-clamp-none" : "line-clamp-6")}
+            className={cn(
+              "inline-block text-base text-left text-neutral-700 whitespace-pre-wrap bg-transparent",
+              showFullText ? "line-clamp-none" : "line-clamp-6"
+            )}
           >
             <Twemoji className="[&>img]:!inline">
               {hashtagParser(postData.content)}
             </Twemoji>
           </p>
-          
-          {isClamped &&
+
+          {isClamped && (
             <SeeMoreBtn
               isClamped={isClamped}
               setIsClamped={setIsClamped}
               setShowFullText={setShowFullText}
             />
-          }
+          )}
         </div>
       )}
 
       {/* Contenido del post */}
-      {postData.postType !== "repost" &&
-        <PostCardSlider data={postData} />
-      }
+      {postData.postType !== "repost" && <PostCardSlider data={postData} />}
 
       {/* Contenido del repost */}
-      {postData.postType === "repost" &&
-        <SharedPostCard data={postData.originalPost} />
-      }
+      {postData.postType === "repost" && <SharedPostCard data={postData.originalPost} />}
 
       <PostCardFooter
         postData={postData}
         isModal={isModal}
         openPostModal={openPostModal}
-        setOpenPostModal={(open) => setOpenPostModal(open)}
+        setOpenPostModal={setOpenPostModal}
       />
     </article>
-  )
-}
+  );
+};
 
-export default PostCard
+export default memo(PostCard);

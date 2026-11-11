@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchPosts } from "@/repositories/postsRepository";
 
@@ -7,13 +8,23 @@ const useGetFeedPosts = () => {
     queryKey: ["posts"],
     queryFn: ({pageParam}) => fetchPosts(pageParam),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextPage : null),
     refetchOnWindowFocus: false
   });
 
-  const {data, error, isLoading: loadingPosts, isFetchingNextPage, hasNextPage, fetchNextPage} = res;
+  const {
+    data,
+    error,
+    isLoading: loadingPosts,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  } = res;
 
-  const posts = data?.pages.flatMap(page => page.data) || [];
+  const posts = useMemo(
+    () => data?.pages.flatMap((page) => page.data) ?? [],
+    [data?.pages]
+  );
 
   return {
     posts,

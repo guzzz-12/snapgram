@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { Twemoji } from "react-emoji-render";
 import { FiMoreVertical } from "react-icons/fi";
@@ -311,4 +311,4 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
   )
 }
 
-export default MessageItem
+export default memo(MessageItem);

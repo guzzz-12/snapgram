@@ -33,16 +33,15 @@ const PING_RETRY = 6;
 const App = () => {
   const { isSignedIn, isLoaded, userId, signOut, getToken } = useAuthContext();
 
-  const [serverStarted, setServerStarted] = useState(false);
-  const [serverError, setServerError] = useState(false);
+  const [interceptorReady, setInterceptorReady] = useState(false);
 
-  const { user: currentUser, setUser, setLoadingUser } = useCurrentUser();
+  const { setUser, setLoadingUser } = useCurrentUser();
   const { setUnseenNotifications } = useUnseenNotifications();
   const { addToUnreadChats } = useUnreadChats();
 
   // Realizar ping al servidor para inicializarlo
   // en caso de estar deshabilitado por inactividad.
-  const { data: keepAliveData, status: serverStatus, failureCount } = useQuery({
+  const { status: serverStatus, failureCount } = useQuery({
     queryKey: ["server-ping"],
     queryFn: async () => {
       return await axiosInstance({
@@ -54,48 +53,51 @@ const App = () => {
     refetchOnWindowFocus: false
   });
 
-  // Actualizar el state activo del servidor
-  useEffect(() => {
-    setServerStarted(serverStatus === "success");
+  const serverStarted = serverStatus === "success";
+  const serverError = serverStatus === "error" || failureCount >= PING_RETRY + 1;
 
-    // failureCount = primer intento + el número de retries
-    if (failureCount === PING_RETRY + 1) {
-      setServerError(true);
-    }
-  }, [serverStatus, failureCount]);
-
-  // Inicializar el interceptor de axios para incluir el token en cada consulta
+  // Inicializar el interceptor de axios y limpiarlo al desmontar o cambiar getToken
   useEffect(() => {
-    if (serverStarted) {
-      setupAxiosInterceptors(getToken);
+    if (!serverStarted) {
+      setInterceptorReady(false);
+      return;
     }
+
+    const ejectInterceptor = setupAxiosInterceptors(getToken);
+    setInterceptorReady(true);
+
+    return () => {
+      ejectInterceptor();
+    };
   }, [serverStarted, getToken]);
 
-  // Consultar la data del usuario autenticado
+  const canFetchAuthenticatedData = Boolean(userId && serverStarted && interceptorReady);
+
+  // Consultar la data del usuario autenticado, notificaciones y chats en paralelo
   const { userData, loadingUser, userError } = useGetCurrentUser({
-    enabled: !!userId && serverStarted
+    enabled: canFetchAuthenticatedData
   });
 
-  // Consultar la cantidad de notificaciones no vistas
   const { unseenNotificationsCount, loadingNotifications } = useGetUnseenNotificationsCount({
-    enabled: serverStarted && !!currentUser
+    enabled: canFetchAuthenticatedData
   });
 
-  // Consultar la cantidad de chats con mesajes sin leer
   const { unreadChatsIds, loadingUnreadChats } = useGetUnreadChats({
-    enabled: serverStarted && !!currentUser
+    enabled: canFetchAuthenticatedData
   });
 
-  // Cerrar sesión en caso de error al consultar el usuario
+  // Cerrar sesión y notificar en caso de error al consultar el usuario
   useEffect(() => {
-    if (userError) {
-      signOut()
-        .then(() => {
-          toast.error("Ocurrió un error al iniciar sesión.");
-        })
-        .catch((_error) => { });
-    }
-  }, [userError]);
+    if (!userError) return;
+
+    toast.error(errorMessage(userError));
+
+    signOut()
+      .then(() => {
+        toast.error("Ocurrió un error al iniciar sesión.");
+      })
+      .catch(() => {});
+  }, [userError, signOut]);
 
   // Actualizar el state global del usuario
   useEffect(() => {
@@ -104,33 +106,29 @@ const App = () => {
     if (userData) {
       setUser(userData);
     }
-  }, [userData, loadingUser]);
+  }, [userData, loadingUser, setLoadingUser, setUser]);
 
   // Actualizar el state del contador de notificaciones no vistas
   useEffect(() => {
     setUnseenNotifications(unseenNotificationsCount ?? 0);
-  }, [unseenNotificationsCount]);
+  }, [unseenNotificationsCount, setUnseenNotifications]);
 
   // Actualizar el state del contador de chats sin leer
   useEffect(() => {
     if (unreadChatsIds && unreadChatsIds.length > 0) {
       addToUnreadChats(unreadChatsIds);
     }
-  }, [unreadChatsIds]);
-
-  if (userError) {
-    toast.error(errorMessage(userError));
-  }
+  }, [unreadChatsIds, addToUnreadChats]);
 
   const isLoading = loadingUser || loadingNotifications || loadingUnreadChats;
 
   // Mostrar el loading mientras se inicia el servidor y se cargan los datos
-  if ((!serverStarted && !serverError) || !isLoaded || isLoading) {
+  if ((!serverStarted && !serverError) || !isLoaded || (Boolean(userId) && !interceptorReady) || isLoading) {
     return (
       <div className="flex justify-center items-center gap-2 h-screen w-full bg-neutral-50">
         <Loader2Icon className="size-[40px] text-[#4F39F6] animate-spin" />
       </div>
-    )
+    );
   }
 
   // Mostrar pantalla de error si hay error en el servidor

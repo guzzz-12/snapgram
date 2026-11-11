@@ -10,26 +10,26 @@ import { mockDb } from "../mocks/notifications/notificationsRepository";
 
 describe("NotificationsPage", () => {
   const user = userEvent.setup();
+  let client: QueryClient;
 
   const RenderPage = () => {
-    const client = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false
-        }
-      }
-    });
-
     return (
       <QueryClientProvider client={client}>
         <MemoryRouter>
           <NotificationsPage />
         </MemoryRouter>
       </QueryClientProvider>
-    )
-  }
+    );
+  };
 
   beforeEach(() => {
+    client = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false
+        }
+      }
+    });
     mockIntersectionObserver();
   });
 

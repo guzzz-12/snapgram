@@ -25,7 +25,7 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
   const {setOpen} = useCreatePublicationModal();
 
   // Dar/quitar like al post
-  const {togglePostLikeMutation, isPending} = useTogglePostLike({
+  const {togglePostLikeMutation} = useTogglePostLike({
     postId: postData._id,
     searchTerm: searchTerm || ""
   });
@@ -90,7 +90,7 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
       
       <div className="flex justify-between items-center gap-1 w-full pt-2 text-neutral-700 text-sm font-semibold border-t overflow-hidden">
         <PostCardFooterBtn
-          disabled={isPending}
+          disabled={false}
           callback={() => togglePostLikeMutation()}
         >
           <Heart

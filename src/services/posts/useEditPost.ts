@@ -71,8 +71,8 @@ const useEditPost = () => {
       );
 
       // Actualizar detalle individual del post si está en caché
-      queryClient.setQueryData<PostWithLikes>(
-        ["post", vars.postData._id],
+      queryClient.setQueryData<PostWithLikes | false>(
+        ["posts", vars.postData._id],
         (oldPost) => (oldPost ? { ...oldPost, content: updatedContent } : oldPost)
       );
 

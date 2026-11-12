@@ -27,10 +27,10 @@ const CommentDropdown = (props: Props) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className={cn("flex justify-center items-center min-w-6 min-h-6 p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 cursor-pointer transition-colors", isPending && "pointer-events-none")}
+          className={cn("flex justify-center items-center min-w-6 min-h-6 p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 dark:hover:bg-slate-800 cursor-pointer transition-colors", isPending && "pointer-events-none")}
           disabled={isPending}
         >
-          <Ellipsis className="size-4 text-neutral-700" aria-hidden />
+          <Ellipsis className="size-4 text-neutral-700 dark:text-slate-300" aria-hidden />
           <span className="sr-only">
             Opciones del comentario
           </span>
@@ -46,7 +46,7 @@ const CommentDropdown = (props: Props) => {
               onClick={() => setIsEditing(true)}
             >
               <Pencil className="size-4.5" aria-hidden />
-              <span className="text-sm text-neutral-900">Editar</span>
+              <span className="text-sm text-neutral-900 dark:text-slate-100">Editar</span>
             </DropdownMenuItem>
 
             <Separator />
@@ -75,7 +75,7 @@ const CommentDropdown = (props: Props) => {
           onClick={() => setOpenChangeLogModal(true)}
         >
           <Logs className="size-5" aria-hidden />
-          <span className="text-sm text-neutral-900">
+          <span className="text-sm text-neutral-900 dark:text-slate-100">
             Ver historial de cambios
           </span>
         </DropdownMenuItem>

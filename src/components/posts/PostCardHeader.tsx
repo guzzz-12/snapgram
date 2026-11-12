@@ -59,14 +59,14 @@ const PostCardHeader = ({ postData, className, setisEditingPost }: Props) => {
 
             <div className="flex flex-col justify-between items-start gap-0 w-fit overflow-hidden">
               <Link
-                className={cn("w-full font-semibold text-neutral-900 truncate", isDeletingPost && "pointer-events-none")}
+                className={cn("w-full font-semibold text-neutral-900 dark:text-slate-100 truncate", isDeletingPost && "pointer-events-none")}
                 to={`/profile/${postData.user.clerkId}`}
               >
                 {postData.user.fullName}
               </Link>
 
               <Link
-                className="text-sm text-neutral-700"
+                className="text-sm text-neutral-700 dark:text-slate-400"
                 to={`/post/${postData._id}`}
                 title={dayJs(postData.createdAt).format("dddd, DD [de] MMMM [de] YYYY [a las] hh:mm a")}
               >

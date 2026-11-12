@@ -67,7 +67,7 @@ const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow, is
         {children}
       </HoverCardTrigger>
 
-      <HoverCardContent className="w-[300px] max-w-[300px] p-0 rounded-md border bg-neutral-200 shadow overflow-hidden">
+      <HoverCardContent className="w-[300px] max-w-[300px] p-0 rounded-md border bg-neutral-200 dark:bg-slate-900 dark:border-slate-800 shadow overflow-hidden">
         <div
           className="relative"
           style={{
@@ -102,13 +102,13 @@ const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow, is
 
                   <div className="flex flex-col w-full overflow-hidden">
                     <div className="flex justify-start items-center gap-2 w-fit overflow-hidden">
-                      <p className="w-full text-base text-neutral-900 font-semibold truncate">
+                      <p className="w-full text-base text-neutral-900 dark:text-white font-semibold truncate">
                         {userData.fullName}
                       </p>
 
                       {(userData.isFollowedBy || isCurrentUser) && 
                         <div className="flex justify-center items-center shrink-0 px-2 py-1 rounded-full border border-neutral-400">
-                          <span className="text-xs text-neutral-700 font-light whitespace-nowrap">
+                          <span className="text-xs text-neutral-700 dark:text-slate-400 font-light whitespace-nowrap">
                             {userData.isFollowedBy && "Te sigue"}
                             {isCurrentUser && "Tú"}
                           </span>
@@ -116,46 +116,46 @@ const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow, is
                       }
                     </div>
 
-                    <p className="w-full text-sm text-neutral-700 truncate">
+                    <p className="w-full text-sm text-neutral-700 dark:text-slate-400 truncate">
                       @{userData.username}
                     </p>
                   </div>
                 </Link>
 
-                <div className="flex justify-center items-center gap-6 w-full mt-auto px-4 pt-4 pb-2 bg-gradient-to-t from-white from-0% to-transparent">
+                <div className="flex justify-center items-center gap-6 w-full mt-auto px-4 pt-4 pb-2 bg-gradient-to-t from-white dark:from-slate-900 from-0% to-transparent">
                   <div className="flex flex-col justify-between items-center gap-0">
-                    <p className="text-sm text-black font-semibold">
+                    <p className="text-sm text-black dark:text-slate-100 font-semibold">
                       {userData.followersCount}
                     </p>
 
-                    <p className="text-sm text-neutral-700">
+                    <p className="text-sm text-neutral-700 dark:text-slate-400">
                       seguidores
                     </p>
                   </div>
 
                   <div className="flex flex-col justify-between items-center gap-0">
-                    <span className="text-sm text-black font-semibold">
+                    <span className="text-sm text-black dark:text-slate-100 font-semibold">
                       {userData.followingCount}
                     </span>
 
-                    <span className="text-sm text-neutral-700">
+                    <span className="text-sm text-neutral-700 dark:text-slate-400">
                       siguiendo
                     </span>
                   </div>
 
                   <div className="flex flex-col justify-between items-center gap-0">
-                    <span className="text-sm text-black font-semibold">
+                    <span className="text-sm text-black dark:text-slate-100 font-semibold">
                       {userData.postsCount}
                     </span>
 
-                    <span className="text-sm text-neutral-700">
+                    <span className="text-sm text-neutral-700 dark:text-slate-400">
                       publicaciones
                     </span>
                   </div>
                 </div>
 
                 {!isCurrentUser &&
-                  <div className="flex justify-center items-center gap-2 w-full px-4 py-2 border-t bg-white overflow-hidden z-10">
+                  <div className="flex justify-center items-center gap-2 w-full px-4 py-2 border-t bg-white dark:bg-slate-900 dark:border-slate-800 overflow-hidden z-10">
                     <Button
                       className="w-1/2 rounded-full bg-[#4F39F6] hover:bg-[#4F39F6]/80 cursor-pointer!"
                       size="sm"
@@ -183,7 +183,7 @@ const UserProfileTooltip = ({isOpen, userClerkId, children, followOrUnfollow, is
                 }
               </div>
 
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white from-0% to-transparent to-55% z-0" />
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white dark:from-slate-900 from-0% to-transparent to-55% z-0" />
             </>
           }
         </div>

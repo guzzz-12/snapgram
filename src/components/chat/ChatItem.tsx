@@ -119,7 +119,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
     <NavLink
       key={chatData._id}
       className={({isActive}) => (
-        `flex justify-center min-[950px]:justify-start items-center gap-2 p-2 min-[700px]:px-4 min-[700px]:py-3 border-b hover:bg-gray-100 cursor-pointer last:mb-0 ${isActive ? "bg-[#4F39F6]/10" : ""}`
+        `flex justify-center min-[950px]:justify-start items-center gap-2 p-2 min-[700px]:px-4 min-[700px]:py-3 border-b border-slate-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800/60 ${isActive ? "bg-[#4F39F6]/10 dark:bg-indigo-500/15" : ""}`
       )}
       to={`/messages/${chatData._id}`}
       onClick={onClickHandler}
@@ -157,13 +157,13 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
       </div>
 
       <div className="hidden min-[950px]:flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
-        <p className="w-full text-sm text-neutral-900 font-semibold truncate">
+        <p className="w-full text-sm text-neutral-900 dark:text-slate-100 font-semibold truncate">
           {name}
         </p>
         
         {/* Mostrar el último mensaje del chat */}
         {lastMessage && !isUserTyping &&
-          <div className="flex items-center gap-0.5 w-full text-xs text-neutral-700 font-light overflow-hidden">
+          <div className="flex items-center gap-0.5 w-full text-xs text-neutral-700 dark:text-slate-400 font-light overflow-hidden">
             <span className="shrink-0">
               {lastMessage.sender._id === user._id && "Tú:"}
             </span>

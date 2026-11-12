@@ -56,7 +56,7 @@ const NotificationsPage = () => {
               Notificaciones
             </h1>
 
-            <p className="text-sm text-neutral-700">
+            <p className="text-sm text-neutral-700 dark:text-slate-400">
               Administra tus notificaciones
             </p>
           </div>
@@ -72,16 +72,16 @@ const NotificationsPage = () => {
             setActiveTab(value as "all" | "unread");
           }}
         >
-          <TabsList className="w-full h-[50px] gap-2 bg-white rounded-md">
+          <TabsList className="w-full h-[50px] gap-2 bg-white dark:bg-slate-900 rounded-md">
             <TabsTrigger
-              className="w-[90px] !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
+              className="w-[90px] !text-[16px] !text-center font-normal bg-white dark:bg-slate-900 rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:font-semibold data-[state=active]:shadow-none data-[state=active]:text-[#4F39F6] dark:data-[state=active]:text-indigo-400 data-[state=active]:border-[#4F39F6] dark:data-[state=active]:border-indigo-400 data-[state=active]:bg-[#4F39F6]/10 dark:data-[state=active]:bg-indigo-500/15"
               value="all"
             >
               Todas
             </TabsTrigger>
 
             <TabsTrigger
-              className="w-[90px] !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
+              className="w-[90px] !text-[16px] !text-center font-normal bg-white dark:bg-slate-900 rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:font-semibold data-[state=active]:shadow-none data-[state=active]:text-[#4F39F6] dark:data-[state=active]:text-indigo-400 data-[state=active]:border-[#4F39F6] dark:data-[state=active]:border-indigo-400 data-[state=active]:bg-[#4F39F6]/10 dark:data-[state=active]:bg-indigo-500/15"
               value="unread"
             >
               No leídas
@@ -96,7 +96,7 @@ const NotificationsPage = () => {
         />
 
         {notifications.length === 0 && !isLoading &&
-          <div className="flex flex-col justify-center items-center gap-3 w-full h-full bg-neutral-50 rounded-lg shadow">
+          <div className="flex flex-col justify-center items-center gap-3 w-full h-full bg-neutral-50 dark:bg-slate-900 dark:border dark:border-slate-800 rounded-lg shadow">
             <IoFileTrayStackedOutline className="size-24 text-neutral-500" />
             <p className="w-full text-center text-lg text-neutral-500">
               No tienes notificaciones

@@ -88,10 +88,10 @@ const CreateGroupChatModal = () => {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-2 shrink-0 mb-4 px-2 py-4 rounded-md bg-neutral-100">
+        <div className="flex flex-col gap-2 shrink-0 mb-4 px-2 py-4 rounded-md bg-neutral-100 dark:bg-slate-800/60">
           <Label
             htmlFor="groupName"
-            className="text-sm text-neutral-900"
+            className="text-sm text-neutral-900 dark:text-slate-100"
           >
             Nombre del grupo
           </Label>
@@ -99,7 +99,7 @@ const CreateGroupChatModal = () => {
           <Input
             ref={inputRef}
             id="groupName"
-            className="bg-white"
+            className="bg-white dark:bg-slate-900"
             placeholder="Grupo de amigos y familiares"
             disabled={isCreatingGroup}
             value={groupName}
@@ -107,8 +107,8 @@ const CreateGroupChatModal = () => {
           />
         </div>
 
-        <div className="flex flex-col gap-3 w-full px-2 py-4 rounded-md bg-neutral-100">
-          <p className="text-sm text-neutral-900 font-medium">
+        <div className="flex flex-col gap-3 w-full px-2 py-4 rounded-md bg-white dark:bg-slate-900">
+          <p className="text-sm text-neutral-900 dark:text-slate-100 font-medium">
             Agregar miembros al grupo
           </p>
 
@@ -141,7 +141,7 @@ const CreateGroupChatModal = () => {
                 <li key={user._id} className="w-full">
                   <GroupChatModalItem
                     key={user._id}
-                    className="bg-white"
+                    className="bg-white dark:bg-slate-900"
                     userData={user}
                     setSelectedUsersIds={setSelectedUsersIds}
                   />

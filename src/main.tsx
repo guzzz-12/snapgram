@@ -8,10 +8,11 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ImageKitProvider } from "@imagekit/react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-import { Toaster } from "sonner";
+import { Toaster } from "./components/ui/sonner";
 import App from "./App.tsx";
 import ErrorPage from "./pages/ErrorPage";
 import AllProviders from "./providers/AllProviders";
+import ThemeProvider from "./providers/ThemeProvider";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "./index.css";
@@ -40,22 +41,24 @@ const Fallback = ({ error }: FallbackProps) => {
 const MyApp = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <AllProviders>
-        <BrowserRouter>
-          <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
-            <QueryErrorResetBoundary>
-              {({ reset }) => (
-                <ErrorBoundary onReset={reset} FallbackComponent={Fallback}>
-                  <App />
-                </ErrorBoundary>
-              )}
-            </QueryErrorResetBoundary>
-          </ImageKitProvider>
-        </BrowserRouter>
+      <ThemeProvider>
+        <AllProviders>
+          <BrowserRouter>
+            <ImageKitProvider urlEndpoint="https://ik.imagekit.io/y1lpjbueh/">
+              <QueryErrorResetBoundary>
+                {({ reset }) => (
+                  <ErrorBoundary onReset={reset} FallbackComponent={Fallback}>
+                    <App />
+                  </ErrorBoundary>
+                )}
+              </QueryErrorResetBoundary>
+            </ImageKitProvider>
+          </BrowserRouter>
 
-        <Toaster position="bottom-right" />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </AllProviders>
+          <Toaster position="bottom-right" />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </AllProviders>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

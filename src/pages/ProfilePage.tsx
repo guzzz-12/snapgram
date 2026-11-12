@@ -43,14 +43,14 @@ const ProfilePage = () => {
     if (isBlocked || isDisabled) {
       return (
         <main className="flex justify-center items-center w-full h-screen">
-          <section className="flex flex-col justify-center items-center w-full max-w-[600px] mx-auto p-6 bg-white shadow border rounded-md">
-            <FaUserTimes className="block mb-5 size-[80px] text-neutral-700 shrink-0" />
+          <section className="flex flex-col justify-center items-center w-full max-w-[600px] mx-auto p-6 bg-white dark:bg-slate-900 shadow border border-slate-200 dark:border-slate-800 rounded-md">
+            <FaUserTimes className="block mb-5 size-[80px] text-neutral-700 dark:text-slate-300 shrink-0" />
   
-            <h1 className="text-center text-xl font-semibold text-neutral-700">
+            <h1 className="text-center text-xl font-semibold text-neutral-700 dark:text-slate-100">
               Este perfil no está disponible actualmente.
             </h1>
 
-            <p className="mb-5 text-center text-sm text-neutral-600">
+            <p className="mb-5 text-center text-sm text-neutral-600 dark:text-slate-400">
               Es posible que el usuario haya desactivado su cuenta, <br /> te haya bloqueado o lo hayas bloqueado.
             </p>
 
@@ -74,7 +74,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <main className="w-full min-h-screen mx-auto min-[600px]:p-0 bg-slate-200">
+    <main className="w-full min-h-screen mx-auto min-[600px]:p-0 bg-slate-200 dark:bg-slate-950">
       <section className="w-full max-w-[900px] mx-auto">
         {loadingUser &&
           <ProfileHeaderSkeleton />
@@ -86,30 +86,30 @@ const ProfilePage = () => {
       </section>
 
       {!loadingUser &&
-        <section className="w-full max-w-[900px] mx-auto px-2 bg-white">
+        <section className="w-full max-w-[900px] mx-auto px-2 bg-white dark:bg-slate-900">
           <Tabs
             className="w-full pb-10" 
             defaultValue={activeTab}
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <TabsList className="flex justify-start items-center w-full h-auto mx-auto px-4 py-2 bg-white shadow-none rounded-none border-t overflow-x-auto">
+            <TabsList className="flex justify-start items-center w-full h-auto mx-auto px-4 py-2 bg-white dark:bg-slate-900 shadow-none rounded-none border-t border-slate-200 dark:border-slate-800 overflow-x-auto">
               <TabsTrigger
-                className="!text-[16px] !text-center font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                className="!text-[16px] !text-center font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] dark:data-[state=active]:text-indigo-400 data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] dark:data-[state=active]:border-indigo-400 data-[state=active]:shadow-none data-[state=active]:bg-transparent dark:data-[state=active]:bg-transparent"
                 value="posts"
               >
                 {userData?.postsCount} Posts
               </TabsTrigger>
 
               <TabsTrigger
-                className="text-[16px] font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                className="text-[16px] font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] dark:data-[state=active]:text-indigo-400 data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] dark:data-[state=active]:border-indigo-400 data-[state=active]:shadow-none data-[state=active]:bg-transparent dark:data-[state=active]:bg-transparent"
                 value="followers"
               >
                 {userData?.followersCount} Seguidores
               </TabsTrigger>
 
               <TabsTrigger
-                className="text-[16px] font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                className="text-[16px] font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] dark:data-[state=active]:text-indigo-400 data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] dark:data-[state=active]:border-indigo-400 data-[state=active]:shadow-none data-[state=active]:bg-transparent dark:data-[state=active]:bg-transparent"
                 value="following"
               >
                 {userData?.followingCount} Siguiendo
@@ -118,7 +118,7 @@ const ProfilePage = () => {
               {/* Mostrar los likes del usuario autenticado, no de otros perfiles */}
               {userClerkId === userId &&
                 <TabsTrigger
-                  className="text-[16px] font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                  className="text-[16px] font-normal rounded-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] dark:data-[state=active]:text-indigo-400 data-[state=active]:font-semibold data-[state=active]:border-[#4F39F6] dark:data-[state=active]:border-indigo-400 data-[state=active]:shadow-none data-[state=active]:bg-transparent dark:data-[state=active]:bg-transparent"
                   value="likes"
                 >
                   Me gusta

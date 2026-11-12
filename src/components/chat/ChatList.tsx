@@ -74,7 +74,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
   }
 
   return (
-    <aside className="flex flex-col w-fit min-[950px]:w-[240px] shrink-0 h-full pb-4 min-[600px]:pb-6 border-r overflow-hidden">
+    <aside className="flex flex-col w-fit min-[950px]:w-[240px] shrink-0 h-full pb-4 min-[600px]:pb-6 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
       {user.hasCryptoKeys && hasLocalCryptoKeys &&
         <Button
           style={{height: `${headerHeight}px`}}
@@ -82,8 +82,8 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
           variant="ghost"
           onClick={() => setOpenPrivateChatsModal(true)}
         >
-          <HiOutlinePencilAlt className="size-7 shrink-0 text-neutral-700" aria-hidden />
-          <span className="hidden min-[950px]:block text-base text-neutral-900 font-normal">
+          <HiOutlinePencilAlt className="size-7 shrink-0 text-neutral-700 dark:text-slate-300" aria-hidden />
+          <span className="hidden min-[950px]:block text-base text-neutral-900 dark:text-slate-100 font-normal">
             Nuevo mensaje
           </span>
         </Button>
@@ -91,7 +91,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
 
       <div
         // style={{ height: `calc(${headerHeight}px + 1px)` }}
-        className="flex flex-col justify-center items-start w-full bg-white border-y"
+        className="flex flex-col justify-center items-start w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 border-y"
       >
         <Tabs
           className="w-full h-full rounded-sm"
@@ -101,16 +101,16 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
             navigate(`/messages?type=${value}`);
           }}
         >
-          <TabsList className="flex-col min-[950px]:flex-row w-full h-fit gap-0 p-0 bg-white rounded-md">
+          <TabsList className="flex-col min-[950px]:flex-row w-full h-fit gap-0 p-0 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-md">
             <TabsTrigger
-              className="w-full h-full px-2 py-3 min-[700px]:p-4 shrink-0 !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
+              className="w-full h-full px-2 py-3 min-[700px]:p-4 shrink-0 !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10 dark:bg-slate-900 dark:data-[state=active]:text-indigo-400 dark:data-[state=active]:bg-indigo-500/15"
               value="all"
             >
               Chats
             </TabsTrigger>
 
             <TabsTrigger
-              className="w-full h-full px-2 py-3 min-[700px]:p-4 shrink-0 !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10"
+              className="w-full h-full px-2 py-3 min-[700px]:p-4 shrink-0 !text-[16px] !text-center font-normal bg-white rounded-t-xs rounded-b-none border-t-0 border-l-0 border-r-0 border-b-3 border-transparent cursor-pointer transition-all data-[state=active]:text-[#4F39F6] data-[state=active]:font-semibold data-[state=active]:border-none data-[state=active]:shadow-none data-[state=active]:bg-[#4F39F6]/10 dark:bg-slate-900 dark:data-[state=active]:text-indigo-400 dark:data-[state=active]:bg-indigo-500/15"
               value="group"
             >
               Grupos

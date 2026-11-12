@@ -10,7 +10,7 @@ interface Props {
 const PostCardFooterBtn = ({ disabled, children, callback }: Props) => {
   return (
     <Button
-      className="flex justify-center gap-1 grow text-base font-normal bg-neutral-100 cursor-pointer hover:bg-neutral-200"
+      className="flex justify-center gap-1 grow text-base font-normal text-neutral-700 dark:text-slate-200 bg-neutral-100 dark:bg-slate-800/80 cursor-pointer hover:bg-neutral-200 dark:hover:bg-slate-700/80"
       variant="ghost"
       size="default"
       disabled={disabled}

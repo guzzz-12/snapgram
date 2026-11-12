@@ -45,7 +45,7 @@ const FollowerItem = ({ data }: Props) => {
   }, [isFollowingBack]);
 
   return (
-    <li className="flex justify-start items-center gap-2 w-full border rounded-md p-2 bg-white shadow overflow-x-auto scrollbar-none">
+    <li className="flex justify-start items-center gap-2 w-full border border-slate-200 dark:border-slate-800 rounded-md p-2 bg-white dark:bg-slate-900 shadow overflow-x-auto scrollbar-none">
       <Link
         className="flex justify-start items-center gap-2 w-full"
         to={`/profile/${followerClerkId}`}
@@ -63,10 +63,10 @@ const FollowerItem = ({ data }: Props) => {
         </div>
 
         <div className="flex flex-col justify-start items-start w-full grow overflow-hidden">
-          <p className="text-base text-neutral-900 font-semibold truncate">
+          <p className="text-base text-neutral-900 dark:text-slate-100 font-semibold truncate">
             {fullName}
           </p>
-          <span className="text-xs min-[450px]:text-sm text-neutral-700 truncate">
+          <span className="text-xs min-[450px]:text-sm text-neutral-700 dark:text-slate-400 truncate">
             @{username}
           </span>
         </div>

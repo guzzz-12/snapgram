@@ -22,7 +22,7 @@ const Logo = ({ size = "md", mode = "light", className }: Props) => {
         aria-hidden
       />
 
-      <h1 className={cn("text-2xl font-semibold", mode === "light" ? "text-neutral-900" : "text-white")}>
+      <h1 className={cn("text-2xl font-semibold", mode === "light" ? "text-neutral-900 dark:text-slate-100" : "text-white")}>
         SnapGram
       </h1>
     </Link>

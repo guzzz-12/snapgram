@@ -15,7 +15,7 @@ const FiltersBar = ({searchTerm, searchType}: Props) => {
   return (
     <div className="flex justify-start items-center gap-3 w-full pb-3 border-b border-[#4F39F6]/20">
       <Link
-        className={cn("flex justify-center items-center gap-2 px-4 py-2 text-neutral-600 rounded-full bg-white hover:bg-[#4F39F6] hover:text-white transition-colors cursor-pointer disabled:text-neutral-500 disabled:pointer-events-none disabled:bg-white select-none", searchType === "people" && "bg-[#331fcf] text-white", !searchTerm && "pointer-events-none")}
+        className={cn("flex justify-center items-center gap-2 px-4 py-2 text-neutral-600 dark:text-slate-300 rounded-full bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 hover:bg-[#4F39F6] hover:text-white transition-colors cursor-pointer disabled:text-neutral-500 disabled:pointer-events-none disabled:bg-white select-none", searchType === "people" && "!bg-[#331fcf] !text-white", !searchTerm && "pointer-events-none")}
         to={`/discover/?searchTerm=${searchTerm}&type=people`}
         onClick={(e) => {
           if (!searchTerm) {
@@ -32,7 +32,7 @@ const FiltersBar = ({searchTerm, searchType}: Props) => {
       </Link>
 
       <Link
-        className={cn("flex justify-center items-center gap-2 px-4 py-2 text-neutral-600 rounded-full bg-white hover:bg-[#4F39F6] hover:text-white transition-colors cursor-pointer disabled:text-neutral-500 disabled:pointer-events-none disabled:bg-white select-none", searchType === "posts" && "bg-[#331fcf] text-white", !searchTerm && "pointer-events-none")}
+        className={cn("flex justify-center items-center gap-2 px-4 py-2 text-neutral-600 dark:text-slate-300 rounded-full bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 hover:bg-[#4F39F6] hover:text-white transition-colors cursor-pointer disabled:text-neutral-500 disabled:pointer-events-none disabled:bg-white select-none", searchType === "posts" && "!bg-[#331fcf] !text-white", !searchTerm && "pointer-events-none")}
         to={`/discover/?searchTerm=${searchTerm}&type=posts`}
         onClick={(e) => {
           if (!searchTerm) {

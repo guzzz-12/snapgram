@@ -54,16 +54,16 @@ const HomePage = () => {
         {!loadingFollowingCount && followingCount > 0 && posts.length === 0 && !loadingPosts &&
           <>
             <div className="flex justify-center items-start w-full h-full max-w-[500px] mx-auto">
-              <div className="flex flex-col justify-center items-center w-full p-10 bg-white rounded-lg">
+              <div className="flex flex-col justify-center items-center w-full p-10 bg-white dark:bg-slate-900 dark:border dark:border-slate-800 rounded-lg">
                 <IoFileTrayStackedOutline className="mb-2 size-[100px] text-[#4F39F6] [&>path]:stroke-[15px]"/>
 
-                <h1 className="text-2xl text-center text-neutral-700">
+                <h1 className="text-2xl text-center text-neutral-700 dark:text-slate-100">
                   No hay publicaciones disponibles
                 </h1>
 
                 <Separator className="w-full my-4" />
 
-                <p className="mb-3 text-center text-neutral-600 leading-tight">
+                <p className="mb-3 text-center text-neutral-600 dark:text-slate-400 leading-tight">
                   Explora y descubre contenido popular y cuentas <br /> que se adapten a tus pasiones.
                 </p>
 

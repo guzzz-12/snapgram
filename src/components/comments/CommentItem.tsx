@@ -116,10 +116,10 @@ const CommentItem = ({ commentData }: Props) => {
           <div className="flex flex-col justify-start items-start gap-1">
             <div className="flex justify-start items-start gap-2 w-full">
               {/* Contenedor de información del comentario */}
-              <div className="max-w-full min-w-0 py-2 px-3 rounded-lg bg-neutral-100 overflow-hidden">
+              <div className="max-w-full min-w-0 py-2 px-3 rounded-lg bg-neutral-100 dark:bg-slate-800/70 overflow-hidden">
                 {/* Nombre del autor del comentario */}
                 <Link
-                  className="block text-sm font-semibold text-neutral-900 truncate"
+                  className="block text-sm font-semibold text-neutral-900 dark:text-slate-100 truncate"
                   to={`/profile/${commentData.user.clerkId}`}
                 >
                   {commentData.user.fullName}
@@ -127,7 +127,7 @@ const CommentItem = ({ commentData }: Props) => {
 
                 {/* Contenido de texto del comentario */}
                 {commentData.content && !isEditing &&
-                  <p className="commentText w-fit text-sm text-neutral-700 whitespace-pre-wrap [overflow-wrap:anywhere]">
+                  <p className="commentText w-fit text-sm text-neutral-700 dark:text-slate-200 whitespace-pre-wrap [overflow-wrap:anywhere]">
                     <Twemoji className="[&>img]:!inline" text={commentData.content} />
                   </p>
                 }
@@ -215,7 +215,7 @@ const CommentItem = ({ commentData }: Props) => {
           {/* Referencia del paginador */}
           {hasNextPage && !isFetchingNextPage && !isLoading &&
             <Button
-              className="flex h-fit mr-auto !px-0 !py-0 text-base text-neutral-600 cursor-pointer"
+              className="flex h-fit mr-auto !px-0 !py-0 text-base text-neutral-600 dark:text-slate-400 cursor-pointer"
               variant="link"
               size="sm"
               onClick={() => fetchNextPage()}
@@ -225,7 +225,7 @@ const CommentItem = ({ commentData }: Props) => {
             </Button>
           }
 
-          <div className="relative flex justify-start items-center gap-2 p-2 bg-neutral-100 rounded-md">
+          <div className="relative flex justify-start items-center gap-2 p-2 bg-neutral-100 dark:bg-slate-800/60 rounded-md">
             <CreateCommentInput
               textContent={replyText}
               isPending={isPending}
@@ -248,7 +248,7 @@ const CommentItem = ({ commentData }: Props) => {
             }
 
             <Button
-              className="absolute right-0 bottom-0 text-xs text-neutral-700 translate-y-[100%] cursor-pointer z-10"
+              className="absolute right-0 bottom-0 text-xs text-neutral-700 dark:text-slate-400 translate-y-[100%] cursor-pointer z-10"
               variant="link"
               size="sm"
               onClick={() => setOpenReplies(false)}

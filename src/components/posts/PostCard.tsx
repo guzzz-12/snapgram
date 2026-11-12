@@ -64,7 +64,7 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
 
   return (
     <article
-      className={cn("flex flex-col gap-3 w-full p-4 rounded-lg bg-white shadow", className)}
+      className={cn("flex flex-col gap-3 w-full p-4 rounded-lg bg-white dark:bg-transparent shadow", className)}
       data-testid="post-card"
     >
       <PostHeader
@@ -110,7 +110,7 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
           <p
             ref={textContentRef}
             className={cn(
-              "inline-block text-base text-left text-neutral-700 whitespace-pre-wrap bg-transparent",
+              "inline-block text-base text-left text-neutral-700 dark:text-slate-200 whitespace-pre-wrap bg-transparent",
               showFullText ? "line-clamp-none" : "line-clamp-6"
             )}
           >

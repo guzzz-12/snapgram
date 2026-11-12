@@ -28,7 +28,7 @@ const StoryCardRounded = ({ userData }: Props) => {
         </Avatar>
       </Link>
 
-      <p className="w-full text-center text-sm text-neutral-700 truncate">
+      <p className="w-full text-center text-sm text-neutral-700 dark:text-slate-300 truncate">
         {user?._id === userData._id ? "Tu historia" : userData.username}
       </p>
     </div>

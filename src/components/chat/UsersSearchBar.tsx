@@ -20,7 +20,7 @@ const UsersSearchBar = (props: Props) => {
   }, [autoFocus]);
 
   return (
-    <search className="relative bg-white" aria-labelledby="searchLabel">
+    <search className="relative bg-white dark:bg-slate-900" aria-labelledby="searchLabel">
       <FiSearch
         className="absolute left-2 top-1/2 size-5 text-neutral-500 translate-y-[-50%]"
         aria-hidden
@@ -33,7 +33,7 @@ const UsersSearchBar = (props: Props) => {
       <Input
         ref={inputRef}
         id="searchInput"
-        className="pl-9"
+        className="pl-9 bg-white dark:bg-slate-900"
         type="search"
         placeholder="Busca por nombre o usuario..."
         disabled={false}

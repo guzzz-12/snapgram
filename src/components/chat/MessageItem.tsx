@@ -152,7 +152,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
         style={{ justifyContent: isCurrentUserSender ? "flex-end" : "flex-start" }}
         className="flex w-full"
       >
-        <div className={cn("relative flex flex-col w-fit min-w-[150px] min-[450px]:max-w-[80%] min-[1200px]:max-w-[60%] px-2 py-1 rounded-lg shadow", (isCurrentUserSender && !isMessageDeleted) ? "bg-[#4F39F6]" : isMessageDeleted ? "bg-neutral-50" : "bg-slate-200")}>
+        <div className={cn("relative flex flex-col w-fit min-w-[150px] min-[450px]:max-w-[80%] min-[1200px]:max-w-[60%] px-2 py-1 rounded-lg shadow", (isCurrentUserSender && !isMessageDeleted) ? "bg-[#4F39F6]" : isMessageDeleted ? "bg-neutral-50 dark:bg-slate-800/40" : "bg-slate-200 dark:bg-slate-800")}>
           {/* Check de visto */}
           {isSeen && isCurrentUserSender &&
             <div
@@ -194,7 +194,7 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
           {/* Contenido de texto del mensaje (si lo tiene) */}
           {message.text && !isEditingMessage && (
-            <p className={cn("w-full text-sm whitespace-pre-wrap", (isCurrentUserSender && !isMessageDeleted) ? "text-neutral-100" : isMessageDeleted ? "text-neutral-500 italic" : "text-neutral-900")}>
+            <p className={cn("w-full text-sm whitespace-pre-wrap", (isCurrentUserSender && !isMessageDeleted) ? "text-neutral-100" : isMessageDeleted ? "text-neutral-500 dark:text-slate-400 italic" : "text-neutral-900 dark:text-slate-100")}>
               <Twemoji className="[&>img]:!inline break-words" text={message.text} />
             </p>
           )}

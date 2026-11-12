@@ -36,7 +36,7 @@ const UserSearchResultItem = ({ userData }: Props) => {
   };
 
   return (
-    <li className="flex justify-start items-center gap-2 w-full p-3 rounded-md bg-transparent hover:bg-neutral-200 transition-colors cursor-pointer">
+    <li className="flex justify-start items-center gap-2 w-full p-3 rounded-md bg-transparent hover:bg-neutral-200 dark:hover:bg-slate-800 transition-colors cursor-pointer">
       <Link
         className={cn("flex justify-start items-center gap-2 w-full overflow-hidden", isPending && "pointer-events-none")}
         to={`/profile/${userData.clerkId}`}
@@ -58,7 +58,7 @@ const UserSearchResultItem = ({ userData }: Props) => {
             {userData.fullName}
           </p>
 
-          <p className="text-xs text-neutral-600 truncate">
+          <p className="text-xs text-neutral-600 dark:text-slate-400 truncate">
             @{userData.username}
           </p>
         </div>

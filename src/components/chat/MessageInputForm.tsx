@@ -3,6 +3,7 @@ import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { FaMicrophone } from "react-icons/fa";
 import { Smile } from "lucide-react";
+import { useTheme } from "next-themes";
 import AudioFileItem from "./AudioFileItem";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,6 +30,8 @@ const MessageInputForm = (props: Props) => {
   const { currentUser, chatData, submitting, messageText, isRecording, isSending, recordingTime, clearRecording, recordedFile, setMessageText, className } = props;
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const { resolvedTheme } = useTheme();
 
   // Hacer focus en el input al montar
   useEffect(() => {
@@ -83,22 +86,22 @@ const MessageInputForm = (props: Props) => {
   };
 
   return (
-    <div className={cn("relative w-full border rounded-full overflow-hidden", (isRecording || recordedFile) ? "border-[#4F39F6]" : "border-input")}>
+    <div className={cn("relative w-full border rounded-full overflow-hidden", (isRecording || recordedFile) ? "border-[#4F39F6]" : "border-input dark:border-slate-700")}>
       {isRecording &&
-        <div className="absolute top-0 left-4 flex justify-start items-center gap-2 w-full h-full bg-white z-[100]">
+        <div className="absolute top-0 left-4 flex justify-start items-center gap-2 w-full h-full bg-white dark:bg-slate-900 z-[100]">
           <FaMicrophone className="size-7 text-[#4F39F6] animate-pulse duration-100" />
-          <span className="block text-base text-neutral-700">
+          <span className="block text-base text-neutral-700 dark:text-slate-200">
             {recordingTime}
           </span>
 
-          <p className="absolute top-1/2 left-[50%] translate-x-[-50%] translate-y-[-50%] w-full text-sm text-center text-neutral-700 font-semibold">
+          <p className="absolute top-1/2 left-[50%] translate-x-[-50%] translate-y-[-50%] w-full text-sm text-center text-neutral-700 dark:text-slate-200 font-semibold">
             Grabando audio...
           </p>
         </div>
       }
 
       {!isRecording && recordedFile && recordingTime && clearRecording &&
-        <div className="absolute top-0 left-4 w-full h-full bg-white z-[100]">
+        <div className="absolute top-0 left-4 w-full h-full bg-white dark:bg-slate-900 z-[100]">
           <AudioFileItem
             recordingDuration={recordingTime}
             clearRecording={clearRecording}
@@ -113,19 +116,20 @@ const MessageInputForm = (props: Props) => {
             className="absolute left-4 top-1/2 shrink-0 -translate-y-1/2 cursor-pointer"
             disabled={submitting}
           >
-            <Smile className="text-neutral-600" aria-hidden />
+            <Smile className="text-neutral-600 dark:text-slate-400" aria-hidden />
             <span className="sr-only">Seleccionar Emoji</span>
           </button>
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-full p-0 -translate-y-[1rem] bg-transparent"
+          className="w-full p-0 -translate-y-[1rem] bg-transparent border-none shadow-none"
           onWheel={handleScrollInterception}
         >
           <Picker
             locale="es"
             emojiVersion="15"
             set="twitter"
+            theme={resolvedTheme === "dark" ? "dark" : "light"}
             previewPosition="none"
             navPosition="bottom"
             data={emojiData}
@@ -138,7 +142,7 @@ const MessageInputForm = (props: Props) => {
 
       <Textarea
         ref={inputRef}
-        className={cn("w-full min-h-full max-h-[80px] pl-12 border-none rounded-full resize-none scrollbar-none placeholder:whitespace-nowrap", className)}
+        className={cn("w-full min-h-full max-h-[80px] pl-12 dark:bg-slate-800/60 dark:text-slate-100 border-none rounded-full resize-none scrollbar-none placeholder:whitespace-nowrap", className)}
         placeholder="Escribe algo..."
         disabled={submitting}
         value={messageText}

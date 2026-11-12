@@ -25,7 +25,7 @@ export const hashtagParser = (text: string) => {
         // El key es requerido
         key={`hashtag-${offset}-${hashtagText}`}
         to={`/discover/?searchTerm=${hashtagText.replace("#", "")}&type=posts`}
-        className="text-blue-500 hover:text-blue-600"
+        className="text-blue-500 dark:text-indigo-400 hover:text-blue-600 dark:hover:text-indigo-300"
       >
         {match}
       </Link>

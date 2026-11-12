@@ -8,6 +8,7 @@ import { FiMoreHorizontal } from "react-icons/fi";
 import SidebarItem from "./SidebarItem";
 import ProfileLinkItem from "./ProfileLinkItem";
 import LogoutItem from "./LogoutItem";
+import ThemeToggle, { ThemeSubMenu } from "./ThemeToggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
@@ -64,7 +65,7 @@ const Sidebar = () => {
   return (
     <aside
       ref={sidebarRef}
-      className="flex flex-col justify-start gap-4 w-fit min-[950px]:w-[200px] min-[1100px]:w-[250px] shrink-0 h-screen px-1.5 pt-4 pb-0 border-r bg-gray-50"
+      className="flex flex-col justify-start gap-4 w-fit min-[950px]:w-[200px] min-[1100px]:w-[250px] shrink-0 h-screen px-1.5 pt-4 pb-0 border-r border-slate-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 transition-colors"
     >
       <Link
         className="flex justify-start items-center gap-2 w-full"
@@ -77,7 +78,7 @@ const Sidebar = () => {
           aria-hidden
         />
 
-        <h1 className="text-neutral-900 font-semibold">
+        <h1 className="text-neutral-900 dark:text-slate-100 font-semibold">
           <span className="hidden min-[950px]:block text-lg">
             SnapGram
           </span>
@@ -161,37 +162,43 @@ const Sidebar = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <div className="w-full mt-0 min-[700px]:mt-auto">
+      <div className="flex flex-col gap-1 w-full mt-0 min-[700px]:mt-auto">
+        <ThemeToggle variant="sidebar" />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              className={cn("justify-center min-[950px]:justify-start w-full h-auto mb-3 py-3 cursor-pointer", !isMessagesPage && "min-[1280px]:hidden")}
+              className={cn("justify-center min-[950px]:justify-start w-full h-auto mb-3 py-3 hover:!bg-[#4F39F6]/10 dark:hover:!bg-indigo-500/15 cursor-pointer", !isMessagesPage && "min-[1280px]:hidden")}
               variant="ghost"
               size="lg"
             >
-              <FiMoreHorizontal className="size-6 text-neutral-700" aria-hidden />
+              <FiMoreHorizontal className="size-6 text-neutral-700 dark:text-slate-300" aria-hidden />
 
-              <span className="hidden min-[950px]:inline text-base text-neutral-900">
+              <span className="hidden min-[950px]:inline text-base text-neutral-900 dark:text-slate-100">
                 Más
               </span>
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent className="w-full p-0" side="top">
+          <DropdownMenuContent className="w-full p-0 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800" side="top">
             <DropdownMenuItem className="w-full px-1">
               <ProfileLinkItem user={user!} />
             </DropdownMenuItem>
 
-            <Separator className="w-full bg-neutral-200" />
+            <Separator className="w-full bg-neutral-200 dark:bg-slate-800" />
+
+            <ThemeSubMenu />
+
+            <Separator className="w-full bg-neutral-200 dark:bg-slate-800" />
 
             <DropdownMenuItem className="w-full px-1">
               <LogoutItem />
             </DropdownMenuItem>
 
-            <Separator className="w-full bg-neutral-200" />
+            <Separator className="w-full bg-neutral-200 dark:bg-slate-800" />
 
             <div className="block min-[950px]:hidden w-full p-3">
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-neutral-500 dark:text-slate-400">
                 &copy; {new Date().getFullYear()} - Desarrollado por <span className="font-semibold">Jesús Guzmán</span>
               </p>
             </div>
@@ -199,10 +206,10 @@ const Sidebar = () => {
         </DropdownMenu>
       </div>
 
-      <Separator className="w-full mt-auto min-[700px]:mt-0 bg-neutral-200" />
+      <Separator className="w-full mt-auto min-[700px]:mt-0 bg-neutral-200 dark:bg-slate-800" />
 
       <div className="hidden min-[950px]:block w-full pb-3">
-        <p className="text-xs text-center text-neutral-500">
+        <p className="text-xs text-center text-neutral-500 dark:text-slate-400">
           &copy; {new Date().getFullYear()} - Desarrollado por <span className="font-semibold">Jesús Guzmán</span>
         </p>
       </div>

@@ -11,16 +11,16 @@ const PostNotFound = () => {
     <main className="flex flex-col justify-center items-center gap-5 w-full h-full">
       <Logo />
 
-      <section className="flex flex-col justify-center items-center gap-3 px-4 py-6 bg-white">
-        <h1 className="text-center text-2xl text-neutral-600 font-semibold">
+      <section className="flex flex-col justify-center items-center gap-3 px-4 py-6 bg-white dark:bg-slate-900 dark:border dark:border-slate-800 rounded-lg">
+        <h1 className="text-center text-2xl text-neutral-600 dark:text-slate-300 font-semibold">
           Este contenido no está disponible
         </h1>
 
-        <Separator className="w-full my-1 bg-neutral-200" />
+        <Separator className="w-full my-1 bg-neutral-200 dark:bg-slate-800" />
 
         <div className="flex justify-center items-center w-full gap-3">
           <FaLock className="size-7 text-neutral-400 shrink-0" />
-          <p className="text-base text-neutral-600">
+          <p className="text-base text-neutral-600 dark:text-slate-300">
             Esto ocurre si el autor eliminó el contenido <br /> o si ha sido compartido con una audiencia privada.
           </p>
         </div>

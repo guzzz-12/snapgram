@@ -50,7 +50,7 @@ const PostsTabContent = ({userData}: Props) => {
   }
 
   return (
-    <section className="flex flex-col gap-6 w-full mx-auto p-2 pb-0 bg-slate-100">
+    <section className="flex flex-col gap-6 w-full mx-auto p-2 pb-0 bg-slate-100 dark:bg-slate-950/60 rounded-md">
       {!isLoading && error &&
         <div className="flex flex-col justify-center items-center gap-4">
           <div className="flex justify-center items-center gap-3">
@@ -95,7 +95,7 @@ const PostsTabContent = ({userData}: Props) => {
       </div>
 
       {!isLoading && userData && postsData.length === 0 &&
-        <p className="text-center text-lg text-neutral-700">
+        <p className="text-center text-lg text-neutral-700 dark:text-slate-400 pb-6">
           No se encontraron publicaciones.
         </p>
       }

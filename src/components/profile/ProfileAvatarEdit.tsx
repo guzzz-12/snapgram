@@ -60,11 +60,11 @@ const ProfileAvatarEdit = (props: Props) => {
         onDelete={() => deleteAvatarMutation()}
       />
       
-      <p className="text-left text-neutral-900 font-medium">
+      <p className="text-left text-neutral-900 dark:text-slate-100 font-medium">
         {title}
       </p>
 
-      <div className="flex justify-between items-center gap-2 w-full p-4 shrink-0 bg-slate-200 rounded-lg">
+      <div className="flex justify-between items-center gap-2 w-full p-4 shrink-0 bg-slate-200 dark:bg-slate-800/60 rounded-lg">
         <Avatar className="w-[120px] h-[120px] shrink-0 outline-2 outline-[#4F39F6]">
           <AvatarImage
             className="w-full h-full object-cover"

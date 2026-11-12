@@ -49,11 +49,11 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center gap-1.5">
-                <span className="text-sm text-neutral-700 font-semibold">
+                <span className="text-sm text-neutral-700 dark:text-slate-300 font-semibold">
                   {postData.commentsCount}
                 </span>
 
-                <MessageCircle className="size-5 text-neutral-500" aria-hidden />
+                <MessageCircle className="size-5 text-neutral-500 dark:text-slate-400" aria-hidden />
 
                 <span className="sr-only">
                   Este post tiene {postData.commentsCount} Comentarios
@@ -69,11 +69,11 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center gap-1.5">
-                <span className="text-sm text-neutral-700 font-semibold">
+                <span className="text-sm text-neutral-700 dark:text-slate-300 font-semibold">
                   {postData.sharedCount}
                 </span>
 
-                <Share2 className="size-5 text-neutral-500" aria-hidden />
+                <Share2 className="size-5 text-neutral-500 dark:text-slate-400" aria-hidden />
 
                 <span className="sr-only">
                   {postData.sharedCount > 0 ? `Este post ha sido compartido ${postData.sharedCount} veces` : "Este post aún no ha sido compartido"}
@@ -88,7 +88,7 @@ const PostCardFooter = ({ postData, isModal, openPostModal, className, setOpenPo
         </div>
       </div>
       
-      <div className="flex justify-between items-center gap-1 w-full pt-2 text-neutral-700 text-sm font-semibold border-t overflow-hidden">
+      <div className="flex justify-between items-center gap-1 w-full pt-2 text-neutral-700 dark:text-slate-200 text-sm font-semibold border-t border-slate-200 dark:border-slate-800 overflow-hidden">
         <PostCardFooterBtn
           disabled={false}
           callback={() => togglePostLikeMutation()}

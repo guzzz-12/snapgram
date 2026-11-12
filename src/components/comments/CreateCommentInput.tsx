@@ -2,6 +2,7 @@ import { type Dispatch, type HTMLAttributes, type SetStateAction, type WheelEven
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data/sets/15/twitter.json";
 import { Smile } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ interface Props {
 
 const CreateCommentInput = (props : Props) => {
   const {textContent, isPending, placeholder, className, setTextContent} = props;
+  const { resolvedTheme } = useTheme();
 
   // Detener la propagación del evento scroll del picker al textarea
   // para que el picker sea scrolleable con el mouse
@@ -29,26 +31,27 @@ const CreateCommentInput = (props : Props) => {
   };
 
   return (
-    <div className="relative w-full border rounded-sm overflow-hidden">
+    <div className="relative w-full border border-slate-200 dark:border-slate-700 rounded-sm overflow-hidden">
       <Popover>
         <PopoverTrigger asChild>
           <button
             className="absolute left-4 top-1/2 shrink-0 -translate-y-1/2 cursor-pointer"
             disabled={isPending}
           >
-            <Smile className="text-neutral-600" aria-hidden />
+            <Smile className="text-neutral-600 dark:text-slate-400" aria-hidden />
             <span className="sr-only">Seleccionar Emoji</span>
           </button>
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-full p-0 translate-x-[2rem] bg-transparent"
+          className="w-full p-0 translate-x-[2rem] bg-transparent border-none shadow-none"
           onWheel={handleScrollInterception}
         >
           <Picker
             locale="es"
             emojiVersion="15"
             set="twitter"
+            theme={resolvedTheme === "dark" ? "dark" : "light"}
             previewPosition="none"
             navPosition="bottom"
             data={emojiData}
@@ -60,7 +63,7 @@ const CreateCommentInput = (props : Props) => {
       </Popover>
 
       <Textarea
-        className={cn("w-full min-h-auto max-h-[150px] pl-12 py-2 min-[500px]:py-4 bg-white border-none rounded-sm resize-none scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white placeholder:whitespace-nowrap", className)}
+        className={cn("w-full min-h-auto max-h-[150px] pl-12 py-2 min-[500px]:py-4 bg-white dark:bg-slate-900 text-neutral-900 dark:text-slate-100 border-none rounded-sm resize-none scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-slate-700 scrollbar-track-white dark:scrollbar-track-slate-900 placeholder:whitespace-nowrap", className)}
         placeholder={placeholder || "Escribe un comentario..."}
         disabled={isPending}
         value={textContent}

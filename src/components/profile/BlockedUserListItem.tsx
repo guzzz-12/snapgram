@@ -17,7 +17,7 @@ const BlockedUserListItem = ({ data }: Props) => {
   const {setOpen, setOperation, setBlockedUser} = useBlockUserModal();
 
   return (
-    <li className="flex justify-between items-center gap-3 w-full p-2 rounded-md bg-neutral-100">
+    <li className="flex justify-between items-center gap-3 w-full p-2 rounded-md bg-neutral-100 dark:bg-slate-800/60">
       <div className="flex justify-start items-center gap-3 overflow-hidden">
         <Avatar className="w-[45px] h-[45px] shrink-0">
           <AvatarImage
@@ -30,11 +30,11 @@ const BlockedUserListItem = ({ data }: Props) => {
         </Avatar>
 
         <div className="flex flex-col w-full overflow-hidden">
-          <p className="w-full text-sm text-neutral-900 font-semibold truncate">
+          <p className="w-full text-sm text-neutral-900 dark:text-slate-100 font-semibold truncate">
             {blockedUser.fullName}
           </p>
 
-          <span className="w-full text-xs text-neutral-700 truncate">
+          <span className="w-full text-xs text-neutral-700 dark:text-slate-400 truncate">
             Bloqueado el {dayjs(createdAt).format("DD/MM/YYYY [a las] hh:mm a")}
           </span>
         </div>

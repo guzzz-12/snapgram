@@ -35,7 +35,7 @@ const ResultUserCard = ({ userData }: Props) => {
   }
 
   return (
-    <div className="flex flex-col p-5 border rounded-md bg-white">
+    <div className="flex flex-col p-5 border rounded-md bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
       <div className="flex flex-col items-center w-full overflow-hidden">
         <Link to={`/profile/${userData.clerkId}`}>
           <Avatar className="w-[50px] h-[50px] mb-2">
@@ -55,20 +55,20 @@ const ResultUserCard = ({ userData }: Props) => {
           </p>
         </Link>
 
-        <p className="w-full text-sm text-center text-neutral-700 truncate">
+        <p className="w-full text-sm text-center text-neutral-700 dark:text-slate-300 truncate">
           @{userData.username}
         </p>
       </div>
 
       <Separator className="w-full my-3" />
 
-      <p className={cn("w-full mb-4 text-sm text-center line-clamp-4", userData.bio ? "text-neutral-700" : "text-neutral-400 italic")}>
+      <p className={cn("w-full mb-4 text-sm text-center line-clamp-4", userData.bio ? "text-neutral-700 dark:text-slate-300" : "text-neutral-400 italic")}>
         {`${userData.bio || "Sin biografía"}`}
       </p>
 
       <div className="flex justify-center items-center gap-2 w-full mb-4">
         <Badge
-          className="basis-1/2 bg-neutral-50 rounded-full overflow-hidden"
+          className="basis-1/2 bg-neutral-50 dark:bg-slate-800 rounded-full overflow-hidden"
           variant="outline"
         >
           <MapPin className="shrink-0" />
@@ -76,7 +76,7 @@ const ResultUserCard = ({ userData }: Props) => {
         </Badge>
         
         <Badge
-          className="basis-1/2 bg-neutral-50 rounded-full overflow-hidden"
+          className="basis-1/2 bg-neutral-50 dark:bg-slate-800 rounded-full overflow-hidden"
           variant="outline"
         >
           <span className="truncate">2 followers</span>

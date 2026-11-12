@@ -26,18 +26,18 @@ const SharedPostCard = ({data}: Props) => {
   const isOriginalPostDeleted = !data || !data._id;
 
   return (
-    <div className="flex flex-col w-full p-4 border rounded-md bg-neutral-100">
+    <div className="flex flex-col w-full p-4 border border-slate-200 dark:border-slate-700/80 rounded-md bg-neutral-100 dark:bg-slate-800/60">
       {isOriginalPostDeleted &&
         <div className="flex flex-col justify-center items-center p-4">
-          <h2 className="text-center text-lg text-neutral-600 font-semibold">
+          <h2 className="text-center text-lg text-neutral-600 dark:text-slate-300 font-semibold">
             Este contenido no está disponible
           </h2>
 
-          <Separator className="w-full my-1 bg-neutral-200" />
+          <Separator className="w-full my-1 bg-neutral-200 dark:bg-slate-700" />
 
           <div className="flex justify-center items-center w-full gap-3">
-            <FaLock className="size-7 text-neutral-400 shrink-0" />
-            <p className="text-sm text-neutral-600">
+            <FaLock className="size-7 text-neutral-400 dark:text-slate-500 shrink-0" />
+            <p className="text-sm text-neutral-600 dark:text-slate-400">
               Esto ocurre si el autor eliminó el contenido o si ha sido compartido con una audiencia privada.
             </p>
           </div>
@@ -63,11 +63,11 @@ const SharedPostCard = ({data}: Props) => {
             </Avatar>
 
             <div className="flex flex-col w-full overflow-hidden">
-              <p className="w-full text-sm text-neutral-900 font-semibold truncate">
+              <p className="w-full text-sm text-neutral-900 dark:text-slate-100 font-semibold truncate">
                 {data.user.fullName}
               </p>
 
-              <p className="text-xs text-neutral-700">
+              <p className="text-xs text-neutral-700 dark:text-slate-400">
                 {dayjs(data.createdAt).format("[Publicado el] DD/MM/YYYY [a las] hh:mm a")}
               </p>
             </div>
@@ -76,7 +76,7 @@ const SharedPostCard = ({data}: Props) => {
           <div>
             <p
               ref={textRef}
-              className={cn("text-sm text-neutral-900", showFullText ? "line-clamp-none" : "line-clamp-6")}
+              className={cn("text-sm text-neutral-900 dark:text-slate-200", showFullText ? "line-clamp-none" : "line-clamp-6")}
             >
               {data.content}
             </p>

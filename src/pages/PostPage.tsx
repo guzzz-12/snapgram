@@ -75,7 +75,7 @@ const PostPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex gap-2 w-full h-screen p-3 bg-white">
+      <div className="flex gap-2 w-full h-screen p-3 bg-white dark:bg-slate-950">
         <Skeleton className="w-[70%] h-full bg-neutral-300" />
 
         <Skeleton className="flex flex-col gap-2 w-[30%] h-full bg-neutral-300">
@@ -125,7 +125,7 @@ const PostPage = () => {
       {/* Contenido del post de tipo texto */}
       {postData.postType === "text" &&
         <section className="flex flex-col w-full max-w-[700px] h-full mx-auto py-4">
-          <div className="w-full h-full bg-white rounded-t-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <div className="w-full h-full bg-white dark:bg-slate-900 rounded-t-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
             <PostCardHeader
               className="mb-3 px-4 pt-3"
               postData={postData}
@@ -164,7 +164,7 @@ const PostPage = () => {
       {/* Contenido del post de tipo repost (post compartido) */}
       {postData.postType === "repost" &&
         <section className="flex flex-col w-full max-w-[700px] h-full mx-auto py-4">
-          <div className="w-full h-full bg-white rounded-t-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <div className="w-full h-full bg-white dark:bg-slate-900 rounded-t-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
             <PostCardHeader
               className="mb-3 px-4 pt-3"
               postData={postData}
@@ -236,7 +236,7 @@ const PostPage = () => {
           </div>
 
           {/* Columna derecha (autor, información del post, comentarios) */}
-          <div className="flex flex-col gap-3 w-full min-[950px]:max-w-[350px] h-full shrink-0 pb-0 overflow-hidden bg-neutral-50">
+          <div className="flex flex-col gap-3 w-full min-[950px]:max-w-[350px] h-full shrink-0 pb-0 overflow-hidden bg-neutral-50 dark:bg-slate-900 dark:border-l dark:border-slate-800">
             <div className="w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
               <PostCardHeader
                 className="p-3 pb-0"

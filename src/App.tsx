@@ -29,7 +29,7 @@ const StoriesPage = lazy(() => import("@/pages/StoriesPage"));
 const UpdateCryptoKeysPage = lazy(() => import("@/pages/UpdateCryptoKeysPage"));
 
 const PageLoader = () => (
-  <div className="flex justify-center items-center gap-2 h-screen w-full bg-neutral-50">
+  <div className="flex justify-center items-center gap-2 h-screen w-full bg-neutral-50 dark:bg-slate-950">
     <Loader2Icon className="size-[40px] text-[#4F39F6] animate-spin" />
   </div>
 );
@@ -132,7 +132,7 @@ const App = () => {
   // Mostrar el loading mientras se inicia el servidor y se cargan los datos
   if ((!serverStarted && !serverError) || !isLoaded || (Boolean(userId) && !interceptorReady) || isLoading) {
     return (
-      <div className="flex justify-center items-center gap-2 h-screen w-full bg-neutral-50">
+      <div className="flex justify-center items-center gap-2 h-screen w-full bg-neutral-50 dark:bg-slate-950">
         <Loader2Icon className="size-[40px] text-[#4F39F6] animate-spin" />
       </div>
     );

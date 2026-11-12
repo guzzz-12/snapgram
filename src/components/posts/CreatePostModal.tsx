@@ -166,11 +166,11 @@ const CreatePostModal = () => {
             </Avatar>
 
             <div className="flex flex-col w-full">
-              <p className="font-semibold text-sm text-neutral-900">
+              <p className="font-semibold text-sm text-neutral-900 dark:text-slate-100">
                 {user?.fullName}
               </p>
 
-              <p className="text-xs text-neutral-700">
+              <p className="text-xs text-neutral-700 dark:text-slate-400">
                 @{user?.username}
               </p>
             </div>
@@ -198,7 +198,7 @@ const CreatePostModal = () => {
                     data-testid="attach-image-btn"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <ImagePlus className="size-10 text-neutral-600 stroke-1" aria-hidden />
+                    <ImagePlus className="size-10 text-neutral-600 dark:text-slate-400 stroke-1" aria-hidden />
                     <span className="sr-only">Adjuntar imágenes</span>
                   </button>
                 )}

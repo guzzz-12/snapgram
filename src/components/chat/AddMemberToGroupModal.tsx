@@ -73,7 +73,7 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
     mutate({
       onSuccess: () => {
         setIsOpen(false);
-        toast.success("Usuario agregado con éxito");
+        toast.success("Usuario agregado con éxito");
       }
     });
   }
@@ -99,7 +99,7 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
         <div className="flex flex-col gap-2 shrink-0">
           <Label
             htmlFor="name"
-            className="text-sm text-neutral-900"
+            className="text-sm text-neutral-900 dark:text-slate-100"
           >
             Buscar amigos
           </Label>
@@ -160,7 +160,10 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
                   <li key={user._id} className="w-full">
                     <Label
                       id={user._id}
-                      className={cn("flex justify-start items-center gap-4 p-2 rounded-md bg-transparent hover:bg-[#4F39F6]/10 cursor-pointer", isAlreadyMember && "cursor-default bg-neutral-100")}
+                      className={cn(
+                        "flex justify-start items-center gap-4 p-2 rounded-md bg-transparent hover:bg-[#4F39F6]/10 cursor-pointer",
+                        isAlreadyMember && "cursor-default bg-neutral-100 dark:bg-slate-800/60"
+                      )}
                     >
                       <div className="flex justify-start items-center gap-2 w-full">
                         <Avatar className="w-[45px] h-[45px] shrink-0">
@@ -175,7 +178,7 @@ const AddMemberToGroupModal = ({ isOpen, chatData, setIsOpen }: Props) => {
                         </Avatar>
 
                         <div className="flex flex-col justify-center items-start gap-1 w-full">
-                          <p className="font-semibold text-neutral-900">{user.fullName}</p>
+                          <p className="font-semibold text-neutral-900 dark:text-slate-100">{user.fullName}</p>
                           <p className="text-xs text-neutral-600">@{user.username}</p>
                         </div>
 

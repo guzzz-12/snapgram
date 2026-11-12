@@ -46,13 +46,13 @@ const EditHistoryModal = ({author, changeLog, title, isOpen, setIsOpen}: Props) 
               className="flex flex-col items-start w-full"
             >
               <span
-                className="block mb-2 text-base text-neutral-700 font-medium"
+                className="block mb-2 text-base text-neutral-700 dark:text-slate-300 font-medium"
                 title={dayjs(changeLogItem.editedAt).format("YYYY-MM-DD HH:mm:ss")}
               >
                 {firstLetterUpperCase(dayjs(changeLogItem.editedAt).fromNow())}
               </span>
 
-              <div className="w-full p-2 border rounded-md bg-neutral-100 overflow-hidden">
+              <div className="w-full p-2 border border-slate-200 dark:border-slate-700 rounded-md bg-neutral-100 dark:bg-slate-800/60 overflow-hidden">
                 <Link
                   className="flex justify-start items-center gap-2.5 max-w-fit mb-2 overflow-hidden"
                   to={`/profile/${author.clerkId}`}
@@ -68,12 +68,12 @@ const EditHistoryModal = ({author, changeLog, title, isOpen, setIsOpen}: Props) 
                     </AvatarFallback>
                   </Avatar>
 
-                  <p className="w-full text-neutral-700 font-semibold truncate">
+                  <p className="w-full text-neutral-700 dark:text-slate-200 font-semibold truncate">
                     {author.fullName}
                   </p>
                 </Link>
 
-                <p className="text-base text-neutral-900 whitespace-pre-wrap leading-tight">
+                <p className="text-base text-neutral-900 dark:text-slate-100 whitespace-pre-wrap leading-tight">
                   {changeLogItem.previousContent}
                 </p>
               </div>

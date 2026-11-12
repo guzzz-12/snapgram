@@ -3,7 +3,7 @@
 @import "tw-animate-css";
 @plugin "tailwind-scrollbar";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   font-family: "Outfit", sans-serif;
@@ -80,37 +80,37 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.129 0.042 264.695); /* slate-950 (#020617) */
+  --foreground: oklch(0.968 0.007 247.896); /* slate-100 (#F1F5F9) */
+  --card: oklch(0.208 0.042 265.755); /* slate-900 (#0F172A) */
+  --card-foreground: oklch(0.968 0.007 247.896); /* slate-100 */
+  --popover: oklch(0.208 0.042 265.755); /* slate-900 */
+  --popover-foreground: oklch(0.968 0.007 247.896); /* slate-100 */
+  --primary: oklch(0.511 0.262 276.966); /* indigo-600 (#4F39F6) */
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.279 0.041 260.031); /* slate-800 (#1E293B) */
+  --secondary-foreground: oklch(0.968 0.007 247.896);
+  --muted: oklch(0.279 0.041 260.031); /* slate-800 */
+  --muted-foreground: oklch(0.704 0.04 256.788); /* slate-400 (#94A3B8) */
+  --accent: oklch(0.279 0.041 260.031); /* slate-800 */
+  --accent-foreground: oklch(0.968 0.007 247.896);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: oklch(0.279 0.041 260.031); /* slate-800 (#1E293B) */
+  --input: oklch(0.279 0.041 260.031); /* slate-800 */
+  --ring: oklch(0.585 0.233 277.117); /* indigo-500 */
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar: oklch(0.208 0.042 265.755); /* slate-900 */
+  --sidebar-foreground: oklch(0.968 0.007 247.896);
+  --sidebar-primary: oklch(0.585 0.233 277.117);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.968 0.007 247.896);
+  --sidebar-border: oklch(0.279 0.041 260.031);
+  --sidebar-ring: oklch(0.585 0.233 277.117);
 }
 
 @layer base {
@@ -149,6 +149,14 @@
 
   .postCardSlider .slick-dots li {
     @apply !mx-0
+  }
+
+  .dark .postCardSlider .slick-dots li button:before {
+    @apply !text-slate-400
+  }
+
+  .dark .postCardSlider .slick-dots li.slick-active button:before {
+    @apply !text-indigo-400
   }
 
   /* Ajustar el tamaño de los emojis de los comentarios y de los posts */

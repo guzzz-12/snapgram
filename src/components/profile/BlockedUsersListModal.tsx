@@ -76,7 +76,7 @@ const BlockedUsersListModal = ({ isOpen, setIsOpen }: Props) => {
 
           {!isLoading && blockedUsers.length === 0 &&
             <li className="w-full p-3 border rounded-md">
-              <p className="w-full text-center text-sm text-neutral-900">
+              <p className="w-full text-center text-sm text-neutral-900 dark:text-slate-100">
                 No tienes perfiles bloqueados
               </p>
             </li>

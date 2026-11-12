@@ -22,10 +22,10 @@ const PostOptionsDropdown = (props: Props) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className={cn("flex justify-center items-center w-9 h-9 p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 cursor-pointer transition-colors", (isPending || !hasContent) && "pointer-events-none")}
+          className={cn("flex justify-center items-center w-9 h-9 p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 dark:hover:bg-slate-800 cursor-pointer transition-colors", (isPending || !hasContent) && "pointer-events-none")}
           disabled={isPending || !hasContent}
         >
-          <Ellipsis className="size-5 text-neutral-700" aria-hidden />
+          <Ellipsis className="size-5 text-neutral-700 dark:text-slate-300" aria-hidden />
           <span className="sr-only">
             Opciones del post
           </span>
@@ -41,7 +41,9 @@ const PostOptionsDropdown = (props: Props) => {
               onClick={() => setisEditingPost(true)}
             >
               <Pencil className="size-4.5" aria-hidden />
-              <span className="text-sm text-neutral-900">Editar</span>
+              <span className="text-sm text-neutral-900 dark:text-slate-100">
+                Editar
+              </span>
             </DropdownMenuItem>
 
             <Separator />
@@ -65,7 +67,7 @@ const PostOptionsDropdown = (props: Props) => {
           onClick={() => setOpenChangelogModal(true)}
         >
           <Logs className="size-5" aria-hidden />
-          <span className="text-sm text-neutral-900">
+          <span className="text-sm text-neutral-900 dark:text-slate-100">
             Ver historial de cambios
           </span>
         </DropdownMenuItem>

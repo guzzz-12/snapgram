@@ -27,17 +27,17 @@ const NoResults = ({term, searchType, setTerm, searchInputRef}: Props) => {
   }
 
   return (
-    <section className="flex flex-col justify-center items-center gap-8 w-full h-[420px] p-5 rounded-md bg-white shadow">
+    <section className="flex flex-col justify-center items-center gap-8 w-full h-[420px] p-5 rounded-md bg-white dark:bg-slate-900 dark:border dark:border-slate-800 shadow">
       <div className="flex justify-center items-center w-16 h-16 bg-[#4F39F6]/10 rounded-full">
         <Search className="size-8 text-[#4F39F6]" />
       </div>
 
       <div className="flex flex-col justify-center items-center gap-1 w-full max-w-[70%]">
-        <p className="text-center text-xl text-neutral-700 ">
+        <p className="text-center text-xl text-neutral-700 dark:text-slate-100">
           No se encontraron {searchType === "people" ? "personas" : "publicaciones"} para <span className="font-semibold">"{term}"</span>
         </p>
 
-        <span className="text-center text-sm text-neutral-600">
+        <span className="text-center text-sm text-neutral-600 dark:text-slate-400">
           Asegúrate de que la ortografía sea correcta.
         </span>
 

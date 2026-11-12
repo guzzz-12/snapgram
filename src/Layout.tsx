@@ -112,12 +112,12 @@ const Layout = () => {
         }
 
         {!isMessagesPage && windowWidth < 700 && !pathname.startsWith("/stories") &&
-          <div className="fixed top-1 right-1 p-0.5 rounded-sm bg-white border z-[100]">
+          <div className="fixed top-1 right-1 p-0.5 rounded-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 z-[100]">
             <MobileNavSidebar />
           </div>
         }
 
-        <section className="grow bg-slate-100 overflow-x-hidden">
+        <section className="grow bg-slate-100 dark:bg-slate-950 overflow-x-hidden transition-colors">
           <Outlet />
         </section>
       </TooltipProvider>

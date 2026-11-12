@@ -29,7 +29,7 @@ const DiscoverPage = () => {
             Descubre
           </h1>
 
-          <p className="text-base text-neutral-700">
+          <p className="text-base text-neutral-700 dark:text-slate-400">
             Descubre publicaciones y personas que compartan tus pasiones
           </p>
         </div>

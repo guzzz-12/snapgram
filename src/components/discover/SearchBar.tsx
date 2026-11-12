@@ -46,13 +46,13 @@ const SearchBar = ({loading, term, searchType, setTerm, searchInputRef}: Props) 
   }, [debouncedValue, searchType]);
 
   return (
-    <search className="w-full p-4 bg-white rounded-md shadow border">
+    <search className="w-full p-4 bg-white dark:bg-slate-900 rounded-md shadow border border-slate-200 dark:border-slate-800">
       <div className="relative">
-        <Search className="absolute top-1/2 left-2 -translate-y-1/2 text-neutral-500" />
+        <Search className="absolute top-1/2 left-2 -translate-y-1/2 text-neutral-500 dark:text-slate-400" />
 
         <Input
           ref={searchInputRef}
-          className="pl-10 bg-slate-100"
+          className="pl-10 bg-slate-100 dark:bg-slate-800/70"
           type="search"
           placeholder="Introduce un término para buscar personas o publicaciones..."
           disabled={false}

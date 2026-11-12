@@ -96,9 +96,9 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys }: Props) => 
   })
 
   return (
-    <div className="relative flex justify-between items-center gap-1.5 min-[500px]:gap-2 w-full shrink-0 px-1 min-[500px]:px-4 py-2 bg-white border-t">
+    <div className="relative flex justify-between items-center gap-1.5 min-[500px]:gap-2 w-full shrink-0 px-1 min-[500px]:px-4 py-2 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
       {(usersCurrentlyTyping.length > 0 || usersCurrentlyRecordingAudio.length > 0) &&
-        <div className="absolute -top-3 left-3 flex flex-col items-start gap-1 px-2 py-1.5 -translate-y-[100%] rounded-lg border shadow bg-slate-200 z-10">
+        <div className="absolute -top-3 left-3 flex flex-col items-start gap-1 px-2 py-1.5 -translate-y-[100%] rounded-lg border shadow bg-slate-200 dark:bg-slate-800 dark:border-slate-700 z-10">
           {/* Mostrar los usuarios que estan escribiendo */}
           <UsersTypingIndicator usersTyping={usersCurrentlyTyping} />
 
@@ -107,7 +107,7 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys }: Props) => 
         </div>
       }
 
-      <div className="absolute -top-2 left-1 flex justify-start items-center gap-2 max-w-[80%] bg-white rounded-md translate-x-[24px] -translate-y-[100%] overflow-x-hidden z-50">
+      <div className="absolute -top-2 left-1 flex justify-start items-center gap-2 max-w-[80%] bg-white dark:bg-slate-900 rounded-md translate-x-[24px] -translate-y-[100%] overflow-x-hidden z-50">
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           <SelectedImagesPreviews
             className="bg-[#4F39F6]/20"
@@ -148,7 +148,7 @@ const ChatInput = ({ chatData, chatTypeParam, recipientsPublicKeys }: Props) => 
 
       {(messageText.length > 0 || selectedImageFiles[0] || recordedFile) &&
         <button
-          className="p-1 text-sm text-blue-700 font-semibold cursor-pointer hover:underline disabled:cursor-not-allowed disabled:text-neutral-400"
+          className="p-1 text-sm text-blue-700 dark:text-indigo-400 font-semibold cursor-pointer hover:underline disabled:cursor-not-allowed disabled:text-neutral-400"
           disabled={submitting}
           onClick={onSendMessageHandler}
         >

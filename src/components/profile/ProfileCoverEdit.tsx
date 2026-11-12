@@ -50,11 +50,11 @@ const ProfileCoverEdit = ({title, userData, selectedImageFile, selectedImagePrev
         onDelete={() => deleteCoverMutation()}
       />
 
-      <p className="w-full text-left text-neutral-900 font-medium">
+      <p className="w-full text-left text-neutral-900 dark:text-slate-100 font-medium">
         {title}
       </p>
 
-      <div className="relative w-full h-[270px] bg-gray-300 rounded-md overflow-hidden">
+      <div className="relative w-full h-[270px] bg-gray-300 dark:bg-slate-800 rounded-md overflow-hidden">
         <div className="absolute bottom-0 left-0 flex justify-end items-end w-full h-[50%] bg-linear-to-t from-black to-transparent">
           <div className="flex flex-col min-[550px]:flex-row justify-center items-center gap-2 w-max pb-2 pr-2">
             {!selectedImageFile[0] &&

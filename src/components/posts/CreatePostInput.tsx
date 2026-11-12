@@ -11,6 +11,7 @@ import {
   type WheelEvent
 } from "react";
 import { Loader2Icon, Smile } from "lucide-react";
+import { useTheme } from "next-themes";
 import HashtagsPopover from "./HashtagsPopover";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -24,11 +25,12 @@ const LazyEmojiPicker = lazy(async () => {
   ]);
 
   return {
-    default: (props: { onEmojiSelect: (e: any) => void }) => (
+    default: (props: { theme?: "light" | "dark"; onEmojiSelect: (e: any) => void }) => (
       <Picker
         locale="es"
         emojiVersion="15"
         set="twitter"
+        theme={props.theme ?? "light"}
         previewPosition="none"
         navPosition="bottom"
         data={emojiData}
@@ -48,6 +50,7 @@ interface Props {
 }
 
 const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
+  const { resolvedTheme } = useTheme();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hashtagsListRef = useRef<HTMLDivElement>(null);
 
@@ -183,11 +186,11 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
       />
 
       <div
-        className="relative flex justify-start items-start gap-3 w-full max-h-[270px] border-b overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+        className="relative flex justify-start items-start gap-3 w-full max-h-[270px] border-b border-slate-200 dark:border-slate-800 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-slate-700 scrollbar-track-gray-200 dark:scrollbar-track-slate-900"
       >
         <Textarea
           ref={inputRef}
-          className="w-full px-0 py-4 !text-base border-t-0 border-b-0 border-l-0 border-r-0 rounded-none shadow-none resize-none placeholder:text-neutral-400 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:ring-offset-transparent focus-visible:border-b"
+          className="w-full px-0 py-4 !text-base text-neutral-900 dark:text-slate-100 dark:bg-transparent border-t-0 border-b-0 border-l-0 border-r-0 rounded-none shadow-none resize-none placeholder:text-neutral-400 dark:placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:ring-offset-transparent focus-visible:border-b"
           placeholder="¿Qué estás pensando?"
           data-testid="create-post-input"
           disabled={isPending}
@@ -208,24 +211,27 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
                 className="shrink-0 cursor-pointer"
                 disabled={isPending}
               >
-                <Smile className="size-6 text-neutral-600" aria-hidden />
+                <Smile className="size-6 text-neutral-600 dark:text-slate-400" aria-hidden />
                 <span className="sr-only">Seleccionar Emoji</span>
               </button>
             </PopoverTrigger>
 
             <PopoverContent
-              className="w-full h-full p-0 -translate-y-[1rem] bg-transparent"
+              className="w-full h-full p-0 -translate-y-[1rem] bg-transparent border-none shadow-none"
               side="left"
               onWheel={handleScrollInterception}
             >
               <Suspense
                 fallback={
-                  <div className="flex items-center justify-center w-[352px] h-[435px] bg-white rounded-lg shadow">
+                  <div className="flex items-center justify-center w-[352px] h-[435px] bg-white dark:bg-slate-900 rounded-lg shadow">
                     <Loader2Icon className="size-6 text-[#4F39F6] animate-spin" />
                   </div>
                 }
               >
-                <LazyEmojiPicker onEmojiSelect={onEmojiPickHandler} />
+                <LazyEmojiPicker
+                  theme={resolvedTheme === "dark" ? "dark" : "light"}
+                  onEmojiSelect={onEmojiPickHandler}
+                />
               </Suspense>
             </PopoverContent>
           </Popover>

@@ -47,13 +47,13 @@ const MessageHistoryModal = (props: Props) => {
           <DialogTitle>Historial de cambios</DialogTitle>
         </DialogHeader>
 
-        <ul className="flex flex-col gap-3 w-full max-h-[360px] overflow-y-auto bg-white scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        <ul className="flex flex-col gap-3 w-full max-h-[360px] overflow-y-auto bg-white dark:bg-slate-900 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           {message.history.map(data => (
             <li
               key={data._id}
-              className="flex flex-col w-full p-2 border rounded-md bg-slate-100"
+              className="flex flex-col w-full p-2 border rounded-md bg-slate-100 dark:bg-slate-800/60"
             >
-              <p className="text-sm whitespace-pre-wrap">
+              <p className="text-sm text-neutral-900 dark:text-slate-100 whitespace-pre-wrap">
                 {data.previousContent}
               </p>
 

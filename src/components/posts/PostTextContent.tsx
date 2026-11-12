@@ -24,7 +24,7 @@ const PostTextContent = ({ postData }: Props) => {
     <div className="mb-3 px-3">
       <p
         ref={textContentRef}
-        className={cn("inline-block text-base text-left text-neutral-700 whitespace-pre-wrap bg-transparent", showFullText ? "line-clamp-none" : "line-clamp-6")}
+        className={cn("inline-block text-base text-left text-neutral-700 dark:text-slate-200 whitespace-pre-wrap bg-transparent", showFullText ? "line-clamp-none" : "line-clamp-6")}
       >
         <Twemoji className="[&>img]:!inline">
           {hashtagParser(postData.content)}

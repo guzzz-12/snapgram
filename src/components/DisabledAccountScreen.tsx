@@ -13,24 +13,24 @@ interface Props {
 const DisabledAccountScreen = ({ isPending, isSigningOut, mutate, signOutHandler }: Props) => {
   return (
     <main
-      className="flex flex-col justify-start pt-20 items-center gap-8 w-full min-h-[100dvh] bg-slate-100"
+      className="flex flex-col justify-start pt-20 items-center gap-8 w-full min-h-[100dvh] bg-slate-100 dark:bg-slate-950"
       data-testid="disabled-account-screen"
     >
       <Logo size="md" />
 
-      <section className="flex flex-col justify-center items-center px-10 py-4 border rounded-lg bg-white shadow">
-        <h1 className="mb-2 text-center text-2xl text-neutral-900 font-semibold">
+      <section className="flex flex-col justify-center items-center px-10 py-4 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-800 shadow">
+        <h1 className="mb-2 text-center text-2xl text-neutral-900 dark:text-slate-100 font-semibold">
           ¿Reactivar tu cuenta?
         </h1>
 
         <div className="flex justify-center items-center gap-2">
           <GoInfo className="size-8 shrink-0 text-orange-700" />
-          <p className="text-base text-left text-neutral-700 leading-tight">
+          <p className="text-base text-left text-neutral-700 dark:text-slate-300 leading-tight">
             Desactivaste tu cuenta recientemente, <br /> para continuar debes reactivarla.
           </p>
         </div>
 
-        <Separator className="w-full my-4 bg-neutral-200" />
+        <Separator className="w-full my-4 bg-neutral-200 dark:bg-slate-800" />
 
         <div className="flex justify-center items-center gap-3 w-full">
           <Button

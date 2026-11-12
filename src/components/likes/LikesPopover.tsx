@@ -68,10 +68,10 @@ const LikesPopover = (props: Props) => {
               }}
             >
               <Heart
-                className="size-5.5 text-neutral-500"
+                className="size-5.5 text-neutral-500 dark:text-slate-400"
                 aria-hidden
               />
-              <span className="text-neutral-700">
+              <span className="text-neutral-700 dark:text-slate-300">
                 {postData.likesCount}
               </span>
             </button>
@@ -94,7 +94,7 @@ const LikesPopover = (props: Props) => {
           }
 
           {!isLoading && likes.length > 0 &&
-            <ul className="flex flex-col gap-1 w-full p-2 bg-white">
+            <ul className="flex flex-col gap-1 w-full p-2 bg-white dark:bg-slate-900">
               {likes.map ((like) => (
                 <LikeItem key={like._id} like={like} />
               ))}
@@ -103,7 +103,7 @@ const LikesPopover = (props: Props) => {
 
           {!isLoading && likes.length === 0 &&
             <div className="flex flex-col gap-1 w-full p-3">
-              <p className="text-neutral-500 text-sm font-semibold">
+              <p className="text-neutral-500 dark:text-slate-400 text-sm font-semibold">
                 Nadie ha dado me gusta aún
               </p>
             </div>

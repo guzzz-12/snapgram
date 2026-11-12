@@ -92,7 +92,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
       onSuccess: () => {
         setIsEditingGroupName(false);
         setIsEditingGroupDescription(false);
-        toast.success("Grupo actualizado con éxito");
+        toast.success("Grupo actualizado con éxito");
       }
     });
   }
@@ -188,7 +188,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
 
               <div className="flex justify-center items-center gap-3 w-full">
                 {(!isAdmin || !isEditingGroupName) &&
-                  <h2 className="max-w-[80%] text-center text-xl text-neutral-900 font-semibold truncate">
+                  <h2 className="max-w-[80%] text-center text-xl text-neutral-900 dark:text-slate-100 font-semibold truncate">
                     {data.groupName}
                   </h2>
                 }
@@ -266,7 +266,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
             </div>
 
             {!isEditingGroupDescription &&
-              <div className={cn("relative w-full max-h-[270px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 rounded-md bg-neutral-100", !isAdmin ? "p-3" : "p-3 pt-6 pr-6")}>
+              <div className={cn("relative w-full max-h-[270px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 rounded-md bg-neutral-100 dark:bg-slate-800/60", !isAdmin ? "p-3" : "p-3 pt-6 pr-6")}>
                 {isAdmin &&
                   <Button
                     className="absolute top-0 right-0 shrink-0 rounded-full cursor-pointer"
@@ -283,7 +283,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                       }, 0);
                     }}
                   >
-                    <BsFillPencilFill className="size-3 text-neutral-900" aria-hidden />
+                    <BsFillPencilFill className="size-3 text-neutral-900 dark:text-slate-100" aria-hidden />
                     <span className="sr-only">
                       Editar descripción del grupo
                     </span>
@@ -293,7 +293,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                 <div>
                   <p
                     ref={textContentRef}
-                    className={cn("w-full text-left text-sm text-neutral-900 whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-6")}
+                    className={cn("w-full text-left text-sm text-neutral-900 dark:text-slate-100 whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-6")}
                   >
                     {data.groupDescription || "Sin descripción"}
                   </p>
@@ -318,7 +318,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                 <Textarea
                   ref={editDescriptionInputRef}
                   id="description"
-                  className="w-full max-h-[240px] resize-none border-none bg-neutral-100 focus-visible:ring-0 focus-visible:ring-offset-0 scrollbar-thin scrollbar-thumb-neutral-300 scrollbar-track-neutral-100"
+                  className="w-full max-h-[240px] resize-none border-none bg-neutral-100 dark:bg-slate-800/60 focus-visible:ring-0 focus-visible:ring-offset-0 scrollbar-thin scrollbar-thumb-neutral-300 scrollbar-track-neutral-100"
                   value={newDescription || data.groupDescription || ""}
                   placeholder="Añade una descripción al grupo..."
                   onChange={(e) => setNewDescription(e.target.value)}
@@ -348,9 +348,9 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
               </div>
             }
 
-            <div className="flex flex-col gap-4 p-3 bg-neutral-100 rounded-lg">
+            <div className="flex flex-col gap-4 p-3 bg-neutral-100 dark:bg-slate-800/60 rounded-lg">
               <div className="flex justify-between items-center w-full">
-                <h3 className="text-left text-neutral-900 font-semibold">
+                <h3 className="text-left text-neutral-900 dark:text-slate-100 font-semibold">
                   {members.length} Miembros
                 </h3>
 
@@ -370,7 +370,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                   return (
                     <li
                       key={member.clerkId}
-                      className="flex justify-between items-center gap-2 w-full px-2 py-3 bg-white rounded-md hover:bg-neutral-200 cursor-pointer transition-colors"
+                      className="flex justify-between items-center gap-2 w-full px-2 py-3 bg-white dark:bg-slate-900 rounded-md hover:bg-neutral-200 cursor-pointer transition-colors"
                     >
                       <Link
                         className="flex justify-start items-center gap-2 w-full overflow-hidden"
@@ -387,7 +387,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                           </AvatarFallback>
                         </Avatar>
 
-                        <p className="w-full text-sm text-neutral-900 font-semibold truncate">
+                        <p className="w-full text-sm text-neutral-900 dark:text-slate-100 font-semibold truncate">
                           {member.fullName}
                         </p>
 

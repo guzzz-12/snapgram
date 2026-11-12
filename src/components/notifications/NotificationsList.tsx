@@ -9,8 +9,12 @@ interface Props {
 }
 
 const NotificationsList = ({ notifications, loading, isFetchingNextPage }: Props) => {
+  if (!loading && notifications.length === 0) {
+    return null;
+  }
+
   return (
-    <ul className="flex flex-col items-start gap-3 w-full">
+    <ul className="flex flex-col items-start gap-3 w-full mb-3">
       {loading && 
         <>
           <NotificationSkeleton />

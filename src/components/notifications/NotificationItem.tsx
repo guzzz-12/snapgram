@@ -42,7 +42,10 @@ const NotificationItem = ({ data }: Props) => {
 
   return (
     <div
-      className={cn("flex justify-start items-center gap-0 w-full p-3 bg-white border rounded-md shadow-md hover:bg-neutral-100 cursor-pointer transition-colors", !isSeen && "bg-[#4F39F6]/20")}
+      className={cn(
+        "flex justify-start items-center gap-0 w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md shadow-md hover:bg-neutral-100 dark:hover:bg-slate-800/80 cursor-pointer transition-colors",
+        !isSeen && "bg-[#4F39F6]/20 dark:bg-indigo-500/20"
+      )}
       data-testid="notification-item"
       onMouseEnter={() => setShowDropdownTrigger(true)}
       onMouseLeave={() => setShowDropdownTrigger(false)}
@@ -82,7 +85,7 @@ const NotificationItem = ({ data }: Props) => {
         </div>
 
         <div className="flex flex-col justify-center items-start gap-0 w-full overflow-hidden">
-          <p className="text-[15px] text-neutral-900 leading-tight">
+          <p className="text-[15px] text-neutral-900 dark:text-slate-100 leading-tight">
             <span>{isLike ? "A " : ""}</span>
 
             <span className="font-semibold">
@@ -93,7 +96,7 @@ const NotificationItem = ({ data }: Props) => {
           </p>
 
           <span
-            className="text-sm text-neutral-700"
+            className="text-sm text-neutral-700 dark:text-slate-400"
             title={dayjs(data.createdAt).format("[El] dddd DD [de] MMMM [de] YYYY [a las] hh:mm a")}
           >
             {dayjs(data.createdAt).fromNow()}
@@ -104,7 +107,7 @@ const NotificationItem = ({ data }: Props) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            className={cn("opacity-0 rounded-full cursor-pointer hover:bg-slate-200 z-10", showDropdownTrigger && "opacity-100")}
+            className={cn("opacity-0 rounded-full cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 z-10", showDropdownTrigger && "opacity-100")}
             variant="ghost"
             size="icon"
           >
@@ -119,7 +122,7 @@ const NotificationItem = ({ data }: Props) => {
             onClick={() => setOpenDeleteModal(true)}
           >
             <Trash2Icon className="text-destructive" aria-hidden />
-            <span className="text-sm text-neutral-900">
+            <span className="text-sm text-neutral-900 dark:text-slate-100">
               Eliminar notificación
             </span>
           </DropdownMenuItem>

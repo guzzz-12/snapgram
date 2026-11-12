@@ -95,7 +95,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
       {isLoading &&
         <div
           style={{height: `${headerHeight}px`}}
-          className="flex justify-start gap-3 w-full px-4 py-2 bg-white border-b"
+          className="flex justify-start gap-3 w-full px-4 py-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 border-b"
         >
           <Skeleton className="w-[50px] h-[50px] shrink-0 rounded-full bg-neutral-200" />
 
@@ -107,7 +107,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
       }
 
       {!isLoading &&
-        <div className="flex justify-between items-center gap-4 w-full px-4 py-2 bg-white border-b">
+        <div className="flex justify-between items-center gap-4 w-full px-4 py-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 border-b">
           <Link
             to={chatData?.type === "group" ? "#" : `/profile/${recipient?.clerkId}`}
             className="flex justify-start items-center gap-4 overflow-hidden"
@@ -130,18 +130,18 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
             </Avatar>
 
             <div className="flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
-              <p className="w-full font-semibold text-neutral-900 truncate">
+              <p className="w-full font-semibold text-neutral-900 dark:text-slate-100 truncate">
                 {chatData?.type === "group" ? chatData.groupName : recipient?.fullName}
               </p>
 
               {chatData?.type !== "group" &&
-                <p className="w-full text-xs text-neutral-700 truncate">
+                <p className="w-full text-xs text-neutral-700 dark:text-slate-400 truncate">
                   @{recipient?.username}
                 </p>
               }
 
               {chatData?.type === "group" &&
-                <p className="w-full text-xs text-neutral-700 truncate">
+                <p className="w-full text-xs text-neutral-700 dark:text-slate-400 truncate">
                   Creado por {chatData.groupAdmin?.fullName}
                 </p>
               }
@@ -153,7 +153,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
               <button
                 className={cn("flex justify-center items-center w-9 h-9 p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 cursor-pointer transition-colors")}
               >
-                <Ellipsis className="size-5 text-neutral-700" aria-hidden />
+                <Ellipsis className="size-5 text-neutral-700 dark:text-slate-400" aria-hidden />
                 <span className="sr-only">
                   Opciones del chat
                 </span>
@@ -184,7 +184,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
                       }}
                     >
                       <FiLock className="size-5 text-neutral-500" aria-hidden />
-                      <span className="text-sm text-neutral-900">
+                      <span className="text-sm text-neutral-900 dark:text-slate-100">
                         {blockData.blockedUser ? "Desbloquear" : "Bloquear"} a {recipient?.fullName.split(" ")[0]}
                       </span>
                     </DropdownMenuItem>
@@ -198,7 +198,7 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
                     className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer"
                     onClick={() => setOpenGroupInfoModal(true)}
                   >
-                    <Info className="size-5 text-neutral-900" aria-hidden />
+                    <Info className="size-5 text-neutral-900 dark:text-slate-100" aria-hidden />
                     <span className="text-sm">
                       Información del grupo
                     </span>
@@ -208,8 +208,8 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
                     className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer"
                     onClick={() => setOpenUpdateGroupImgModal(true)}
                   >
-                    <FaRegImage className="size-5 text-neutral-900" aria-hidden />
-                    <span className="text-sm text-neutral-900">
+                    <FaRegImage className="size-5 text-neutral-900 dark:text-slate-100" aria-hidden />
+                    <span className="text-sm text-neutral-900 dark:text-slate-100">
                       Cambiar imagen del grupo
                     </span>
                   </DropdownMenuItem>
@@ -218,8 +218,8 @@ const ChatHeader = ({ chatData, isLoading, headerHeight, blockData }: Props) => 
                     className="flex justify-start items-center gap-2 w-full px-4 py-2 cursor-pointer"
                     onClick={() => setOpenAddMemberModal(true)}
                   >
-                    <MdOutlinePersonAddAlt className="size-6 text-neutral-900" aria-hidden />
-                    <span className="text-sm text-neutral-900">
+                    <MdOutlinePersonAddAlt className="size-6 text-neutral-900 dark:text-slate-100" aria-hidden />
+                    <span className="text-sm text-neutral-900 dark:text-slate-100">
                       Agregar miembros
                     </span>
                   </DropdownMenuItem>

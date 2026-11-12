@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const SearchUserCardSkeleton = () => {
   return (
-    <div className="flex flex-col w-full p-5 border rounded-md bg-white">
+    <div className="flex flex-col w-full p-5 border rounded-md bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
       <div className="flex flex-col items-center w-full overflow-hidden">
         {/* Avatar Skeleton */}
         <Skeleton className="w-[50px] h-[50px] mb-2 rounded-full" />

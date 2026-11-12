@@ -6,7 +6,7 @@ const PostCardSkeleton = () => {
       className="w-full mx-auto"
       data-testid="post-skeleton"
     >
-      <div className="flex flex-col space-y-3 rounded-lg border bg-white p-6 shadow-md">
+      <div className="flex flex-col space-y-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-md">
         {/* Header del post */}
         <div className="flex items-center space-x-4">
           <Skeleton className="h-12 w-12 rounded-full" />

@@ -54,9 +54,9 @@ const PostCommentInput = ({postId, className}: Props) => {
   }, []);
 
   return (
-    <div className={cn("relative flex justify-between items-center gap-3 w-full shrink-0 px-3 py-2 bg-neutral-100 border-t", className)}>
+    <div className={cn("relative flex justify-between items-center gap-3 w-full shrink-0 px-3 py-2 bg-neutral-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800", className)}>
       {selectedImagePreviews.length > 0 &&
-        <div className="absolute -top-1 right-1 p-1.5 -translate-x-[100%] -translate-y-[100%] bg-neutral-300 rounded-sm shadow overflow-hidden">
+        <div className="absolute -top-1 right-1 p-1.5 -translate-x-[100%] -translate-y-[100%] bg-neutral-300 dark:bg-slate-800 rounded-sm shadow overflow-hidden">
           <button
             className="absolute top-1 right-1 p-0.5 rounded-full bg-red-50 cursor-pointer disabled:cursor-not-allowed disabled:pointer-events-none"
             disabled={isPending}
@@ -89,7 +89,7 @@ const PostCommentInput = ({postId, className}: Props) => {
             disabled={isPending}
             onClick={() => fileInputRef.current?.click()}
           >
-            <Image className="text-neutral-600" aria-hidden />
+            <Image className="text-neutral-600 dark:text-slate-400" aria-hidden />
             <span className="sr-only">Seleccionar imagen</span>
           </button>
         </div>
@@ -97,7 +97,7 @@ const PostCommentInput = ({postId, className}: Props) => {
 
       {(commentText.length > 0 || selectedImageFiles[0]) &&
         <button
-          className="p-1 text-sm text-blue-700 font-semibold cursor-pointer hover:underline disabled:cursor-not-allowed disabled:text-neutral-400 disabled:pointer-events-none"
+          className="p-1 text-sm text-blue-700 dark:text-indigo-400 font-semibold cursor-pointer hover:underline disabled:cursor-not-allowed disabled:text-neutral-400 disabled:pointer-events-none"
           disabled={isPending}
           onClick={onCreateCommentHandler}
         >

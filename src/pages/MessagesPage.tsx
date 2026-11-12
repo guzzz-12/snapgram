@@ -32,7 +32,7 @@ const MessagesPage = () => {
   }
 
   return (
-    <main className="relative flex w-full h-full bg-white overflow-hidden">
+    <main className="relative flex w-full h-full bg-white dark:bg-slate-950 overflow-hidden">
       <PrivateChatsModalList />
       
       <ChatList
@@ -57,7 +57,7 @@ const MessagesPage = () => {
 
         {!chatId && user.hasCryptoKeys && hasLocalCryptoKeys &&
           <div className="flex flex-col justify-center items-center w-full h-full">
-            <div className="flex justify-center items-center w-[120px] h-[120px] mb-2 shrink-0 rounded-full border-2 border-neutral-600">
+            <div className="flex justify-center items-center w-[120px] h-[120px] mb-2 shrink-0 rounded-full border-2 border-neutral-600 dark:border-slate-400">
               <LuSendHorizontal className="size-16 text-neutral-600 stroke-1" />
             </div>
             
@@ -66,7 +66,7 @@ const MessagesPage = () => {
               {chatTypeParam === "group" && "Crear grupo"}
             </h1>
 
-            <p className="mb-5 text-center text-sm text-neutral-600">
+            <p className="mb-5 text-center text-sm text-neutral-600 dark:text-slate-400">
               Envía mensajes a tus amigos o grupos
             </p>
 

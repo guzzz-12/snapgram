@@ -36,7 +36,7 @@ const NewMessageToast = ({ messageData, currentUser }: Props) => {
 
   return (
     <Link
-      className="flex justify-start items-center gap-2 min-w-[270px] max-w-[300px] px-3 py-2 bg-neutral-200 rounded-md border shadow-md"
+      className="flex justify-start items-center gap-2 min-w-[270px] max-w-[300px] px-3 py-2 bg-neutral-200 dark:bg-slate-800 dark:border-slate-700 rounded-md border shadow-md"
       to={notificationLink}
     >
       <div className="flex items-center h-full shrink-0">
@@ -52,12 +52,12 @@ const NewMessageToast = ({ messageData, currentUser }: Props) => {
       </div>
 
       <div className="flex flex-col w-full h-full overflow-hidden">
-        <p className="w-full text-sm text-neutral-900 leading-tight">
+        <p className="w-full text-sm text-neutral-900 dark:text-slate-100 leading-tight">
           <span className="font-semibold">{sender.fullName}</span> ha enviado un mensaje.
         </p>
 
         {decryptedMsg.text &&
-          <span className="w-full mt-1 text-xs text-neutral-700 italic line-clamp-3">
+          <span className="w-full mt-1 text-xs text-neutral-700 dark:text-slate-300 italic line-clamp-3">
             {decryptedMsg.text}
           </span>
         }
@@ -74,7 +74,7 @@ const NewMessageToast = ({ messageData, currentUser }: Props) => {
         {type === "audio" &&
           <div className="flex justify-start items-center gap-2 w-full mt-0">
             <IoIosRecording className="size-8 shrink-0 text-[#4F39F6]" />
-            <p className="w-full mt-1 text-sm text-neutral-700 font-semibold">
+            <p className="w-full mt-1 text-sm text-neutral-700 dark:text-slate-300 font-semibold">
               Nota de voz
             </p>
           </div>

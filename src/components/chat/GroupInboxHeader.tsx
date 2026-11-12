@@ -24,7 +24,7 @@ const GroupInboxHeader = ({ groupData }: Props) => {
   }
 
   return (
-    <section className="w-full py-6 border-b bg-neutral-50">
+    <section className="w-full py-6 border-b bg-neutral-50 dark:bg-slate-900/60">
       <GroupInfoModal
         groupId={groupData._id}
         isOpen={openGroupInfoModal}
@@ -57,14 +57,14 @@ const GroupInboxHeader = ({ groupData }: Props) => {
           </span>
         </button>
 
-        <h2 className="w-full mb-2 text-center text-xl font-semibold text-neutral-900">
+        <h2 className="w-full mb-2 text-center text-xl font-semibold text-neutral-900 dark:text-slate-100">
           {groupData.groupName}
         </h2>
 
         <div className="flex flex-col justify-center items-start gap-1 w-full overflow-hidden">
           <div className="flex justify-center items-center gap-2 w-full">
             <MdOutlineAdminPanelSettings className="size-6 shrink-0 text-neutral-500" />
-            <p className="w-fit max-w-full text-center text-sm text-neutral-900 truncate">
+            <p className="w-fit max-w-full text-center text-sm text-neutral-900 dark:text-slate-100 truncate">
               Grupo creado por
               {" "}
               <Link
@@ -78,7 +78,7 @@ const GroupInboxHeader = ({ groupData }: Props) => {
 
           <div className="flex justify-center items-center gap-3 w-full">
             <FaUsers className="size-6 shrink-0 text-neutral-500" />
-            <p className="text-center text-sm text-neutral-900">
+            <p className="text-center text-sm text-neutral-900 dark:text-slate-100">
               {groupData.participants.length} miembros
             </p>
           </div>
@@ -88,7 +88,7 @@ const GroupInboxHeader = ({ groupData }: Props) => {
             title={dayjs(groupData.createdAt).format("DD/MM/YYYY - hh:mm a")}
           >
             <CgCalendarDates className="size-6 shrink-0 text-neutral-500" />
-            <p className="text-center text-sm text-neutral-900">
+            <p className="text-center text-sm text-neutral-900 dark:text-slate-100">
               {dayjs(groupData.createdAt).format("DD/MM/YYYY")}
             </p>
           </div>

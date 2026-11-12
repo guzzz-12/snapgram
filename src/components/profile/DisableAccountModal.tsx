@@ -23,11 +23,11 @@ const DisableAccountModal = ({isOpen, setIsOpen}: Props) => {
       <DialogContent className="p-3 min-[400px]:p-6">
         <DialogHeader>
           <DialogTitle>¿Desactivar tu cuenta?</DialogTitle>
-          <Separator className="w-full my-2 bg-neutral-200" />
+          <Separator className="w-full my-2 bg-neutral-200 dark:bg-slate-800" />
           <DialogDescription asChild>
             <div className="flex justify-start items-center gap-2 w-full text-left">
               <IoWarningOutline className="size-8 text-destructive shrink-0" />
-              <p className="text-sm text-neutral-700">
+              <p className="text-sm text-neutral-700 dark:text-slate-300">
                 Si desactivas tu cuenta se ocultarán tu perfil y todas tus publicaciones. Podrás reactivar tu cuenta nuevamente en cualquier momento iniciando sesión.
               </p>
             </div>

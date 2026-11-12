@@ -13,7 +13,7 @@ const SeeMoreBtn = (props: Props) => {
 
   return (
     <Button
-      className="inline-block h-auto p-0 text-blue-900 cursor-pointer"
+      className="inline-block h-auto p-0 text-blue-900 dark:text-indigo-400 cursor-pointer"
       variant="link"
       onClick={() => {
         setShowFullText(prev => !prev);

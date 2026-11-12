@@ -26,7 +26,11 @@ const GroupChatModalItem = ({ userData, className, setSelectedUsersIds }: Props)
       <TooltipTrigger asChild>
         <Label
           id={userData._id}
-          className={cn("flex justify-start items-center gap-4 p-2 rounded-md bg-transparent hover:bg-[#4F39F6]/10", userData.hasCryptoKeys ? "cursor-pointer" : "cursor-not-allowed", className)}
+          className={cn(
+            "flex justify-start items-center gap-4 p-2 rounded-md bg-transparent hover:bg-[#4F39F6]/10 dark:hover:bg-indigo-500/15",
+            userData.hasCryptoKeys ? "cursor-pointer" : "cursor-not-allowed",
+            className
+          )}
         >
           <div className="flex justify-start items-center gap-2 w-full">
             <Avatar className="w-[45px] h-[45px] shrink-0">
@@ -39,14 +43,14 @@ const GroupChatModalItem = ({ userData, className, setSelectedUsersIds }: Props)
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-center items-start gap-1 w-full">
-              <p className="font-semibold text-neutral-900">{userData.fullName}</p>
-              <p className="text-xs text-neutral-600">@{userData.username}</p>
+              <p className="font-semibold text-neutral-900 dark:text-slate-100">{userData.fullName}</p>
+              <p className="text-xs text-neutral-600 dark:text-slate-400">@{userData.username}</p>
             </div>
           </div>
           {userData.hasCryptoKeys &&
             <Checkbox
               id={userData._id}
-              className="size-6.5 start-0 rounded-full cursor-pointer data-[state=checked]:border-[#4F39F6] data-[state=checked]:bg-[#4F39F6] data-[state=checked]:text-white"
+              className="size-6.5 start-0 rounded-full border-neutral-300 dark:border-slate-600 cursor-pointer data-[state=checked]:border-[#4F39F6] dark:data-[state=checked]:border-indigo-500 data-[state=checked]:bg-[#4F39F6] dark:data-[state=checked]:bg-indigo-500 data-[state=checked]:text-white"
               value={userData._id}
               onCheckedChange={onCheckedChange}
             />

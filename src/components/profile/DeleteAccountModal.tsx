@@ -50,12 +50,12 @@ const DeleteAccountModal = ({ isOpen, setIsOpen, setOpenDisableAccountModal }: P
       <DialogContent className="p-3 min-[400px]:p-6">
         <DialogHeader>
           <DialogTitle>Eliminar cuenta permanentemente</DialogTitle>
-          <Separator className="w-full my-2 bg-neutral-200" />
+          <Separator className="w-full my-2 bg-neutral-200 dark:bg-slate-800" />
           <DialogDescription asChild>
             <div className="flex justify-start items-center gap-2 w-full">
               <IoWarningOutline className="size-8 text-destructive shrink-0" />
               <div className="flex flex-col gap-0 text-left">
-                <p className="text-sm text-neutral-700">
+                <p className="text-sm text-neutral-700 dark:text-slate-300">
                   Si eliminas tu cuenta se eliminarán permanentemente tus datos y todas tus publicaciones. <span className="font-semibold">Esto no se puede deshacer.</span> Alternativamente, puedes <Button className="h-auto px-0.5 py-0 text-left whitespace-break-spaces underline cursor-pointer" variant="link" disabled={isPending} onClick={() => setOpenDisableAccountModal(true)}>desactivar tu cuenta temporalmente.</Button>
                 </p>
               </div>

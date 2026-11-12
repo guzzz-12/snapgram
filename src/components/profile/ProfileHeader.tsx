@@ -75,7 +75,7 @@ const ProfileHeader = ({ userData }: Props) => {
   }
 
   return (
-    <div className="block bg-slate-50 shadow overflow-hidden">
+    <div className="block bg-slate-50 dark:bg-slate-900 shadow overflow-hidden">
       <ProfileEditModal
         userData={userData}
         isOpen={openEditModal}
@@ -124,7 +124,7 @@ const ProfileHeader = ({ userData }: Props) => {
         >
           <Avatar
             ref={avatarRef}
-            className="w-[90px] h-[90px] min-[850px]:w-[120px] min-[850px]:h-[120px] shrink-0 outline-4 outline-white bg-black"
+            className="w-[90px] h-[90px] min-[850px]:w-[120px] min-[850px]:h-[120px] shrink-0 outline-4 outline-white dark:outline-slate-900 bg-black"
           >
             <AvatarImage
               className="w-full h-full object-cover group-hover:opacity-80 transition-colors"
@@ -149,11 +149,11 @@ const ProfileHeader = ({ userData }: Props) => {
         >
           <div className="flex justify-between items-center mb-2">
             <div className="grow overflow-hidden">
-              <h1 className="mb-0 text-2xl font-semibold truncate">
+              <h1 className="mb-0 text-2xl text-neutral-900 dark:text-slate-100 font-semibold truncate">
                 {userData.fullName}
               </h1>
 
-              <span className="text-neutral-700 truncate">
+              <span className="text-neutral-700 dark:text-slate-400 truncate">
                 @{userData.username}
               </span>
             </div>
@@ -161,8 +161,8 @@ const ProfileHeader = ({ userData }: Props) => {
             {user?._id === userData._id &&
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className={cn("flex justify-center items-center w-9 h-9 p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 cursor-pointer transition-colors", isPending && "pointer-events-none")}>
-                    <MoreHorizontal />
+                  <button className={cn("flex justify-center items-center w-9 h-9 p-2 shrink-0 rounded-full bg-transparent hover:bg-neutral-200 dark:hover:bg-slate-800 cursor-pointer transition-colors", isPending && "pointer-events-none")}>
+                    <MoreHorizontal className="text-neutral-700 dark:text-slate-300" />
                   </button>
                 </DropdownMenuTrigger>
 
@@ -171,7 +171,7 @@ const ProfileHeader = ({ userData }: Props) => {
                     className="flex justify-start items-center gap-2 cursor-pointer"
                     onClick={() => setOpenEditModal(true)}
                   >
-                    <Pencil className="size-5 text-neutral-700" aria-hidden />
+                    <Pencil className="size-5 text-neutral-700 dark:text-slate-300" aria-hidden />
                     <span>Editar perfil</span>
                   </DropdownMenuItem>
 
@@ -179,7 +179,7 @@ const ProfileHeader = ({ userData }: Props) => {
                     className="flex justify-start items-center gap-2 cursor-pointer"
                     onClick={() => setOpenBlockedUsersModal(true)}
                   >
-                    <RiUserForbidLine className="size-5 text-neutral-700" aria-hidden />
+                    <RiUserForbidLine className="size-5 text-neutral-700 dark:text-slate-300" aria-hidden />
                     <span>Perfiles bloqueados</span>
                   </DropdownMenuItem>
 
@@ -205,7 +205,7 @@ const ProfileHeader = ({ userData }: Props) => {
             {(user?._id !== userData._id) &&
               <div className="flex justify-center items-center gap-3">
                 <Button
-                  className={cn("shrink-0 rounded-full cursor-pointer", userData.isFollowing && "hover:text-red-600 hover:border-red-600 hover:bg-red-50")}
+                  className={cn("shrink-0 rounded-full cursor-pointer", userData.isFollowing && "hover:text-red-600 hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-950/30")}
                   variant="outline"
                   disabled={isPending}
                   onMouseEnter={onMouseFollowBtnEnter}
@@ -240,7 +240,7 @@ const ProfileHeader = ({ userData }: Props) => {
             }
           </div>
 
-          <div className="flex items-center gap-1 mb-4 text-neutral-500">
+          <div className="flex items-center gap-1 mb-4 text-neutral-500 dark:text-slate-400">
             <Calendar className="size-4" />
             <span className="text-sm truncate">
               {dayjs(userData.createdAt).format("[Se unió el] DD [de] MMMM [de] YYYY")}
@@ -248,10 +248,10 @@ const ProfileHeader = ({ userData }: Props) => {
           </div>
 
           {userData.bio &&
-            <div className="max-h-[450px] mb-4 pt-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 border-t">
+            <div className="max-h-[450px] mb-4 pt-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-slate-700 scrollbar-track-gray-200 dark:scrollbar-track-slate-900 border-t border-slate-200 dark:border-slate-800">
               <p
                 ref={textContentRef}
-                className={cn("inline-block pt-2 text-left text-neutral-700 whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-3")}
+                className={cn("inline-block pt-2 text-left text-neutral-700 dark:text-slate-200 whitespace-pre-wrap", showFullText ? "line-clamp-none" : "line-clamp-3")}
               >
                 {userData.bio}
               </p>

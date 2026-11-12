@@ -44,7 +44,7 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
 
     if (createPinStep === 2 && val.length === 6) {
       if (pinRef.current !== val) {
-        toast.error("Los pins no coinciden. Inténtalo de nuevo.");
+        toast.error("Los pins no coinciden. Inténtalo de nuevo.");
         setCreatePinStep(1);
       }
     }
@@ -92,7 +92,7 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
 
   return (
     <main
-      className="flex justify-center items-center w-full h-screen bg-neutral-200"
+      className="flex justify-center items-center w-full h-screen bg-neutral-200 dark:bg-slate-950"
       data-testid="create-crypto-keys-screen"
     >
       <ConfirmationModal
@@ -104,22 +104,22 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
         setIsOpen={setOpenConfirmationModal}
       />
 
-      <section className="w-full max-w-[600px] mx-auto p-6 rounded-lg bg-white shadow">
+      <section className="w-full max-w-[600px] mx-auto p-6 rounded-lg bg-white dark:bg-slate-900 dark:border dark:border-slate-800 shadow">
         {operation === "create" && <Logo className="mb-4" />}
 
-        <h1 className="mb-1 text-left text-2xl text-neutral-900 font-semibold">
+        <h1 className="mb-1 text-left text-2xl text-neutral-900 dark:text-slate-100 font-semibold">
           {operation === "create" ? "Habilita el cifrado de extremo a extremo del chat" : "Actualizar pin de cifrado"}
         </h1>
 
         {operation === "create" &&
-          <p className="text-left text-sm text-neutral-700 leading-tight">
+          <p className="text-left text-sm text-neutral-700 dark:text-slate-300 leading-tight">
             Para continuar debes habilitar el cifrado de extremo a extremo. <br />
             Crea un pin para habilitar el cifrado de extremo a extremo.
           </p>
         }
 
         {operation === "update" &&
-          <p className="text-left text-sm text-neutral-700 leading-tight">
+          <p className="text-left text-sm text-neutral-700 dark:text-slate-300 leading-tight">
             Actualiza tu pin de cifrado de extremo a extremo del chat.
           </p>
         }
@@ -128,7 +128,7 @@ const CreateCryptoKeysScreen = ({operation}: {operation: "create" | "update"}) =
 
         <div className="w-[70%] mx-auto mb-2">
           {createPinStep === 2 &&
-            <p className="w-full mb-3 text-center text-neutral-700 font-semibold">
+            <p className="w-full mb-3 text-center text-neutral-700 dark:text-slate-300 font-semibold">
               Confirma tu pin
             </p>
           }

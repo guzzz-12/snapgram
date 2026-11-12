@@ -11,10 +11,10 @@ const RightSidebar = () => {
   }
 
   return (
-    <aside className="sticky top-0 right-0 flex max-xl:hidden flex-col w-[300px] h-fit p-3 shrink-0 rounded-lg bg-white shadow">
+    <aside className="sticky top-0 right-0 flex max-xl:hidden flex-col w-[300px] h-fit p-3 shrink-0 rounded-lg bg-white dark:bg-slate-900 dark:border dark:border-slate-800 shadow">
       <ProfileLinkItem user={user} />
 
-      <Separator className="w-full my-1 bg-neutral-200" />
+      <Separator className="w-full my-1 bg-neutral-200 dark:bg-slate-800" />
 
       <LogoutItem />
     </aside>

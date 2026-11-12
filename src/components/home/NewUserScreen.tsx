@@ -55,12 +55,12 @@ const NewUserScreen = () => {
       className="flex flex-col justify-start items-center w-full max-w-[600px] h-full mx-auto"
       data-testid="new-user-screen"
     >
-      <h1 className="mt-1 text-3xl text-center text-neutral-700 font-light leading-[1.1]">
+      <h1 className="mt-1 text-3xl text-center text-neutral-700 dark:text-slate-200 font-light leading-[1.1]">
         Comienza a seguir cuentas <br /> para ver más contenido
       </h1>
 
-      <div className="flex flex-col gap-3 w-full h-[420px] mt-6 p-4 bg-white rounded-lg overflow-hidden">
-        <div className="relative w-full mb-6 bg-neutral-100 rounded-full shadow">
+      <div className="flex flex-col gap-3 w-full h-[420px] mt-6 p-4 bg-white dark:bg-slate-900 dark:border dark:border-slate-800 rounded-lg overflow-hidden">
+        <div className="relative w-full mb-6 bg-neutral-100 dark:bg-slate-800 rounded-full shadow">
           <Search className="absolute left-2 top-1/2 size-6 text-neutral-500 translate-y-[-50%] stroke-1 z-10" />
 
           <Input
@@ -78,7 +78,7 @@ const NewUserScreen = () => {
           {!isLoading && status === "pending" && users.length === 0 &&
             <div className="flex flex-col justify-center items-center gap-2 w-full h-full">
               <Search className="size-[50px] text-[#4F39F6] stroke-1" />
-              <p className="text-center text-base text-neutral-700 leading-tight">
+              <p className="text-center text-base text-neutral-700 dark:text-slate-200 leading-tight">
                 Explora y descubre contenido <br /> que se adapte a tus pasiones
               </p>
             </div>

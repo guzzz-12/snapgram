@@ -20,14 +20,14 @@ const MobileNavSidebar = () => {
           variant="ghost"
           size="icon"
         >
-          <AiOutlineMenu className="size-7 text-neutral-700" aria-hidden />
+          <AiOutlineMenu className="size-7 text-neutral-700 dark:text-slate-200" aria-hidden />
           <span className="sr-only">
             Abrir menú de navegación principal
           </span>
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent className="!w-fit">
+      <DrawerContent className="!w-fit bg-gray-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
         <Sidebar />
       </DrawerContent>
     </Drawer>

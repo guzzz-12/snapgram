@@ -18,7 +18,7 @@ const CommentFooter = (props: Props) => {
     <div className="flex flex-col items-start gap-1">
       <div className="flex justify-start items-center gap-3 py-0.5">
         <span
-          className="text-xs text-neutral-600 font-medium"
+          className="text-xs text-neutral-600 dark:text-slate-400 font-medium"
           title={dayjs(commentData.createdAt).format("dddd, DD [de] MMMM [de] YYYY [a las] hh:mm a")}
         >
           {dayjs(commentData.createdAt).fromNow()}
@@ -26,7 +26,7 @@ const CommentFooter = (props: Props) => {
         
         {!commentData.parent &&
           <Button
-            className="block h-fit p-0 text-xs text-neutral-600 cursor-pointer"
+            className="block h-fit p-0 text-xs text-neutral-600 dark:text-slate-400 cursor-pointer"
             variant="link"
             size="sm"
             onClick={() => setOpenReplies(true)}
@@ -37,7 +37,7 @@ const CommentFooter = (props: Props) => {
 
         {commentData.changeLog.length > 0 &&
           <Button
-            className="block h-fit p-0 text-xs text-neutral-600 cursor-pointer"
+            className="block h-fit p-0 text-xs text-neutral-600 dark:text-slate-400 cursor-pointer"
             variant="link"
             size="sm"
             onClick={() => setOpenChangeLogModal(true)}
@@ -49,7 +49,7 @@ const CommentFooter = (props: Props) => {
 
       {commentData.repliesCount > 0 && !openReplies &&
         <Button
-          className="flex h-fit !px-0 !py-0 text-base text-neutral-600 cursor-pointer"
+          className="flex h-fit !px-0 !py-0 text-base text-neutral-600 dark:text-slate-400 cursor-pointer"
           variant="link"
           size="sm"
           onClick={() => setOpenReplies(true)}

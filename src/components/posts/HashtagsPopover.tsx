@@ -94,10 +94,10 @@ const HashtagsPopover = (props: Props) => {
           left: `${position.left}px`,
           transform: "translate(-30%, 1.5rem)",
         }}
-        className="fixed w-[320px] h-fit max-h-[320px] rounded-md bg-slate-100 border shadow-md pointer-events-auto z-[50]"
+        className="fixed w-[320px] h-fit max-h-[320px] rounded-md bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md pointer-events-auto z-[50]"
         shouldFilter={false}
       >
-        <CommandList className="p-1 bg-white">
+        <CommandList className="p-1 bg-white dark:bg-slate-900">
           {(loading || (!loading && !isEnabled && openPopover)) &&
             <CommandItem
               className="flex justify-center items-center px-2 py-3 text-sm capitalize cursor-pointer data-[selected=true]:!bg-[#331fcf]/10"

@@ -37,50 +37,60 @@ dayjs.updateLocale("es", {
     y: "1 a", // Un año: "1 a"
     yy: "%d a" // Múltiples años: "x a"
   }
-})
+});
 
 interface Props {
   chatData: ChatType;
   usersTyping: TypingEventData[];
 }
 
-const ChatItem = ({chatData, usersTyping}: Props) => {
-  const {user} = useCurrentUser();
+const ChatItem = ({ chatData, usersTyping }: Props) => {
+  const { user } = useCurrentUser();
 
   const chatParticipants = chatData?.participants || [];
 
-  const otherUser = chatData.type === "private" ? chatParticipants.find((p) => p._id !== user?._id) : chatData.groupAdmin;
+  const otherUser =
+    chatData.type === "private"
+      ? chatParticipants.find((p) => p._id !== user?._id)
+      : chatData.groupAdmin;
 
   const otherUserExists = chatData.type === "private" && !!otherUser;
 
   const [lastMessage, setLastMessage] = useState<MessageType | null>(null);
-  
+
   const queryClient = useQueryClient();
 
-  const {removeFromUnreadChats} = useUnreadChats();
+  const { removeFromUnreadChats } = useUnreadChats();
 
   // Desencriptar el último mensaje del chat
   useEffect(() => {
-    if (!chatData.lastMessage || !user) return;
+    if (!chatData.lastMessage || !user) {
+      setLastMessage(null);
+      return;
+    }
+
+    let isCancelled = false;
 
     decryptMessage(chatData.lastMessage, user._id)
-    .then((msg) => {
-      setLastMessage(msg);
-    })
-    .catch((error) => {
-      console.error(error.message);
-    });
+      .then((msg) => {
+        if (!isCancelled) {
+          setLastMessage(msg);
+        }
+      })
+      .catch((error) => {
+        console.error(error.message);
+      });
 
     return () => {
-      setLastMessage(null);
+      isCancelled = true;
     };
-  }, [chatData, user]);
+  }, [chatData.lastMessage, user]);
 
   // Mutation para restablecer el contador de mensajes sin leer del usuario en el chat
-  const {resetUnreadMessagesCounter, isPending} = useResetUnreadCount({
+  const { resetUnreadMessagesCounter, isPending } = useResetUnreadCount({
     chatData,
     onSuccess: (chat) => {
-      updateUnreadMessagesCounterCache({chat, queryClient});
+      updateUnreadMessagesCounterCache({ chat, queryClient });
     }
   });
 
@@ -95,32 +105,53 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
       resetUnreadMessagesCounter();
       removeFromUnreadChats(chatData._id);
     }
-  }
+  };
 
   if (!user) return null;
 
   // Obtener el contador de mensajes sin leer del usuario en el chat
-  const unReadMessagesCounter = chatData.unseenMessages?.find(counter => {
-    return counter.user === user._id
+  const unReadMessagesCounter = chatData.unseenMessages?.find((counter) => {
+    return counter.user === user._id;
   });
 
-  // Verificar si el usuario está escribiendo
+  // Verificar si el usuario está escribiendo
   const isUserTyping = usersTyping.find((typing) => {
-    return (typing.chatId == chatData._id && typing.user._id !== user._id);
+    return typing.chatId == chatData._id && typing.user._id !== user._id;
   });
 
   // Si el chat es private y el otro usuario no existe, mostrar el avatar default
-  const avatar = chatData.type === "private" && otherUserExists ? otherUser.profilePicture : chatData.type === "private" && !otherUserExists ? "/default-avatar.webp" : chatData.groupPicture;
+  const avatar =
+    chatData.type === "private" && otherUserExists
+      ? otherUser.profilePicture
+      : chatData.type === "private" && !otherUserExists
+      ? "/default-avatar.webp"
+      : chatData.groupPicture;
 
   // Si el chat es private y el otro usuario no existe, mostrar "Usuario de Snapgram"
-  const name = chatData.type === "private" && otherUserExists ? otherUser.fullName : chatData.type === "private" && !otherUserExists ? "Usuario de Snapgram" : chatData.groupName;
+  const name =
+    chatData.type === "private" && otherUserExists
+      ? otherUser.fullName
+      : chatData.type === "private" && !otherUserExists
+      ? "Usuario de Snapgram"
+      : chatData.groupName;
+
+  const lastMessageSenderId =
+    typeof lastMessage?.sender === "string"
+      ? lastMessage.sender
+      : lastMessage?.sender?._id;
+
+  const isLastMessageDeleted = Boolean(
+    lastMessage?.deletedForAll || lastMessage?.deletedFor?.includes(user._id)
+  );
 
   return (
     <NavLink
       key={chatData._id}
-      className={({isActive}) => (
-        `flex justify-center min-[950px]:justify-start items-center gap-2 p-2 min-[700px]:px-4 min-[700px]:py-3 border-b border-slate-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800/60 ${isActive ? "bg-[#4F39F6]/10 dark:bg-indigo-500/15" : ""}`
-      )}
+      className={({ isActive }) =>
+        `flex justify-center min-[950px]:justify-start items-center gap-2 p-2 min-[700px]:px-4 min-[700px]:py-3 border-b border-slate-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800/60 ${
+          isActive ? "bg-[#4F39F6]/10 dark:bg-indigo-500/15" : ""
+        }`
+      }
       to={`/messages/${chatData._id}`}
       onClick={onClickHandler}
     >
@@ -143,8 +174,8 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
           />
         </div>
 
-        {/* Indicador de usuario que está escribiendo */}
-        {isUserTyping &&
+        {/* Indicador de usuario que está escribiendo */}
+        {isUserTyping && (
           <div className="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-white/50 rounded-full z-5">
             <BeatLoader
               className="opacity-80"
@@ -153,32 +184,38 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
               speedMultiplier={0.8}
             />
           </div>
-        }
+        )}
       </div>
 
       <div className="hidden min-[950px]:flex flex-col justify-between items-start gap-0 w-full overflow-hidden">
         <p className="w-full text-sm text-neutral-900 dark:text-slate-100 font-semibold truncate">
           {name}
         </p>
-        
-        {/* Mostrar el último mensaje del chat */}
-        {lastMessage && !isUserTyping &&
+
+        {/* Mostrar el último mensaje del chat */}
+        {lastMessage && !isUserTyping && (
           <div className="flex items-center gap-0.5 w-full text-xs text-neutral-700 dark:text-slate-400 font-light overflow-hidden">
-            <span className="shrink-0">
-              {lastMessage.sender._id === user._id && "Tú:"}
-            </span>
+            {lastMessageSenderId === user._id && (
+              <span className="shrink-0">Tú:</span>
+            )}
 
-            <p className="truncate">
-              {lastMessage.text}
-            </p>
+            {isLastMessageDeleted ? (
+              <p className="truncate italic">Mensaje eliminado</p>
+            ) : (
+              <>
+                {lastMessage.text && (
+                  <p className="truncate">{lastMessage.text}</p>
+                )}
 
-            {lastMessage.type !== "text" &&
-              <p className="truncate">
-                <MdOutlineAttachment className="inline shrink-0" aria-hidden />
-                {" "}
-                Archivo adjunto
-              </p>
-            }
+                {lastMessage.type !== "text" && (
+                  <p className="truncate">
+                    <MdOutlineAttachment className="inline shrink-0" aria-hidden />
+                    {" "}
+                    Archivo adjunto
+                  </p>
+                )}
+              </>
+            )}
 
             <LuDot className="size-2 shrink-0" aria-hidden />
 
@@ -186,15 +223,13 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
               {dayjs(lastMessage.createdAt).fromNow().replace("hace ", "")}
             </p>
           </div>
-        }
+        )}
 
-        {isUserTyping &&
+        {isUserTyping && (
           <div className="w-full text-xs text-neutral-700 font-light italic">
-            <span className="shrink-0">
-              Escribiendo...
-            </span>
+            <span className="shrink-0">Escribiendo...</span>
           </div>
-        }
+        )}
       </div>
 
       {/* Contador de mensajes sin leer */}
@@ -203,7 +238,7 @@ const ChatItem = ({chatData, usersTyping}: Props) => {
         counter={unReadMessagesCounter}
       />
     </NavLink>
-  )
-}
+  );
+};
 
 export default ChatItem

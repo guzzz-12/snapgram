@@ -27,15 +27,15 @@ interface Props {
 const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, headerHeight }: Props) => {
   const paginationRef = useRef<HTMLDivElement>(null);
 
-  const {chatId} = useParams<{chatId: string}>();
+  const { chatId } = useParams<{ chatId: string }>();
 
   const navigate = useNavigate();
 
-  const {setIsOpen: setOpenPrivateChatsModal} = usePrivateChatsListModal();
+  const { setIsOpen: setOpenPrivateChatsModal } = usePrivateChatsListModal();
 
-  const {user} = useCurrentUser();
+  const { user } = useCurrentUser();
 
-  const {usersTyping} = useUsersTyping();
+  const { usersTyping } = useUsersTyping();
 
   // Consultar los chats del usuario (tanto privados como grupales)
   const {
@@ -57,7 +57,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
     }
   }, [chatTypeParam, chatId]);
 
-  const {isIntersecting} = useIntersectionObserver({data: chats, paginationRef});
+  const { isIntersecting } = useIntersectionObserver({ data: chats, paginationRef });
 
   useEffect(() => {
     if (isIntersecting && hasNextPage) {
@@ -65,9 +65,11 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
     }
   }, [isIntersecting]);
 
-  if (error) {
-    toast.error(errorMessage(error));
-  }
+  useEffect(() => {
+    if (error) {
+      toast.error(errorMessage(error));
+    }
+  }, [error]);
 
   if (!user) {
     return null;
@@ -75,9 +77,9 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
 
   return (
     <aside className="flex flex-col w-fit min-[950px]:w-[240px] shrink-0 h-full pb-4 min-[600px]:pb-6 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-      {user.hasCryptoKeys && hasLocalCryptoKeys &&
+      {user.hasCryptoKeys && hasLocalCryptoKeys && (
         <Button
-          style={{height: `${headerHeight}px`}}
+          style={{ height: `${headerHeight}px` }}
           className="p-2 min-[700px]:py-4 rounded-none cursor-pointer"
           variant="ghost"
           onClick={() => setOpenPrivateChatsModal(true)}
@@ -87,7 +89,7 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
             Nuevo mensaje
           </span>
         </Button>
-      }
+      )}
 
       <div
         // style={{ height: `calc(${headerHeight}px + 1px)` }}
@@ -128,18 +130,18 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
       </div>
 
       <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-        {isLoading &&
+        {isLoading && (
           <div className="flex flex-col gap-2 w-full px-4 pt-4">
             {Array.from({ length: 5 }).map((_, index) => (
               <ChatListItemSkeleton key={index} />
             ))}
           </div>
-        }
+        )}
 
         {/* Chat temporal (se muestra al seleccionar un usuario por primera vez) */}
-        {!isLoading && temporaryChatItem && (chatTypeParam === "all" || chatId) &&
-          <ChatItem chatData={temporaryChatItem} usersTyping={[]}/>
-        }
+        {!isLoading && temporaryChatItem && (chatTypeParam === "all" || chatId) && (
+          <ChatItem chatData={temporaryChatItem} usersTyping={[]} />
+        )}
 
         {chats.map((chat) => {
           return (
@@ -148,13 +150,13 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
               chatData={chat}
               usersTyping={usersTyping}
             />
-          )
+          );
         })}
 
         {/* Mostrar mensaje placeholder en la lista de chats/grupos si no hay chats */}
-        {chats.length === 0 && !isLoading && hasLocalCryptoKeys &&
+        {chats.length === 0 && !isLoading && hasLocalCryptoKeys && (
           <div className="flex flex-col justify-center items-center w-full px-4 py-5">
-            {!temporaryChatItem && chatTypeParam === "all" &&
+            {!temporaryChatItem && chatTypeParam === "all" && (
               <>
                 <ImUsers className="size-16 text-neutral-500" />
             
@@ -162,9 +164,9 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
                   Aún no tienes conversaciones
                 </p>
               </>
-            }
+            )}
 
-            {chatTypeParam === "group" &&
+            {chatTypeParam === "group" && (
               <>
                 <FaUsers className="size-16 text-neutral-500" />
 
@@ -172,26 +174,26 @@ const ChatList = ({ temporaryChatItem, chatTypeParam, hasLocalCryptoKeys, header
                   Aún no has creado grupos
                 </p>
               </>
-            }
+            )}
           </div>
-        }
+        )}
 
-        {isFetchingNextPage &&
+        {isFetchingNextPage && (
           <div className="flex flex-col gap-2 w-full px-4 pt-4">
             {Array.from({ length: 5 }).map((_, index) => (
               <ChatListItemSkeleton key={index} />
             ))}
           </div>
-        }
+        )}
 
-        {hasNextPage &&
+        {hasNextPage && (
           <div ref={paginationRef} className="w-full h-4 bg-yellow-300" />
-        }
+        )}
       </div>
 
       <MobileNavSidebar />
     </aside>
-  )
-}
+  );
+};
 
 export default ChatList

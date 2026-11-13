@@ -442,20 +442,35 @@ export const updateMsgDataCache = (props: UpdateMsgDataCacheProps) => {
       return oldData;
     }
 
-    // Buscar el index del page al cual pertenece el mensaje
-    const pageIndex = oldData.pages.findIndex(page => page.data.messages.some(msg => msg._id === messageData._id));
+    const pageIndex = oldData.pages.findIndex((page) =>
+      page.data.messages.some((msg) => msg._id === messageData._id)
+    );
 
-    const updatedPage = {...oldData.pages[pageIndex]}
+    if (pageIndex === -1) {
+      return oldData;
+    }
 
-    // Buscar el index del mensaje
-    const messageIndex = updatedPage.data.messages.findIndex(msg => msg._id === messageData._id);
+    const targetPage = oldData.pages[pageIndex];
+    const messageIndex = targetPage.data.messages.findIndex(
+      (msg) => msg._id === messageData._id
+    );
 
-    // Reemplazar el mensaje en la caché
-    updatedPage.data.messages.splice(messageIndex, 1, messageData);
+    if (messageIndex === -1) {
+      return oldData;
+    }
 
-    // Reemplazar el page en la data
+    const updatedMessages = [...targetPage.data.messages];
+    updatedMessages.splice(messageIndex, 1, messageData);
+
+    const updatedPage = {
+      ...targetPage,
+      data: {
+        ...targetPage.data,
+        messages: updatedMessages
+      }
+    };
+
     const updatedPages = [...oldData.pages];
-
     updatedPages.splice(pageIndex, 1, updatedPage);
 
     return {

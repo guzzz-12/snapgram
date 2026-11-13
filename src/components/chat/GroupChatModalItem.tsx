@@ -27,7 +27,7 @@ const GroupChatModalItem = ({ userData, className, setSelectedUsersIds }: Props)
         <Label
           id={userData._id}
           className={cn(
-            "flex justify-start items-center gap-4 p-2 rounded-md bg-transparent hover:bg-[#4F39F6]/10 dark:hover:bg-indigo-500/15",
+            "flex justify-start items-center gap-4 p-2 rounded-md bg-white dark:bg-slate-800/60 hover:bg-[#4F39F6]/15 dark:hover:bg-indigo-500/20 transition-colors",
             userData.hasCryptoKeys ? "cursor-pointer" : "cursor-not-allowed",
             className
           )}

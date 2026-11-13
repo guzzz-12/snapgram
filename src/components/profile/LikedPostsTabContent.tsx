@@ -52,12 +52,12 @@ const LikedPostsTabContent = ({userData}: Props) => {
   const loadingPosts = isLoading || isFetchingNextPage;
 
   return (
-    <section className="flex flex-col gap-6 w-full mx-auto p-2 pb-0 bg-slate-100">
+    <section className="flex flex-col gap-6 w-full mx-auto p-2 pb-0 bg-slate-100 dark:bg-slate-950/60 rounded-md">
       {!loadingPosts && error &&
-        <div className="flex flex-col justify-center items-center gap-4">
+        <div className="flex flex-col justify-center items-center gap-4 pb-6">
           <div className="flex justify-center items-center gap-3">
             <TriangleAlert className="size-9 shrink-0 text-orange-600" />
-            <p className="text-center text-lg text-neutral-700">
+            <p className="text-center text-lg text-neutral-700 dark:text-slate-300">
               Error al cargar los me gusta.
             </p>
           </div>
@@ -97,7 +97,7 @@ const LikedPostsTabContent = ({userData}: Props) => {
       </div>
 
       {!loadingPosts && userData && postsData.length === 0 &&
-        <p className="text-center text-lg text-neutral-700">
+        <p className="text-center text-lg text-neutral-700 dark:text-slate-400 pb-6">
           No tienes posts gustados.
         </p>
       }

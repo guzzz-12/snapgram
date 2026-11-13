@@ -64,7 +64,7 @@ const PostCard = ({ postData, isModal, className, editPost, isPending }: Props) 
 
   return (
     <article
-      className={cn("flex flex-col gap-3 w-full p-4 rounded-lg bg-white dark:bg-transparent shadow", className)}
+      className={cn("flex flex-col gap-3 w-full p-4 rounded-lg bg-white dark:bg-slate-900 dark:border dark:border-slate-800 shadow", className)}
       data-testid="post-card"
     >
       <PostHeader

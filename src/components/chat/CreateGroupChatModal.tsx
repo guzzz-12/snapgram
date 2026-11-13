@@ -5,7 +5,6 @@ import GroupChatModalItem from "./GroupChatModalItem";
 import ChatListItemSkeleton from "./ChatListItemSkeleton";
 import UsersSearchNoResults from "./UsersSearchNoResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -107,7 +106,7 @@ const CreateGroupChatModal = () => {
           />
         </div>
 
-        <div className="flex flex-col gap-3 w-full px-2 py-4 rounded-md bg-white dark:bg-slate-900">
+        <div className="flex flex-col gap-3 w-full px-2 py-4 rounded-md bg-neutral-100 dark:bg-slate-900">
           <p className="text-sm text-neutral-900 dark:text-slate-100 font-medium">
             Agregar miembros al grupo
           </p>
@@ -117,8 +116,6 @@ const CreateGroupChatModal = () => {
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
           />
-
-          <Separator className="w-full bg-neutral-300" />
 
           <ul className="flex flex-col gap-2 w-full max-h-[400px] grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
             {/* Indicador de loading */}
@@ -141,7 +138,6 @@ const CreateGroupChatModal = () => {
                 <li key={user._id} className="w-full">
                   <GroupChatModalItem
                     key={user._id}
-                    className="bg-white dark:bg-slate-900"
                     userData={user}
                     setSelectedUsersIds={setSelectedUsersIds}
                   />

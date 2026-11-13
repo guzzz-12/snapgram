@@ -15,7 +15,10 @@ const PrivateChatsModalItem = ({ userData }: Props) => {
       <TooltipTrigger asChild>
         <Label
           id={userData._id}
-          className={cn("flex justify-start items-center gap-4 p-2 rounded-md bg-transparent hover:bg-[#4F39F6]/10", userData.hasCryptoKeys ? "cursor-pointer" : "cursor-not-allowed")}
+          className={cn(
+            "flex justify-start items-center gap-4 p-2 rounded-md bg-neutral-100 dark:bg-slate-800/60 hover:bg-[#4F39F6]/15 dark:hover:bg-indigo-500/20 transition-colors",
+            userData.hasCryptoKeys ? "cursor-pointer" : "cursor-not-allowed"
+          )}
         >
           <div className="flex justify-start items-center gap-2 w-full">
             <Avatar className="w-[45px] h-[45px] shrink-0">
@@ -28,14 +31,14 @@ const PrivateChatsModalItem = ({ userData }: Props) => {
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-center items-start gap-1 w-full">
-              <p className="font-semibold text-neutral-900">{userData.fullName}</p>
-              <p className="text-xs text-neutral-600">@{userData.username}</p>
+              <p className="font-semibold text-neutral-900 dark:text-slate-100">{userData.fullName}</p>
+              <p className="text-xs text-neutral-600 dark:text-slate-400">@{userData.username}</p>
             </div>
           </div>
           {userData.hasCryptoKeys &&
             <RadioGroupItem
               id={userData._id}
-              className="size-6.5 start-0 rounded-full cursor-pointer data-[state=checked]:border-[#4F39F6] data-[state=checked]:bg-[#4F39F6] data-[state=checked]:text-white"
+              className="size-6.5 start-0 rounded-full border-neutral-300 dark:border-slate-600 cursor-pointer data-[state=checked]:border-[#4F39F6] dark:data-[state=checked]:border-indigo-500 data-[state=checked]:bg-[#4F39F6] dark:data-[state=checked]:bg-indigo-500 data-[state=checked]:text-white"
               value={userData._id}
             />
           }

@@ -53,9 +53,10 @@ const MyApp = () => {
                 )}
               </QueryErrorResetBoundary>
             </ImageKitProvider>
+
+            <Toaster position="bottom-right" />
           </BrowserRouter>
 
-          <Toaster position="bottom-right" />
           <ReactQueryDevtools initialIsOpen={false} />
         </AllProviders>
       </ThemeProvider>

@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest --no-watch",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --no-watch --coverage"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.43.1",
@@ -83,6 +84,7 @@
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/coverage-v8": "^4.1.5",
     "@vitest/ui": "^4.1.5",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",

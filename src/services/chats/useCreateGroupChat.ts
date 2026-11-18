@@ -13,8 +13,9 @@ const useCreateGroupChat = () => {
   const {mutate, isPending} = useMutation({
     mutationFn: createGroupChatFn,
     onSuccess: async (data) => {
+      if (!data) return;
       await queryClient.invalidateQueries({queryKey: ["chats", "all"]});
-      navigate(`/messages/${data?.data._id}`);
+      navigate(`/messages/${data.data._id}`);
     },
     onError: (error: any) => {
       toast.error(errorMessage(error));

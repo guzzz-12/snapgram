@@ -32,7 +32,8 @@ const useLeaveGroup = (props: Props) => {
 
       return data;
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
+      if (!data) return;
       await queryClient.invalidateQueries({queryKey: ["chats", "all"]});
       await queryClient.invalidateQueries({queryKey: ["recipientsCryptoKeys", chatData?._id]});
       setModalState({operation: null, isOpen: false});

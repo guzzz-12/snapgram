@@ -43,6 +43,29 @@ class MockPostsStore {
     return this.posts;
   }
 
+  getPostById(postId: string): PostType | undefined {
+    return this.posts.find((post) => post._id === postId);
+  }
+
+  updatePost(postId: string, content: string): PostType | undefined {
+    const index = this.posts.findIndex((post) => post._id === postId);
+    if (index === -1) return undefined;
+
+    const updatedPost: PostType = {
+      ...this.posts[index],
+      content,
+      updatedAt: new Date().toISOString()
+    };
+    this.posts[index] = updatedPost;
+    return updatedPost;
+  }
+
+  deletePost(postId: string): boolean {
+    const prevLength = this.posts.length;
+    this.posts = this.posts.filter((post) => post._id !== postId);
+    return this.posts.length < prevLength;
+  }
+
   createPost({textContent}: {textContent: string}): PostType {
     const imageUrls = Array.from({length: faker.number.int({min: 0, max: 5})}, () => faker.image.url());
 

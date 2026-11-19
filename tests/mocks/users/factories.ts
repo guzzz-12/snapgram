@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import type { UserType } from "@/types/global";
+import type { FollowedType, FollowerType, UserType } from "@/types/global";
 
 export const buildMockUser = (overrides?: Partial<UserType>): UserType => ({
   _id: faker.database.mongodbObjectId(),
@@ -23,3 +23,43 @@ export const buildMockUser = (overrides?: Partial<UserType>): UserType => ({
   updatedAt: faker.date.recent().toISOString(),
   ...overrides,
 });
+
+export const buildMockFollower = (
+  overrides?: Partial<FollowerType["followerData"]> & { isFollowingBack?: boolean }
+): FollowerType => {
+  const { isFollowingBack = false, ...followerOverrides } = overrides ?? {};
+  const user = buildMockUser();
+
+  return {
+    _id: faker.database.mongodbObjectId(),
+    followerData: {
+      _id: user._id,
+      clerkId: user.clerkId,
+      username: user.username,
+      fullName: user.fullName,
+      profilePicture: user.profilePicture,
+      ...followerOverrides
+    },
+    isFollowingBack,
+    followingSince: faker.date.past().toISOString()
+  };
+};
+
+export const buildMockFollowed = (
+  overrides?: Partial<FollowedType["followedData"]>
+): FollowedType => {
+  const user = buildMockUser();
+
+  return {
+    _id: faker.database.mongodbObjectId(),
+    followedData: {
+      _id: user._id,
+      clerkId: user.clerkId,
+      username: user.username,
+      fullName: user.fullName,
+      profilePicture: user.profilePicture,
+      ...overrides
+    },
+    followingSince: faker.date.past().toISOString()
+  };
+};

@@ -23,6 +23,21 @@ export const handlers = [
     });
   }),
 
+  // Debe declararse después de /me y /search para no interceptarlos
+  http.get("/api/users/:userClerkId", ({ params }) => {
+    return HttpResponse.json({
+      data: buildMockUser({ clerkId: params.userClerkId as string })
+    });
+  }),
+
+  http.get("/api/follows/get-followers/:userId", () => {
+    return HttpResponse.json({ data: [], hasMore: false, nextPage: null });
+  }),
+
+  http.get("/api/follows/get-following/:userId", () => {
+    return HttpResponse.json({ data: [], hasMore: false, nextPage: null });
+  }),
+
   http.post("/api/follows/follow-or-unfollow", async ({ request }) => {
     const { userId } = (await request.json()) as { userId?: string };
 

@@ -24,6 +24,14 @@ export const handlers = [
     });
   }),
 
+  http.get("/api/posts/user/:userId", () => {
+    return HttpResponse.json({ data: [], hasMore: false, nextPage: null });
+  }),
+
+  http.get("/api/likes/liked-posts", () => {
+    return HttpResponse.json({ data: [], hasMore: false, nextPage: null });
+  }),
+
   http.get("/api/posts/:postId", ({ params }) => {
     const post = mockPostsDb.getPostById(params.postId as string);
 

@@ -7,6 +7,7 @@ import { handlers as cryptoKeysHandlers } from "./cryptoKeys/handlers";
 import { handlers as commentsHandlers } from "./comments/handlers";
 import { handlers as userHandlers } from "./users/handlers";
 import { handlers as storiesHandlers } from "./stories/handlers";
+import { handlers as searchHandlers } from "./search/handlers";
 
 const storageHandlers = [
   http.post("/api/storage/upload-signature", async ({ request }) => {
@@ -30,6 +31,7 @@ const handlers = [
   ...commentsHandlers,
   ...userHandlers,
   ...storiesHandlers,
+  ...searchHandlers,
   ...storageHandlers
 ];
 

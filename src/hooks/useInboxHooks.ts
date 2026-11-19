@@ -43,9 +43,15 @@ const useInboxHooks = (props: Props) => {
     if (wrapperRef.current && !isLoadingMessages && chatData) {
       const scrollHeight = wrapperRef.current.scrollHeight;
 
-      setTimeout(() => {
-        wrapperRef.current!.scrollTop = scrollHeight;
+      const timeoutId = setTimeout(() => {
+        if (wrapperRef.current) {
+          wrapperRef.current.scrollTop = scrollHeight;
+        }
       }, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
     }
   }, [chatData, isLoadingMessages, params.chatId]);
 

@@ -15,6 +15,14 @@ export const handlers = [
     });
   }),
 
+  http.get("/api/users/search", () => {
+    return HttpResponse.json({
+      data: [],
+      hasMore: false,
+      nextPage: null
+    });
+  }),
+
   http.post("/api/follows/follow-or-unfollow", async ({ request }) => {
     const { userId } = (await request.json()) as { userId?: string };
 

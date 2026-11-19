@@ -41,5 +41,18 @@ export const handlers = [
     return HttpResponse.json({
       data: publicKeyJWK
     });
+  }),
+
+  http.get("/api/crypto-keys/get-recipients-public-keys/:chatId", async () => {
+    const { publicKeyJWK } = await getCachedMockKeyPair("primary");
+
+    return HttpResponse.json({
+      publicKeys: [
+        {
+          userId: "usr_recipient_mock",
+          publicKey: publicKeyJWK
+        }
+      ]
+    });
   })
 ];

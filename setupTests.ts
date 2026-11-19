@@ -24,3 +24,4 @@ global.ResizeObserver = ResizeObserver;
 
 window.HTMLElement.prototype.hasPointerCapture = vi.fn();
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
+document.elementFromPoint = vi.fn(() => null);

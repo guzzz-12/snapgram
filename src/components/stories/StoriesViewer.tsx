@@ -51,8 +51,7 @@ const StoriesViewer = (props: Props) => {
 
   // Dar/quitar like a una historia
   const {
-    toggleLikeStory: toggleStoryLike,
-    isTogglingLikeStory
+    toggleLikeStory: toggleStoryLike
   } = useToggleLikeStory(activeStoryId, storiesUsername, currentUser?._id);
 
   const { markStoryAsSeen } = useMarkStoryAsSeen(activeStoryId);
@@ -318,7 +317,6 @@ const StoriesViewer = (props: Props) => {
               variant="ghost"
               size="icon"
               onClick={() => toggleStoryLike()}
-              disabled={isTogglingLikeStory}
             >
               {currentStory.likedBy.some((like) => like.user === currentUser?._id) ? (
                 <FaHeart

@@ -33,10 +33,10 @@ import {
  *     `content`, `backgroundColor`, `textColor`, `textBgColor`, `imageSize`) hacia
  *     `POST /api/stories/create`, guarda ante contenido y archivo vacíos, invalidación de
  *     `["stories"]`, cierre de `useCreatePublicationModal` y `toast.error` en fallos.
- *   - `useToggleLikeStory`: envío `PUT /api/likes/story/:storyId`, actualización inmediata de
- *     `likedBy` dentro de `["stories", username]` (agregar like, quitar solo el like del usuario
- *     actual, preservar otras historias y no fallar si `storyId` no está en caché), invalidación
- *     de `["stories", username]` y manejo de errores sin mutar la caché.
+ *   - `useToggleLikeStory`: envío `PUT /api/likes/story/:storyId`, actualización optimista
+ *     inmediata de `likedBy` dentro de `["stories", username]` (agregar like, quitar solo el like
+ *     del usuario actual, preservar otras historias y no fallar si `storyId` no está en caché),
+ *     invalidación de `["stories", username]`, rollback y `toast.error` ante fallos.
  *   - `useMarkStoryAsSeen`: envío `PUT /api/stories/seen/:storyId` y manejo de error.
  *   - `useDeleteStory`: envío `DELETE /api/stories/:storyId`, invalidación de `["stories"]`,
  *     estados `isSuccess`/`isError` y `toast.error` en fallos.
@@ -436,10 +436,10 @@ describe("storiesServices (useCreateStory, useToggleLikeStory, useMarkStoryAsSee
       ]);
     });
 
-    it("no modifica la caché ni invalida queries si falla PUT /api/likes/story/:storyId", async () => {
+    it("aplica el cambio optimista y revierte la caché mostrando toast.error sin invalidar queries si falla PUT /api/likes/story/:storyId", async () => {
       const targetStory = buildMockStory({
         _id: "story_1",
-        likedBy: []
+        likedBy: [{ user: "other_user", likedAt: "2026-01-01T00:00:00.000Z" }]
       });
       const cachedUserStories = buildMockUserWithStories({
         username: "maria_dev",
@@ -457,7 +457,7 @@ describe("storiesServices (useCreateStory, useToggleLikeStory, useMarkStoryAsSee
         })
       );
 
-      const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      const toastErrorSpy = vi.spyOn(toast, "error").mockImplementation(() => "toast-id");
       const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
       const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
@@ -470,18 +470,22 @@ describe("storiesServices (useCreateStory, useToggleLikeStory, useMarkStoryAsSee
         result.current.toggleLikeStory();
       });
 
+      // Actualización optimista inmediata antes de fallar la petición
+      expect(
+        queryClient.getQueryData<UserWithStories>(["stories", "maria_dev"])
+          ?.stories[0].likedBy.map((l) => l.user)
+      ).toEqual(["other_user", "current_user_1"]);
+
       await waitFor(() => {
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          "Error alternando like en historia"
-        );
+        expect(toastErrorSpy).toHaveBeenCalledWith("Error en servidor");
       });
 
-      expect(setQueryDataSpy).not.toHaveBeenCalled();
+      expect(setQueryDataSpy).toHaveBeenCalledTimes(2);
       expect(invalidateSpy).not.toHaveBeenCalled();
       expect(
         queryClient.getQueryData<UserWithStories>(["stories", "maria_dev"])
           ?.stories[0].likedBy
-      ).toEqual([]);
+      ).toEqual([{ user: "other_user", likedAt: "2026-01-01T00:00:00.000Z" }]);
     });
   });
 

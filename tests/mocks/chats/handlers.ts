@@ -10,6 +10,10 @@ export const handlers = [
     });
   }),
 
+  http.get("/api/chats/get-unread-chats", () => {
+    return HttpResponse.json({ data: [] });
+  }),
+
   http.get("/api/chats/:chatId", ({ params }) => {
     return HttpResponse.json({
       data: buildMockChat({ _id: params.chatId as string }),

@@ -29,6 +29,10 @@ export const handlers = [
     });
   }),
 
+  http.get("/api/notifications/unseen", () => {
+    return HttpResponse.json({ data: 0 });
+  }),
+
   http.get("/api/notifications/:id", ({ params }) => {
     const { id } = params;
     const notification = mockDb.getById(id as string);

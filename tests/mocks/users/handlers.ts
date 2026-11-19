@@ -2,6 +2,19 @@ import { http, HttpResponse } from "msw";
 import { buildMockUser } from "./factories";
 
 export const handlers = [
+  http.get("/api/ping", () => {
+    return HttpResponse.json({ message: "pong" });
+  }),
+
+  http.get("/api/users/me", () => {
+    return HttpResponse.json({
+      data: buildMockUser({
+        isDisabled: false,
+        hasCryptoKeys: true
+      })
+    });
+  }),
+
   http.post("/api/follows/follow-or-unfollow", async ({ request }) => {
     const { userId } = (await request.json()) as { userId?: string };
 

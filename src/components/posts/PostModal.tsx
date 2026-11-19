@@ -28,7 +28,7 @@ const PostModal = ({isOpen, postData, setIsOpen}: Props) => {
     fetchNextPage
   } = useGetPostComments({postId: postData._id, enabled: isOpen});
 
-  if (commentsError) {
+  if (isOpen && commentsError) {
     toast.error(errorMessage(commentsError));
   }
   

@@ -95,6 +95,14 @@ export const handlers = [
     });
   }),
 
+  http.get("/api/likes/post/:postId", () => {
+    return HttpResponse.json({
+      data: [],
+      hasMore: false,
+      nextPage: null
+    });
+  }),
+
   http.post("/api/likes/post/:postId", ({ params }) => {
     return HttpResponse.json({
       data: {

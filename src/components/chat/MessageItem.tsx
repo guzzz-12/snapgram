@@ -63,20 +63,19 @@ const MessageItem = ({ currentUser, messageData, chatData, chatType }: Props) =>
 
   // Observar si el mensaje es visible en el viewport
   useEffect(() => {
+    const node = messageRef.current;
+    if (!node) return;
+
     const observer = new IntersectionObserver(([entry]) => {
       setIsIntersecting(entry.isIntersecting);
     }, {threshold: 0.5});
 
-    if (messageRef.current) {
-      observer.observe(messageRef.current);
-    }
+    observer.observe(node);
 
     return () => {
-      if (messageRef.current) {
-        observer.unobserve(messageRef.current);
-      }
+      observer.unobserve(node);
     }
-  }, []);
+  }, [message]);
 
   // Marcar el mensaje como visto
   useEffect(() => {

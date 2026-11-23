@@ -219,7 +219,7 @@ const CreateStoryModal = () => {
 
             <div className="flex items-center gap-1.5">
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <Button
                     className="flex justify-center items-center gap-1 w-8 h-8 rounded-full text-neutral-900 bg-white hover:bg-neutral-100 cursor-pointer"
                     size="icon"
@@ -236,7 +236,7 @@ const CreateStoryModal = () => {
               </Tooltip>
 
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <Button
                     className="flex justify-center items-center gap-1 w-8 h-8 rounded-full text-neutral-900 bg-white hover:bg-neutral-100 cursor-pointer"
                     size="icon"

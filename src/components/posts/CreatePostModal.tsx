@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import CreatePostInput from "./CreatePostInput";
 import SharedPostCard from "./SharedPostCard";
 import SelectedImagesPreviews from "@/components/SelectedImagesPreviews";
+import ImageCropperModal from "@/components/imageCropper/ImageCropperModal";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle } from "../ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
@@ -21,17 +22,28 @@ const CreatePostModal = () => {
   const searchTerm = searchParams.get("searchTerm");
   
   const [textContent, setTextContent] = useState("");
+  const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null);
+  const [isUpdatingImage, setIsUpdatingImage] = useState(false);
 
   const {user} = useCurrentUser();
+
+  const {
+    open,
+    publicationType,
+    isRepost,
+    repostedPostId,
+    setOpen,
+  } = useCreatePublicationModal();
 
   /** Manejar los errores de crear y compartir post */
   const onErrorHandler = (error: Error, type: "create" | "share") => {
     const message = `Error al ${type === "share" ? "compartir" : "crear"} el post: ${errorMessage(error)}`;
 
     toast.error(message, {
-      testId: "toast-post-error"
+      testId: "toast-post-error",
     });
 
+    setEditingImageIndex(null);
     setOpen({
       open: false,
       publicationType: null,
@@ -41,34 +53,48 @@ const CreatePostModal = () => {
   }
 
   const {
-    open,
-    publicationType,
-    isRepost,
-    repostedPostId,
-    setOpen
-  } = useCreatePublicationModal();
-
-  const {
     selectedImageFiles,
     selectedImagePreviews,
     isProcessing,
     setSelectedImageFiles,
     setSelectedImagePreviews,
-    onImagePickHandler
+    onImagePickHandler,
+    removeImageAt,
+    replaceImageAt,
   } = useImagePicker({ fileInputRef });
 
   // Mutation para crear el post
-  const {mutate: createPostMutation, isPending: isCreatePostPending} = useCreatePost();
+  const { mutate: createPostMutation, isPending: isCreatePostPending } = useCreatePost();
 
   // Query para consultar el post compartido
   const {
     repostedPost,
     isRepostLoading,
-    fetchRepostError
   } = useGetSharedPost({repostedPostId, open, isRepost});
   
   // Mutation para compartir el post
   const {repostMutation, isRepostPending} = useSharePost();
+
+  const handleConfirmCrop = async (croppedFile: File) => {
+    if (editingImageIndex === null) return;
+
+    setIsUpdatingImage(true);
+
+    try {
+      const updated = await replaceImageAt(editingImageIndex, croppedFile);
+      if (updated) {
+        setEditingImageIndex(null);
+      }
+    } finally {
+      setIsUpdatingImage(false);
+    }
+  };
+
+  const handleCancelCrop = () => {
+    if (!isUpdatingImage) {
+      setEditingImageIndex(null);
+    }
+  };
 
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -106,7 +132,8 @@ const CreatePostModal = () => {
           setTextContent("");
           setSelectedImageFiles([]);
           setSelectedImagePreviews([]);
-          setOpen({open: false, publicationType: null});
+          setEditingImageIndex(null);
+          setOpen({ open: false, publicationType: null });
 
           if (fileInputRef.current) {
             fileInputRef.current.value = "";
@@ -125,139 +152,165 @@ const CreatePostModal = () => {
 
   const isPending = isCreatePostPending || isRepostPending;
 
+  const editingImageSrc =
+    editingImageIndex !== null ? selectedImagePreviews[editingImageIndex] ?? null : null;
+  const editingFileName =
+    editingImageIndex !== null ? selectedImageFiles[editingImageIndex]?.name : undefined;
+
   return (
-    <Dialog
-      open={open && publicationType === "post"}
-      onOpenChange={(isOpen) => {
-        if (!isPending && !isOpen) {
-          setOpen({
-            open: false,
-            publicationType: null,
-            isRepost: false,
-            repostedPostId: null
-          });
-        }
-      }}
-    >
-      <DialogOverlay className="bg-black/80" />
+    <>
+      <Dialog
+        open={open && publicationType === "post"}
+        onOpenChange={(isOpen) => {
+          if (!isPending && !isUpdatingImage && editingImageIndex === null && !isOpen) {
+            setEditingImageIndex(null);
+            setOpen({
+              open: false,
+              publicationType: null,
+              isRepost: false,
+              repostedPostId: null,
+            });
+          }
+        }}
+      >
+        <DialogOverlay className="bg-black/80" />
 
-      <DialogContent className="gap-0 max-h-[80vh] overflow-x-hidden overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-        <DialogHeader>
-          <DialogTitle className="sr-only">
-            Crear publicación
-          </DialogTitle>
-        </DialogHeader>
+        <DialogContent className="gap-0 max-h-[80vh] overflow-x-hidden overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <DialogHeader>
+            <DialogTitle className="sr-only">
+              Crear publicación
+            </DialogTitle>
+          </DialogHeader>
 
-        <div
-          className="w-full max-w-[600px] h-auto overflow-hidden"
-          data-testid="create-post-modal"
-        >
-          <div className="flex justify-start items-center gap-2 mb-4">
-            <Avatar className="w-[40px] h-[40px] shrink-0">
-              <AvatarImage
-                className="w-full h-full object-cover"
-                src={user?.profilePicture}
-                alt={user?.username}
+          <div
+            className="w-full max-w-[600px] h-auto overflow-hidden"
+            data-testid="create-post-modal"
+          >
+            <div className="flex justify-start items-center gap-2 mb-4">
+              <Avatar className="w-[40px] h-[40px] shrink-0">
+                <AvatarImage
+                  className="w-full h-full object-cover"
+                  src={user?.profilePicture}
+                  alt={user?.username}
+                />
+
+                <AvatarFallback className="w-full h-full object-cover">
+                  {user?.fullName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="flex flex-col w-full">
+                <p className="font-semibold text-sm text-neutral-900 dark:text-slate-100">
+                  {user?.fullName}
+                </p>
+
+                <p className="text-xs text-neutral-700 dark:text-slate-400">
+                  @{user?.username}
+                </p>
+              </div>
+            </div>
+
+            <form
+              className="flex flex-col gap-2 w-full"
+              onSubmit={onSubmitHandler}
+              data-testid="create-post-form"
+            >
+              <CreatePostInput
+                isPending={isPending}
+                textContent={textContent}
+                setTextContent={setTextContent}
               />
 
-              <AvatarFallback className="w-full h-full object-cover">
-                {user?.fullName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+              {/* Adjuntar imágenes en el post (sólo si no es un repost) */}
+              {!isRepost && (
+                <div className="flex justify-start items-center gap-3">
+                  {selectedImagePreviews.length === 0 && (
+                    <button
+                      className="cursor-pointer"
+                      type="button"
+                      disabled={isPending}
+                      data-testid="attach-image-btn"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <ImagePlus
+                        className="size-10 text-neutral-600 dark:text-slate-400 stroke-1"
+                        aria-hidden
+                      />
+                      <span className="sr-only">Adjuntar imágenes</span>
+                    </button>
+                  )}
 
-            <div className="flex flex-col w-full">
-              <p className="font-semibold text-sm text-neutral-900 dark:text-slate-100">
-                {user?.fullName}
-              </p>
+                  <SelectedImagesPreviews
+                    fileInputRef={fileInputRef}
+                    processingImages={isProcessing}
+                    isPending={isPending || isUpdatingImage}
+                    selectedImagePreviews={selectedImagePreviews}
+                    selectedImageFiles={selectedImageFiles}
+                    setSelectedImagePreviews={setSelectedImagePreviews}
+                    setSelectedImageFiles={setSelectedImageFiles}
+                    onEditImage={setEditingImageIndex}
+                    onRemoveImage={removeImageAt}
+                  />
+                </div>
+              )}
 
-              <p className="text-xs text-neutral-700 dark:text-slate-400">
-                @{user?.username}
-              </p>
-            </div>
-          </div>
+              {isRepost && isRepostLoading && (
+                <div className="flex justify-center items-center w-full h-40">
+                  <Loader2Icon className="size-[30px] text-[#4F39F6] animate-spin" aria-hidden />
+                  <span className="sr-only">Cargando post</span>
+                </div>
+              )}
 
-          <form
-            className="flex flex-col gap-2 w-full"
-            onSubmit={onSubmitHandler}
-            data-testid="create-post-form"
-          >
-            <CreatePostInput
-              isPending={isPending}
-              textContent={textContent}
-              setTextContent={setTextContent}
-            />
+              {isRepost && repostedPost && <SharedPostCard data={repostedPost.data} />}
 
-            {/* Adjuntar imágenes en el post (sólo si no es un repost) */}
-            {!isRepost &&
-              <div className="flex justify-start items-center gap-3">
-                {selectedImagePreviews.length === 0 && (
-                  <button
-                    className="cursor-pointer"
-                    type="button"
-                    disabled={isPending}
-                    data-testid="attach-image-btn"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <ImagePlus className="size-10 text-neutral-600 dark:text-slate-400 stroke-1" aria-hidden />
-                    <span className="sr-only">Adjuntar imágenes</span>
-                  </button>
+              <Button
+                className="gap-1 w-full mt-3 text-sm font-normal shrink-0 bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
+                type="submit"
+                disabled={
+                  isPending ||
+                  isProcessing ||
+                  isUpdatingImage ||
+                  (!isRepost && !textContent && !selectedImageFiles.length)
+                }
+                data-testid="create-post-submit-btn"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2Icon className="size-4 text-white animate-spin" aria-hidden />
+                    Publicando post...
+                  </>
+                ) : (
+                  <>{isRepost ? "Compartir" : "Publicar"} Post</>
                 )}
+              </Button>
+            </form>
 
-                <SelectedImagesPreviews
-                  fileInputRef={fileInputRef}
-                  processingImages={isProcessing}
-                  isPending={isPending}
-                  selectedImagePreviews={selectedImagePreviews}
-                  selectedImageFiles={selectedImageFiles}
-                  setSelectedImagePreviews={setSelectedImagePreviews}
-                  setSelectedImageFiles={setSelectedImageFiles}
-                />
-              </div>
-            }
+            {/* Input oculto del selector de imagen */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              hidden
+              multiple
+              disabled={isPending || isRepost}
+              accept="image/png, image/jpg, image/jpeg, image/webp"
+              data-testid="file-input"
+              onChange={onImagePickHandler}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
-            {isRepost && isRepostLoading &&
-              <div className="flex justify-center items-center w-full h-40">
-                <Loader2Icon className="size-[30px] text-[#4F39F6] animate-spin" aria-hidden />
-                <span className="sr-only">Cargando post</span>
-              </div>
-            }
-
-            {isRepost && repostedPost &&
-              <SharedPostCard data={repostedPost.data} />
-            }
-
-            <Button
-              className="gap-1 w-full mt-3 text-sm font-normal shrink-0 bg-[#4F39F6] hover:bg-[#331fcf] transition-colors cursor-pointer"
-              type="submit"
-              disabled={isPending || (!isRepost && !textContent && !selectedImageFiles.length)}
-              data-testid="create-post-submit-btn"
-            >
-              {isPending ? 
-                <>
-                  <Loader2Icon className="size-4 text-white animate-spin" aria-hidden />
-                  Publicando post...
-                </>
-                :
-                <>{isRepost ? "Compartir" : "Publicar"} Post</>
-              }
-            </Button>
-          </form>
-
-          {/* Input oculto del selector de imagen */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            hidden
-            multiple
-            disabled={isPending || isRepost}
-            accept="image/png, image/jpg, image/jpeg, image/webp"
-            data-testid="file-input"
-            onChange={onImagePickHandler}
-          />
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
+      {/* Modal independiente de recorte de imagen */}
+      <ImageCropperModal
+        open={editingImageIndex !== null}
+        imageSrc={editingImageSrc}
+        originalFileName={editingFileName}
+        isSubmitting={isUpdatingImage}
+        onConfirm={handleConfirmCrop}
+        onCancel={handleCancelCrop}
+      />
+    </>
+  );
+};
 
 export default CreatePostModal

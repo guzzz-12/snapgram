@@ -109,5 +109,24 @@ export const handlers = [
         postId: params.postId
       }
     });
+  }),
+
+  http.get("/api/hashtags", () => {
+    return HttpResponse.json({
+      data: [],
+      hasMore: false,
+      nextPage: null
+    });
+  }),
+
+  http.post("/api/hashtags", async ({ request }) => {
+    const { title } = (await request.json()) as { title: string };
+    return HttpResponse.json({
+      data: {
+        _id: "hashtag_created_default",
+        title,
+        postsCount: 0
+      }
+    });
   })
 ];

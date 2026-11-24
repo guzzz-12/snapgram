@@ -177,6 +177,11 @@ const CreatePostModal = () => {
 
         <DialogContent
           className="gap-0 max-h-[80vh] overflow-x-hidden overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+          onEscapeKeyDown={(e) => {
+            if (document.querySelector("[data-hashtags-popover]")) {
+              e.preventDefault();
+            }
+          }}
           onPointerDownOutside={(e) => {
             if ((e.target as HTMLElement | null)?.closest("[data-hashtags-popover]")) {
               e.preventDefault();

@@ -85,5 +85,37 @@ export const handlers = [
     return HttpResponse.json({
       message: "Cuenta reactivada correctamente"
     });
+  }),
+
+  http.post("/api/users/user-avatar", () => {
+    return HttpResponse.json({
+      data: buildMockUser({
+        profilePicture: "https://example.com/updated-avatar.jpg"
+      })
+    });
+  }),
+
+  http.delete("/api/users/user-avatar", () => {
+    return HttpResponse.json({
+      data: buildMockUser({
+        profilePicture: ""
+      })
+    });
+  }),
+
+  http.post("/api/users/cover-picture", () => {
+    return HttpResponse.json({
+      data: buildMockUser({
+        coverPicture: "https://example.com/updated-cover.jpg"
+      })
+    });
+  }),
+
+  http.delete("/api/users/cover-picture", () => {
+    return HttpResponse.json({
+      data: buildMockUser({
+        coverPicture: ""
+      })
+    });
   })
 ];

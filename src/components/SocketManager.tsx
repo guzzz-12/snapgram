@@ -201,6 +201,8 @@ const SocketManager = () => {
       socket.off("deletedMessage");
       socket.off("typing");
       socket.off("stoppedTyping");
+      socket.off("recordingAudio");
+      socket.off("stoppedRecordingAudio");
       socket.off("groupCreated");
       socket.off("groupUpdated");
       socket.off("groupDeleted");

@@ -5,11 +5,28 @@ export interface CaretCoordinates {
 }
 
 const propertiesToMirror = [
-  "direction", "boxSizing", "width", "height", "overflowX", "overflowY",
-  "paddingTop", "paddingRight", "paddingBottom", "paddingLeft", 
-  "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth", 
-  "borderStyle", "lineHeight", "fontSize", "fontFamily", "fontWeight", 
-  "wordWrap", "whiteSpace", "tabSize",
+  "direction",
+  "boxSizing",
+  "width",
+  "height",
+  "overflowX",
+  "overflowY",
+  "paddingTop",
+  "paddingRight",
+  "paddingBottom",
+  "paddingLeft",
+  "borderTopWidth",
+  "borderRightWidth",
+  "borderBottomWidth",
+  "borderLeftWidth",
+  "borderStyle",
+  "lineHeight",
+  "fontSize",
+  "fontFamily",
+  "fontWeight",
+  "wordWrap",
+  "whiteSpace",
+  "tabSize",
 ];
 
 let mirrorDiv: HTMLDivElement | null = null;
@@ -27,7 +44,7 @@ export const getCaretCoordinates = (
   if (typeof window === "undefined") {
     return { top: 0, left: 0, height: 0 }; 
   }
-  
+
   if (!mirrorDiv) {
     mirrorDiv = document.createElement("div");
     document.body.appendChild(mirrorDiv);
@@ -50,49 +67,36 @@ export const getCaretCoordinates = (
   });
 
   // 2. Posicionar el div mirror alineado con el textarea en la ventana del navegador.
-  // Usamos offsetTop/offsetLeft (relativo al documento/parent) y restamos el scroll
-  // del documento para posicionar el div mirror en la ubicación exacta del textarea.
   style.top = `${element.offsetTop - document.documentElement.scrollTop}px`;
   style.left = `${element.offsetLeft - document.documentElement.scrollLeft}px`;
-  style.width = `${element.clientWidth}px`; 
-  
+  style.width = `${element.clientWidth}px`;
+
   const scrollX = element.scrollLeft;
   const scrollY = element.scrollTop;
 
-  // 3. Llenar el contenido del mirror con el marcador
-  const textBeforeCaret = element.value.substring(0, position);
-  const textAfterCaret = element.value.substring(position);
+  // 3. Llenar el contenido del mirror con nodos de texto reales para preservar el word-wrap nativo sin usar &nbsp;
+  const clampedPosition = Math.max(0, Math.min(position, element.value.length));
+  const textBeforeCaret = element.value.substring(0, clampedPosition);
+  const textAfterCaret = element.value.substring(clampedPosition);
 
-  // Normalización de espacios y saltos de linea
-  const escapeText = (text: string) => text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\n/g, "<br>")
-    .replace(/\s/g, "&nbsp;");
+  mirrorDiv.textContent = textBeforeCaret;
 
-  const htmlBefore = escapeText(textBeforeCaret);
-  const htmlAfter = escapeText(textAfterCaret);
-  
-  const marker = `<span id="caret-marker"></span>`;
-  
-  mirrorDiv.innerHTML = htmlBefore + marker + htmlAfter;
-  
-  const markerElement = document.getElementById("caret-marker");
-  if (!markerElement) {
-    mirrorDiv.innerHTML = "";
-    return { top: 0, left: 0, height: 0 }; 
+  const markerElement = document.createElement("span");
+  // Preservar altura de línea si el cursor está al final o en una línea vacía
+  markerElement.textContent = textAfterCaret.charAt(0) || "\u200b";
+  mirrorDiv.appendChild(markerElement);
+
+  if (textAfterCaret.length > 1) {
+    mirrorDiv.appendChild(document.createTextNode(textAfterCaret.slice(1)));
   }
   // 4. Calcular las coordenadas relativas al contenido del div mirror
-  // offsetLeft/offsetTop son las coordenadas del marcador relativas al div mirror.
-  // Restamos el scroll interno del textarea para obtener la ubicación visible.
   const coordinates: CaretCoordinates = {
     left: markerElement.offsetLeft - scrollX,
     top: markerElement.offsetTop - scrollY,
     height: markerElement.offsetHeight,
   };
-  
-  mirrorDiv.innerHTML = "";
+
+  mirrorDiv.textContent = "";
 
   return coordinates;
-}
+};

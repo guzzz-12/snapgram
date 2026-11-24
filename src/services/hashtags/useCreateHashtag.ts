@@ -1,47 +1,42 @@
-import { axiosInstance } from "@/utils/axiosInstance";
-import { errorMessage } from "@/utils/errorMessage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { axiosInstance } from "@/utils/axiosInstance";
+import { errorMessage } from "@/utils/errorMessage";
 
 type Props = {
-  selectedHashtag: string;
-  currentlyTypingHashtag: string;
-  onSuccess: () => void;
-}
+  onSuccess: (createdTitle: string) => void;
+};
 
-const useCreateHashtag = (props: Props) => {
-  const {selectedHashtag, currentlyTypingHashtag, onSuccess} = props;
-
+const useCreateHashtag = ({ onSuccess }: Props) => {
   const queryClient = useQueryClient();
 
   const {mutate: createHashtag, isPending} = useMutation({
-    mutationFn: async () => {
-      return axiosInstance( {
+    mutationFn: async (title: string) => {
+      await axiosInstance({
         method: "POST",
         url: "/hashtags",
-        data: {
-          title: selectedHashtag || currentlyTypingHashtag
-        },
+        data: {title},
         headers: {
           "Content-Type": "application/json",
-        }
+        },
       });
+
+      return title;
     },
-    onSuccess: async () => {
+    onSuccess: async (createdTitle) => {
       await queryClient.invalidateQueries({queryKey: ["hashtags"]});
-      onSuccess();
-      // setOpenPopover(false);
+      onSuccess(createdTitle);
     },
     onError: (err) => {
       toast.error(errorMessage(err));
     },
-    retry: 2
+    retry: 1,
   });
 
   return {
     createHashtag,
-    isPending
-  }
-}
+    isPending,
+  };
+};
 
 export default useCreateHashtag;

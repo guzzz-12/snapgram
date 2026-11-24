@@ -1,6 +1,7 @@
 import {
   lazy,
   Suspense,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -8,7 +9,7 @@ import {
   type Dispatch,
   type KeyboardEvent,
   type SetStateAction,
-  type WheelEvent
+  type WheelEvent,
 } from "react";
 import { Loader2Icon, Smile } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -17,11 +18,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getCaretCoordinates } from "@/utils/getCaretCoordinates";
+import {
+  getActiveHashtagAtCaret,
+  replaceActiveHashtag,
+  type ActiveHashtag,
+} from "@/utils/hashtagCaret";
 
 const LazyEmojiPicker = lazy(async () => {
   const [{ default: Picker }, { default: emojiData }] = await Promise.all([
     import("@emoji-mart/react"),
-    import("@emoji-mart/data/sets/15/twitter.json")
+    import("@emoji-mart/data/sets/15/twitter.json"),
   ]);
 
   return {
@@ -36,12 +42,9 @@ const LazyEmojiPicker = lazy(async () => {
         data={emojiData}
         onEmojiSelect={props.onEmojiSelect}
       />
-    )
+    ),
   };
 });
-
-// const HASHTAG_REGEX = /#[A-Za-z_][A-Za-z0-9_]*$/; // No soporta diacríticas
-const HASHTAG_REGEX = /#[\p{L}\p{N}_]+$/u; // Soporta diacríticas (multilenguaje)
 
 interface Props {
   textContent: string;
@@ -52,28 +55,60 @@ interface Props {
 const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
   const { resolvedTheme } = useTheme();
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const hashtagsListRef = useRef<HTMLDivElement>(null);
 
   const [caretPosition, setCaretPosition] = useState(0);
-  const [hashtagPosition, setHashtagPosition] = useState({left: 0, top: 0});
-  const [showHashtagPopover, setShowHashtagPopover] = useState(false);
-  const [currentlyTypingHashtag, setCurrentlyTypingHashtag] = useState("");
-  const [selectedHashtag, setSelectedHashtag] = useState("");
+  const [hashtagPosition, setHashtagPosition] = useState({
+    left: 0,
+    top: 0,
+    lineHeight: 24,
+  });
+  const [activeHashtag, setActiveHashtag] = useState<ActiveHashtag | null>(null);
 
-  const {debouncedValue} = useDebounce(currentlyTypingHashtag);
+  const rawHashtag = activeHashtag?.value ?? "";
+  const showHashtagPopover = activeHashtag !== null;
+  const { debouncedValue: debouncedHashtag } = useDebounce(rawHashtag, 250);
+
+  const closeHashtagPopover = useCallback(() => {
+    setActiveHashtag(null);
+  }, []);
+
+  // Sincronizar el hashtag activo respecto a la posición actual del cursor
+  const syncActiveHashtag = useCallback(
+    (value: string, selectionStart: number, selectionEnd: number = selectionStart) => {
+      setCaretPosition(selectionStart);
+      const detected = getActiveHashtagAtCaret(value, selectionStart, selectionEnd);
+      setActiveHashtag(detected);
+    },
+    []
+  );
+
+  // Recalcular posición del popover en viewport (incluyendo scroll y resize)
+  const updatePopoverPosition = useCallback(() => {
+    const textarea = inputRef.current;
+    if (!textarea || !activeHashtag) return;
+
+    const { top: textareaTop, left: textareaLeft } = textarea.getBoundingClientRect();
+    const coords = getCaretCoordinates(textarea, activeHashtag.start);
+
+    setHashtagPosition({
+      top: coords.top + textareaTop,
+      left: coords.left + textareaLeft,
+      lineHeight: coords.height || 24,
+    });
+  }, [activeHashtag]);
 
   // Hacer autoFocus en el textarea
   useEffect(() => {
     const timeout = setTimeout(() => {
       const textarea = inputRef.current;
-
       if (!textarea) return;
 
       textarea.focus();
-
       const contentLength = textarea.value.length;
-
       textarea.setSelectionRange(contentLength, contentLength);
+      setCaretPosition(contentLength);
     }, 250);
 
     return () => {
@@ -82,74 +117,139 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
     };
   }, []);
 
-  // Reemplazar el hashtag en el textarea con el hashtag seleccionado
+  // Actualizar coordenadas cuando cambie el contenido, cursor, scroll o viewport
   useEffect(() => {
-    if (!selectedHashtag) return;
+    if (!showHashtagPopover) return;
 
-    setTextContent(textContent.replace(HASHTAG_REGEX, selectedHashtag));
+    updatePopoverPosition();
 
-    setSelectedHashtag("");
-  }, [selectedHashtag]);
+    const scrollContainer = scrollContainerRef.current;
+    scrollContainer?.addEventListener("scroll", updatePopoverPosition, { passive: true });
+    window.addEventListener("scroll", updatePopoverPosition, { passive: true, capture: true });
+    window.addEventListener("resize", updatePopoverPosition);
 
-  // Actualizar la posicion del popover a medida que se tipea
+    return () => {
+      scrollContainer?.removeEventListener("scroll", updatePopoverPosition);
+      window.removeEventListener("scroll", updatePopoverPosition, { capture: true });
+      window.removeEventListener("resize", updatePopoverPosition);
+    };
+  }, [showHashtagPopover, textContent, caretPosition, updatePopoverPosition]);
+
+  // Cerrar el popover al hacer clic fuera del textarea y de la lista de sugerencias
   useEffect(() => {
-    const textarea = inputRef.current!;
-    
-    const { top: textareaTop, left: textareaLeft } = textarea.getBoundingClientRect();
+    if (!showHashtagPopover) return;
 
-    const coords = getCaretCoordinates(textarea, caretPosition);
+    const handlePointerDownOutside = (e: PointerEvent) => {
+      const target = e.target as Node;
+      const isInsideTextarea = inputRef.current?.contains(target);
+      const isInsidePopover = hashtagsListRef.current?.contains(target);
 
-    setHashtagPosition({
-      top: coords.top + textareaTop,
-      left: coords.left + textareaLeft,
-    });
-    
-  }, [textContent, caretPosition]);
+      if (!isInsideTextarea && !isInsidePopover) {
+        closeHashtagPopover();
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDownOutside);
+    return () => document.removeEventListener("pointerdown", handlePointerDownOutside);
+  }, [showHashtagPopover, closeHashtagPopover]);
+
+  // Insertar/reemplazar el hashtag seleccionado o recién creado en su rango exacto
+  const handleSelectHashtag = useCallback(
+    (selectedTitle: string) => {
+      if (!activeHashtag) return;
+
+      const { nextText, nextCaretPosition } = replaceActiveHashtag(
+        textContent,
+        activeHashtag,
+        selectedTitle,
+        true
+      );
+
+      setTextContent(nextText);
+      setCaretPosition(nextCaretPosition);
+      closeHashtagPopover();
+
+      requestAnimationFrame(() => {
+        const textarea = inputRef.current;
+        if (!textarea) return;
+        textarea.focus();
+        textarea.setSelectionRange(nextCaretPosition, nextCaretPosition);
+      });
+    },
+    [activeHashtag, textContent, setTextContent, closeHashtagPopover]
+  );
 
   // Manejar el evento change del textarea
   const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.currentTarget.value;
-
-    // Obtener la posición del cursor del textarea al tipear
-    const caretPosition = e.target.selectionStart
-
-    // Chequear si hay un hashtag al final del texto
-    const hashtagMatch = value.match(HASHTAG_REGEX);
-
+    const { value, selectionStart, selectionEnd } = e.currentTarget;
     setTextContent(value);
-    setCaretPosition(caretPosition);
-    setShowHashtagPopover(!!hashtagMatch);
+    syncActiveHashtag(value, selectionStart, selectionEnd);
+  };
 
-    if (hashtagMatch) {
-      setCurrentlyTypingHashtag(hashtagMatch[0]);
+  // Re-evaluar el hashtag activo al mover el cursor con el teclado
+  const handleKeyUp = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Escape") return;
+
+    if (
+      showHashtagPopover &&
+      (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === "Tab")
+    ) {
+      return;
     }
-  }
-  
-  // Insertar el emoji en la posición del cursor
+
+    const navigationKeys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
+    if (navigationKeys.includes(e.key)) {
+      const { value, selectionStart, selectionEnd } = e.currentTarget;
+      syncActiveHashtag(value, selectionStart, selectionEnd);
+    }
+  };
+
+  // Insertar el emoji en la posición del cursor y mover el caret después del emoji
   const onEmojiPickHandler = (e: any) => {
-    const value = textContent.slice(0, caretPosition) + e.native + textContent.slice(caretPosition);
-    setTextContent(value);
-  }
+    const emoji: string = e.native;
+    const nextValue =
+      textContent.slice(0, caretPosition) + emoji + textContent.slice(caretPosition);
+    const nextCaret = caretPosition + emoji.length;
+
+    setTextContent(nextValue);
+    setCaretPosition(nextCaret);
+    closeHashtagPopover();
+
+    requestAnimationFrame(() => {
+      const textarea = inputRef.current;
+      if (!textarea) return;
+      textarea.focus();
+      textarea.setSelectionRange(nextCaret, nextCaret);
+    });
+  };
 
   // Traspasar el control del evento keydown del textarea a la lista de hashtags
-  // de las teclas flecha arriba, abajo y enter si el popover esta abierto
-  // para que el usuario pueda navegar entre los hashtags y seleccionarlos
+  // y cerrar el popover con Escape sin cerrar el Dialog padre
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (!showHashtagPopover) return;
 
-    if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === "Tab") {
-      // Evitar el comportamiento por defecto de las flechas y enter
-      // en el textarea si el popover esta abierto
+    if (e.key === "Escape") {
       e.preventDefault();
-      
-      const hashtagsListElement = hashtagsListRef.current;
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      closeHashtagPopover();
+      return;
+    }
 
-      // Sobreescribir el evento keydown de la lista de hashtags
+    if (
+      e.key === "ArrowDown" ||
+      e.key === "ArrowUp" ||
+      e.key === "Enter" ||
+      e.key === "Tab"
+    ) {
+      e.preventDefault();
+
+      const hashtagsListElement = hashtagsListRef.current;
       if (hashtagsListElement) {
         hashtagsListElement.dispatchEvent(
           new KeyboardEvent("keydown", {
-            key: e.key,
-            // Propagar el evento keydown a la lista de hashtags
+            // cmdk selecciona con Enter, no con Tab
+            key: e.key === "Tab" ? "Enter" : e.key,
             bubbles: true,
             cancelable: true,
           })
@@ -161,10 +261,7 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
   // Detener la propagación del evento scroll del emoji picker al scroll del textarea
   const handleScrollInterception = (e: WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
-
-    e.stopPropagation(); 
-
-    // Aplicar manualmente el scroll al emoji picker
+    e.stopPropagation();
     e.currentTarget.scrollTop += e.deltaY;
   };
 
@@ -174,18 +271,14 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
       <HashtagsPopover
         openPopover={showHashtagPopover}
         position={hashtagPosition}
-        currentlyTypingHashtag={debouncedValue}
-        selectedHashtag={selectedHashtag}
+        rawHashtag={rawHashtag}
+        debouncedHashtag={debouncedHashtag}
         hashtagsListRef={hashtagsListRef}
-        setOpenPopover={setShowHashtagPopover}
-        setSelectedHashtag={(hashtag) => {
-          setSelectedHashtag(hashtag);
-          setShowHashtagPopover(false);
-          inputRef.current!.focus();
-        }}
+        onSelectHashtag={handleSelectHashtag}
       />
 
       <div
+        ref={scrollContainerRef}
         className="relative flex justify-start items-start gap-3 w-full max-h-[270px] border-b border-slate-200 dark:border-slate-800 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-slate-700 scrollbar-track-gray-200 dark:scrollbar-track-slate-900"
       >
         <Textarea
@@ -193,14 +286,18 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
           className="w-full px-0 py-4 !text-base text-neutral-900 dark:text-slate-100 dark:bg-transparent border-t-0 border-b-0 border-l-0 border-r-0 rounded-none shadow-none resize-none placeholder:text-neutral-400 dark:placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:ring-offset-transparent focus-visible:border-b"
           placeholder="¿Qué estás pensando?"
           data-testid="create-post-input"
+          role="combobox"
+          aria-expanded={showHashtagPopover}
+          aria-haspopup="listbox"
+          aria-autocomplete="list"
           disabled={isPending}
           value={textContent}
           onChange={onChangeHandler}
           onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
           onClick={(e) => {
-            // Actualizar el state de la posición del cursor al clickear en el textarea
-            const caretPosition = e.currentTarget.selectionStart;
-            setCaretPosition(caretPosition);
+            const { value, selectionStart, selectionEnd } = e.currentTarget;
+            syncActiveHashtag(value, selectionStart, selectionEnd);
           }}
         />
 
@@ -208,6 +305,7 @@ const CreatePostInput = ({ textContent, isPending, setTextContent }: Props) => {
           <Popover>
             <PopoverTrigger asChild>
               <button
+                type="button"
                 className="shrink-0 cursor-pointer"
                 disabled={isPending}
               >

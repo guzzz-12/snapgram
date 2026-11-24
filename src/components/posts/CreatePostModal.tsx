@@ -20,7 +20,7 @@ const CreatePostModal = () => {
 
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
-  
+
   const [textContent, setTextContent] = useState("");
   const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null);
   const [isUpdatingImage, setIsUpdatingImage] = useState(false);
@@ -175,7 +175,19 @@ const CreatePostModal = () => {
       >
         <DialogOverlay className="bg-black/80" />
 
-        <DialogContent className="gap-0 max-h-[80vh] overflow-x-hidden overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        <DialogContent
+          className="gap-0 max-h-[80vh] overflow-x-hidden overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+          onPointerDownOutside={(e) => {
+            if ((e.target as HTMLElement | null)?.closest("[data-hashtags-popover]")) {
+              e.preventDefault();
+            }
+          }}
+          onInteractOutside={(e) => {
+            if ((e.target as HTMLElement | null)?.closest("[data-hashtags-popover]")) {
+              e.preventDefault();
+            }
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="sr-only">
               Crear publicación

@@ -30,6 +30,7 @@ const useGetHashtags = (props: {value: string; enabled: boolean}) => {
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextPage : null,
+    staleTime: 1000 * 60, // 1 minuto de caché para evitar refetches al borrar o reescribir
     refetchOnWindowFocus: false,
     enabled,
     retry: 2

@@ -8,36 +8,36 @@ export const hashtagParser = (text: string) => {
   const parts = [];
   let lastIndex = 0;
 
-  // Encontrar todas las ocurrencias de hashtags
-  // Explicación de los argumentos del callback:
-  // - match: El texto completo del hashtag (#hashtagText)
-  // - hashtagText: El texto del hashtag (#hashtagText)
-  // - offset: El index donde comienza el hashtag en el texto
+  // Encontrar todas las ocurrencias de hashtags válidos (al inicio o precedidos por espacio)
   text.replace(hashtagRegex, (match: string, hashtagText: string, offset: number) => {
+    const hasValidBoundary = offset === 0 || /\s/.test(text[offset - 1]);
+    if (!hasValidBoundary) {
+      return match;
+    }
+
     // Pushear el texto *antes* del hashtag
     if (offset > lastIndex) {
       parts.push(text.substring(lastIndex, offset));
     }
 
-    // Pushear el enlace al hashtag    
+    // Pushear el enlace al hashtag codificando diacríticas/caracteres especiales
     parts.push(
       <Link
-        // El key es requerido
         key={`hashtag-${offset}-${hashtagText}`}
-        to={`/discover/?searchTerm=${hashtagText.replace("#", "")}&type=posts`}
+        to={`/discover/?searchTerm=${encodeURIComponent(hashtagText)}&type=posts`}
         className="text-blue-500 dark:text-indigo-400 hover:text-blue-600 dark:hover:text-indigo-300"
       >
         {match}
       </Link>
     );
 
-    // Actualizar el index para comenzar a buscar despues del match actual
+    // Actualizar el index para comenzar a buscar después del match actual
     lastIndex = offset + match.length;
 
     return match;
   });
 
-  // Pushear el texto *despues* del ultimo hashtag
+  // Pushear el texto *después* del último hashtag
   if (lastIndex < text.length) {
     parts.push(text.substring(lastIndex));
   }

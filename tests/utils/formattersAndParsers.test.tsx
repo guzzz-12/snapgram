@@ -47,7 +47,7 @@ describe("formattersAndParsers (hashtagParser, generateNotificationLink, errorMe
     const unicodeLink = screen.getByRole("link", { name: "#ProgramaciónWeb" });
     expect(unicodeLink).toHaveAttribute(
       "href",
-      "/discover/?searchTerm=ProgramaciónWeb&type=posts"
+      "/discover/?searchTerm=Programaci%C3%B3nWeb&type=posts"
     );
   });
 

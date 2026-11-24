@@ -158,7 +158,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                     src={data.groupPicture || ""}
                   />
                   <AvatarFallback className="w-full h-full object-cover text-3xl text-white bg-[#4F39F6] font-semibold">
-                    {data.groupName!.charAt(0).toUpperCase()}
+                    {data.groupName?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
@@ -319,7 +319,7 @@ const GroupInfoModal = ({ groupId, isOpen, setIsOpen }: Props) => {
                   ref={editDescriptionInputRef}
                   id="description"
                   className="w-full max-h-[240px] resize-none border-none bg-neutral-100 dark:bg-slate-800/60 focus-visible:ring-0 focus-visible:ring-offset-0 scrollbar-thin scrollbar-thumb-neutral-300 scrollbar-track-neutral-100"
-                  value={newDescription || data.groupDescription || ""}
+                  value={newDescription}
                   placeholder="Añade una descripción al grupo..."
                   onChange={(e) => setNewDescription(e.target.value)}
                 />

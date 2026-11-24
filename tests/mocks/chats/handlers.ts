@@ -122,5 +122,30 @@ export const handlers = [
         type: "group"
       })
     });
+  }),
+
+  http.put("/api/chats/group/:chatId/update-info", async ({ params, request }) => {
+    const body = (await request.json()) as {
+      groupName: string;
+      groupDescription: string;
+    };
+
+    return HttpResponse.json({
+      data: buildMockChat({
+        _id: params.chatId as string,
+        type: "group",
+        groupName: body.groupName,
+        groupDescription: body.groupDescription
+      })
+    });
+  }),
+
+  http.put("/api/chats/group/:chatId/add-members", ({ params }) => {
+    return HttpResponse.json({
+      data: buildMockChat({
+        _id: params.chatId as string,
+        type: "group"
+      })
+    });
   })
 ];

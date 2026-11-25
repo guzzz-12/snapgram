@@ -319,15 +319,32 @@ describe("CreateStoryModal", () => {
       }
     );
 
-    fireEvent.paste(textarea, {
-      clipboardData: {
-        getData: () => "ABCDEFGHIJ"
-      }
+    const pasteEvent = new Event("paste", { bubbles: true, cancelable: true });
+    Object.defineProperty(pasteEvent, "clipboardData", {
+      value: { getData: () => "ABCDEFGHIJ" }
     });
+    fireEvent(textarea, pasteEvent);
+
+    // onPaste debe prevenir el pegado nativo del navegador
+    expect(pasteEvent.defaultPrevented).toBe(true);
 
     await waitFor(() => {
       expect(textarea).toHaveValue("ABCD");
     });
+
+    // Al agregar un 5to carácter (500px >= 480px) alcanza el límite y bloquea el 6to, pero permite borrar y volver a escribir
+    await user.type(textarea, "E");
+    expect(textarea).toHaveValue("ABCDE");
+
+    await user.type(textarea, "F");
+    expect(textarea).toHaveValue("ABCDE");
+
+    await user.type(textarea, "{Backspace}");
+    expect(textarea).toHaveValue("ABCD");
+
+    // Al bajar de 480px (400px < 480px) se desbloquea nuevamente la escritura
+    await user.type(textarea, "Z");
+    expect(textarea).toHaveValue("ABCDZ");
   });
 
   it("deshabilita los controles mientras se publica y cierra el modal al pulsar 'Cancelar'", async () => {
